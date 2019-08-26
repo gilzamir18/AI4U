@@ -1,10 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using unityremote;
-using System.Text;
-using UnityEngine.SceneManagement;
-
 
 public class Paddle : Agent
 {
@@ -116,26 +111,26 @@ public class Paddle : Agent
     {
         if (GetFrame.currentFrame.Length > 0)
         {
-            SetState(0, "frame", Brain.OTHER, System.Convert.ToBase64String(GetFrame.currentFrame));
+            SetStateAsByteArray(0, "frame", GetFrame.currentFrame);
             if (isRight)
             {
                 int r = Ball.instance.GetRightReward();
-                SetState(1, "reward", Brain.FLOAT, "" + r);
+                SetStateAsFloat(1, "reward", r);
             }
             else
             {
-                SetState(1, "reward", Brain.FLOAT, "" + Ball.instance.GetLeftReward());
+                SetStateAsFloat(1, "reward", Ball.instance.GetLeftReward());
             }
-            SetState(2, "done", Brain.BOOL, GameManager.isDone ? "1" : "0");
+            SetStateAsBool(2, "done", GameManager.isDone);
             
             return true;
         }
         return false;
     }
     
-    public override void ApplyAction(string cmdname, string[] args)
+    public override void ApplyAction()
     {
-        switch (cmdname)
+        switch (GetActionName())
         {
             case "GetState":
                  break;
