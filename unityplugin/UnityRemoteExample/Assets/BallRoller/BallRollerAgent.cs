@@ -1,22 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using unityremote;
 
 public class BallRollerAgent : Agent
 {
-
     public GameObject target;
-
     private Rigidbody rBody;
-
     public float speed = 10;
-
     private bool done = false;
     private float reward = 0.0f;
+    public float timeScaling = 1.0f;
 
     public void Start()
     {
+        Time.timeScale = timeScaling;
         rBody = GetComponent<Rigidbody>();
         done = false;
     }

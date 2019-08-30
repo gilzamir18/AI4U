@@ -637,7 +637,8 @@ MonoBehaviour:
   numberOfFields: 9
   userControl: 0
   target: {fileID: 1427391933}
-  speed: 10
+  speed: 20
+  timeScaling: 10
 --- !u!54 &1895860467
 Rigidbody:
   m_ObjectHideFlags: 0

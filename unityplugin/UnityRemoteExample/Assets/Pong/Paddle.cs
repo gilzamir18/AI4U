@@ -68,7 +68,13 @@ public class Paddle : Agent
         if (Ball.instance != null)
         {
             Vector2 pos = Ball.instance.GetPosition();
-            if (pos.y - transform.position.y > 0)
+            if (Random.value < 0.25)
+            {
+                string[] v = { "Up", "Down" };
+
+                int idx = Random.Range(0, 1);
+                cmd = v[idx];
+            } else if (pos.y - transform.position.y > 0)
             {
                 cmd = "Up";
             } else if (pos.y - transform.position.y < 0)
