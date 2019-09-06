@@ -1,45 +1,42 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
-using UnityStandardAssets.Characters.ThirdPerson;
-using UnityEngine.SceneManagement;
+
 namespace unityremote
 {
-
-    public class Remote : MonoBehaviour
+    public class RemoteBrain : Brain
     {
-
-        public static byte FLOAT = 0;
-        public static byte INT = 1;
-        public static byte BOOL = 2;
-        public static byte STR = 3;
-        public static byte OTHER = 4;
-
         public int port = 8081;
+        public int buffer_size = 8192; 
         private UdpClient udpSocket;
 
-        private static UdpClient socket;
-        private static bool commandReceived;
+        private UdpClient socket;
+        private bool commandReceived;
 
-        private static Socket sock;
-        private static IPAddress serverAddr;
-        private static EndPoint endPoint;
+        private Socket sock;
+        private IPAddress serverAddr;
+        private EndPoint endPoint;
 
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
-
-        private static Remote instance;
        
-        private System.Collections.Queue queue = new System.Collections.Queue();
+        public Agent agent = null;
+        public bool fixedUpdate = true;
 
-        public GameObject player;
-
+        private string cmdname;
+        private string[] args;
+        private bool message_received = false;
+        private bool firstMsgSended = false;
+        private System.AsyncCallback async_call;
+        private IPEndPoint source;
         // Use this for initialization
         void Start()
         {
+            source = null;
+            async_call = new System.AsyncCallback(ReceiveData);
             commandReceived = false;
+            firstMsgSended = false;
             if (sock == null)
             {
                 sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -47,17 +44,16 @@ namespace unityremote
             serverAddr = IPAddress.Parse(remoteIP);
             endPoint = new IPEndPoint(serverAddr, remotePort);
             Reset();
-            player.SendMessage("SetRemote", this);
+            agent.SetBrain(this);
+            agent.StartData();
         }
 
         public void Reset()
         {
             try
             {
-                instance = this;
                 udpSocket = new UdpClient(port);
-                udpSocket.BeginReceive(new System.AsyncCallback(ReceiveData), udpSocket);
-
+                udpSocket.BeginReceive(async_call, udpSocket);
                 //Debug.Log("Listening");
             }
             catch (System.Exception e)
@@ -76,32 +72,62 @@ namespace unityremote
             }
         }
 
-        private void Update()
-        {
 
-            if (this.queue.Count > 0)
+        void RemoteUpdate()
+        {
+            if (message_received)
             {
-                object[] cmd = (object[])this.queue.Dequeue();
-                string cmdname = (string)cmd[0];
-                string[] args = (string[])cmd[1];
-                if (player != null)
-                    if (args.Length > 0)
-                        player.SendMessage(cmdname, args);
-                    else
-                        player.SendMessage(cmdname);
+                this.receivedcmd = cmdname;
+                this.receivedargs = args;
+                agent.ApplyAction();
+                agent.UpdatePhysics();
+                message_received = false;
+                if (agent.UpdateState())
+                {
+                    agent.GetState();
+                    firstMsgSended = true;
+                }
+                socket.Client.ReceiveBufferSize = buffer_size;
+                socket.BeginReceive(async_call, udpSocket);
+            }
+            if (!firstMsgSended)
+            {
+                if (agent.UpdateState())
+                {
+                    agent.GetState();
+                    firstMsgSended = true;
+                }
             }
         }
 
-        public static void ReceiveData(System.IAsyncResult result)
+        void FixedUpdate()
+        {
+            if (fixedUpdate)
+            {
+                RemoteUpdate();
+            }
+        }
+
+        void Update()
+        {
+            if (!fixedUpdate)
+            {
+                RemoteUpdate();
+            }    
+        }
+
+        public void ReceiveData(System.IAsyncResult result)
         {
             socket = null;
             try
             {
+                
                 socket = result.AsyncState as UdpClient;
-                IPEndPoint source = new IPEndPoint(0, 0);
+                if (source == null)
+                    source = new IPEndPoint(0, 0);
                 
                 byte[] data = socket.EndReceive(result, ref source);
-               
+                socket.Client.ReceiveBufferSize = 0;
                 if (data != null)
                 {
                     string cmd = Encoding.UTF8.GetString(data);
@@ -119,21 +145,21 @@ namespace unityremote
                     {
                         args[i] = tokens[i+2];
                     }
-
-                    instance.queue.Enqueue(new object[] { cmdname, args});
-                    
-                    socket.BeginReceive(new System.AsyncCallback(ReceiveData), instance.udpSocket);
+                    this.cmdname = cmdname;
+                    this.args = args;
+                    message_received = true;
                 }
             }
             catch (System.Exception e)
             {
-                Debug.Log("Inexpected error: " + e.Message);
-            }
+                Debug.Log(e.Message);
+                Debug.Log("Inexpected error: " + e.StackTrace);
+            } 
         }
-
-        public void SendMessage(string[] desc, byte[] tipo, string[] valor)
+   
+        public override void SendMessage(string[] desc, byte[] tipo, string[] valor)
         {
-            Remote.SendMessageFrom(desc, tipo, valor);
+            SendMessageFrom(desc, tipo, valor);
         }
 
         /// <summary>
@@ -147,7 +173,7 @@ namespace unityremote
         ///         4 = array de bytes
         ///    e valor é o valor da informacao enviada.
         /// </summary>
-        public static void SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
+        public void SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
         {
             StringBuilder sb = new StringBuilder();
             int numberoffields = desc.Length;
@@ -160,17 +186,16 @@ namespace unityremote
                 field.Append(descsize.ToString().PadLeft(4, ' ').PadRight(4,' '));
                 field.Append(desc[i]);
                 field.Append((int)tipo[i]);
-                field.Append(Encoding.UTF8.GetByteCount(valor[i].ToString()).ToString().PadLeft(8, ' ').PadRight(8, ' '));
+                field.Append(Encoding.UTF8.GetByteCount(valor[i]).ToString().PadLeft(8, ' ').PadRight(8, ' '));
                 field.Append(valor[i]);
                 string fstr = field.ToString();
-                //int c = Encoding.UTF8.GetByteCount(fstr);                
                 sb.Append(fstr);
             }
             byte[] b = Encoding.UTF8.GetBytes(sb.ToString());
-            sendData(b);
+            this.sendData(b);
         }
 
-        public static void sendData(byte[] data)
+        public void sendData(byte[] data)
         {
             sock.SendTo(data, endPoint);
         }

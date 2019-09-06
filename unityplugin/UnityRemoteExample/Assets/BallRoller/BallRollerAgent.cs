@@ -22,14 +22,14 @@ public class BallRollerAgent : Agent
         done = false;
         rBody.velocity = Vector3.zero;
         rBody.angularVelocity = Vector3.zero;
-        target.transform.position = new Vector3(Random.value * 6 - 3, 0.5f, Random.value * 6 - 3);
-        transform.position = new Vector3(0, 0.5f, 0);
+        target.transform.localPosition = new Vector3(Random.value * 6 - 3, 0.5f, Random.value * 6 - 3);
+        transform.localPosition = new Vector3(0, 0.5f, 0);
         reward = 0;
     }
 
     public override void UpdatePhysics()
     {
-        if (gameObject.transform.position.y < 0.0 && !done)
+        if (gameObject.transform.localPosition.y < 0.0 && !done)
         {
             done = true;
         }
@@ -62,13 +62,13 @@ public class BallRollerAgent : Agent
     {
         SetStateAsBool(0, "done", done);
         SetStateAsFloat(1, "reward", reward);
-        SetStateAsFloat(2, "tx", target.transform.position.x);
-        SetStateAsFloat(3, "tz", target.transform.position.z);
+        SetStateAsFloat(2, "tx", target.transform.localPosition.x);
+        SetStateAsFloat(3, "tz", target.transform.localPosition.z);
         SetStateAsFloat(4, "vx", rBody.velocity.x);
         SetStateAsFloat(5, "vz", rBody.velocity.z);
-        SetStateAsFloat(6, "x", transform.position.x);
-        SetStateAsFloat(7, "y", transform.position.y);
-        SetStateAsFloat(8, "z", transform.position.z);
+        SetStateAsFloat(6, "x", transform.localPosition.x);
+        SetStateAsFloat(7, "y", transform.localPosition.y);
+        SetStateAsFloat(8, "z", transform.localPosition.z);
         return true;
     }
 

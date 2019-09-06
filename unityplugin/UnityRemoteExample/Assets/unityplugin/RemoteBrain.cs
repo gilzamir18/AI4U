@@ -11,27 +11,25 @@ namespace unityremote
         public int buffer_size = 8192; 
         private UdpClient udpSocket;
 
-        private static UdpClient socket;
-        private static bool commandReceived;
+        private UdpClient socket;
+        private bool commandReceived;
 
-        private static Socket sock;
-        private static IPAddress serverAddr;
-        private static EndPoint endPoint;
+        private Socket sock;
+        private IPAddress serverAddr;
+        private EndPoint endPoint;
 
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
-
-        private static RemoteBrain instance;
        
         public Agent agent = null;
         public bool fixedUpdate = true;
 
-        private static string cmdname;
-        private static string[] args;
-        private static bool message_received = false;
+        private string cmdname;
+        private string[] args;
+        private bool message_received = false;
         private bool firstMsgSended = false;
         private System.AsyncCallback async_call;
-        private static IPEndPoint source;
+        private IPEndPoint source;
         // Use this for initialization
         void Start()
         {
@@ -54,7 +52,6 @@ namespace unityremote
         {
             try
             {
-                instance = this;
                 udpSocket = new UdpClient(port);
                 udpSocket.BeginReceive(async_call, udpSocket);
                 //Debug.Log("Listening");
@@ -91,7 +88,7 @@ namespace unityremote
                     firstMsgSended = true;
                 }
                 socket.Client.ReceiveBufferSize = buffer_size;
-                socket.BeginReceive(async_call, instance.udpSocket);
+                socket.BeginReceive(async_call, udpSocket);
             }
             if (!firstMsgSended)
             {
@@ -119,7 +116,7 @@ namespace unityremote
             }    
         }
 
-        public static void ReceiveData(System.IAsyncResult result)
+        public void ReceiveData(System.IAsyncResult result)
         {
             socket = null;
             try
@@ -148,8 +145,8 @@ namespace unityremote
                     {
                         args[i] = tokens[i+2];
                     }
-                    RemoteBrain.cmdname = cmdname;
-                    RemoteBrain.args = args;
+                    this.cmdname = cmdname;
+                    this.args = args;
                     message_received = true;
                 }
             }
@@ -162,7 +159,7 @@ namespace unityremote
    
         public override void SendMessage(string[] desc, byte[] tipo, string[] valor)
         {
-            RemoteBrain.SendMessageFrom(desc, tipo, valor);
+            SendMessageFrom(desc, tipo, valor);
         }
 
         /// <summary>
@@ -176,7 +173,7 @@ namespace unityremote
         ///         4 = array de bytes
         ///    e valor é o valor da informacao enviada.
         /// </summary>
-        public static void SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
+        public void SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
         {
             StringBuilder sb = new StringBuilder();
             int numberoffields = desc.Length;
@@ -195,10 +192,10 @@ namespace unityremote
                 sb.Append(fstr);
             }
             byte[] b = Encoding.UTF8.GetBytes(sb.ToString());
-            sendData(b);
+            this.sendData(b);
         }
 
-        public static void sendData(byte[] data)
+        public void sendData(byte[] data)
         {
             sock.SendTo(data, endPoint);
         }
