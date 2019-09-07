@@ -55,7 +55,7 @@ After this change, we can associate the game object **Cube** with the game objec
 
 Finally, we can create the client script to control our cube. In this case, we can just move our cube to the right or left. Figure 9 shows a very simple script that does this.
 
-| ![Python script controls remote cube.](images/cubeclientsidescript.png) |
+| ![Python script controls remote cube.](images/cubeclientsidescript.PNG) |
 | :--: |
 | Figure 9. *Python script to control remote cube.* |
 
@@ -91,4 +91,8 @@ env.close()
 Figure 9 shows a very simple client side script. 
 
 #Resume
-In this brief tutorial, I showed you how to create a very simple Unity application that takes commands from a Python script. However, this is a very simple use case, hello world! Read other tutorials in the doc section to delve into UnityRemotePlugin.
+In this brief tutorial, I showed you how to create a very simple Unity application that takes commands from a Python script. See this complete example in examples directory.
+
+This is a very simple use case, hello world! Read other tutorials in the doc section to delve into UnityRemotePlugin.
+
+
