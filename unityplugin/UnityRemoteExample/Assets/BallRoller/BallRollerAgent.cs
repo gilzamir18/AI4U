@@ -58,7 +58,7 @@ public class BallRollerAgent : Agent
         }
     }
 
-    public override bool UpdateState()
+    public override void UpdateState()
     {
         SetStateAsBool(0, "done", done);
         SetStateAsFloat(1, "reward", reward);
@@ -69,7 +69,6 @@ public class BallRollerAgent : Agent
         SetStateAsFloat(6, "x", transform.localPosition.x);
         SetStateAsFloat(7, "y", transform.localPosition.y);
         SetStateAsFloat(8, "z", transform.localPosition.z);
-        return true;
     }
 
     private void OnCollisionEnter(Collision collision)

@@ -119,9 +119,8 @@ namespace unityremote
 
         }
 
-        public virtual bool UpdateState()
+        public virtual void UpdateState()
         {
-            return false;
         }
 
         public virtual object[] LocalDecision()

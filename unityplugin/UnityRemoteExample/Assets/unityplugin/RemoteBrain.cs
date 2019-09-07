@@ -82,21 +82,17 @@ namespace unityremote
                 agent.ApplyAction();
                 agent.UpdatePhysics();
                 message_received = false;
-                if (agent.UpdateState())
-                {
-                    agent.GetState();
-                    firstMsgSended = true;
-                }
+                agent.UpdateState();
+                agent.GetState();
+                firstMsgSended = true;
                 socket.Client.ReceiveBufferSize = buffer_size;
                 socket.BeginReceive(async_call, udpSocket);
             }
             if (!firstMsgSended)
             {
-                if (agent.UpdateState())
-                {
-                    agent.GetState();
-                    firstMsgSended = true;
-                }
+                agent.UpdateState();
+                agent.GetState();
+                firstMsgSended = true;
             }
         }
 

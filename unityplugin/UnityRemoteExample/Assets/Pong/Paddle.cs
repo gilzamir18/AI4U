@@ -113,7 +113,7 @@ public class Paddle : Agent
         transform.name = input;
     }
 
-    public override bool UpdateState()
+    public override void UpdateState()
     {
         if (GetFrame.currentFrame.Length > 0)
         {
@@ -127,11 +127,8 @@ public class Paddle : Agent
             {
                 SetStateAsFloat(1, "reward", Ball.instance.GetLeftReward());
             }
-            SetStateAsBool(2, "done", GameManager.isDone);
-            
-            return true;
+            SetStateAsBool(2, "done", GameManager.isDone);    
         }
-        return false;
     }
     
     public override void ApplyAction()
