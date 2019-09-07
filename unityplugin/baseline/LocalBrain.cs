@@ -19,10 +19,8 @@
                 receivedargs = (string[])msg[1];
                 agent.ApplyAction();
                 agent.UpdatePhysics();
-                if (agent.UpdateState())
-                {
-                    agent.GetState();
-                }
+                agent.UpdateState();
+                agent.GetState();
             } else
             {
                 agent.UpdatePhysics();

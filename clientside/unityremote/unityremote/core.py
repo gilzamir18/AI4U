@@ -163,7 +163,7 @@ class RemoteEnv:
     def close(self):
         self.UDP.close()
 
-    def open(self, timeout=None):
+    def open(self, timeout=0):
         self.timeout = timeout
         return self.open_receive()
 
@@ -217,7 +217,6 @@ class RemoteEnv:
                 pos += valuesize
             return fields
         except:
-            e = sys.exc_info()[1]
             raise
             return None
 
