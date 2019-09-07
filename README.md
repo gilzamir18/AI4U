@@ -24,24 +24,24 @@ Waiting the installation ends.
 
 Now, run Unity and open project available in *unityplugin/UnityRemoteExample*.  Then open the BallRoller scene (available on *Assets/scenes*) if it is not already loaded.
 
-![Menu File --> Open Scene ](/doc/images/openscene.png)
+![Menu File --> Open Scene ](doc/images/openscene.png)
 
 
-![Menu File --> Open Scene ](/doc/images/scenesmarked.png)
+![Menu File --> Open Scene ](doc/images/scenesmarked.png)
 
 Then, press the play button and then run the random_ballroller.py script located in *clientside/examples/ballroller*.
 
-![Pressing play button](/doc/images/ballrollerplay.png)
+![Pressing play button](doc/images/ballrollerplay.png)
 
 
 ```
 python3 random_ballroller.py
 ```
 
-![Running example ballroller](/doc/images/ballrollerexec.png)
+![Running example ballroller](doc/images/ballrollerexec.png)
 
 Output logs:
-![See output logs ](/doc/images/ballrollerlog.png)
+![See output logs ](doc/images/ballrollerlog.png)
 
 If no error message was displayed, then UnityRemotePlugin was installed correctly.
 
