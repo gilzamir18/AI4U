@@ -90,7 +90,7 @@ env.close()
 
 Figure 9 shows a very simple client side script. 
 
-#Resume
+# Resume
 In this brief tutorial, I showed you how to create a very simple Unity application that takes commands from a Python script. See this complete example in examples directory.
 
 This is a very simple use case, hello world! Read other tutorials in the doc section to delve into UnityRemotePlugin.
