@@ -24,24 +24,23 @@ Waiting the installation ends.
 
 Now, run Unity and open project available in *unityplugin/UnityRemoteExample*.  Then open the BallRoller scene (available on *Assets/scenes*) if it is not already loaded.
 
-![Menu File --> Open Scene ](https://github.com/gilcoder/repository/blob/master/doc/images/openscene.png)
+![Menu File --> Open Scene ](doc/images/openscene.PNG)
 
 
-![Menu File --> Open Scene ](https://github.com/gilcoder/repository/blob/master/doc/images/scenesmarked.png)
+![Menu File --> Open Scene ](doc/images/scenesmarked.PNG)
 
 Then, press the play button and then run the random_ballroller.py script located in *clientside/examples/ballroller*.
 
-![Pressing play button](https://github.com/gilcoder/repository/blob/master/doc/images/ballrollerplay.png)
-
+![Pressing play button](doc/images/ballrollerplay.PNG)
 
 ```
 python3 random_ballroller.py
 ```
 
-![Running example ballroller](https://github.com/gilcoder/repository/blob/master/doc/images/ballrollerexec.png)
+![Running example ballroller](doc/images/ballrollerexec.PNG)
 
 Output logs:
-![See output logs ](https://github.com/gilcoder/repository/blob/master/doc/images/ballrollerlog.png)
+![See output logs ](doc/images/ballrollerlog.PNG)
 
 If no error message was displayed, then UnityRemotePlugin was installed correctly.
 
