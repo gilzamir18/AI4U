@@ -47,7 +47,7 @@ If no error message was displayed, then UnityRemotePlugin was installed correctl
 # OS Support and Software Compatibility
 All examples available in UnityRemotePlugin repo were tested only in Windows 10 Pro (version 1903) with WSL activated. Ubuntu 18.0.4 image was used in WSL. We used Python 3.6.8 available in this Ubuntu version. Unity used was the version 2019.2.1f1 (64 bits for windows).
 
-Unfortunately, for now, UnityRemotePlugin does not have support for mobile applications.
+Unfortunately, UnityRemotePlugin does not have support for mobile applications.
 
 # <span style="color:red"> Warning </span>
-For now, UnityRemote is in alpha development stage. Therefore, your API is not yet consistent as we would wish. But we are evolving!
+UnityRemote is in alpha development stage. Therefore, your API is not yet consistent as we would wish. But we are evolving!
