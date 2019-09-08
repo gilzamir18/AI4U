@@ -8,7 +8,7 @@ We recommend that you have some version of Unity 2019 and start by looking at th
 
 ## Installation
 
-Firstly, it is need to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/unityremote*. Run the following command:
+First, you need to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/unityremote*. Run the following command:
 
 ```
 pip3 install -e .
@@ -29,7 +29,7 @@ Now, run Unity and open project available in *unityplugin/UnityRemoteExample*.  
 
 ![Menu File --> Open Scene ](doc/images/scenesmarked.PNG)
 
-Then, press the play button and then run the random_ballroller.py script located in *clientside/examples/ballroller*.
+Then, press the play button and run the random_ballroller.py script located in *clientside/examples/ballroller*.
 
 ![Pressing play button](doc/images/ballrollerplay.PNG)
 
