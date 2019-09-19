@@ -20,9 +20,7 @@ namespace unityremote
 
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
-       
-        public Agent agent = null;
-        public bool fixedUpdate = true;
+   
 
         private string cmdname;
         private string[] args;
@@ -30,6 +28,7 @@ namespace unityremote
         private bool firstMsgSended = false;
         private System.AsyncCallback async_call;
         private IPEndPoint source;
+        
         // Use this for initialization
         void Start()
         {
@@ -82,9 +81,11 @@ namespace unityremote
                 agent.ApplyAction();
                 agent.UpdatePhysics();
                 message_received = false;
+                
                 agent.UpdateState();
                 agent.GetState();
                 firstMsgSended = true;
+                
                 socket.Client.ReceiveBufferSize = buffer_size;
                 socket.BeginReceive(async_call, udpSocket);
             }
