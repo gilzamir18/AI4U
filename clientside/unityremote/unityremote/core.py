@@ -211,8 +211,15 @@ class RemoteEnv:
                     fields[desc] = True if int(str(value, 'utf-8').strip()) == 1 else False
                 elif datatype == 3:
                     fields[desc] = str(value, 'utf-8').strip()
-                else:
+                elif datatype == 4:
                     fields[desc] = str(value, 'utf-8').strip()
+                elif datatype == 5:
+                    v = str(value, 'utf-8').strip()
+                    vs = v.split(' ')
+                    a = np.zeros(len(vs))
+                    for idx, e in enumerate(vs):
+                        a[idx] = e.replace(",", ".")
+                    fields[desc] = a
                 count += 1
                 pos += valuesize
             return fields
@@ -237,6 +244,8 @@ class RemoteEnv:
         else:
             return self.send(action)
 
+    def stepfv(self, action, values):
+        return self.send(action, [str(values).replace(' ', '').replace(',', ' ').replace('[','').replace(']', '')])
 
 def make_inference_network(obs_shape, n_actions, debug=False):
     import tensorflow as tf

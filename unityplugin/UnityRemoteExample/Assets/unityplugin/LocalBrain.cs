@@ -2,29 +2,24 @@
 {
     public class LocalBrain : Brain
     {
-        public Agent agent;
-        public bool fixedUpdate = true;
-
+        public Controller controller;
+        
         public void Start()
         {
+            agent.SetBrain(this);
             agent.StartData();
         }
 
         private void LocalDecision()
         {
-            if (!agent.userControl)
-            {
-                object[] msg = agent.LocalDecision();
-                receivedcmd = (string)msg[0];
-                receivedargs = (string[])msg[1];
-                agent.ApplyAction();
-                agent.UpdatePhysics();
-                agent.UpdateState();
-                agent.GetState();
-            } else
-            {
-                agent.UpdatePhysics();
-            }
+            object[] msg = controller.GetAction();
+            receivedcmd = (string)msg[0];
+            receivedargs = (string[])msg[1];
+            agent.ApplyAction();
+            agent.UpdatePhysics();
+            
+            agent.UpdateState();
+            agent.GetState();
         }
 
         public void FixedUpdate()
@@ -45,7 +40,7 @@
 
         public override void SendMessage(string[] desc, byte[] tipo, string[] valor)
         {
-
+            controller.ReceiveState(desc, tipo, valor);
         }
     }
 }
