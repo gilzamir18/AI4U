@@ -77,7 +77,7 @@ public class MoveBall : Agent
             }
             
             hv.Set(horizontal, vertical);
-            Debug.Log(hv.x + " " + hv.y);
+            //Debug.Log(hv.x + " " + hv.y);
         }
     }
 

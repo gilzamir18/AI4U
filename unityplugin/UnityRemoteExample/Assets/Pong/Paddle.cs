@@ -35,7 +35,7 @@ public class Paddle : Agent
         if (!GameManager.paused)
         {
             float move = 0.0f;
-            if (isRight || !userControl)
+            if (isRight)
             {
                 move = remoteAxis * Time.deltaTime * speed;
             }
@@ -60,30 +60,6 @@ public class Paddle : Agent
             }
 
         }
-    }
-
-    public override object[] LocalDecision()
-    {
-        string cmd = null;
-        if (Ball.instance != null)
-        {
-            Vector2 pos = Ball.instance.GetPosition();
-            if (Random.value < 0.25)
-            {
-                string[] v = { "Up", "Down" };
-
-                int idx = Random.Range(0, 1);
-                cmd = v[idx];
-            } else if (pos.y - transform.position.y > 0)
-            {
-                cmd = "Up";
-            } else if (pos.y - transform.position.y < 0)
-            {
-                cmd = "Down";
-            }
-        }
-
-        return new object[] { cmd, new string[] { } };
     }
 
     public bool IsRight()

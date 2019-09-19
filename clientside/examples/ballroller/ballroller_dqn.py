@@ -1,4 +1,5 @@
-from unityremote.core import RemoteEnv, get_image
+from unityremote.utils import get_image
+from unityremote.core import RemoteEnv
 from unityremote.ml.dqn import KerasDQNAgent, huber_loss
 from PIL import Image
 import io

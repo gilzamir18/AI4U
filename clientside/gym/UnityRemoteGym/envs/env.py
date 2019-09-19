@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from unityremote.core import RemoteEnv, environment_definitions
+from unityremote.core import RemoteEnv
+from unityremote.utils import environment_definitions
 import threading as td
 import numpy as np
 import io

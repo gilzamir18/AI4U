@@ -1,6 +1,6 @@
 from unityremote.ml.a3c.train import run as run_train
 from unityremote.ml.a3c.run_checkpoint import run as run_test
-from unityremote.core import environment_definitions
+from unityremote.utils import environment_definitions
 import UnityRemoteGym
 import numpy as np
 import argparse
@@ -11,7 +11,7 @@ def parse_args():
                         choices=['train', 'test'],
                         default='train')
     parser.add_argument('--path', default='.')
-    return parser.parse_args();
+    return parser.parse_args()
 
 def get_state_from_fields(fields):
 	return np.array([fields['tx'], fields['tz'], fields['vx'], fields['vz'], fields['x'], fields['y'],	fields['z']])

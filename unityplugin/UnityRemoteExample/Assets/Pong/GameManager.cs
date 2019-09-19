@@ -37,8 +37,8 @@ public class GameManager : MonoBehaviour
         paddle1.gameObject.AddComponent<RemoteBrain>();
         RemoteBrain remote = paddle1.GetComponent<RemoteBrain>();
         paddle2.gameObject.AddComponent<LocalBrain>();
-        paddle2.userControl = false;
         LocalBrain local = paddle2.GetComponent<LocalBrain>();
+        local.controller = new HumanController();
         remote.agent = paddle1;
         paddle1.SetBrain(remote);
         paddle1.Init(true); //Is Right Paddle = True
