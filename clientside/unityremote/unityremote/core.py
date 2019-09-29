@@ -233,6 +233,8 @@ class RemoteEnv:
             return self.send(action)
 
     def stepfv(self, action, values):
-        return self.send(action, [str(values).replace(' ', '').replace(',', ' ').replace('[','').replace(']', '')])
-
-                        
+        strvalues = str(values)
+        if isinstance(values, list):
+            strvalues = strvalues.replace(' ', '').replace(',', ' ')
+        strvalues = strvalues.replace('[','').replace(']', '')
+        return self.send(action, [strvalues])

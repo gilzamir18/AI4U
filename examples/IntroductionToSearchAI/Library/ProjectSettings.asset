@@ -68,7 +68,7 @@ PlayerSettings:
   androidUseSwappy: 0
   androidBlitType: 0
   defaultIsNativeResolution: 1
-  macRetinaSupport: 1
+  macRetinaSupport: 0
   runInBackground: 1
   captureSingleScreen: 0
   muteOtherAudioSources: 0
@@ -94,7 +94,7 @@ PlayerSettings:
   visibleInBackground: 1
   allowFullscreenSwitch: 1
   graphicsJobMode: 0
-  fullscreenMode: 1
+  fullscreenMode: 3
   xboxSpeechDB: 0
   xboxEnableHeadOrientation: 0
   xboxEnableGuest: 0
