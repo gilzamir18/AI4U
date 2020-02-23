@@ -13,7 +13,7 @@ from threading import Thread
 import threading
 
 def run(env_defs, kargs=None):
-    args = parse_args(kargs)
+    args = parse_args(env_defs, kargs)
     network_created = False
     for i in range(args.n_workers):
         env = gym.make(args.env_id)
@@ -41,9 +41,14 @@ def parse_args(kargs=None):
 def get_network(ckpt_dir, obs_shape, n_actions, env_defs):
     sess = tf.Session()
     make_inference_network = env_defs['make_inference_network']
+
+    extra_inputs_shape = None
+    if 'extra_inputs_shape' in env_defs:
+        extra_inputs_shape = env_defs['extra_inputs_shape']
+
     with tf.variable_scope('global'):
         obs_placeholder, _, action_probs_op, _, _ = \
-            make_inference_network(obs_shape, n_actions, debug=False)
+            make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=extra_inputs_shape)
 
     ckpt_file = tf.train.latest_checkpoint(ckpt_dir)
     if not ckpt_file:

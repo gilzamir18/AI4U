@@ -23,7 +23,7 @@ def get_image(frame, width=84, height=84, dtype=np.float32):
     img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-def make_inference_network(obs_shape, n_actions, debug=False):
+def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
     import tensorflow as tf
     from unityremote.ml.a3c.multi_scope_train_op import make_train_op 
     from unityremote.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \

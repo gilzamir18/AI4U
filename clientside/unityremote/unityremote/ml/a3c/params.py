@@ -8,7 +8,7 @@ from . import preprocessing
 from .utils import get_git_rev
 
 
-def parse_args(kargs=None):
+def parse_args(env_defs, kargs=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("env_id")
     parser.add_argument("--n_steps", type=float, default=10e6)
@@ -23,7 +23,7 @@ def parse_args(kargs=None):
                              "RMSprop statistics for each layer")
     parser.add_argument("--manager_wake_interval_seconds", type=int, default=60)
     parser.add_argument("--preprocessing",
-                        choices=['generic', 'pong', 'from_image'],
+                        choices=['generic', 'from_image', 'external'],
                         default='generic')
 
     # Training hyperparameters
@@ -57,6 +57,8 @@ def parse_args(kargs=None):
         preprocess_wrapper = preprocessing.generic_preprocess
     elif args.preprocessing == 'from_image':
         preprocess_wrapper = preprocessing.imageinput_preprocess
+    elif args.preprocessing == 'external':
+        preprocess_wrapper = env_defs['preprocessing']
 
     args.n_steps = int(args.n_steps)
     if args.lr_decay_to_zero_by_n_steps is not None:

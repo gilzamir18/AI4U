@@ -23,12 +23,22 @@ class Worker:
 
         self.updates = 0
         self.last_state = self.env.reset()
+
+        if self.last_state is tuple:
+            self.last_extra_inputs = self.last_state[1]
+            self.last_state = self.last_state[0]
+        else:
+            self.last_extra_inputs = None
+
+
+
         self.episode_values = []
 
     def run_update(self, n_steps):
         self.sess.run(self.network.sync_with_global_ops)
 
-        actions, done, rewards, states = self.run_steps(n_steps)
+        actions, done, rewards, states, extra_inputs = self.run_steps(n_steps)
+
         returns = self.calculate_returns(done, rewards)
 
         if done:
@@ -38,9 +48,19 @@ class Worker:
                 self.logger.logkv('rl/episode_value_mean', episode_value_mean)
             self.episode_values = []
 
-        feed_dict = {self.network.states: states,
-                     self.network.actions: actions,
-                     self.network.returns: returns}
+        
+        feed_dict = None
+
+        if self.last_extra_inputs is not None:
+            feed_dict = {self.network.states: states,
+                         self.network.extra_inputs: extra_inputs,
+                         self.network.actions: actions,
+                         self.network.returns: returns}
+        else:
+            feed_dict = {self.network.states: states,
+                         self.network.actions: actions,
+                         self.network.returns: returns}
+
         self.sess.run(self.network.train_op, feed_dict)
 
         if self.summary_writer and self.updates != 0 and self.updates % 100 == 0:
@@ -56,10 +76,17 @@ class Worker:
         states = []
         actions = []
         rewards = []
+        extra_inputs = []
 
         for _ in range(n_steps):
             states.append(self.last_state)
-            feed_dict = {self.network.states: [self.last_state]}
+            feed_dict = None
+            if self.last_extra_inputs is not None:
+                states.append(self.last_extra_inputs)
+                feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+            else:       
+                feed_dict = {self.network.states: [self.last_state]}
+            
             [action_probs], [value_estimate] = \
                 self.sess.run([self.network.action_probs, self.network.value],
                               feed_dict=feed_dict)
@@ -68,12 +95,17 @@ class Worker:
             action = np.random.choice(self.env.action_space.n, p=action_probs)
             actions.append(action)
             self.last_state, reward, done, _ = self.env.step(action)
+
+            if self.last_state is tuple:
+                self.last_extra_inputs = self.last_state[1]
+                self.last_state = self.last_state[0]
+
             rewards.append(reward)
 
             if done:
                 break
 
-        return actions, done, rewards, states
+        return actions, done, rewards, states, extra_inputs
 
     def calculate_returns(self, done, rewards):
         if done:
