@@ -252,10 +252,11 @@ MonoBehaviour:
   agentList: {fileID: 1658458596}
   epCounter: {fileID: 176672322}
   target: {fileID: 0}
-  verticalDistance: 1
+  height: 30
   distance: 30
   FPS: 0
   alwaysUpdateOrientation: 0
+  speed: 50
 --- !u!1 &176672320
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +291,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -254, y: 112}
+  m_AnchoredPosition: {x: -260, y: 151}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &176672322
@@ -1100,7 +1101,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 65, y: 113}
+  m_AnchoredPosition: {x: 72, y: 152}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1074540876
@@ -1940,7 +1941,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -91, y: 115}
+  m_AnchoredPosition: {x: -89, y: 152}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1915248233
@@ -2158,7 +2159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5eb638b72f654f9b6856f39c03572f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfEggs: 10
+  numberOfEggs: 50
   top: {fileID: 1363660681}
   bottom: {fileID: 113514964}
   left: {fileID: 216123881}
@@ -2170,8 +2171,7 @@ MonoBehaviour:
     type: 3}
   eggPrefab: {fileID: 8509519157904452546, guid: 796b7b5d206764dae8b02eb343ffb079,
     type: 3}
-  eggsUpdateFreq: 5
-  reloadDelay: 0.2
+  eggsUpdateFreq: 10
 --- !u!4 &2146688646
 Transform:
   m_ObjectHideFlags: 0

@@ -267,52 +267,6 @@ Transform:
   m_Father: {fileID: 2234280982724780453}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3922505363819758111
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3922505363819758110}
-  - component: {fileID: 3922505363819758105}
-  m_Layer: 0
-  m_Name: LocalBrain
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3922505363819758110
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3922505363819758111}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 8292601455661311577}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3922505363819758105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3922505363819758111}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f621018bd2148a7579d9064e8ad3cbbc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agent: {fileID: 3922505365514472780}
-  fixedUpdate: 1
-  controller: {fileID: 0}
 --- !u!1 &3922505364316540577
 GameObject:
   m_ObjectHideFlags: 0
@@ -594,7 +548,6 @@ Transform:
   - {fileID: 6129598270067159907}
   - {fileID: 3229043862569679279}
   - {fileID: 3922505364316540579}
-  - {fileID: 3922505363819758110}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -680,14 +633,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numberOfFields: 6
   ID: 0
-  speed: 20
-  angularSpeed: 1
-  jumpPower: 25000
-  verticalSpeed: 20
+  initialEnergy: 30
+  speed: 50
+  angularSpeed: 50
+  jumpPower: 9000
+  verticalSpeed: 50
   visionMaxDistance: 500
   eye: {fileID: 5215205669028057146}
   eggValue: 50
-  energyUpdateInterval: 100
+  energyUpdateInterval: 30
   feet: {fileID: 7208234687404217510}
   mouth: {fileID: 3411910769985011481}
   happiness: 0

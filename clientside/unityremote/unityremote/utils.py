@@ -1,13 +1,24 @@
 import cv2
 import numpy as np
+import base64
 
-def image_decode(frame):
-    imgdata = base64.b64decode(frame)
-    return np.asarray(bytearray(imgdata), dtype=np.uint8)
+def image_decode(frame, w, h, dtype=np.uint8):
+    imgdata = base64.b64decode(frame).decode('UTF-8')
+    lines = imgdata.strip().split(';')
+    result = np.zeros(shape=(w, h), dtype=dtype)
+    i = 0
+    for line in lines:
+        values = line.strip().split(',')
+        j = 0
+        for value in values:
+            result[i,j] = int(value)
+            j += 1
+    i += 1
+    return result
 
-def get_image(frame, width=84, height=84):
-    imgdata = base64.b64decode(frame)
-    inputdata = np.asarray(bytearray(imgdata), dtype=np.uint8)
+
+def get_image(frame, width=84, height=84, dtype=np.float32):
+    inputdata = image_decode(frame, width, height, dtype)
     img = cv2.imdecode(inputdata, cv2.IMREAD_COLOR)
     img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

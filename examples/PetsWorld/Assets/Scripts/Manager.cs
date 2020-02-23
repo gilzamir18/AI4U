@@ -5,7 +5,6 @@ using unityremote;
 using UnityEngine.SceneManagement;
 public class Manager : MonoBehaviour
 {    
-    public static bool stopped = false;
 
     public static int epCounter = 0;
 
@@ -46,7 +45,6 @@ public class Manager : MonoBehaviour
         Manager.epCounter++;
         sumOfEnergy = 0.0f;
         eggsDelta = 0;
-        stopped = false;
         instance = this;
         agents = new GameObject[brainManager.brainList.Length];
         anims = new petanim[agents.Length];
@@ -63,6 +61,15 @@ public class Manager : MonoBehaviour
         brainManager.Configure();
         ProduceBlocks();
         ProduceEggs(numberOfEggs);
+    }
+
+    public void Respawn(GameObject gobj){
+        Vector3 mposition = new Vector3(Random.Range(left.transform.position.x, right.transform.position.x), 
+                20, Random.Range(bottom.transform.position.z, top.transform.position.z));
+    
+        gobj.GetComponent<Rigidbody>().position = mposition;
+        gobj.transform.position = mposition;
+        gobj.transform.rotation = Quaternion.identity;
     }
 
     public GameObject[] Agents {
@@ -120,35 +127,15 @@ public class Manager : MonoBehaviour
         }
     }
 
-
-    private float reloadDelta = 0;
-    public float reloadDelay = 0.2f;
-
     // Update is called once per frame
     void FixedUpdate()
     {
-
-        if (stopped) {
-            reloadDelta += Time.deltaTime;
-            if (reloadDelta >= reloadDelay) {
-                stopped = false;
-                reloadDelta = 0.0f;
-                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            }
-            return;
+        float tmp = 0;
+        foreach (petanim agent in anims) {
+            tmp += agent.Energy;
         }
-
-        if (!stopped) {
-            sumOfEnergy = 0;
-            foreach (petanim agent in anims) {
-                sumOfEnergy += agent.Energy;
-            }
-
-            if (sumOfEnergy <= 0){
-                stopped = true;
-                return;
-            }
-        }
+        sumOfEnergy = tmp;
+        
 
         eggsDelta += Time.deltaTime;
         if (eggsDelta > eggsUpdateFreq) {

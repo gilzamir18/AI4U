@@ -8,11 +8,11 @@ public class petanim : Agent
 {
     Animator m_Animator;
 
-    Rigidbody rigidBody;
+    Rigidbody mRigidBody;
 
     public int ID = 0;
 
-    private const int MAX_AGENT_ENERGY = 10;
+    public int initialEnergy = 10;
 
     //BEGIN::CONTROL VARIABLES
     public float speed = 1.0f;
@@ -37,7 +37,7 @@ public class petanim : Agent
 
     private int touched_id = -1;
 
-    private int energy = MAX_AGENT_ENERGY;
+    private int energy;
 
     private Ray[,] raysMatrix = null;
     private int[,] viewMatrix = null;
@@ -82,7 +82,7 @@ public class petanim : Agent
     {
         manager = Manager.instance;
         m_Animator = GetComponent<Animator>();
-        rigidBody = GetComponent<Rigidbody>();
+        mRigidBody = GetComponent<Rigidbody>();
         raysMatrix = new Ray[verticalResolution, horizontalResolution];
         viewMatrix = new int[verticalResolution, horizontalResolution];
         ResetParams();
@@ -90,7 +90,9 @@ public class petanim : Agent
 
     public void ResetParams() {
         touched_id = 0;
-        energy = MAX_AGENT_ENERGY;
+        energy = initialEnergy;
+        onGround = false;
+        touched_id = -1;
     }
 
     public int Energy {
@@ -99,29 +101,55 @@ public class petanim : Agent
         }
     }
 
-    private float v, h, jump, push, signal;
+    private float v=0, h=0, jump=0, push=0, signal=0;
 
     override public void ApplyAction()
     {
-        string action = GetActionName();
+        v = 0; h = 0; jump = 0; push = 0; signal = 0;
+        string actionName = GetActionName();
         //Debug.Log(action);
-        if (action == "act") {
-            float[] args = GetActionArgAsFloatArray();
-            v = args[0];
-            h =  args[1];
-            jump = args[2];
-            push = args[3];
-            signal = args[4];
-            if (args.Length >= 12) {
-                happiness = args[5];
-                surprise = args[6];
-                fear = args[7];
-                disgust = args[8];
-                sadness = args[9];
-                neutral = args[10];
-                anger = args[11];
+        if (actionName == "act"){
+            int action = GetActionArgAsInt();
+            switch(action){
+                case 0:
+                    v = 1;
+                    break;
+                case 1:
+                    h = 1;
+                    break;
+                case 2:
+                    v = 1;
+                    h = 1;
+                    break;
+                case 3:
+                    v = -1;
+                    break;
+                case 4:
+                    h = -1;
+                    break;
+                case 5:
+                    v = -1;
+                    h = -1;
+                    break;
+                case 6:
+                    v = 1;
+                    h = -1;
+                    break;
+                case 7:
+                    v = -1;
+                    h = 1;
+                    break;
+                case 8:
+                    jump =  1;
+                    break;
+                case 9:
+                    push = 1;
+                    break;
+                case 10:
+                    signal = 1;
+                    break;
             }
-        } else if (action == "emotion"){
+        } else if (actionName == "emotion"){
             float[] args = GetActionArgAsFloatArray();
             happiness = args[0];
             surprise = args[1];
@@ -130,8 +158,15 @@ public class petanim : Agent
             sadness = args[4];
             neutral = args[5];
             anger = args[6];
-        } else if (action == "get_status"){
+        } else if (actionName == "get_status"){
             Debug.Log("checking status...");
+        } else if (actionName == "reset") {
+            if (energy <= 0) {
+                Manager.instance.Respawn(gameObject);
+                mRigidBody.velocity = Vector3.zero;
+                mRigidBody.angularVelocity = Vector3.zero;
+                ResetParams();
+            }
         }
     }
 
@@ -145,9 +180,13 @@ public class petanim : Agent
             for (int j = 0; j < horizontalResolution; j++)
             {
                 //Debug.DrawRay(raysMatrix[i, j].origin, raysMatrix[i, j].direction, Color.red);
-                sb.Append(viewMatrix[i, j]).Append(",");
+                sb.Append(viewMatrix[i, j]);
+                if (j <= horizontalResolution-2)
+                    sb.Append(",");
             }
-            sb.Append(";");
+            if (i <= verticalResolution - 2)
+                sb.Append(";");
+
         }
         return Encoding.UTF8.GetBytes(sb.ToString().ToCharArray());
     }
@@ -204,7 +243,7 @@ public class petanim : Agent
                             viewMatrix[i, j] = 4;
                         } else if (objtag == "agent") {
                             int code = int.Parse(objname.Split('_')[1]);
-                            viewMatrix[i, j] = code;
+                            viewMatrix[i, j] = code + 10;
                         } else {
                             viewMatrix[i, j] = -1;
                         }
@@ -221,16 +260,11 @@ public class petanim : Agent
     override public void UpdatePhysics()
     {
         if (energy <= 0){
-            rigidBody.velocity = Vector3.zero;
+            if (onGround){
+                mRigidBody.velocity = Vector3.zero;
+            }
             return;
         }
-
-        if (Manager.stopped) {
-            return;
-        }
-
-
-
 
         //BEGIN::UPDATE EMOTIONAL STATE
         m_Animator.SetFloat("happiness", happiness);
@@ -245,14 +279,14 @@ public class petanim : Agent
         //BEGIN::UPDATE PHYSICS STATE
         Vector3 fwd = gameObject.transform.forward;
 
-        rigidBody.angularVelocity = new Vector3(0, h * angularSpeed, 0);
-        rigidBody.velocity = v * speed * fwd;
+        mRigidBody.angularVelocity = new Vector3(0, h * angularSpeed, 0);
+        mRigidBody.velocity = v * speed * fwd;
         
         
         if (jump < 0 || !onGround) {
-            rigidBody.velocity = new Vector3(rigidBody.velocity.x, - verticalSpeed, rigidBody.velocity.z);
+            mRigidBody.velocity = new Vector3(mRigidBody.velocity.x, - verticalSpeed, mRigidBody.velocity.z);
         } else if (onGround){
-            rigidBody.AddForce(Vector3.up * jumpPower);
+            mRigidBody.AddForce(Vector3.up * jumpPower);
         }
         //END::UPDATE PHYSICS STATE
 
@@ -278,7 +312,7 @@ public class petanim : Agent
     /// <param name="other">The Collision data associated with this collision.</param>
     void OnCollisionStay(Collision other)
     {
-        if (Manager.stopped) {
+        if (this.energy <= 0) {
             return;
         }
 
@@ -295,9 +329,8 @@ public class petanim : Agent
         } else if (objtag == "agent") {
             int code = int.Parse(objname.Split('_')[1]);
             petanim anim = other.gameObject.GetComponent<petanim>();
-            if (this.energy < anim.energy) {
-                this.energy = anim.energy;
-            }
+            this.energy += 10;
+            anim.energy += 10;
             touched_id = code;
         } else if (objname == "Terrain") {
             touched_id = 1;
@@ -319,7 +352,7 @@ public class petanim : Agent
         } else if (other.gameObject.tag == "eating") {
             foreach (ContactPoint contact in other.contacts)
             {
-                if (Vector3.Distance(contact.point, mouth.transform.position) < 2.0f){
+                if (Vector3.Distance(contact.point, mouth.transform.position) < 10.0f){
                     energy += eggValue;
 
                     Destroy(other.gameObject);
@@ -337,7 +370,7 @@ public class petanim : Agent
     /// <param name="other">The Collision data associated with this collision.</param>
     void OnCollisionExit(Collision other)
     {
-        if (Manager.stopped) {
+        if (this.energy <= 0) {
             return;
         }
 
@@ -358,7 +391,7 @@ public class petanim : Agent
         SetStateAsInt(2, "energy", energy);
         SetStateAsInt(3, "id", ID);
         SetStateAsInt(4, "touched", touched_id);
-        SetStateAsBool(5, "status", Manager.stopped);
+        SetStateAsFloat(5, "totalenergy", Manager.instance.SumOfEnergy);
         //END::UPDATE AGENT VISION
     }
 }

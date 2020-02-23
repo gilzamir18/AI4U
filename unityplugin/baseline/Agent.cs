@@ -39,6 +39,10 @@ namespace unityremote
         private byte[] types;
         private string[] values;
 
+
+        /***
+        This method receives client's command to apply to remote environment.
+        ***/
         public virtual void ApplyAction()
         {
         }

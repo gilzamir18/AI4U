@@ -33,8 +33,9 @@ def agent(env):
             ID = state['id']
             sum_energy += (energy - prev_energy)
             prev_energy = energy
+            time.sleep(0.05)
         print(sum_energy)
-        time.sleep(0.01)
+
     env.close()    
 
 if __name__ == "__main__":

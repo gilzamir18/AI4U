@@ -89,7 +89,7 @@ class EnvironmentManager():
         output_port = start_output_port
         output_step = step_output_port
         for i in range(size):
-            if wrapper is RemoteEnv:
+            if not (wrapper is None):
                 env = wrapper()
                 env.configure(host, output_port, input_port)
                 env.make()
@@ -150,6 +150,9 @@ class RemoteEnv:
 
     def close(self):
         self.UDP.close()
+
+    def reset(self):
+        pass
 
     def open(self, timeout=0):
         self.timeout = timeout

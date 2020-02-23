@@ -2,7 +2,7 @@ from unityremote.core import RemoteEnv, EnvironmentManager
 import numpy as np
 import threading
 import time
-from gmproc.gmproc import Workers
+from gmproc import Workers
 
 
 class SkipframesWrapper(RemoteEnv):
@@ -11,6 +11,7 @@ class SkipframesWrapper(RemoteEnv):
         for i in range(4):
             state = super().step(action, value)
         return state
+
 
 envs = EnvironmentManager(4, wrapper=SkipframesWrapper)
 
@@ -34,9 +35,11 @@ def agent(env):
             ID = state['id']
             sum_energy += (energy - prev_energy)
             prev_energy = energy
+            time.sleep(0.05)
         print(sum_energy)
-        time.sleep(0.01)
+        
     env.close()    
+    return True
 
 if __name__ == "__main__":
 	ws = Workers()
@@ -45,6 +48,5 @@ if __name__ == "__main__":
 	ws.add(1, agent, params=envs[1])
 	ws.add(2, agent, params=envs[2])
 	ws.add(3, agent, params=envs[3])
-	for _ in range(10):
-		ws.run([0, 1, 2, 3])
+	ws.run([0, 1, 2, 3])
 

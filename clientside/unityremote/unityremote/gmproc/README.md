@@ -5,8 +5,6 @@ GIL (Global Interpreter Lock) limits the power of the multiprocessing based thre
 
 Therefore, GPROC is an abstraction to make ease python based multiprocessing. GMPROC combines with UnityRemote on the client-side. But you can use it in other applications.
 
-We analyzed the performance difference between threads and multi processing with GMPROC in an experiment using Unity. While using UnityRemote with threads yielded a frame rate of 2.5 fps, GMPROC yielded a frame rate of 75 fps. See the application used in the experiment at UnityRemote/examples/PetsWorld. Python scripts are in UnityRemote/examples/PetsWorld/Assets/clientside.
-
 ## USER GUIDE
 
 GMPROC provides two main abstractions to use Python based multiprocessing: workers and client-server.
