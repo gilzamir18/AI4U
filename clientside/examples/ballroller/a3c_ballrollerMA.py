@@ -46,7 +46,7 @@ def parse_args():
 def get_state_from_fields(fields):
 	return np.array([fields['tx'], fields['tz'], fields['vx'], fields['vz'], fields['x'], fields['y'],	fields['z']])
 
-def state_wrapper(fields):
+def state_wrapper(fields, env):
         state = get_state_from_fields(fields)
         done = fields['done']
         reward = fields['reward']

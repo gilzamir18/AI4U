@@ -9,7 +9,7 @@ import argparse
 import matplotlib.pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
-from gmproc import ClientServer, ClientWorker, ServerWorker
+from .gmproc import ClientServer, ClientWorker, ServerWorker
 import tensorflow as tf
 import time
 import datetime
@@ -110,7 +110,7 @@ class A3CModel(keras.Model):
 
 
 def __initialize_model__(model, state_size):
-	model( tf.convert_to_tensor( np.random.random((1, state_shape), dtype=tf.float32) ) )
+	model( tf.convert_to_tensor( np.random.random( (1, state_size) ), dtype=tf.float32 ) )
 
 class A3CMaster(ServerWorker):
 	def __init__(self):
@@ -120,17 +120,20 @@ class A3CMaster(ServerWorker):
 
 	def start(self, params):
 
-		log_bsize = 1000
-		if 'log_bsize' in params:
-			log_bsize = params['log_bsize']
+		if 'log_manager' in params:
+			self.log_manager = params['log_manager']
+		else:
+			log_bsize = 1000
+			if 'log_bsize' in params:
+				log_bsize = params['log_bsize']
 
-		log_verbose = False
-		if 'log_verbose' in params:
-			log_verbose = params['log_verbose']
+			log_verbose = False
+			if 'log_verbose' in params:
+				log_verbose = params['log_verbose']
 
 
-		self.log = LogManager("logs/server.log", log_bsize)
-		self.log.verbose = log_verbose
+			self.log = LogManager("logs/server.log", log_bsize)
+			self.log.verbose = log_verbose
 
 		self.log.addline('starting server %s on time %s'%(self.id, datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 		self.learning_rate = params['learning_rate']
@@ -150,8 +153,11 @@ class A3CMaster(ServerWorker):
 		
 		self.initialize_model(self.model, self.state_size)
 
-		self.opt = tf.keras.optimizers.RMSprop(learning_rate=self.learning_rate, decay=0.99, epsilon=1e-5)
-
+		if 'opt' in params:
+			self.opt = params['opt']()
+		else:
+			self.opt = tf.keras.optimizers.Adam(lr=params['learning_rate'])
+	
 	def process(self, id, msg):
 		if msg is not None:
 			grads = [None]*len(msg)
@@ -174,10 +180,10 @@ def __prepare_data__(data):
 	return tf.convert_to_tensor(data[None, :], dtype=tf.float32)
 
 def __make_transition__(mem, state, action, reward):
-	mem.store(current_state, action, reward)
+	mem.store(state, action, reward)
 
 def __prepare_array_data__(data):
-	tf.convert_to_tensor(np.vstack(data), dtype=tf.float32)
+	return tf.convert_to_tensor(np.vstack(data), dtype=tf.float32)
 
 
 class A3CWorker(ClientWorker):
@@ -193,25 +199,26 @@ class A3CWorker(ClientWorker):
 		self.global_episodes = 0
 		self.mem = Memory()
 		self.ep_reward = 0.0
-		self.avg_reward = 0.0
 		self.update_counter = 0
-		self.avg_counter = 0
-		self.avg_score = 0
 		self.ep_score = 0
+		self.ep_entropy = 0.0
+		self.ep_values = 0.0
 
 	def start(self, params):
 
-		log_bsize = 1000
-		if 'log_bsize' in params:
-			log_bsize = params['log_bsize']
+		if 'log_manager' in params:
+			self.log = params['log_manager']()
+		else:
+			log_bsize = 1000
+			if 'log_bsize' in params:
+				log_bsize = params['log_bsize']
 
+			log_verbose = False
+			if 'log_verbose' in params:
+				log_verbose = params['log_verbose']
 
-		log_verbose = False
-		if 'log_verbose' in params:
-			log_verbose = params['log_verbose']
-
-		self.log = LogManager('logs/ga3c%d'%(self.id), log_bsize)
-		self.log.verbose = log_verbose
+			self.log = LogManager('logs/ga3c%d'%(self.id), log_bsize)
+			self.log.verbose = log_verbose
 
 		self.log.addline("starting client %s"%(self.id))
 		self.sess = tf.compat.v1.Session()
@@ -224,6 +231,11 @@ class A3CWorker(ClientWorker):
 		self.UPDATE_FREQ = params['update_freq']
 		self.action_size = params['action_size']
 		self.state_size = params['state_size']
+
+
+		self.max_n_ep = 1000000
+		if 'max_ep' in params:
+			self.max_n_ep = params['max_ep']
 
 		if 'debug_freq' in params:
 			self.DEBUG_FREQ = params['debug_freq']
@@ -243,6 +255,8 @@ class A3CWorker(ClientWorker):
 
 		if 'prepare_array_data' in params:
 			self.prepare_array_data = params['prepare_array_data']
+		else:
+			self.prepare_array_data = __prepare_array_data__
 
 
 		if 'act' in params:
@@ -267,14 +281,20 @@ class A3CWorker(ClientWorker):
 		self.entropy_bonus = params['entropy_bonus']
 		self.max_grad_norm = params['max_grad_norm']
 		self.gamma = params['gamma']
-		self.opt = tf.keras.optimizers.Adam(lr=params['learning_rate'])
+
+		if 'opt' in params:
+			self.opt = params['opt']()
+		else:
+			self.opt = tf.keras.optimizers.Adam(lr=params['learning_rate'])
+	
 		self.current_state = self.env.reset()
 
-	def print_loss(self):
+	def get_loss(self):
 		loss = self.ep_loss.numpy()
-		avg = np.mean(loss)/self.ep_steps
-		self.log.addline("AVG Loss: %s"%(avg))
-
+		avg = 0
+		if self.ep_steps > 0:
+			avg = np.mean(loss)/self.ep_steps
+		return avg
 
 	def process(self):
 		if self.started:
@@ -325,20 +345,13 @@ class A3CWorker(ClientWorker):
 		self.time_count = 0
 		self.update_counter += 1
 		self.mem.clear()
-		if self.update_counter %  self.DEBUG_FREQ == 0:
-			self.log.addline("EPOCH: %d; LOSS \n"%(self.update_counter))
-			self.print_loss()
-			if self.avg_counter > 0:
-				self.log.addline("AVG REWARD SUM: %f"%(self.avg_reward/self.avg_counter))
-			self.avg_reward = 0.0
-			self.avg_score = 0
-			self.avg_counter = 0
 
 		if self.is_done:
-			self.avg_counter += 1
-			self.avg_reward += self.ep_reward
-			self.avg_score += self.ep_score
 			self.global_episodes += 1
+
+			self.log.addline('env %d [episodeinfo]: ep_number %d; ep_nstpes: %d; ep_loss %f; ep_entropy %f; ep_values %f; ep_reward_sum %f;\n'
+							%(self.id, self.global_episodes, self.ep_steps, self.get_loss(), self.ep_entropy/max(1, self.ep_steps), self.ep_values/max(1, self.ep_steps), self.ep_reward/max(1, self.ep_steps) ) )
+
 			self.ep_reward = 0.0
 			self.ep_score = 0
 			self.ep_steps = 0
@@ -351,7 +364,7 @@ class A3CWorker(ClientWorker):
 		self.log.close()
 
 	def done(self):
-		return self.global_episodes > 1000000
+		return self.global_episodes > self.max_n_ep
 
 	def compute_loss(self,
 				   done,
@@ -385,6 +398,9 @@ class A3CWorker(ClientWorker):
 																	 logits=logits)
 
 		policy_loss *= tf.compat.v2.stop_gradient(advantage)
+
+		self.ep_entropy += np.mean(entropy.numpy())
+		self.ep_values += np.mean(values.numpy())
 		
 		policy_loss -= self.entropy_bonus * entropy
 		total_loss = tf.reduce_mean((self.value_loss_coef * value_loss + policy_loss))

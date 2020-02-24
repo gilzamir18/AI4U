@@ -213,16 +213,19 @@ class FrameStackWrapper(Wrapper):
 
 
 class FrameSkipWrapper(Wrapper):
-    """
-    Repeat the chosen action for 4 frames, only returning the last frame.
-    """
+    def __init__(self, env, k=4):
+        Wrapper.__init__(self, env)
+        self.k = k
 
+    """
+    Repeat the chosen action for k frames, only returning the last frame.
+    """
     def reset(self):
         return self.env.reset()
 
     def step(self, action):
         reward_sum = 0
-        for _ in range(4):
+        for _ in range(self.k):
             obs, reward, done, info = self.env.step(action)
             reward_sum += reward
             if done:

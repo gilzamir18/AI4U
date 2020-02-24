@@ -76,7 +76,7 @@ class Network:
         self.states = None
         self.extra_inputs = None
 
-        if observations is tuple:
+        if type(observations) is tuple:
             self.states = observations[0]
             self.extra_inputs = observations[1]
         else:

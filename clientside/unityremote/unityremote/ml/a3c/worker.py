@@ -23,14 +23,11 @@ class Worker:
 
         self.updates = 0
         self.last_state = self.env.reset()
-
-        if self.last_state is tuple:
+        if type(self.last_state) is tuple:
             self.last_extra_inputs = self.last_state[1]
             self.last_state = self.last_state[0]
         else:
             self.last_extra_inputs = None
-
-
 
         self.episode_values = []
 
@@ -43,6 +40,12 @@ class Worker:
 
         if done:
             self.last_state = self.env.reset()
+            if type(self.last_state) is tuple:
+                self.last_extra_inputs = self.last_state[1]
+                self.last_state = self.last_state[0]
+            else:
+                self.last_extra_inputs = None
+
             if self.logger:
                 episode_value_mean = sum(self.episode_values) / len(self.episode_values)
                 self.logger.logkv('rl/episode_value_mean', episode_value_mean)
@@ -82,23 +85,26 @@ class Worker:
             states.append(self.last_state)
             feed_dict = None
             if self.last_extra_inputs is not None:
-                states.append(self.last_extra_inputs)
+                extra_inputs.append(self.last_extra_inputs)
                 feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
-            else:       
+            else:
                 feed_dict = {self.network.states: [self.last_state]}
-            
+
             [action_probs], [value_estimate] = \
                 self.sess.run([self.network.action_probs, self.network.value],
                               feed_dict=feed_dict)
+
             self.episode_values.append(value_estimate)
 
             action = np.random.choice(self.env.action_space.n, p=action_probs)
             actions.append(action)
             self.last_state, reward, done, _ = self.env.step(action)
 
-            if self.last_state is tuple:
+            if type(self.last_state) is tuple:
                 self.last_extra_inputs = self.last_state[1]
                 self.last_state = self.last_state[0]
+            else:
+                self.last_extra_inputs = None
 
             rewards.append(reward)
 
@@ -114,7 +120,12 @@ class Worker:
             # If we're ending in a non-terminal state, in order to calculate returns,
             # we need to know the return of the final state.
             # We estimate this using the value network.
-            feed_dict = {self.network.states: [self.last_state]}
+            feed_dict = None
+            if self.last_extra_inputs is not None:
+                feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+            else:       
+                feed_dict = {self.network.states: [self.last_state]}
+
             last_value = self.sess.run(self.network.value, feed_dict=feed_dict)[0]
             rewards += [last_value]
             returns = utils.rewards_to_discounted_returns(rewards, DISCOUNT_FACTOR)

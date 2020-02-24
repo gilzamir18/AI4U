@@ -50,7 +50,7 @@ class Environment(gym.Env):
 
     def reset(self):
         fields = self.remoteenv.step('restart')
-        self.state, self.reward, self.done, self.info = self.state_wrapper(fields)
+        self.state, self.reward, self.done, self.info = self.state_wrapper(fields, self)
         return self.state
  
     def render(self, mode='human', close=False):
@@ -61,7 +61,7 @@ class Environment(gym.Env):
 
     def step(self, action):
         fields = self.remoteenv.step(self.actions[action][0], self.actions[action][1])
-        self.state, self.reward, self.done, self.info = self.state_wrapper(fields)
+        self.state, self.reward, self.done, self.info = self.state_wrapper(fields, self)
         return (self.state, self.reward, self.done, self.info)
 
     def __del__(self):
