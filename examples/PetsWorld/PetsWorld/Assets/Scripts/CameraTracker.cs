@@ -7,6 +7,8 @@ public class CameraTracker : MonoBehaviour
 {
 	private float refreshDisplayFreq = 1;
 
+	public Text wasdIndicator;
+
 	public Text displayEnergy;
 
 	public Dropdown agentList;
@@ -16,12 +18,6 @@ public class CameraTracker : MonoBehaviour
     public GameObject target;
     public float height;
     public float distance;
-
-    public bool FPS;
-
-	private bool firstTime = true;
-
-	public bool alwaysUpdateOrientation;
 
 	private Manager manager;
 
@@ -40,20 +36,14 @@ public class CameraTracker : MonoBehaviour
 				OnValueChanged(agentList);
 			}
 		);
+		UpdateTargetValue(agentList);
+		UpdateWASDIndicator();
 	}
 
 
-	private void UpdateOrientation(){
-		if (FPS){
-			gameObject.transform.eulerAngles = new Vector3(
-			target.transform.eulerAngles.x,
-			target.transform.eulerAngles.y,
-			target.transform.eulerAngles.z);
-		} else {	
-			gameObject.transform.eulerAngles = new Vector3(
-			target.transform.eulerAngles.x,
-			target.transform.eulerAngles.y + 180,
-			target.transform.eulerAngles.z);
+	private void  UpdateWASDIndicator(){
+		if (wasdIndicator != null) {
+			wasdIndicator.text = WASD ? "wasd on" : "wasd off";
 		}
 	}
 
@@ -73,9 +63,9 @@ public class CameraTracker : MonoBehaviour
 		Vector3 p = gameObject.transform.position;
 		p.y = height;
 		gameObject.transform.position = p;
-
 		if (Input.GetKey(KeyCode.F)){
 			WASD = !WASD;
+			UpdateWASDIndicator();
 		}
 
 		if (WASD) {
@@ -96,17 +86,11 @@ public class CameraTracker : MonoBehaviour
 			transform.Rotate(0, rotation, 0);
 		} else if (target != null) {
 			gameObject.transform.position = new Vector3(target.transform.position.x,
-						target.transform.position.y + height, target.transform.position.z + distance);
-
-			if (firstTime) {
-				UpdateOrientation();
-				firstTime = false;
-			} else if (alwaysUpdateOrientation) {
-				UpdateOrientation();
-			}
+						gameObject.transform.position.y, target.transform.position.z + distance);
 		} 
 
 		if (target != null) {
+			gameObject.transform.LookAt(target.transform);
 			float energy  = target.GetComponent<petanim>().Energy;
 			displayDelta += Time.deltaTime;
 			if (displayDelta > refreshDisplayFreq ) {
@@ -120,7 +104,8 @@ public class CameraTracker : MonoBehaviour
 		}
     }
 
-	public void OnValueChanged(Dropdown dropdown){
+
+	private void UpdateTargetValue(Dropdown dropdown){
 		int idx = dropdown.value - 1;
 		Debug.Log("Selected Agent " + idx);
 		if (idx >= 0) {
@@ -129,5 +114,9 @@ public class CameraTracker : MonoBehaviour
 			target = null;
 			displayEnergy.text = "";
 		}
+	}
+
+	public void OnValueChanged(Dropdown dropdown){
+		UpdateTargetValue(dropdown);
 	}
 }

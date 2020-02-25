@@ -1,4 +1,5 @@
 from unityremote.core import RemoteEnv
+from unityremote.utils import image_decode
 
 def agent():
     env = RemoteEnv(IN_PORT=8080, OUT_PORT=7070)
@@ -10,7 +11,8 @@ def agent():
         print(prev_energy)
         done = state['done']
         while not done:
-            frame = None
+            frame = image_decode(state['frame'], 20, 20)
+            print(frame)
             action = int(input('action'))
             for i in range(8):
                 state = env.step("act", action)

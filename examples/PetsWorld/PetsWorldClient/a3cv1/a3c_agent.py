@@ -6,13 +6,35 @@ import numpy as np
 import argparse
 from gym.core import Wrapper
 from unityremote.utils import image_decode
-from unityremote.ml.a3c.preprocessing import RandomStartWrapper, FrameSkipWrapper, EndEpisodeOnLifeLossWrapper, ClipRewardsWrapper
+from unityremote.ml.a3c.preprocessing import RandomStartWrapper, EndEpisodeOnLifeLossWrapper, ClipRewardsWrapper
 from collections import deque
 
 
 IMAGE_SHAPE = (20, 20, 4)
-ARRAY_SIZE = 2
+ARRAY_SIZE = 3
 ACTION_SIZE = 7
+
+class FrameSkipWrapper(Wrapper):
+    def __init__(self, env, k=4):
+        Wrapper.__init__(self, env)
+        self.k = k
+
+    """
+    Repeat the chosen action for k frames, only returning the last frame.
+    """
+    def reset(self):
+        return self.env.reset()
+
+    def step(self, action):
+        reward_sum = 0
+        for _ in range(self.k):
+            obs, reward, done, info = self.env.step(action)
+            reward_sum += reward
+            if done:
+                break
+        if not done:
+            obs, _, done, info = self.env.step(-1)
+        return obs, reward_sum, done, info
 
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
@@ -62,7 +84,7 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
 
 
 
-class FrameStackWrapper(Wrapper):
+class AgentWrapper(Wrapper):
     """
     Start each episode with a random number of no-ops.
     """
@@ -84,7 +106,7 @@ def agent_preprocessing(env, max_n_noops, clip_rewards=True):
     env = EndEpisodeOnLifeLossWrapper(env)
     if clip_rewards:
         env = ClipRewardsWrapper(env)
-    env = FrameStackWrapper(env)
+    env = AgentWrapper(env)
     return env
 
 
@@ -122,6 +144,11 @@ class state_wrapper:
         done = fields['done']
         delta = fields['energy'] - self.energy
 
+        '''if delta > 0 and fields['id']==0:
+            print('-------------------------------------DELTA---------------------------------------')
+            print(delta)
+            print('---------------------------------------------------------------------------------')
+        '''
         reward = 0
         if not done:
             if self.energy > 200:
@@ -132,11 +159,9 @@ class state_wrapper:
                 if reward < 0:
                     reward = 0;
             info = fields
+            self.energy = fields['energy']
         else:
             self.energy = None
-
-        self.energy = fields['energy']
-
 
         self.buf.append(frame)
         #frameseq = np.array(self.buf, dtype=np.float32).reshape(1, 4, 20, 20)
@@ -144,6 +169,7 @@ class state_wrapper:
         frameseq = np.moveaxis(frameseq, 0, -1)
         self.proprioceptions[0] = fields['touched']
         self.proprioceptions[1] = fields['energy']/300.0
+        self.proprioceptions[2] = fields['signal']
         #proprioception = np.array(self.proprioceptions, np.float32).reshape(1, len(self.proprioceptions))
         proprioception = np.array(self.proprioceptions, dtype=np.float32)
         state = (frameseq, proprioception)

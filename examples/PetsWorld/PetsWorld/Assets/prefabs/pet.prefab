@@ -730,9 +730,9 @@ MonoBehaviour:
   ID: 0
   maxEnergy: 300
   initialEnergy: 30
-  speed: 50
-  angularSpeed: 50
-  jumpPower: 9000
+  speed: 25
+  angularSpeed: 3
+  jumpPower: 20000
   verticalSpeed: 50
   visionMaxDistance: 500
   eye: {fileID: 5215205669028057146}

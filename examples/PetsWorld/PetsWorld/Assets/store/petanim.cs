@@ -102,6 +102,7 @@ public class petanim : Agent
         energy = initialEnergy;
         onGround = false;
         touched_id = -1;
+        signal = 0;
     }
 
     public int Energy {
@@ -118,7 +119,7 @@ public class petanim : Agent
 
     override public void ApplyAction()
     {
-        v = 0; h = 0; jump = 0; push = 0; signal = 0;
+        v = 0; h = 0; jump = 0; push = 0; //signal = 0;
         string actionName = GetActionName();
         //Debug.Log(action);
         if (actionName == "act"){
@@ -159,7 +160,8 @@ public class petanim : Agent
                     push = 1;
                     break;
                 case 10:
-                    signal = 1;
+                    //Debug.Log("signal");
+                    signal = 1-signal;
                     break;
             }
         } else if (actionName == "emotion"){
@@ -316,7 +318,7 @@ public class petanim : Agent
             energy_delta_time += 1;
         }
         //END::UPDATE BIO
-        v = 0; h = 0; jump = 0; push = 0; signal = 0;
+        v = 0; h = 0; jump = 0; push = 0; //signal = 0;
     }
 
     /// <summary>
@@ -335,9 +337,21 @@ public class petanim : Agent
         if (objtag == "eating")
         {
             touched_id = 2;
-            energy += eggValue;
-            Destroy(other.gameObject);
-            manager.DestroyEgg();
+            //Debug.Log("Signal " + signal);
+            if (signal > 0){
+                energy += eggValue;
+                Destroy(other.gameObject);
+                manager.DestroyEgg();
+            }
+        
+        } else if (other.gameObject.tag == "agent") {
+            int code = int.Parse(other.gameObject.name.Split('_')[1]);
+            petanim anim = other.gameObject.GetComponent<petanim>();
+            touched_id = code + 10;
+            if (signal > 0) {
+                this.energy += 10;
+                anim.energy += 10;
+            }
         } else if (objname.StartsWith("block"))
         {
             touched_id = 3;
@@ -374,13 +388,7 @@ public class petanim : Agent
             return;
         }
 
-        if (other.gameObject.tag == "agent") {
-            int code = int.Parse(other.gameObject.name.Split('_')[1]);
-            petanim anim = other.gameObject.GetComponent<petanim>();
-            touched_id = code + 10;
-            this.energy += 10;
-            anim.energy += 10;
-        } else if (other.gameObject.tag == "ground"){
+        if (other.gameObject.tag == "ground"){
             onGround = false;
         }
         touched_id = 0;
@@ -397,7 +405,7 @@ public class petanim : Agent
         SetStateAsInt(2, "energy", energy);
         SetStateAsInt(3, "id", ID);
         SetStateAsInt(4, "touched", touched_id);
-        SetStateAsFloat(5, "totalenergy", Manager.instance.SumOfEnergy);
+        SetStateAsFloat(5, "signal", signal);
         //END::UPDATE AGENT VISION
     }
 }
