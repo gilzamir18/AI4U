@@ -7,6 +7,7 @@ namespace unityremote
     public class BrainManager : MonoBehaviour
     {
         public RemoteBrain[] brainList;
+        public bool autoConfiguration = true;
         public int startInputPort = 7070;
         public int stepInputPort = 1;
         public int startOuputPort = 8080;
@@ -15,10 +16,17 @@ namespace unityremote
         // Start is called before the first frame update
         void Awake()
         {
+            if (autoConfiguration) {
+                Configure();
+            }
+        }
+
+        public void Configure() {
             int inputPort = startInputPort;
             int outputPort = startOuputPort;
             int stepIn = stepInputPort;
             int stepOut = stepOutputPort;
+
 
             foreach (RemoteBrain rb in brainList)
             {

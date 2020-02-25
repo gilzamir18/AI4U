@@ -286,7 +286,7 @@ public class petanim : Agent
         m_Animator.SetFloat("sadness", sadness);
         m_Animator.SetFloat("anger", anger);
         m_Animator.SetFloat("neutral", neutral);
-        m_Animator.SetFloat("disgust", disgust);
+        m_Animator.SetFloat("disgust",disgust);
         //END::UPDATE EMOTIONAL STATE
 
         //BEGIN::UPDATE PHYSICS STATE
@@ -298,7 +298,7 @@ public class petanim : Agent
         
         if (jump < 0 || !onGround) {
             mRigidBody.velocity = new Vector3(mRigidBody.velocity.x, - verticalSpeed, mRigidBody.velocity.z);
-        } else if (onGround){
+        } else if (onGround && jump > 0){
             mRigidBody.AddForce(Vector3.up * jumpPower);
         }
         //END::UPDATE PHYSICS STATE
@@ -316,6 +316,7 @@ public class petanim : Agent
             energy_delta_time += 1;
         }
         //END::UPDATE BIO
+        v = 0; h = 0; jump = 0; push = 0; signal = 0;
     }
 
     /// <summary>
@@ -334,17 +335,14 @@ public class petanim : Agent
         if (objtag == "eating")
         {
             touched_id = 2;
+            energy += eggValue;
+            Destroy(other.gameObject);
+            manager.DestroyEgg();
         } else if (objname.StartsWith("block"))
         {
             touched_id = 3;
         } else if (objtag == "wall"){
             touched_id = 4;
-        } else if (objtag == "agent") {
-            int code = int.Parse(objname.Split('_')[1]);
-            petanim anim = other.gameObject.GetComponent<petanim>();
-            this.energy += 10;
-            anim.energy += 10;
-            touched_id = code;
         } else if (objname == "Terrain") {
             touched_id = 1;
         } else {
@@ -362,18 +360,7 @@ public class petanim : Agent
                 // Visualize the contact point
                 //Debug.DrawRay(contact.point, contact.normal, Color.white);
             }
-        } else if (other.gameObject.tag == "eating") {
-            foreach (ContactPoint contact in other.contacts)
-            {
-                if (Vector3.Distance(contact.point, mouth.transform.position) < 10.0f){
-                    energy += eggValue;
-
-                    Destroy(other.gameObject);
-                    manager.DestroyEgg();
-                    break;
-                }
-            }
-        }    
+        }
     }
 
     /// <summary>
@@ -387,7 +374,13 @@ public class petanim : Agent
             return;
         }
 
-        if (other.gameObject.tag == "ground"){
+        if (other.gameObject.tag == "agent") {
+            int code = int.Parse(other.gameObject.name.Split('_')[1]);
+            petanim anim = other.gameObject.GetComponent<petanim>();
+            touched_id = code + 10;
+            this.energy += 10;
+            anim.energy += 10;
+        } else if (other.gameObject.tag == "ground"){
             onGround = false;
         }
         touched_id = 0;

@@ -116,7 +116,7 @@ namespace unityremote
             {
                 RemoteUpdate();
             } else if (updateStateOnUpdate) {
-                if (!message_received) {
+                if (message_received) {
                     message_received = false;
                     agent.UpdateState();
                     agent.GetState();

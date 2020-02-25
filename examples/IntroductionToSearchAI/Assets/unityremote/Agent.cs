@@ -17,6 +17,7 @@ namespace unityremote
 
         public Agent agent = null;
         public bool fixedUpdate = true;
+        public bool updateStateOnUpdate = false;
 
         public string GetReceivedCommand()
         {
@@ -39,6 +40,10 @@ namespace unityremote
         private byte[] types;
         private string[] values;
 
+
+        /***
+        This method receives client's command to apply to remote environment.
+        ***/
         public virtual void ApplyAction()
         {
         }

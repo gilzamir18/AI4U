@@ -12,17 +12,14 @@
 
         private void LocalDecision()
         {
-            if (controller != null)
-            {
-                object[] msg = controller.GetAction();
-                receivedcmd = (string)msg[0];
-                receivedargs = (string[])msg[1];
-                agent.ApplyAction();
-                agent.UpdatePhysics();
-
-                agent.UpdateState();
-                agent.GetState();
-            }
+            object[] msg = controller.GetAction();
+            receivedcmd = (string)msg[0];
+            receivedargs = (string[])msg[1];
+            agent.ApplyAction();
+            agent.UpdatePhysics();
+            
+            agent.UpdateState();
+            agent.GetState();
         }
 
         public void FixedUpdate()

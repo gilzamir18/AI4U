@@ -12,7 +12,7 @@ from collections import deque
 
 IMAGE_SHAPE = (20, 20, 4)
 ARRAY_SIZE = 2
-ACTION_SIZE = 6
+ACTION_SIZE = 7
 
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
@@ -121,7 +121,6 @@ class state_wrapper:
 
         done = fields['done']
         delta = fields['energy'] - self.energy
-        self.energy = fields['energy']
 
         reward = 0
         if not done:
@@ -135,6 +134,9 @@ class state_wrapper:
             info = fields
         else:
             self.energy = None
+
+        self.energy = fields['energy']
+
 
         self.buf.append(frame)
         #frameseq = np.array(self.buf, dtype=np.float32).reshape(1, 4, 20, 20)
@@ -150,8 +152,8 @@ class state_wrapper:
 def make_env_def():
         environment_definitions['state_shape'] = IMAGE_SHAPE
         environment_definitions['action_shape'] = (ACTION_SIZE,)
-        environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1)]
-        environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left', 'jump', 'NOOP']
+        environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1), ('act', 10)]
+        environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left', 'jump', 'NOOP', 'PickUp']
         environment_definitions['state_wrapper'] = state_wrapper()
         environment_definitions['preprocessing'] = agent_preprocessing
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)

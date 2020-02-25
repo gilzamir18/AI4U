@@ -405,6 +405,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 3922505365514472780}
   fixedUpdate: 1
+  updateStateOnUpdate: 0
   port: 8081
   buffer_size: 8192
   remoteIP: 127.0.0.1
@@ -654,8 +655,8 @@ Rigidbody:
   m_GameObject: {fileID: 4994039875192919114}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Drag: 10
+  m_AngularDrag: 10
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1

@@ -80,20 +80,25 @@ namespace unityremote
                 this.receivedargs = args;
                 agent.ApplyAction();
                 agent.UpdatePhysics();
-                message_received = false;
                 
-                agent.UpdateState();
-                agent.GetState();
-                firstMsgSended = true;
-                
-                socket.Client.ReceiveBufferSize = buffer_size;
-                socket.BeginReceive(async_call, udpSocket);
+                if (!updateStateOnUpdate) {
+                    message_received = false;
+                 
+                    agent.UpdateState();
+                    agent.GetState();
+                    firstMsgSended = true;
+                    socket.Client.ReceiveBufferSize = buffer_size;
+                    socket.BeginReceive(async_call, udpSocket);
+                }
             }
-            if (!firstMsgSended)
-            {
-                agent.UpdateState();
-                agent.GetState();
-                firstMsgSended = true;
+
+            if (!updateStateOnUpdate){
+                if (!firstMsgSended)
+                {
+                    agent.UpdateState();
+                    agent.GetState();
+                    firstMsgSended = true;
+                }
             }
         }
 
@@ -110,7 +115,23 @@ namespace unityremote
             if (!fixedUpdate)
             {
                 RemoteUpdate();
-            }    
+            } else if (updateStateOnUpdate) {
+                if (message_received) {
+                    message_received = false;
+                    agent.UpdateState();
+                    agent.GetState();
+                    firstMsgSended = true;
+                    socket.Client.ReceiveBufferSize = buffer_size;
+                    socket.BeginReceive(async_call, udpSocket);
+                }
+
+                if (!firstMsgSended)
+                {
+                    agent.UpdateState();
+                    agent.GetState();
+                    firstMsgSended = true;
+                }
+            }
         }
 
         public void ReceiveData(System.IAsyncResult result)

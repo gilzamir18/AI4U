@@ -17,6 +17,7 @@ namespace unityremote
 
         public Agent agent = null;
         public bool fixedUpdate = true;
+        public bool updateStateOnUpdate = false;
 
         public string GetReceivedCommand()
         {
