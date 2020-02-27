@@ -4,7 +4,11 @@ import base64
 
 def image_decode(frame, w, h, dtype=np.uint8):
     imgdata = base64.b64decode(frame).decode('UTF-8')
-    lines = imgdata.strip().split(';')
+    return image_from_str(imgdata, w, h, dtype)
+
+
+def image_from_str(imgstr, w, h, dtype=np.uint8):
+    lines = imgstr.strip().split(';')
     result = np.zeros(shape=(w, h), dtype=dtype)
     i = 0
     for line in lines:
