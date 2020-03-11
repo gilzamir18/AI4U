@@ -46,12 +46,12 @@ def parse_args():
 def get_state_from_fields(fields):
 	return np.array([fields['tx'], fields['tz'], fields['vx'], fields['vz'], fields['x'], fields['y'],	fields['z']])
 
-def state_wrapper(fields, env):
+def state_wrapper(fields, env, action=None, info=None):
         state = get_state_from_fields(fields)
         done = fields['done']
         reward = fields['reward']
-        info = fields
-        return (state, reward, done, info)
+        extra_info = fields
+        return (state, reward, done, extra_info)
 
 def make_env_def():
         environment_definitions['state_shape'] = (7,)
