@@ -48,13 +48,10 @@ class SubProcessEnv:
         env = make_env_fn()
         pipe.send((env.observation_space, env.action_space))
         while True:
-            cmd, data, agent_info = pipe.recv()
+            cmd, data = pipe.recv()
             if cmd == 'step':
                 action = data
-                if agent_info is None:
-                    obs, reward, done, info = env.step(action)
-                else:
-                    obs, reward, done, info = env.step(action, agent_info)
+                obs, reward, done, info = env.step(action)
                 pipe.send((obs, reward, done, info))
             elif cmd == 'reset':
                 obs = env.reset()
@@ -68,11 +65,11 @@ class SubProcessEnv:
         self.observation_space, self.action_space = self.pipe.recv()
 
     def reset(self):
-        self.pipe.send(('reset', None, None))
+        self.pipe.send(('reset', None))
         return self.pipe.recv()
 
-    def step(self, action, info=None):
-        self.pipe.send(('step', action, info))
+    def step(self, action):
+        self.pipe.send(('step', action))
         return self.pipe.recv()
 
     def close(self):

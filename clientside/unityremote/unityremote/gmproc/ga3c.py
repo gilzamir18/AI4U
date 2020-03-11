@@ -350,7 +350,7 @@ class A3CWorker(ClientWorker):
 			self.global_episodes += 1
 
 			self.log.addline('env %d [episodeinfo]: ep_number %d; ep_nstpes: %d; ep_loss %f; ep_entropy %f; ep_values %f; ep_reward_sum %f;\n'
-							%(self.id, self.global_episodes, self.ep_steps, self.get_loss(), self.ep_entropy/max(1, self.ep_steps), self.ep_values/max(1, self.ep_steps), self.ep_reward/max(1, self.ep_steps) ) )
+							%(self.id, self.global_episodes, self.ep_steps, self.get_loss(), self.ep_entropy, self.ep_values, self.ep_reward) )
 
 			self.ep_reward = 0.0
 			self.ep_score = 0

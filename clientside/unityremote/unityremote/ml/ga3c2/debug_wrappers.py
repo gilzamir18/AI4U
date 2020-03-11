@@ -53,8 +53,8 @@ class EarlyReset(Wrapper):
         self.n_steps = 0
         return self.env.reset()
 
-    def step(self, action, info=None):
-        obs, reward, done, info = self.env.step(action, action_probs)
+    def step(self, action):
+        obs, reward, done, info = self.env.step(action)
         self.n_steps += 1
         if self.n_steps >= 100:
             done = True
@@ -104,19 +104,28 @@ class MonitorEnv(Wrapper):
         self.episode_length_steps = None
         self.episode_n = -1
         self.episode_done = None
+        self.episode_goal_reward = None
 
     def reset(self):
         self.episode_rewards = []
         self.episode_length_steps = 0
         self.episode_n += 1
         self.episode_done = False
+        self.episode_goal_reward = [] 
         return self.env.reset()
 
-    def step(self, action, info=None):
+    def step(self, action):
         if self.episode_done:
             raise Exception("Attempted to call step() after episode done")
 
-        obs, reward, done, info = self.env.step(action, info)
+        obs, reward, done, info = self.env.step(action)
+
+        if 'goal_reward' in  info:
+            if len(self.episode_goal_reward) == 0:
+                for _ in info['goal_reward']:
+                    self.episode_goal_reward.append([])
+            for g, gr in enumerate(info['goal_reward']):
+                self.episode_goal_reward[g].append(gr)
 
         self.episode_rewards.append(reward)
         self.episode_length_steps += 1
@@ -124,11 +133,18 @@ class MonitorEnv(Wrapper):
         if done:
             self.episode_done = True
             reward_sum = sum(self.episode_rewards)
-            print("{}Episode {} finished; episode reward sum {}".format(self.log_prefix,
+            goal_reward_sum = []
+            if len(self.episode_goal_reward)>0:
+                for l in self.episode_goal_reward:
+                    goal_reward_sum.append(sum(l))
+
+            print("{}Episode {} finished; episode reward sum {}. Goal reward sum  {}".format(self.log_prefix,
                                                                         self.episode_n,
-                                                                        reward_sum))
+                                                                        reward_sum, goal_reward_sum))
             if self.logger:
                 self.logger.logkv('rl/episode_reward_sum', reward_sum)
                 self.logger.logkv('rl/episode_length_steps', self.episode_length_steps)
+                for i in range(len(goal_reward_sum)):
+                    self.logger.logkv('rl/episode_goalreward_sum%d'%(i), goal_reward_sum[i])
 
         return obs, reward, done, info

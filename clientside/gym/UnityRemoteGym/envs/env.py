@@ -13,6 +13,7 @@ import os
 import platform
 from threading import Thread
 import threading
+import inspect
 
 class AleWrapper:
     def __init__(self, env):
@@ -36,7 +37,12 @@ class Environment(gym.Env):
         self.n_envs = environment_definitions['n_envs']
         self.actions = environment_definitions['actions']
         self.action_meaning = environment_definitions['action_meaning']
-        self.state_wrapper = environment_definitions['state_wrapper']
+
+        if inspect.isclass(environment_definitions['state_wrapper']):
+            self.state_wrapper = environment_definitions['state_wrapper']()
+        else:
+            self.state_wrapper = environment_definitions['state_wrapper']
+        
         host = environment_definitions['host']
         input_port = environment_definitions['input_port']
         output_port = environment_definitions['output_port']
@@ -59,10 +65,9 @@ class Environment(gym.Env):
     def close(self):
         self.remoteenv.close()
 
-    def step(self, action):
+    def step(self, action, info=None):
         fields = self.remoteenv.step(self.actions[action][0], self.actions[action][1])
-        self.state, self.reward, self.done, self.info = self.state_wrapper(fields, self)
-        return (self.state, self.reward, self.done, self.info)
+        return self.state_wrapper(fields, self, action, info)
 
     def __del__(self):
         self.remoteenv.close()

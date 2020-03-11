@@ -98,7 +98,7 @@ class Worker:
 
             action = np.random.choice(self.env.action_space.n, p=action_probs)
             actions.append(action)
-            self.last_state, reward, done, _ = self.env.step(action)
+            self.last_state, reward, done, _ = self.env.step(action, (action_probs, value_estimate) )
 
             if type(self.last_state) is tuple:
                 self.last_extra_inputs = self.last_state[1]
