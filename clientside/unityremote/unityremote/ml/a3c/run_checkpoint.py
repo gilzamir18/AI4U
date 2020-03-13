@@ -97,7 +97,7 @@ def run_agent(env, sess, obs_placeholder, action_probs_op):
                 feed_dict = {obsph: [obs[0]], extraph: [obs[1]]}
             action_probs = sess.run(action_probs_op, feed_dict)[0]
             action = np.random.choice(env.action_space.n, p=action_probs)
-            obs, reward, done, _ = env.step(action)
+            obs, reward, done, _ = env.step(action, (action_probs, 0))
             episode_reward += reward
             env.render()
             time.sleep(1 / 60.0)
