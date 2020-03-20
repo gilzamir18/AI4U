@@ -69,12 +69,12 @@ class AgentWrapper(Wrapper):
         Wrapper.__init__(self, env)
         self.episode_steps = 0
 
-    def step(self, action):
-        state, reward, done, info = self.env.step(action)
+    def step(self, action, info=None):
+        state, reward, done, env_info = self.env.step(action)
 
         self.episode_steps += 1
 
-        return state, reward, done, info
+        return state, reward, done, env_info
 
     def reset(self):
         self.episode_steps = 0
@@ -99,7 +99,7 @@ def get_frame_from_fields(fields):
     return imgdata
 
 
-def state_wrapper(fields, env, action=None):
+def state_wrapper(fields, env, action=None, info=None):
         frame = get_frame_from_fields(fields)
 
         frame = frame.reshape(1, 10, 10)
@@ -135,7 +135,7 @@ def make_env_def():
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=2', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
+        args = ['--n_workers=8', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
