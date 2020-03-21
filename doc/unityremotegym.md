@@ -24,7 +24,7 @@ Table 1: show the means of each key in dictionary `environment_definitions`.
 | input_port      |  Client side input port. Also, it is server side output port.                         |
 | output_port     |  Client side output port. Also, it is server side input port.                         |
 | n_envs          |  Number of environments. We use n_envs > 1 if there is several agents in server side. |
-| action_shape    |  Action shape is a number of actions (used by A3C* implementation).                                              |
+| action_shape    |  Action shape is a number of actions (used by A3C [1] implementation).                                              |
 | state_shape     |  Shape of the environment's state (used by A3C implementation).                                                    |
 | min_value       |  Minimum value in the state content (used by A3C implementation).                                                  |
 | max_value       |  Maximum value in the state content (used by A3C implementation).                                                  |
@@ -55,6 +55,6 @@ The reset command should restart the environment for a new simulation episode. F
 
 The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server-side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
 
-* A3C: Asynchronous Advantage Actor-Critic.
+[1] A3C: Asynchronous Advantage Actor-Critic.
 
 
