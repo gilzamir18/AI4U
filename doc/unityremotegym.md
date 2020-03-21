@@ -8,7 +8,7 @@ After this, you can make a environment instance:
 
     env = gym.make('UnityRemote-v0')
  
- Environment object `env`  performe comunication with server-side of the your unity application. It's necessary to define the environment configuration by means of a dictionary. For example:
+Environment object `env`  performed communication with the server-side of your unity application. It's necessary to define the environment configuration using a dictionary. For example:
 
 	environment_definitions = {'host': '127.0.0.1', 'input_port': 8080, 'output_port': 7070, 'n_envs': 1,
                                 "action_shape": (1, ), "state_shape": (1, ), 'min_value': -100.0, 
@@ -16,7 +16,7 @@ After this, you can make a environment instance:
                                         'action_meaning':[], 'state_wrapper': lambda s, e: s,
                                         'make_inference_network': make_inference_network}
 
-Table 1 show the means of each key in dictionary `environment_definitions`:
+Table 1: show the means of each key in dictionary `environment_definitions`.
 
 | Key             |                                    Defintion                                          |
 |-----------------|---------------------------------------------------------------------------------------|
@@ -24,7 +24,7 @@ Table 1 show the means of each key in dictionary `environment_definitions`:
 | input_port      |  Client side input port. Also, it is server side output port.                         |
 | output_port     |  Client side output port. Also, it is server side input port.                         |
 | n_envs          |  Number of environments. We use n_envs > 1 if there is several agents in server side. |
-| action_shape    |  Action shape is a number of actions (used by A3C implementation).                                              |
+| action_shape    |  Action shape is a number of actions (used by A3C* implementation).                                              |
 | state_shape     |  Shape of the environment's state (used by A3C implementation).                                                    |
 | min_value       |  Minimum value in the state content (used by A3C implementation).                                                  |
 | max_value       |  Maximum value in the state content (used by A3C implementation).                                                  |
@@ -35,7 +35,7 @@ Table 1 show the means of each key in dictionary `environment_definitions`:
 | make_inference_network | Method used only by A3C algorithm.                                             |
 
 
-The next step is to set up the environment. To do this, you call the method 'configure' from the object `env`by passing the dictionary `environment_definition` as an argument. If you don't want to create the dictionary from scratch, you can import a preconfigured dictionary from the `unityremote.utils` module. Most parameters do not need to be specified. For example, the following attributes are likely to have to be modified:
+The next step is to set up the environment. To do this, you call the method 'configure' from the object `env` passing the dictionary `environment_definition` as an argument. If you don't want to create the dictionary from scratch, you can import a preconfigured dictionary from the `unityremote.utils` module. Most parameters do not need to be specified. For example, the following attributes are likely to have to be modified:
 
 	from unityremote.utils import environment_definitions as env_def
 	#set new values
@@ -45,7 +45,7 @@ The next step is to set up the environment. To do this, you call the method 'con
 	env_def['output_port'] = 8081
 	env.configure(env_def)
 
-When you performe `reset`, `env` sends a especial command named `restart` to your unity application and returns the first environment's state:
+When you perform `reset`, the environment implementation (`env`) sends an especial command named `restart` to your unity application and returns the first environment's state:
 
     initial_state = env.reset()
 
@@ -53,6 +53,8 @@ The reset command should restart the environment for a new simulation episode. F
 
 	next_state = env.step(0)
 
-The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
+The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server-side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
+
+* A3C: Asynchronous Advantage Actor-Critic.
 
 
