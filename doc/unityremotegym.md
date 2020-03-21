@@ -26,9 +26,9 @@ Table 1 show the means of each key in dictionary `environment_definitions`:
 | n_envs          |  Number of environments. We use n_envs > 1 if there is several agents in server side. |
 | action_shape    |  Action shape is a number of actions (used by A3C implementation).                                              |
 | state_shape     |  Shape of the environment's state (used by A3C implementation).                                                    |
-| min_value       |  Minimum value in the state content(used by A3C implementation).                                                  |
-| max_value       |  Maximum value in the state content(used by A3C implementation).                                                  |
-| state_type      |  Type of the state content(used by A3C implementation).                                                          |
+| min_value       |  Minimum value in the state content (used by A3C implementation).                                                  |
+| max_value       |  Maximum value in the state content (used by A3C implementation).                                                  |
+| state_type      |  Type of the state content (used by A3C implementation).                                                          |
 | actions         |  List of pairs (action_name, actions_parameters).                                     |
 | actions_meaning |  Action meaning for each action in actions.                                           |
 | state_wrapper   |  Method or callable object that transform dictionary returned by RemoteEnv in gym compatible data.                                                                                          |
