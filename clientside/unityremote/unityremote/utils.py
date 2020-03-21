@@ -53,5 +53,5 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
 environment_definitions = {'host': '127.0.0.1', 'input_port': 8080, 'output_port': 7070, 'n_envs': 1,
                                 "action_shape": (1, ), "state_shape": (1, ), 'min_value': -100.0, 
                                     'max_value': 100.0, 'state_type': np.float32,  'actions': [], 
-                                        'action_meaning':[], 'state_wrapper': lambda s, e: s,
+                                        'action_meaning':[], 'state_wrapper': lambda s, e, a=None, i=None: (s, 0, False, s),
                                         'make_inference_network': make_inference_network}

@@ -26,6 +26,7 @@ class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
         self.ale = AleWrapper(self)
+        self.configureFlag = False
     
     def configure(self, environment_definitions, port_inc=0):
         self.action_space = spaces.Discrete(environment_definitions['action_shape'][0])
@@ -49,25 +50,36 @@ class Environment(gym.Env):
         self.remoteenv = RemoteEnv(host, output_port+port_inc, input_port+port_inc)
         self.remoteenv.open(0)
         self.nlives = 1
+        self.configureFlag = True
 
     def get_action_meanings(self):
+        self.__check_configuration_()
         return [self.action_meaning[i] for i in range(len(self.actions))]
 
 
     def reset(self):
+        self.__check_configuration_()
         fields = self.remoteenv.step('restart')
         self.state, self.reward, self.done, self.info = self.state_wrapper(fields, self)
         return self.state
  
     def render(self, mode='human', close=False):
+        self.__check_configuration_()
         return self.state
        
     def close(self):
+        self.__check_configuration_()
         self.remoteenv.close()
 
     def step(self, action, info=None):
+        self.__check_configuration_()
         fields = self.remoteenv.step(self.actions[action][0], self.actions[action][1])
         return self.state_wrapper(fields, self, action, info)
 
     def __del__(self):
+        self.__check_configuration_()
         self.remoteenv.close()
+
+    def __check_configuration_(self):
+        if not self.configureFlag:
+            raise Exception("The environment is not configured. Try to set up the environment before trying again!!!")

@@ -33,13 +33,26 @@ Table 1 show the means of each key in dictionary `environment_definitions`:
 | actions_meaning |  Action meaning for each action in actions.                                           |
 | state_wrapper   |  Method or callable object that transform dictionary returned by RemoteEnv in gym compatible data.                                                                                          |
 | make_inference_network | Method used only by A3C algorithm.                                             |
-|-----------------|---------------------------------------------------------------------------------------|
 
 
- When you performe `reset`, `env` sends a especial command named `restart` to your unity application and returns the first environment's state:
+The next step is to set up the environment. To do this, you call the method 'configure' from the object `env`by passing the dictionary `environment_definition` as an argument. If you don't want to create the dictionary from scratch, you can import a preconfigured dictionary from the `unityremote.utils` module. Most parameters do not need to be specified. For example, the following attributes are likely to have to be modified:
+
+	from unityremote.utils import environment_definitions as env_def
+	#set new values
+	env_def['actions'] = [('tx', 10)]
+	env_def['actions_meaning'] = ['horizontal movement']
+	env_def['input_port'] = 8080
+	env_def['output_port'] = 8081
+	env.configure(env_def)
+
+When you performe `reset`, `env` sends a especial command named `restart` to your unity application and returns the first environment's state:
 
     initial_state = env.reset()
 
+The reset command should restart the environment for a new simulation episode. Finally, to perform an action, simply execute the step command with the index of the action you want to send to the remote environment.
 
- 
+	next_state = env.step(0)
+
+The complete example used in this guide can be found at `unityremote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server side implementation can be found at `unityremote/examples/CubeAgent/CubeExampleUnity`.
+
 
