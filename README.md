@@ -8,7 +8,7 @@ We recommend that you have some version of Unity 2019 and start by looking at th
 
 Table 1: Documentation.
 
-| Tutorial        |                                    Defintion                                          |
+| Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|
 | API Overview    |  [doc/overeview.md](doc/overeview.md)                                           |
 | UnityRemote with Gyn      | [doc/unityremotegym.md](doc/unityremotegym.md)                         |
