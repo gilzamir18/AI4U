@@ -1,8 +1,8 @@
-from unityremote.core import RemoteEnv
+import gym
 
-env = RemoteEnv()
-env.open()
 
-env.step('tx', 5)
-
+env = gym.make("UnityRemote-v0")
+env.reset()
+print(env.step())
+print('ola')
 env.close()
