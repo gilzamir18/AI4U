@@ -24,11 +24,11 @@ Table 1 show the means of each key in dictionary `environment_definitions`:
 | input_port      |  Client side input port. Also, it is server side output port.                         |
 | output_port     |  Client side output port. Also, it is server side input port.                         |
 | n_envs          |  Number of environments. We use n_envs > 1 if there is several agents in server side. |
-| action_shape    |  Action shape is a number of actions.                                                 |
-| state_shape     |  Shape of the environment's state.                                                    |
-| min_value       |  Minimum value in the state content.                                                  |
-| max_value       |  Maximum value in the state content.                                                  |
-| state_type      |  Type of the state content.                                                           |
+| action_shape    |  Action shape is a number of actions (used by A3C implementation).                                              |
+| state_shape     |  Shape of the environment's state (used by A3C implementation).                                                    |
+| min_value       |  Minimum value in the state content(used by A3C implementation).                                                  |
+| max_value       |  Maximum value in the state content(used by A3C implementation).                                                  |
+| state_type      |  Type of the state content(used by A3C implementation).                                                          |
 | actions         |  List of pairs (action_name, actions_parameters).                                     |
 | actions_meaning |  Action meaning for each action in actions.                                           |
 | state_wrapper   |  Method or callable object that transform dictionary returned by RemoteEnv in gym compatible data.                                                                                          |
@@ -53,6 +53,6 @@ The reset command should restart the environment for a new simulation episode. F
 
 	next_state = env.step(0)
 
-The complete example used in this guide can be found at `unityremote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server side implementation can be found at `unityremote/examples/CubeAgent/CubeExampleUnity`.
+The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
 
 
