@@ -32,12 +32,13 @@ namespace unityremote
         private float down = 0;
         private bool pushing;
         private bool getpickup;
-        private bool walkspeed;
-        private UdpClient socket;
-        private bool commandReceived;
+        private bool walkspeed = false; 
+ 
         public int rayCastingWidth;
         public int rayCastingHeight;
         //END::
+
+        public int GameID;
 
 
         public Text hud;
@@ -60,28 +61,35 @@ namespace unityremote
 
         private bool done;
 
-        private bool isNewState = false;
-
         public GameObject TopLeftCorner, BottonRightCorner;
 
         public GameObject[] respawnPositions;
 
-        private float reward = 1;
+        public GameObject[] fruits;
+        public GameObject[] fires;
+
+        private float reward = 0;
 
         public GameObject restartButton;
+
+        public bool get_result = false;
+
+        private float touchX = 0, touchY = 0, touchZ = 0;
 
         // Use this for initialization
         void Start()
         {
             
+            fires = GameObject.FindGameObjectsWithTag("Fire");
+            fruits = GameObject.FindGameObjectsWithTag("Life");
+
             if (restartButton != null) {
                 Button btn = restartButton.GetComponent<Button>();
 		        btn.onClick.AddListener(OnClick);
             }
 
             mRigidBody = GetComponent<Rigidbody>();
-            commandReceived = false;
-            Restart();
+            Respawn(false);
             if (!gameObject.activeSelf)
             {
                 return;
@@ -107,12 +115,23 @@ namespace unityremote
         
         private float deltaTime = 0;
 
-        private void Restart(){
+        private void Respawn(bool respawn=true){
+            reward = 0;
+            if (respawn) {
+                foreach(GameObject fruit in fruits){
+                    fruit.GetComponent<RandomAgent>().Respawn();
+                }
+
+                foreach(GameObject fire  in fires){
+                    fire.GetComponent<RandomAgent>().Respawn();
+                }
+            }
+            getpickup = false;
             deltaTime = 0;
             energy = initialEnergy;
+            touchID = 0;
             ResetState();
             done = false;
-            isNewState = true;
             int idx = Random.Range(0, respawnPositions.Length);
             //mRigidBody.position = respawnPositions[idx].transform.position;
 
@@ -122,6 +141,8 @@ namespace unityremote
 
         private void ResetState()
         {
+            reward = 0;
+            touchID = 0;
             speed = 0.0f;
             fx = 0;
             fy = 0;
@@ -132,38 +153,52 @@ namespace unityremote
             rightTurn = 0;
             up = 0;
             down = 0;
-            touchID = 0;
-            reward = 0;
+            get_result = false;
+            touchX = 0;
+            touchY = 0;
+            touchZ = 0;
         }
 
 
         private void UpdateHUD(){
             if (hud != null) {
-                hud.text = "Energy: " + System.Math.Round(energy,2) + "\tReward: " + reward + "\tDone: " + done;
+                hud.text = "Energy: " + System.Math.Round(energy,2) + "\tReward: " + reward + "\tDone: " + done + "\tGameID: " + GameID;
             }
         }
 
         public override void ApplyAction()
         {
-            isNewState = true;
             string action = GetActionName();
-            if (action=="restart") {
-                Restart();
+            if (action.Equals("get_result")){
+                    get_result = true;
+            } else if (action.Equals("restart")) {
+                Respawn();
             } else if (!done) {
-                ResetState();
                 switch (action)
                 {
-                    case "fx":
-                        fx = GetActionArgAsFloat();
+                    case "walk":
+                        fx = 0;
+                        fy = 1;
+                        speed = GetActionArgAsFloat();
+                        increaseEnergy(-0.05f);
                         break;
-                    case "fy":
-                        fy = GetActionArgAsFloat();
+                    case "run":
+                        fx = 0;
+                        fy = 1;
+                        speed = GetActionArgAsFloat();
+                        increaseEnergy(-0.1f);
+                        break;
+                    case "walk_in_circle":
+                        fx = 1;
+                        fy = 0;
+                        speed = GetActionArgAsFloat();
+                        increaseEnergy(-0.05f);
+                        break;
+                    case "right_turn":
+                        rightTurn = GetActionArgAsFloat();
                         break;
                     case "left_turn":
                         leftTurn = GetActionArgAsFloat();
-                        break;
-                    case "right turn":
-                        rightTurn = GetActionArgAsFloat();
                         break;
                     case "up":
                         up = GetActionArgAsFloat();
@@ -173,9 +208,11 @@ namespace unityremote
                         break;
                     case "push":
                         pushing = GetActionArgAsBool();
+                        increaseEnergy(-0.5f);
                         break;
                     case "jump":
                         jump = GetActionArgAsBool();
+                        increaseEnergy(-0.5f);
                         break;
                     case "crouch":
                         crouch = GetActionArgAsBool();
@@ -191,6 +228,9 @@ namespace unityremote
         // Update is called once per frame
         public override void UpdatePhysics()
         {
+            if (get_result || done) {
+                return;
+            }
 
             deltaTime += Time.deltaTime;
             if (deltaTime > 1.0){
@@ -240,28 +280,61 @@ namespace unityremote
             float bz = BottonRightCorner.transform.localPosition.z;
             if (x < tx || x > bx || z > tz || z < bz) {
                 done = true;
-                reward = 1;
+                reward += 10;
             }
         }
+
+        private void increaseEnergy(float inc){
+            energy += inc;
+            if (energy>50) {
+                energy = 50;
+            }
+
+            if (energy < 0) {
+                energy = 0;
+            }
+        }
+
+        private void updateTouchPosition(Collision other) {
+            foreach(ContactPoint contact in other.contacts) {
+                Vector3 lp = transform.InverseTransformPoint(contact.point);
+                touchX = lp.x;
+                touchY = lp.y;
+                touchZ = lp.z;
+            }
+        }
+
 
         /// <summary>
         /// OnCollisionEnter is called when this collider/rigidbody has begun
         /// touching another rigidbody/collider.
         /// </summary>
         /// <param name="other">The Collision data associated with this collision.</param>
-        void OnCollisionEnter(Collision other)
+        void OnCollisionStay(Collision other)
         {
-            if (other.gameObject.tag == "Fire"){
-                energy -= 10;
-                touchID = -1;
-            } else if (other.gameObject.tag == "Life"){
-                touchID = 1;
-                energy += 10;
+            if (!done) {
+                //Debug.Log("COlission with " + other.gameObject.name);
+                if (other.gameObject.tag.Equals("Fire")){
+                    updateTouchPosition(other);
+                    touchID = -2;
+                    if (getpickup) {
+                        increaseEnergy(-1);
+                    }
+                } else if (other.gameObject.tag.Equals("Life")){
+                    updateTouchPosition(other);
+                    touchID = 2;
+                    if (getpickup) {
+                        increaseEnergy(1);
+                    }
+                } else if (other.gameObject.name.Equals("maze1")) {
+                    updateTouchPosition(other);
+                    touchID = -1;
+                }
             }
         }
 
         public void OnClick(){
-            Restart();
+            Respawn(true);
         }
 
         public override void UpdateState()
@@ -276,12 +349,11 @@ namespace unityremote
             SetStateAsFloat(2, "touchID", touchID);
             SetStateAsFloat(3, "energy", energy);
             SetStateAsBool(4, "done", done);
-            SetStateAsBool(5, "isNewState", isNewState);
-            if (isNewState) {
-                UpdateHUD();
-                isNewState = false;
-            }
-            if(done){
+            SetStateAsFloat(5, "tx", touchX);
+            SetStateAsFloat(6, "ty", touchY);
+            SetStateAsFloat(7, "tz", touchZ);
+            UpdateHUD();
+            if(get_result) {
                 ResetState();
             }
         }
@@ -372,7 +444,7 @@ namespace unityremote
 
         public string getCurrentRayCastingFrame()
         {
-            UpdateRaysMatrix(m_camera.transform.localPosition, m_camera.transform.forward, m_camera.transform.up, m_camera.transform.right);
+            UpdateRaysMatrix(m_camera.transform.position, m_camera.transform.forward, m_camera.transform.up, m_camera.transform.right);
             UpdateViewMatrix();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < verticalResolution; i++)
@@ -424,21 +496,17 @@ namespace unityremote
                     if (Physics.Raycast(raysMatrix[i, j], out hitinfo, maxDistance))
                     {
                         string objname = hitinfo.collider.gameObject.name;
-                        switch (objname)
-                        {
-                            case "Terrain":
+                        if (objname.Equals("Terrain")){
                                 viewMatrix[i, j] = 1;
-                                break;
-                            case "maze":
+                        } else if (objname.StartsWith("maze")){
                                 viewMatrix[i, j] = 2;
-                                break;
-                            default:
+                        } else {
                                 objname = hitinfo.collider.gameObject.tag;
-                                if (objname == "Fire")
+                                if (objname.Equals("Fire"))
                                 {
                                     viewMatrix[i, j] = -3;
                                 }
-                                else if (objname=="Life")
+                                else if (objname.Equals("Life"))
                                 {
                                     viewMatrix[i, j] = 3;
                                 }
@@ -446,7 +514,6 @@ namespace unityremote
                                 {
                                     viewMatrix[i, j] = 0;
                                 }
-                                break;
                         }
                     }
                     else

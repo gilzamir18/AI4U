@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: LifeMat
-  m_Shader: {fileID: 4800000, guid: 1cac2e0bcc34e4b3cbb4bd85982eba83, type: 3}
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -93,7 +93,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - WaveSpeed: {r: 19, g: 9, b: -16, a: -7}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 1, b: 0.1308515, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HorizonColor: {r: 0.172, g: 0.463, b: 0.435, a: 1}
     - _RefrColor: {r: 0.34, g: 0.85, b: 0.92, a: 1}

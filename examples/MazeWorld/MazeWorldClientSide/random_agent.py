@@ -1,8 +1,8 @@
 from unityremote.core import RemoteEnv
 import numpy as np
-
+import time
 from threading import Thread
-
+from unityremote.utils import image_from_str
 
 
 def run_agent(inport, outport):
@@ -12,15 +12,36 @@ def run_agent(inport, outport):
 	speed = 100
 	angular_speed = 50
 
-	actions = [('fx', speed), ('fx', -speed), ('fy', speed), ('fy', -speed), ('left_turn', angular_speed), ('left_turn', -angular_speed), ('right_turn', angular_speed), ('right_turn', -angular_speed), ('up',speed),
-	            ('down', speed), ('crouch', True), ('crouch', False)]
+	actions = [('walk', 1), ('run', 15), ('walk_in_circle', 1), ('left_turn', 1), ('right_turn', 1), ('up', 1),
+				('down', 1), ('jump', True), ('pickup', True), ('pickup', False), ('noop', -1)]
 
 	action_size = len(actions)
-	    
-	for i in range(100000):
-	    idx = np.random.choice(action_size)
-	    env.step(actions[idx][0], actions[idx][1])
-
+		
+	for i in range(100000):		
+		sum_rewards = 0
+		touchID = 0
+		energy = 0
+		idx = np.random.choice(len(actions))
+		for i in range(4):
+			env_info = env.step(actions[idx][0], actions[idx][1])
+			done = env_info['done']
+			if not done:
+				env_info = env.step('get_result', -1)
+				sum_rewards += env_info['reward']
+				touchID = env_info['touchID']
+				energy = env_info['energy']
+			if done:
+				sum_rewards += env_info['reward']
+				touchID = env_info['touchID']
+				energy = env_info['energy']
+				env_info = env.step('restart', -1)
+				break
+			if touchID != 0:
+				if inport == 8080:
+					print("Object touched ---------------- ",  touchID)
+					print("Reward sum -------------------- ", sum_rewards)
+					print("-----------------------------------------------")
+					print(env_info['frame'])
 	env.close()
 
 def r1():
@@ -37,7 +58,9 @@ def r4():
 
 t1 = Thread(target=r1)
 t1.start()
+t1.join()
 
+'''
 t2 = Thread(target=r2)
 t2.start()
 
@@ -51,7 +74,7 @@ t1.join()
 t2.join()
 t3.join()
 t4.join()
-
+'''
 
 
 

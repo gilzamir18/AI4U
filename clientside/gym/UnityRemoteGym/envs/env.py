@@ -37,7 +37,10 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(low=min_value, high=max_value, shape=state_shape, dtype=state_type)
         self.n_envs = environment_definitions['n_envs']
         self.actions = environment_definitions['actions']
-        self.action_meaning = environment_definitions['action_meaning']
+        if 'action_meaning' in environment_definitions:
+            self.action_meaning = environment_definitions['action_meaning']
+        else:
+            self.action_meaning = ['action']*len(self.actions)
 
         if inspect.isclass(environment_definitions['state_wrapper']):
             self.state_wrapper = environment_definitions['state_wrapper']()

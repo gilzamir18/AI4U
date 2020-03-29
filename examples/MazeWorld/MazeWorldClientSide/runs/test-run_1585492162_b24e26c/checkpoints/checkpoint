@@ -1,0 +1,2 @@
+model_checkpoint_path: "network.ckpt-321746"
+all_model_checkpoint_paths: "network.ckpt-321746"

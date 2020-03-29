@@ -11,8 +11,8 @@ from collections import deque
 
 
 IMAGE_SHAPE = (20, 20, 4)
-ARRAY_SIZE = 2
-ACTION_SIZE = 14
+ARRAY_SIZE = 7
+ACTION_SIZE = 6
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
     import tensorflow as tf
@@ -69,20 +69,40 @@ class AgentWrapper(Wrapper):
     def __init__(self, env):
         Wrapper.__init__(self, env)
         self.episode_steps = 0
+        self.get_result_op = ACTION_SIZE
 
     def step(self, action, info=None):
-        state, reward, done, env_info = self.env.step(action)
+        sum_rewards = 0
+        touchID = 0
+        energy = 0
+        for i in range(8):
+            state, reward, done, env_info = self.env.step(action)
+            if not done:
+                state, reward, done, env_info = self.env.step(self.get_result_op)
+                sum_rewards += reward
+                touchID = env_info['touchID']
+                energy = env_info['energy']
+            if done:
+                sum_rewards += reward
+                touchID = env_info['touchID']
+                energy = env_info['energy']
+                break
 
         self.episode_steps += 1
 
-        return state, reward, done, env_info
+        state[1][0] = energy
+        state[1][1] = touchID
+        state[1][2] = env_info['tx']
+        state[1][3] = env_info['ty']
+        state[1][4] = env_info['tz']
+
+        return state, sum_rewards, done, env_info
 
     def reset(self):
         self.episode_steps = 0
         return self.env.reset()
 
 def agent_preprocessing(env, max_n_noops, clip_rewards=True):
-    env = FrameSkipWrapper(env, 8)
     env = AgentWrapper(env)
     return env
 
@@ -117,14 +137,9 @@ class state_wrapper:
 
         info = fields
 
-        reward = np.clip(reward, -1, +1)
+        #reward = np.clip(reward, -1, +1)
 
         proprioceptions = np.zeros(ARRAY_SIZE)
-        
-        proprioceptions[0] = fields['energy']/100.0
-        proprioceptions[1] = fields['touchID']/10.0
-
-        proprioception = np.array(proprioceptions, dtype=np.float32)
  
         seq = np.array(self.hist)
         seq = np.moveaxis(seq, 0, -1)
@@ -133,24 +148,20 @@ class state_wrapper:
             self.hist.append( np.zeros( (20, 20) ) )
             self.hist.append( np.zeros( (20, 20) ) )
             self.hist.append( np.zeros( (20, 20) ) )
-        state = (seq, proprioception)
+        state = (seq, proprioceptions)
         return (state, reward, done, fields)
 
 def make_env_def():
-        speed = 100
-        angular_speed = 50
         environment_definitions['state_shape'] = IMAGE_SHAPE
         environment_definitions['action_shape'] = (ACTION_SIZE,)
-        environment_definitions['actions'] = [('fx', speed), ('fx', -speed), ('fy', speed), ('fy', -speed), ('left_turn', angular_speed), ('left_turn', -angular_speed), ('right_turn', angular_speed), ('right_turn', -angular_speed), ('up',speed),
-                ('down', speed), ('jump', True), ('crouch', True), ('crouch', False), ('noop', -1)]
-        environment_definitions['action_meaning'] = ['fx', 'fx', 'fy', 'fy', 'left_turn', 'left_turn', 'right_turn', 'right_turn', 'up', 'down', 'jump', 'crouch', 'crouch', 'NOOP']
+        environment_definitions['actions'] = [('walk', 1), ('run', 15), ('walk_in_circle', 1), ('pickup', True), ('pickup', False), ('noop', -1), ('get_result', -1)]
         environment_definitions['state_wrapper'] = state_wrapper
         environment_definitions['preprocessing'] = agent_preprocessing
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=4', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
+        args = ['--n_workers=8', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 

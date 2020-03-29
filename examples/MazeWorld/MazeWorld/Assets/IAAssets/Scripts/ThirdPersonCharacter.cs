@@ -237,13 +237,12 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			RaycastHit hitInfo;
 #if UNITY_EDITOR
 			// helper to visualise the ground check ray in the scene view
-			Vector3 up = Vector3.up * 0.1f;
-			Vector3 down = Vector3.down;
-			Debug.DrawLine(transform.position + up, transform.position + up + (down * m_GroundCheckDistance));
+
+			Debug.DrawLine(transform.position + Vector3.up * 0.1f, transform.position + Vector3.up * 0.1f + (Vector3.down * m_GroundCheckDistance));
 #endif
 			// 0.1f is a small offset to start the ray from inside the character
 			// it is also good to note that the transform position in the sample assets is at the base of the character
-			if (Physics.Raycast(transform.position + up, down, out hitInfo, m_GroundCheckDistance))
+			if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hitInfo, m_GroundCheckDistance))
 			{
 				m_GroundNormal = hitInfo.normal;
 				m_IsGrounded = true;
@@ -252,7 +251,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			else
 			{
 				m_IsGrounded = false;
-				m_GroundNormal = up;
+				m_GroundNormal = Vector3.up * 0.1f;
 				m_Animator.applyRootMotion = false;
 			}
 		}
