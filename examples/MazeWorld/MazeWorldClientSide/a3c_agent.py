@@ -23,7 +23,7 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
     proprioceptions = tf.placeholder(tf.float32, (None, ARRAY_SIZE) )
     
-    normalized_obs = tf.keras.layers.Lambda(lambda x : x/6.0)(observations)
+    normalized_obs = tf.keras.layers.Lambda(lambda x : x/3.0)(observations)
 
     # Numerical arguments are filters, kernel_size, strides
     conv1 = tf.keras.layers.Conv2D(16, (1,1), (1,1), activation='relu', name='conv1')(normalized_obs)
@@ -77,21 +77,22 @@ class AgentWrapper(Wrapper):
         energy = 0
         for i in range(8):
             state, reward, done, env_info = self.env.step(action)
-            if not done:
-                state, reward, done, env_info = self.env.step(self.get_result_op)
-                sum_rewards += reward
-                touchID = env_info['touchID']
-                energy = env_info['energy']
             if done:
-                sum_rewards += reward
-                touchID = env_info['touchID']
-                energy = env_info['energy']
                 break
+        if not done:
+            state, reward, done, env_info = self.env.step(self.get_result_op)
+            sum_rewards += reward
+            touchID = env_info['touchID']
+            energy = env_info['energy']
+        if done:
+            sum_rewards += reward
+            touchID = env_info['touchID']
+            energy = env_info['energy']
 
         self.episode_steps += 1
 
-        state[1][0] = energy
-        state[1][1] = touchID
+        state[1][0] = energy/50.0
+        state[1][1] = touchID/3.0
         state[1][2] = env_info['tx']
         state[1][3] = env_info['ty']
         state[1][4] = env_info['tz']
@@ -166,7 +167,7 @@ def train():
         run_train(environment_definitions, args)
 
 def test(path):
-        args = ['UnityRemote-v0', path, '--preprocessing=external' '--n_workers=4']
+        args = ['UnityRemote-v0', path, '--preprocessing=external']
         make_env_def()
         run_test(environment_definitions, args)
 

@@ -12,7 +12,7 @@ def run_agent(inport, outport):
 	speed = 100
 	angular_speed = 50
 
-	actions = [('walk', 1), ('run', 15), ('walk_in_circle', 1), ('left_turn', 1), ('right_turn', 1), ('up', 1),
+	actions = [('walk', 15), ('run', 30), ('walk_in_circle', 1), ('left_turn', 1), ('right_turn', 1), ('up', 1),
 				('down', 1), ('jump', True), ('pickup', True), ('pickup', False), ('noop', -1)]
 
 	action_size = len(actions)
@@ -22,26 +22,25 @@ def run_agent(inport, outport):
 		touchID = 0
 		energy = 0
 		idx = np.random.choice(len(actions))
-		for i in range(4):
+		#idx = int(input())
+		for i in range(8):
 			env_info = env.step(actions[idx][0], actions[idx][1])
 			done = env_info['done']
-			if not done:
-				env_info = env.step('get_result', -1)
-				sum_rewards += env_info['reward']
-				touchID = env_info['touchID']
-				energy = env_info['energy']
 			if done:
-				sum_rewards += env_info['reward']
-				touchID = env_info['touchID']
-				energy = env_info['energy']
-				env_info = env.step('restart', -1)
 				break
-			if touchID != 0:
-				if inport == 8080:
-					print("Object touched ---------------- ",  touchID)
-					print("Reward sum -------------------- ", sum_rewards)
-					print("-----------------------------------------------")
-					print(env_info['frame'])
+		if not done:
+			env_info = env.step('get_result', -1)
+			sum_rewards += env_info['reward']
+			touchID = env_info['touchID']
+			energy = env_info['energy']
+		if done:
+			sum_rewards += env_info['reward']
+			touchID = env_info['touchID']
+			energy = env_info['energy']
+			env_info = env.step('restart', -1)
+		print("Object touched ---------------- ",  touchID)
+		print("Reward sum -------------------- ", sum_rewards)
+		print("-----------------------------------------------")
 	env.close()
 
 def r1():

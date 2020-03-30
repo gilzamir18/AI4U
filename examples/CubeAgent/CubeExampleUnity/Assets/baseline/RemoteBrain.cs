@@ -20,6 +20,7 @@ namespace unityremote
 
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
+        public bool alwaysUpdate = false;
    
 
         private string cmdname;
@@ -79,8 +80,15 @@ namespace unityremote
                 this.receivedcmd = cmdname;
                 this.receivedargs = args;
                 agent.ApplyAction();
+                if (!alwaysUpdate){
+                    agent.UpdatePhysics();
+                }
+            }
+            if (alwaysUpdate){
                 agent.UpdatePhysics();
-                
+            }
+
+            if (message_received){   
                 if (!updateStateOnUpdate) {
                     message_received = false;
                  

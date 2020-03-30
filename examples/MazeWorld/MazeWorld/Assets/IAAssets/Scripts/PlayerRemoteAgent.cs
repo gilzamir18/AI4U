@@ -32,7 +32,8 @@ namespace unityremote
         private float down = 0;
         private bool pushing;
         private bool getpickup;
-        private bool walkspeed = false; 
+        private bool usewalkspeed = true;
+        private float walkspeed = 0.5f;
  
         public int rayCastingWidth;
         public int rayCastingHeight;
@@ -55,7 +56,7 @@ namespace unityremote
 
         private float energy;
 
-        public float energyRatio = 1.0f;
+        public float energyRatio = 5.0f/60.0f;
 
         private int touchID = 0;
 
@@ -76,16 +77,16 @@ namespace unityremote
 
         private float touchX = 0, touchY = 0, touchZ = 0;
 
+
         // Use this for initialization
         void Start()
         {
             
-            fires = GameObject.FindGameObjectsWithTag("Fire");
-            fruits = GameObject.FindGameObjectsWithTag("Life");
-
-            if (restartButton != null) {
-                Button btn = restartButton.GetComponent<Button>();
-		        btn.onClick.AddListener(OnClick);
+            fires = new GameObject[3];
+            fruits = new GameObject[3];
+            for (int i = 1; i <= 3; i++){
+                fires[i-1] = GameObject.Find("Game" + GameID + "/FireBall" + i);
+                fruits[i-1] = GameObject.Find("Game" + GameID + "/LifeBall" + i);
             }
 
             mRigidBody = GetComponent<Rigidbody>();
@@ -136,6 +137,7 @@ namespace unityremote
             //mRigidBody.position = respawnPositions[idx].transform.position;
 
             Vector3 pos = respawnPositions[idx].transform.position;
+            mRigidBody.velocity = Vector3.zero;
             mRigidBody.MovePosition(pos);
         }
 
@@ -143,7 +145,6 @@ namespace unityremote
         {
             reward = 0;
             touchID = 0;
-            speed = 0.0f;
             fx = 0;
             fy = 0;
             crouch = false;
@@ -178,21 +179,18 @@ namespace unityremote
                 {
                     case "walk":
                         fx = 0;
-                        fy = 1;
-                        speed = GetActionArgAsFloat();
-                        increaseEnergy(-0.05f);
+                        fy = GetActionArgAsFloat();
+                        increaseEnergy(-0.0001f);
                         break;
                     case "run":
                         fx = 0;
-                        fy = 1;
-                        speed = GetActionArgAsFloat();
-                        increaseEnergy(-0.1f);
+                        fy = GetActionArgAsFloat();
+                        increaseEnergy(-0.0005f);
                         break;
                     case "walk_in_circle":
-                        fx = 1;
+                        fx = GetActionArgAsFloat();;
                         fy = 0;
-                        speed = GetActionArgAsFloat();
-                        increaseEnergy(-0.05f);
+                        increaseEnergy(-0.0001f);
                         break;
                     case "right_turn":
                         rightTurn = GetActionArgAsFloat();
@@ -208,11 +206,11 @@ namespace unityremote
                         break;
                     case "push":
                         pushing = GetActionArgAsBool();
-                        increaseEnergy(-0.5f);
+                        increaseEnergy(-0.01f);
                         break;
                     case "jump":
                         jump = GetActionArgAsBool();
-                        increaseEnergy(-0.5f);
+                        increaseEnergy(-0.1f);
                         break;
                     case "crouch":
                         crouch = GetActionArgAsBool();
@@ -228,10 +226,6 @@ namespace unityremote
         // Update is called once per frame
         public override void UpdatePhysics()
         {
-            if (get_result || done) {
-                return;
-            }
-
             deltaTime += Time.deltaTime;
             if (deltaTime > 1.0){
                 energy -= energyRatio;
@@ -263,8 +257,8 @@ namespace unityremote
 
 
             // walk speed multiplier
-            if (walkspeed) {
-                m_Move *= speed;
+            if (usewalkspeed) {
+                m_Move *= walkspeed;
             } 
 
             // pass all parameters to the character control script
@@ -318,13 +312,13 @@ namespace unityremote
                     updateTouchPosition(other);
                     touchID = -2;
                     if (getpickup) {
-                        increaseEnergy(-1);
+                        increaseEnergy(-energy);
                     }
                 } else if (other.gameObject.tag.Equals("Life")){
                     updateTouchPosition(other);
                     touchID = 2;
                     if (getpickup) {
-                        increaseEnergy(1);
+                        increaseEnergy(10);
                     }
                 } else if (other.gameObject.name.Equals("maze1")) {
                     updateTouchPosition(other);
@@ -333,14 +327,13 @@ namespace unityremote
             }
         }
 
-        public void OnClick(){
-            Respawn(true);
-        }
-
         public override void UpdateState()
         {
             if (energy <= 0) {
                 energy = 0;
+                if (!done){
+                    reward -= 10;
+                }
                 done = true;
             }
 
@@ -463,7 +456,7 @@ namespace unityremote
             return sb.ToString();
         }
 
-        private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 45.0f)
+        private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 90.0f)
         {
 
 
