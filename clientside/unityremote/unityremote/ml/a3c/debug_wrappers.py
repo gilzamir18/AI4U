@@ -114,7 +114,7 @@ class MonitorEnv(Wrapper):
 
     def step(self, action, info=None):
         if self.episode_done:
-            raise Exception("Attempted to call step() after episode done")
+            print("Attempted to call step() after episode done")
 
         obs, reward, done, info = self.env.step(action, info)
 

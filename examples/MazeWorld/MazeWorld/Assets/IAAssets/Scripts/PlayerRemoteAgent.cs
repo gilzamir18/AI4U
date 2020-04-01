@@ -12,8 +12,6 @@ namespace unityremote
 
     public class PlayerRemoteAgent : Agent
     {
-
-
         //BEGIN::Game controller variables
         private ThirdPersonCharacter character;
         private Transform m_CamTransform;
@@ -22,7 +20,7 @@ namespace unityremote
         //END::
 
         //BEGIN::motor controll variables
-        private static float fx, fy;
+        private float fx, fy;
         private float speed = 0.0f;
         private bool crouch;
         private bool jump;
@@ -32,7 +30,7 @@ namespace unityremote
         private float down = 0;
         private bool pushing;
         private bool getpickup;
-        private bool usewalkspeed = true;
+        private bool usewalkspeed = false;
         private float walkspeed = 0.5f;
  
         public int rayCastingWidth;
@@ -44,8 +42,6 @@ namespace unityremote
 
         public Text hud;
 
-        private GameObject player;
-        
         private PlayerRemoteSensor sensor;
 
         public Camera m_camera;
@@ -71,11 +67,11 @@ namespace unityremote
 
         private float reward = 0;
 
-        public GameObject restartButton;
-
         public bool get_result = false;
 
         private float touchX = 0, touchY = 0, touchZ = 0;
+
+        private bool isToRespawn;
 
 
         // Use this for initialization
@@ -95,7 +91,6 @@ namespace unityremote
             {
                 return;
             }
-            player = GameObject.FindGameObjectsWithTag("Player")[0];
 
             if (m_camera != null)
             {
@@ -111,7 +106,7 @@ namespace unityremote
             // get the third person character ( this should never be null due to require component )
             character = GetComponent<ThirdPersonCharacter>();
             sensor = new PlayerRemoteSensor();
-            sensor.Start(m_camera, player, this.rayCastingHeight, this.rayCastingWidth);
+            sensor.Start(m_camera, gameObject, this.rayCastingHeight, this.rayCastingWidth);
         }
         
         private float deltaTime = 0;
@@ -139,6 +134,7 @@ namespace unityremote
             Vector3 pos = respawnPositions[idx].transform.position;
             mRigidBody.velocity = Vector3.zero;
             mRigidBody.MovePosition(pos);
+            isToRespawn = false;
         }
 
         private void ResetState()
@@ -173,7 +169,7 @@ namespace unityremote
             if (action.Equals("get_result")){
                     get_result = true;
             } else if (action.Equals("restart")) {
-                Respawn();
+                isToRespawn = true;
             } else if (!done) {
                 switch (action)
                 {
@@ -226,6 +222,9 @@ namespace unityremote
         // Update is called once per frame
         public override void UpdatePhysics()
         {
+            if (done) {
+                return;
+            }
             deltaTime += Time.deltaTime;
             if (deltaTime > 1.0){
                 energy -= energyRatio;
@@ -272,7 +271,7 @@ namespace unityremote
             float bx = BottonRightCorner.transform.localPosition.x;
             float tz = TopLeftCorner.transform.localPosition.z;
             float bz = BottonRightCorner.transform.localPosition.z;
-            if (x < tx || x > bx || z > tz || z < bz) {
+            if (!done && (x < tx || x > bx || z > tz || z < bz)) {
                 done = true;
                 reward += 10;
             }
@@ -349,6 +348,11 @@ namespace unityremote
             if(get_result) {
                 ResetState();
             }
+
+            if (isToRespawn) {
+                Respawn();
+            }
+
         }
     }
 
@@ -456,7 +460,7 @@ namespace unityremote
             return sb.ToString();
         }
 
-        private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 90.0f)
+        private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 60.0f)
         {
 
 

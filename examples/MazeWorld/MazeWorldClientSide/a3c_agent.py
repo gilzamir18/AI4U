@@ -8,7 +8,7 @@ import argparse
 from gym.core import Wrapper
 from unityremote.utils import image_from_str
 from collections import deque
-
+import time
 
 IMAGE_SHAPE = (20, 20, 4)
 ARRAY_SIZE = 7

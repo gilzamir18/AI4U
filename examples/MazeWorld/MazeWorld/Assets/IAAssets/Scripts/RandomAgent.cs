@@ -50,18 +50,20 @@ public class RandomAgent : MonoBehaviour
         float lx = LowerRightCorner.x;
         float lz = LowerRightCorner.z;
         bool inRoom = true;
-        if (x < tx) {
+        const float ep = 0.1f;
+
+        if (x < tx + ep) {
             inRoom = false;
             mRigidbody.AddForce(Vector3.right * speed);
-        } else if (x > lx) {
+        } else if (x > lx - ep) {
             inRoom = false;
             mRigidbody.AddForce(Vector3.left * speed);
         } 
         
-        if (z < lz) {
+        if (z < lz + ep) {
             inRoom = false;
             mRigidbody.AddForce(Vector3.forward * speed);
-        } else if (z > tz) {
+        } else if (z > tz - ep) {
             inRoom = false;
             mRigidbody.AddForce(Vector3.forward * (-speed));
         }
