@@ -5,10 +5,21 @@ from threading import Thread
 from unityremote.utils import image_from_str
 
 
+def get_frame_from_fields(fields):
+    imgdata = image_from_str(fields, 40, 40)
+    return imgdata
+
+def print_matrix(mat):
+	for i in range(40):
+		for j in range(40):
+			print(mat[i, j], end=' ')
+		print()
+
+
 def run_agent(inport, outport):
 	env = RemoteEnv(IN_PORT=inport, OUT_PORT=outport)
 	env.open(0)
-
+	env.step("restart")
 	speed = 100
 	angular_speed = 50
 
@@ -21,8 +32,8 @@ def run_agent(inport, outport):
 		sum_rewards = 0
 		touchID = 0
 		energy = 0
-		idx = np.random.choice(len(actions))
-		#idx = int(input())
+		#idx = np.random.choice(len(actions))
+		idx = int(input())
 		for i in range(8):
 			env_info = env.step(actions[idx][0], actions[idx][1])
 			done = env_info['done']
@@ -40,6 +51,9 @@ def run_agent(inport, outport):
 			env_info = env.step('restart', -1)
 		print("Object touched ---------------- ",  touchID)
 		print("Reward sum -------------------- ", sum_rewards)
+		print("Done ---------------------------", env_info['done'])
+		print("--------------------------------------------------------------------------------------")
+		print_matrix(get_frame_from_fields(env_info['frame']))
 		print("-----------------------------------------------")
 	env.close()
 

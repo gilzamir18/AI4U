@@ -32,17 +32,11 @@ namespace unityremote
         private bool getpickup;
         private bool usewalkspeed = false;
         private float walkspeed = 0.5f;
- 
-        public int rayCastingWidth;
-        public int rayCastingHeight;
-        //END::
 
         public int GameID;
 
 
         public Text hud;
-
-        private PlayerRemoteSensor sensor;
 
         public Camera m_camera;
 
@@ -105,8 +99,6 @@ namespace unityremote
 
             // get the third person character ( this should never be null due to require component )
             character = GetComponent<ThirdPersonCharacter>();
-            sensor = new PlayerRemoteSensor();
-            sensor.Start(m_camera, gameObject, this.rayCastingHeight, this.rayCastingWidth);
         }
         
         private float deltaTime = 0;
@@ -133,7 +125,8 @@ namespace unityremote
 
             Vector3 pos = respawnPositions[idx].transform.position;
             mRigidBody.velocity = Vector3.zero;
-            mRigidBody.MovePosition(pos);
+            //mRigidBody.MovePosition(pos);
+            transform.position = pos;
             isToRespawn = false;
         }
 
@@ -225,14 +218,6 @@ namespace unityremote
             if (done) {
                 return;
             }
-            deltaTime += Time.deltaTime;
-            if (deltaTime > 1.0){
-                energy -= energyRatio;
-                if (energy < 0){
-                    energy = 0;
-                }
-                deltaTime = 0;
-            }
 
             // read inputs
             float h = fx;
@@ -264,7 +249,6 @@ namespace unityremote
             character.Move(m_Move, crouch, jump, rightTurn - leftTurn, down - up, pushing, fx, fy, getpickup);
             //character.Move(m_Move, crouch, m_Jump, h, v, pushing);
             jump = false;
-            sensor.UpdateViewMatrix();
             float x = transform.localPosition.x;
             float z = transform.localPosition.z;
             float tx = TopLeftCorner.transform.localPosition.x;
@@ -273,7 +257,7 @@ namespace unityremote
             float bz = BottonRightCorner.transform.localPosition.z;
             if (!done && (x < tx || x > bx || z > tz || z < bz)) {
                 done = true;
-                reward += 10;
+                reward += 100;
             }
         }
 
@@ -326,17 +310,93 @@ namespace unityremote
             }
         }
 
-        public override void UpdateState()
+        private string getview()
         {
-            if (energy <= 0) {
-                energy = 0;
-                if (!done){
-                    reward -= 10;
+
+            float minx = this.TopLeftCorner.transform.position.x;
+            float maxx = this.BottonRightCorner.transform.position.x;
+            float maxz = this.TopLeftCorner.transform.position.z;
+            float minz = this.BottonRightCorner.transform.position.z;
+            const int W = 40;
+            const int H = 40;
+            float wx = maxx - minx;
+            float wz = maxz - minz;
+            float dx = wx / W;
+            float dz = wz / H;
+            float x = minx;
+            float z = minz;
+            float y = transform.position.y + 400;
+            Vector3 pos = Vector3.zero;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < W; i++)
+            {
+                for (int j = 0; j <  H; j++)
+                {
+                    RaycastHit hit;
+                    RaycastHit hitinfo;
+                    pos.Set(x, y, z);
+                    if (Physics.Raycast(pos, Vector3.up * -1, out hitinfo, 500))
+                    {
+                        string name = hitinfo.collider.gameObject.name;
+
+                        if (name == "Terrain")
+                        {
+                            sb.Append("1");
+                        } else if (name == "maze1")
+                        {
+                            sb.Append("2");
+                        } else if (name == "IAAgent")
+                        {
+                            sb.Append("5");
+                        } else
+                        {
+                            string tag = hitinfo.collider.gameObject.tag;
+                            if (tag == "Fire")
+                            {
+                                sb.Append("3");
+                            } else if (tag == "Life")
+                            {
+                                sb.Append("4");
+                            } else
+                            {
+                                sb.Append("0");
+                            }
+                        }
+                    } else
+                    {
+                        sb.Append("0");
+                    }
+                    z += dz;
+                    if (j < H-1)
+                    {
+                        sb.Append(",");
+                    }
                 }
-                done = true;
+                z = minz;
+                x += dx; 
+                if (i < W - 1)
+                {
+                    sb.Append(";");
+                }
             }
 
-            SetStateAsString(0, "frame", sensor.getCurrentRayCastingFrame());
+            return sb.ToString();
+        }
+
+        public override void UpdateState()
+        {
+
+            deltaTime += Time.deltaTime;
+            if (deltaTime > 1.0){
+                energy -= energyRatio;
+                if (energy < 0){
+                    energy = 0;
+                    done = true;
+                }
+                deltaTime = 0;
+            }
+
+            SetStateAsString(0, "frame", getview());
             SetStateAsFloat(1, "reward", reward);
             SetStateAsFloat(2, "touchID", touchID);
             SetStateAsFloat(3, "energy", energy);
@@ -344,6 +404,9 @@ namespace unityremote
             SetStateAsFloat(5, "tx", touchX);
             SetStateAsFloat(6, "ty", touchY);
             SetStateAsFloat(7, "tz", touchZ);
+            SetStateAsFloat(8, "fx", transform.forward.x);
+            SetStateAsFloat(9, "fz", transform.forward.z);
+
             UpdateHUD();
             if(get_result) {
                 ResetState();

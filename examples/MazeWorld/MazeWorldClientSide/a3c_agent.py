@@ -10,9 +10,9 @@ from unityremote.utils import image_from_str
 from collections import deque
 import time
 
-IMAGE_SHAPE = (20, 20, 4)
+IMAGE_SHAPE = (40, 40, 2)
 ARRAY_SIZE = 7
-ACTION_SIZE = 6
+ACTION_SIZE = 7
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
     import tensorflow as tf
@@ -42,7 +42,7 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
 
     expanded_features = tf.keras.layers.Concatenate()([flattened, phidden2])
 
-    hidden = tf.keras.layers.Dense(512, activation='relu', name='hidden')(expanded_features)
+    hidden = tf.keras.layers.Dense(256, activation='relu', name='hidden')(expanded_features)
     #hidden2 = tf.keras.layers.Lambda(lambda x: x * proprioceptions[:,9:10])(hidden)
     #action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden2)
     action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden)
@@ -60,114 +60,93 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     return (observations, proprioceptions), action_logits, action_probs, values, layers
 
 
-
-class AgentWrapper(Wrapper):
-    """
-    Start each episode with a random number of no-ops.
-    """
-
-    def __init__(self, env):
-        Wrapper.__init__(self, env)
-        self.episode_steps = 0
-        self.get_result_op = ACTION_SIZE
-
-    def step(self, action, info=None):
-        sum_rewards = 0
-        touchID = 0
-        energy = 0
-        for i in range(8):
-            state, reward, done, env_info = self.env.step(action)
-            if done:
-                break
-        if not done:
-            state, reward, done, env_info = self.env.step(self.get_result_op)
-            sum_rewards += reward
-            touchID = env_info['touchID']
-            energy = env_info['energy']
-        if done:
-            sum_rewards += reward
-            touchID = env_info['touchID']
-            energy = env_info['energy']
-
-        self.episode_steps += 1
-
-        state[1][0] = energy/50.0
-        state[1][1] = touchID/3.0
-        state[1][2] = env_info['tx']
-        state[1][3] = env_info['ty']
-        state[1][4] = env_info['tz']
-
-        return state, sum_rewards, done, env_info
-
-    def reset(self):
-        self.episode_steps = 0
-        return self.env.reset()
-
-def agent_preprocessing(env, max_n_noops, clip_rewards=True):
-    env = AgentWrapper(env)
-    return env
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run",
                         choices=['train', 'test'],
                         default='train')
     parser.add_argument('--path', default='.')
-    parser.add_argument('--preprocessing', choices=['generic, image_image', 'external'])
+    parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
     return parser.parse_args()
 
 def get_frame_from_fields(fields):
-    imgdata = image_from_str(fields['frame'], 20, 20)
+    imgdata = image_from_str(fields['frame'], 40, 40)
     return imgdata
 
 
-class state_wrapper:
+class Agent:
     def __init__(self):
-        self.hist = deque(maxlen=4)
-        self.hist.append( np.zeros( (20, 20) ) )
-        self.hist.append( np.zeros( (20, 20) ) )
-        self.hist.append( np.zeros( (20, 20) ) )
-        self.hist.append( np.zeros( (20, 20) ) )
+        self.hist = deque(maxlen=2)
+        self.good_touchs = 0
 
-    def __call__(self, fields, env, action=None, info=None):
-        frame = get_frame_from_fields(fields)
-        self.hist.append(frame)
-        
-        done = fields['done']
-        reward = fields['reward'];
-
-        info = fields
-
-        #reward = np.clip(reward, -1, +1)
-
-        proprioceptions = np.zeros(ARRAY_SIZE)
- 
-        seq = np.array(self.hist)
+    def __make_state__(hist, env_info):
+        seq = np.array(hist)
         seq = np.moveaxis(seq, 0, -1)
-        if done:
-            self.hist.append( np.zeros( (20, 20) ) )
-            self.hist.append( np.zeros( (20, 20) ) )
-            self.hist.append( np.zeros( (20, 20) ) )
-            self.hist.append( np.zeros( (20, 20) ) )
-        state = (seq, proprioceptions)
-        return (state, reward, done, fields)
+        state = (seq, np.zeros(ARRAY_SIZE))
+        state[1][0] = env_info['energy']/50.0
+        state[1][1] = env_info['touchID']/3.0
+        state[1][2] = env_info['tx']
+        state[1][3] = env_info['ty']
+        state[1][4] = env_info['tz']
+        state[1][5] = env_info['fx']
+        state[1][6] = env_info['fz']
+        return state
+
+    def reset(self, env):
+        env_info = env.remoteenv.step('restart')
+        frame = get_frame_from_fields(env_info)
+        self.hist.append( frame )
+        self.hist.append( frame )
+        self.good_touchs = 0
+        return Agent.__make_state__(self.hist, env_info)
+
+    def act(self, env, action=None, info=None):
+        sum_rewards = 0
+        touchID = 0
+        energy = 0
+        for i in range(4):
+            env_info = env.one_step(action)
+
+            if env_info['done']:
+                sum_rewards += env_info['reward']                
+                if env_info['touchID'] == 2:
+                    self.good_touchs += 1
+                break
+            
+            env_info = env.remoteenv.step("get_result")
+            sum_rewards += env_info['reward']
+            if env_info['touchID'] == 2:
+                self.good_touchs += 1
+
+            if env_info['done']:
+                break
+
+        if env_info['done']:
+            if sum_rewards == 0:
+                sum_rewards = self.good_touchs
+                if sum_rewards > 50:
+                    sum_rewards = 50
+
+        frame = get_frame_from_fields(env_info)
+        self.hist.append(frame)
+
+        return Agent.__make_state__(self.hist, env_info), sum_rewards, env_info['done'], env_info
 
 def make_env_def():
         environment_definitions['state_shape'] = IMAGE_SHAPE
         environment_definitions['action_shape'] = (ACTION_SIZE,)
-        environment_definitions['actions'] = [('walk', 1), ('run', 15), ('walk_in_circle', 1), ('pickup', True), ('pickup', False), ('noop', -1), ('get_result', -1)]
-        environment_definitions['state_wrapper'] = state_wrapper
-        environment_definitions['preprocessing'] = agent_preprocessing
+        environment_definitions['actions'] = [('walk', 1), ('run', 15), ('walk_in_circle', 1.0), ('walk_in_circle', -1.0), ('pickup', True), ('pickup', False), ('noop', -1), ('get_result', -1)]
+        environment_definitions['agent'] = Agent
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=8', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
+        args = ['--n_workers=8', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
 def test(path):
-        args = ['UnityRemote-v0', path, '--preprocessing=external']
+        args = ['UnityRemote-v0', path]
         make_env_def()
         run_test(environment_definitions, args)
 

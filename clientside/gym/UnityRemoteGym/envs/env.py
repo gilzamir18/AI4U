@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from unityremote.core import RemoteEnv
-from unityremote.utils import environment_definitions
 import threading as td
 import numpy as np
 import io
@@ -22,6 +21,15 @@ class AleWrapper:
     def lives(self):
         return self.env.nlives
 
+class BasicAgent:
+    def reset(self, env):
+        envinfo = env.remoteenv.step('restart')
+        return envinfo['state']
+
+    def act(self, env, action, info=None):
+        envinfo = env.one_step(action)
+        return envinfo['state'], envinfo['reward'], envinfo['done'], envinfo
+
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
@@ -42,10 +50,13 @@ class Environment(gym.Env):
         else:
             self.action_meaning = ['action']*len(self.actions)
 
-        if inspect.isclass(environment_definitions['state_wrapper']):
-            self.state_wrapper = environment_definitions['state_wrapper']()
+        if 'agent' in environment_definitions:
+            if inspect.isclass(environment_definitions['agent']):
+                self.agent = environment_definitions['agent']()
+            else:
+                raise Exception("Agent object is not a class!!!!")
         else:
-            self.state_wrapper = environment_definitions['state_wrapper']
+            self.agent = BasicAgent()
         
         host = environment_definitions['host']
         input_port = environment_definitions['input_port']
@@ -59,12 +70,9 @@ class Environment(gym.Env):
         self.__check_configuration_()
         return [self.action_meaning[i] for i in range(len(self.actions))]
 
-
     def reset(self):
         self.__check_configuration_()
-        fields = self.remoteenv.step('restart')
-        self.state, self.reward, self.done, self.info = self.state_wrapper(fields, self)
-        return self.state
+        return self.agent.reset(self)
  
     def render(self, mode='human', close=False):
         self.__check_configuration_()
@@ -74,10 +82,12 @@ class Environment(gym.Env):
         self.__check_configuration_()
         self.remoteenv.close()
 
+    def one_step(self, action):
+        return self.remoteenv.step(self.actions[action][0], self.actions[action][1])
+
     def step(self, action, info=None):
         self.__check_configuration_()
-        fields = self.remoteenv.step(self.actions[action][0], self.actions[action][1])
-        return self.state_wrapper(fields, self, action, info)
+        return self.agent.act(self, action, info)
 
     def __del__(self):
         self.__check_configuration_()

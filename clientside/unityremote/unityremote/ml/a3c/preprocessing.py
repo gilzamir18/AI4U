@@ -315,25 +315,4 @@ class EndEpisodeOnLifeLossWrapper(Wrapper):
             return self.env.reset()
 
 def generic_preprocess(env, max_n_noops, clip_rewards=True):
-    env = RandomStartWrapper(env, max_n_noops)
-    env = FrameSkipWrapper(env)
-    env = EndEpisodeOnLifeLossWrapper(env)
-    if clip_rewards:
-        env = ClipRewardsWrapper(env)
-    return env
-
-def imageinput_preprocess(env, max_n_noops, clip_rewards=True):
-    """
-    Apply the full sequence of preprocessing steps.
-    """
-    env = ExtractImageWrapper(env)
-    #env = RandomStartWrapper(env, max_n_noops)
-    env = MaxWrapper(env) #na
-    env = ExtractLuminanceAndScaleWrapper(env)
-    env = NormalizeObservationsWrapper(env)
-    env = FrameSkipWrapper(env)
-    env = FrameStackWrapper(env)
-    env = EndEpisodeOnLifeLossWrapper(env)
-    if clip_rewards:
-        env = ClipRewardsWrapper(env)
     return env

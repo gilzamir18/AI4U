@@ -2,37 +2,28 @@ from unityremote.ml.a3c.train import run as run_train
 from unityremote.ml.a3c.run_checkpoint import run as run_test
 from unityremote.utils import environment_definitions
 import UnityRemoteGym
+from UnityRemoteGym import BasicAgent
 import numpy as np
 import argparse
-from gym.core import Wrapper
 
-from unityremote.ml.a3c.preprocessing import RandomStartWrapper, FrameSkipWrapper, EndEpisodeOnLifeLossWrapper, ClipRewardsWrapper
+'''
+This method extract environemnt state from a remote environment response.
+'''
+def get_state_from_fields(fields):
+    return np.array([fields['tx'], fields['tz'], fields['vx'], fields['vz'], fields['x'], fields['y'],  fields['z']])
 
 
-class TestWrapper(Wrapper):
-    """
-    Start each episode with a random number of no-ops.
-    """
+'''
+It's necessary overloading the BasicAgent because server response (remote environment) don't have default field 'frame' as state.
+'''
+class Agent(BasicAgent):
+    def __init__(self):
+        BasicAgent.__init__(self)
 
-    def __init__(self, env):
-        Wrapper.__init__(self, env)
-
-    def step(self, action):
-        #Do anything before send your result
-        return self.env.step(action)
-
-    def reset(self):
-        return self.env.reset()
-
-def test_preprocessing(env, max_n_noops, clip_rewards=True):
-    env = RandomStartWrapper(env, max_n_noops)
-    env = FrameSkipWrapper(env)
-    env = EndEpisodeOnLifeLossWrapper(env)
-    if clip_rewards:
-        env = ClipRewardsWrapper(env)
-    env = TestWrapper(env)
-    return env
-
+    def act(self, env, action, info=None):
+        envinfo = env.one_step(action)
+        state = get_state_from_fields(envinfo)
+        return state, envinfo['reward'], envinfo['done'], envinfo
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -40,34 +31,23 @@ def parse_args():
                         choices=['train', 'test'],
                         default='train')
     parser.add_argument('--path', default='.')
-    parser.add_argument('--preprocessing', choices=['generic, image_image', 'external'])
+    parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
     return parser.parse_args()
-
-def get_state_from_fields(fields):
-	return np.array([fields['tx'], fields['tz'], fields['vx'], fields['vz'], fields['x'], fields['y'],	fields['z']])
-
-def state_wrapper(fields, env, action=None, info=None):
-        state = get_state_from_fields(fields)
-        done = fields['done']
-        reward = fields['reward']
-        extra_info = fields
-        return (state, reward, done, extra_info)
 
 def make_env_def():
         environment_definitions['state_shape'] = (7,)
         environment_definitions['action_shape'] = (5,)
         environment_definitions['actions'] = [('fx',0.1), ('fx', -0.1), ('fz', 0.1), ('fz', -0.1), ('noop', 0.0)]
         environment_definitions['action_meaning'] = ['tx_right', 'tx_left', 'tz_toward', 'tz_backward', 'NOOP']
-        environment_definitions['state_wrapper'] = state_wrapper
-        environment_definitions['preprocessing'] = test_preprocessing
+        environment_definitions['agent'] = Agent
 
 def train():
-        args = ['--n_workers=2', '--preprocessing=external', 'UnityRemote-v0']
+        args = ['--n_workers=2', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
 def test(path):
-        args = ['UnityRemote-v0', path, '--n_workers=2']
+        args = ['UnityRemote-v0', path,]
         make_env_def()
         run_test(environment_definitions, args)
 

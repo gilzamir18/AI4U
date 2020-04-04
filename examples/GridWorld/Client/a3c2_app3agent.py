@@ -60,39 +60,13 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     return (observations, proprioceptions), action_logits, action_probs, values, layers
 
 
-
-class AgentWrapper(Wrapper):
-    """
-    Start each episode with a random number of no-ops.
-    """
-
-    def __init__(self, env):
-        Wrapper.__init__(self, env)
-        self.episode_steps = 0
-
-    def step(self, action, info):
-        state, reward, done, env_info = self.env.step(action)
-
-        self.episode_steps += 1
-
-        return state, reward, done, env_info
-
-    def reset(self):
-        self.episode_steps = 0
-        return self.env.reset()
-
-def agent_preprocessing(env, max_n_noops, clip_rewards=True):
-    env = AgentWrapper(env)
-    return env
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run",
                         choices=['train', 'test'],
                         default='train')
     parser.add_argument('--path', default='.')
-    parser.add_argument('--preprocessing', choices=['generic, image_image', 'external'])
+    parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
     return parser.parse_args()
 
 def get_frame_from_fields(fields):
@@ -107,7 +81,7 @@ ENERGY_REST = 0.09
 
 ENERGY_CAP = 500.0
 
-class state_wrapper():
+class Agent:
     def __init__(self):
         self.goal_checker = goal_checker()
         self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
@@ -116,28 +90,57 @@ class state_wrapper():
         self.suc = 0
         self.total = 0
 
-    def __call__(self, fields, env, action=None, info=None):
-        frame = get_frame_from_fields(fields)
+    def reset(self, env):
+        #print("Second goal success rate ", self.suc/self.total)
+        env_info = env.remoteenv.step("restart")
 
-        if action is not None:
-            action = env.actions[action][1]
 
-            if action >= 0:
-                self.energy = ENERGY_DECAY * self.energy;
-            else:
-                self.energy += ENERGY_REST * MAX_ENERGY[self.goal_checker.g];
+        self.goal_checker.reset()
+        self.goal  = np.random.choice([0,1])
+        #self.goal = 1
+        self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
+        self.total = 0
+        self.suc = 0
 
-            if self.energy > ENERGY_CAP:
-                self.energy = ENERGY_CAP
+        frame = get_frame_from_fields(env_info)
 
 
         frame = frame.reshape(1, 10, 10)
         frame = np.moveaxis(frame, 0, -1)
         
-        done = fields['done']
-        reward = fields['reward'];
+        done = env_info['done']
+        reward = env_info['reward'];
 
-        info = fields
+        proprioceptions = np.zeros(ARRAY_SIZE)
+        proprioceptions[0] = self.energy/ENERGY_CAP
+        proprioceptions[1] = MIN_ENERGY[self.goal_checker.g]/ENERGY_CAP
+        proprioceptions[2] = MAX_ENERGY[self.goal_checker.g]/ENERGY_CAP
+        proprioceptions[3] = self.goal
+
+        return (frame, proprioception)
+
+    def act(self, fields, env, action=None, info=None):
+        env_info = env.one_step(action)
+
+        frame = get_frame_from_fields(env_info)
+
+
+
+        if action >= 0:
+            self.energy = ENERGY_DECAY * self.energy;
+        else:
+            self.energy += ENERGY_REST * MAX_ENERGY[self.goal_checker.g];
+
+        if self.energy > ENERGY_CAP:
+            self.energy = ENERGY_CAP
+
+
+        frame = frame.reshape(1, 10, 10)
+        frame = np.moveaxis(frame, 0, -1)
+        
+        done = env_info['done']
+        reward = env_info['reward'];
+
 
         reward = np.clip(reward, -1, +1)
 
@@ -160,16 +163,6 @@ class state_wrapper():
 
         proprioception = np.array(proprioceptions, dtype=np.float32)
 
-        if fields['done']:
-
-            #print("Second goal success rate ", self.suc/self.total)
-
-            self.goal_checker.reset()
-            self.goal  = np.random.choice([0,1])
-            #self.goal = 1
-            self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
-            self.total = 0
-            self.suc = 0
         
         state = (frame, proprioception)
         return (state, reward, done, fields)
@@ -213,18 +206,17 @@ def make_env_def():
         environment_definitions['action_shape'] = (ACTION_SIZE,)
         environment_definitions['actions'] = [('move',0), ('move', 1), ('move', 2), ('move', 3), ('NOOP', -1)]
         environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left',  'NOOP']
-        environment_definitions['state_wrapper'] = state_wrapper
-        environment_definitions['preprocessing'] = agent_preprocessing
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
+        environment_definitions['agent'] = Agent
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=8', '--preprocessing=external', '--steps_per_update=30', 'UnityRemote-v0']
+        args = ['--n_workers=8', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
 def test(path):
-        args = ['UnityRemote-v0', path, '--preprocessing=external']
+        args = ['UnityRemote-v0', path]
         make_env_def()
         run_test(environment_definitions, args)
 

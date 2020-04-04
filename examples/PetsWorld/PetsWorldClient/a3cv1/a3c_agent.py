@@ -83,22 +83,6 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     return (observations, proprioceptions), action_logits, action_probs, values, layers
 
 
-
-class AgentWrapper(Wrapper):
-    """
-    Start each episode with a random number of no-ops.
-    """
-
-    def __init__(self, env):
-        Wrapper.__init__(self, env)
-
-    def step(self, action):
-        state, reward, done, info = self.env.step(action)
-        return state, reward, done, info
-
-    def reset(self):
-        return self.env.reset()
-
 def agent_preprocessing(env, max_n_noops, clip_rewards=True):
     env = RandomStartWrapper(env, max_n_noops)
     #env = FrameSkipWrapper(env)
@@ -106,7 +90,6 @@ def agent_preprocessing(env, max_n_noops, clip_rewards=True):
     env = EndEpisodeOnLifeLossWrapper(env)
     if clip_rewards:
         env = ClipRewardsWrapper(env)
-    env = AgentWrapper(env)
     return env
 
 
@@ -116,15 +99,14 @@ def parse_args():
                         choices=['train', 'test'],
                         default='train')
     parser.add_argument('--path', default='.')
-    parser.add_argument('--preprocessing', choices=['generic, image_image', 'external'])
+    parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
     return parser.parse_args()
 
 def get_frame_from_fields(fields):
     imgdata = image_decode(fields['frame'], 20, 20)
     return imgdata
 
-
-class state_wrapper:
+class Agent:
     def __init__(self):
         self.energy = None
         self.buf = deque(maxlen=4)
@@ -133,22 +115,29 @@ class state_wrapper:
         self.buf.append(mem.copy())
         self.buf.append(mem.copy())
         self.buf.append(mem.copy())
-        self.proprioceptions = np.zeros(ARRAY_SIZE)
 
-    def __call__(self, fields, env):
-        frame = get_frame_from_fields(fields)
+    def __make_state__(env_info, imageseq):
+        proprioceptions = np.zeros(ARRAY_SIZE)
+        frameseq = np.array(imageseq, dtype=np.float32)
+        frameseq = np.moveaxis(frameseq, 0, -1)
+        frameseq = np.array(imageseq, dtype=np.float32)
+        frameseq = np.moveaxis(frameseq, 0, -1)
+        proprioceptions[0] = env_info['touched']
+        proprioceptions[1] = env_info['energy']/300.0
+        proprioceptions[2] = env_info['signal']
+        proprioception = np.array(proprioceptions, dtype=np.float32)
+        state = (frameseq, proprioception)
+
+    def act(self, env, action=0, info=None):
+        env_info = env.one_step(action)
+
+        frame = get_frame_from_fields(env_info)
 
         if self.energy is None:
-            self.energy = fields['energy']
+            self.energy = env_info['energy']
 
-        done = fields['done']
-        delta = fields['energy'] - self.energy
-
-        '''if delta > 0 and fields['id']==0:
-            print('-------------------------------------DELTA---------------------------------------')
-            print(delta)
-            print('---------------------------------------------------------------------------------')
-        '''
+        done = env_info['done']
+        delta = env_info['energy'] - self.energy
         reward = 0
         if not done:
             if self.energy > 200:
@@ -159,20 +148,13 @@ class state_wrapper:
                 if reward < 0:
                     reward = 0;
             info = fields
-            self.energy = fields['energy']
+            self.energy = env_info['energy']
         else:
             self.energy = None
 
         self.buf.append(frame)
-        #frameseq = np.array(self.buf, dtype=np.float32).reshape(1, 4, 20, 20)
-        frameseq = np.array(self.buf, dtype=np.float32)
-        frameseq = np.moveaxis(frameseq, 0, -1)
-        self.proprioceptions[0] = fields['touched']
-        self.proprioceptions[1] = fields['energy']/300.0
-        self.proprioceptions[2] = fields['signal']
-        #proprioception = np.array(self.proprioceptions, np.float32).reshape(1, len(self.proprioceptions))
-        proprioception = np.array(self.proprioceptions, dtype=np.float32)
-        state = (frameseq, proprioception)
+        state = Agent.__make_state__(env_info, self.buf)
+
         return (state, reward, done, fields)
 
 def make_env_def():
@@ -180,18 +162,17 @@ def make_env_def():
         environment_definitions['action_shape'] = (ACTION_SIZE,)
         environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1), ('act', 10)]
         environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left', 'jump', 'NOOP', 'PickUp']
-        environment_definitions['state_wrapper'] = state_wrapper()
-        environment_definitions['preprocessing'] = agent_preprocessing
+        environment_definitions['agent'] = Agent
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=4', '--preprocessing=external', 'UnityRemote-v0']
+        args = ['--n_workers=4', '--preprocessing=user_defined', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
 def test(path):
-        args = ['UnityRemote-v0', path, '--preprocessing=external' '--n_workers=4']
+        args = ['UnityRemote-v0', path, '--preprocessing=user_defined']
         make_env_def()
         run_test(environment_definitions, args)
 

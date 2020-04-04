@@ -23,7 +23,7 @@ def parse_args(env_defs, kargs=None):
                              "RMSprop statistics for each layer")
     parser.add_argument("--manager_wake_interval_seconds", type=int, default=60)
     parser.add_argument("--preprocessing",
-                        choices=['generic', 'from_image', 'external'],
+                        choices=['generic', 'user_defined'],
                         default='generic')
 
     # Training hyperparameters
@@ -55,9 +55,7 @@ def parse_args(env_defs, kargs=None):
 
     if args.preprocessing == 'generic':
         preprocess_wrapper = preprocessing.generic_preprocess
-    elif args.preprocessing == 'from_image':
-        preprocess_wrapper = preprocessing.imageinput_preprocess
-    elif args.preprocessing == 'external':
+    elif args.preprocessing == 'user_defined':
         preprocess_wrapper = env_defs['preprocessing']
 
     args.n_steps = int(args.n_steps)
