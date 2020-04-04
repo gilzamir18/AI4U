@@ -157,4 +157,4 @@ The complete code example shown in this tutorial can be found at [examples/MazeW
 
 | ![MazeWorld Agent](images/resultafter1dayoftraining.png) |
 | :--: |
-| Figure 1. *MazeWorld Agent obtain maximum score after one day and twelve hours of training.* |
+| Figure 1. *MazeWorld Agent obtains maximum score after one day and twelve hours of training.* |
