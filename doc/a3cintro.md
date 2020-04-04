@@ -1,13 +1,13 @@
 # A3C Implementation
 
-Our A3C implementation is a fork of Rahtz's (Matthew) implementation of the vanilla A3C algorithm, available on ![github](https://github.com/mrahtz/ocd-a3c). We adapt this implementation according to our requirements. Moreover, we extend A3C vanilla to a goal-parametrized A3C with intrinsic motivations and emotional models.
+Our A3C implementation is a fork of Rahtz's (Matthew) implementation of the vanilla A3C algorithm, available on [github](https://github.com/mrahtz/ocd-a3c). We adapt this implementation according to our requirements. Moreover, we extend A3C vanilla to a goal-parametrized A3C with intrinsic motivations and emotional models.
 
-## Environment Configuration
+# Environment Configuration
 
-UnityRemote provides a set of tools that allow you to use the A3C algorithm easily. Firstly, see the tutorial about the Gym-based environment available on ![site](unityremotegym.md). UnityRemoteGym allows you to connect your Unity application with Python3 using a comprehensively known agent-environment protocol developed by the OpenAI Gym initiative.
+UnityRemote provides a set of tools that allow you to use the A3C algorithm easily. Firstly, see the tutorial about the Gym-based environment available on [site](unityremotegym.md). UnityRemoteGym allows you to connect your Unity application with Python3 using a comprehensively known agent-environment protocol developed by the OpenAI Gym initiative.
 
 
-The environment configuration can be made using a dictionary (see on ![site](unityremotegym.md)). For example, 
+The environment configuration can be made using a dictionary (see on [site](unityremotegym.md)). For example, 
 
         environment_definitions = {}
         environment_definitions['state_shape'] = (20, 20, 3)
@@ -22,7 +22,7 @@ where *state_shape* field is the shape of the network input, *action_shape* fiel
 
 acts *moveleft* that move left one cell on the matrix of a grid world.
 
-## Buiding a Agent's Neural Network
+# Buiding a Agent's Neural Network
 A3C algorithm implementations use a neural network for approximating an optimal agent's police. The function *make_inference_network* should return a TensorFlow model representing the agent's network used by the A3C  algorithm.  For example, the following implementation makes a convolutional network that receives environment data and returns the agent's decision. When the method *act* from the agent is called, it receives the action selected by the agent's policy. The choice of this action depends on the agent's neural network.
 
 	def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
@@ -70,9 +70,9 @@ A3C algorithm implementations use a neural network for approximating an optimal 
 
 	    return (observations, proprioceptions), action_logits, action_probs, values, layers
 
-##The Agent
+# The Agent
 
-The agent implementation should follow the directives given in ![site](unityremotegym.md). For example, the following implementation receives the action selected by the agent's policy and returns the next state resulting in this action.
+The agent implementation should follow the directives given in [site](unityremotegym.md). For example, the following implementation receives the action selected by the agent's policy and returns the next state resulting in this action.
 
 	class Agent:
 	    def __init__(self):
@@ -126,7 +126,7 @@ The agent implementation should follow the directives given in ![site](unityremo
 	        return (state, reward, done, fields)
 
 
-## Run A3C algoritm
+# Run A3C algoritm
 
 Assuming you have already set up your simulation environment and agent, the next step is to start agent training. To do this, you need to call the run method of the module *unityremote.ml.a3c.train*, as shown in the following example.
 
@@ -139,7 +139,7 @@ Assuming you have already set up your simulation environment and agent, the next
 where *args* is a list of arguments to our A3C implementation, and  *environment_definintions* is a dictionary with the configuration of the environment. The parameter *--n_workers* in args is the number of workers running during the training, *--steps_per_updates* is the number of update steps to consider during A3C training, and *UnityRemote-v0* is the default name of all unityremote plugin in gym environment management.
 
 
-## Testing
+# Testing
 
 After training, to view the result obtained, you can run the environment with the optimized model. To do this, run the *run* method of the *unityremote.ml.a3c.run_checkpoint* module, as shown in the following example.
 
@@ -150,9 +150,9 @@ After training, to view the result obtained, you can run the environment with th
         run_test(environment_definitions, args)
 
 
-## Final Considerations
+# Final Considerations
 
-The complete code example shown in this tutorial can be found at ![examples/MazeWorld](examples/MazeWorld). In this environment, the maximum agent's score is 100. After one day and twelve hours of training agents meet the maximum score. Image 1 shows the result.
+The complete code example shown in this tutorial can be found at [examples/MazeWorld](examples/MazeWorld). In this environment, the maximum agent's score is 100. After one day and twelve hours of training agents meet the maximum score. Image 1 shows the result.
 
 
 | ![MazeWorld Agent](images/resultafter1dayoftraining.png) |

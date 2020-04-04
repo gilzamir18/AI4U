@@ -1,4 +1,4 @@
-## UnityRemote with Gym
+# UnityRemote with Gym
 
 We can use unity remote as a gym environment, but there is a complex flow in this case. First, you import UnityRemoteGym and gym modules
 
@@ -53,7 +53,7 @@ The reset command should restart the environment for a new simulated episode. Fi
 	next_state = env.one_step(0) #run action named 'tx'
 
 
-##The Agent Class
+#The Agent Class
 
 If you don't specify an *agent* field, UnityRemoteGym assumes the following agent behavior as the default
 
@@ -97,7 +97,7 @@ Then, you need to override the methods *act* and *reset*. For example
 
 
 
-##Final Considerations
+# Final Considerations
 
 The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server-side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
 
