@@ -99,7 +99,7 @@ Then, you need to override the methods *act* and *reset*. For example
 
 # Final Considerations
 
-The complete example used in this guide can be found at `UnityRemote/examples/CubeAgent/CubeExampleClient/cubeagentwithgym.py`. Server-side implementation can be found at `UnityRemote/examples/CubeAgent/CubeExampleUnity`.
+The complete example used in this guide can be found at [here](/examples/CubeAgent/CubeExampleClient/).
 
 [1] A3C: Asynchronous Advantage Actor-Critic.
 
