@@ -155,6 +155,6 @@ After training, to view the result obtained, you can run the environment with th
 The complete code example shown in this tutorial can be found at ![examples/MazeWorld](examples/MazeWorld). In this environment, the maximum agent's score is 100. After one day and twelve hours of training agents meet the maximum score. Image 1 shows the result.
 
 
-| ![MazeWorld Agent](images/cubeagent.png) |
+| ![MazeWorld Agent](images/resultafter1dayoftraining.png) |
 | :--: |
 | Figure 1. *MazeWorld Agent obtain maximum score after one day and twelve hours of training.* |
