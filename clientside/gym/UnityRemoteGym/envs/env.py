@@ -24,11 +24,26 @@ class AleWrapper:
 class BasicAgent:
     def reset(self, env):
         envinfo = env.remoteenv.step('restart')
-        return envinfo['state']
+        if 'state' in envinfo:
+            return envinfo['state']
+        else:
+            return None
 
     def act(self, env, action, info=None):
         envinfo = env.one_step(action)
-        return envinfo['state'], envinfo['reward'], envinfo['done'], envinfo
+        state = None
+        reward = 0
+        if 'state' in envinfo:
+            state = envinfo['state']
+
+        if 'reward' in envinfo:
+            reward = envinfo['reward']
+
+        done = True
+        if 'done' in envinfo:
+            done = envinfo['done']
+
+        return state, reward, done, {}
 
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}

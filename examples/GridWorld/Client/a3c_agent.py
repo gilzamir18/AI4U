@@ -74,11 +74,11 @@ def get_frame_from_fields(fields):
 
 
 class Agent(BasicAgent):
-
-
     def reset(self, env):
         env_info = env.remoteenv.step("restart")
-
+        frame = get_frame_from_fields(env_info)
+        frame = frame.reshape(1, 10, 10)
+        frame = np.moveaxis(frame, 0, -1)
         proprioceptions = np.zeros(ARRAY_SIZE)
         
         proprioceptions[0] = env_info['lifes']/1000
@@ -87,7 +87,7 @@ class Agent(BasicAgent):
  
         return (frame, proprioception)
 
-    def act(self, env, action=None, info=None):
+    def act(self, env, action, info=None):
         env_info = env.one_step(action)
         frame = get_frame_from_fields(env_info)
         frame = frame.reshape(1, 10, 10)
@@ -112,7 +112,7 @@ def make_env_def():
         environment_definitions['action_shape'] = (ACTION_SIZE,)
         environment_definitions['actions'] = [('move',0), ('move', 1), ('move', 2), ('move', 3), ('NOOP', -1)]
         environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left',  'NOOP']
-        environment_definitions['Agent'] = Agent
+        environment_definitions['agent'] = Agent
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
 

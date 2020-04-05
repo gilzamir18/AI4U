@@ -89,17 +89,11 @@ class Agent:
         self.suc = 0
         self.total = 0
 
-    def make_state(env, env_info):
+    def make_state(self, env, env_info):
         frame = get_frame_from_fields(env_info)
 
         frame = frame.reshape(1, 10, 10)
         frame = np.moveaxis(frame, 0, -1)
-        
-        done = env_info['done']
-        reward = env_info['reward'];
-
-
-        reward = np.clip(reward, -1, +1)
 
         proprioceptions = np.zeros(ARRAY_SIZE)
 
@@ -107,7 +101,7 @@ class Agent:
         proprioceptions[1] = MIN_ENERGY[self.goal_checker.g]/ENERGY_CAP
         proprioceptions[2] = MAX_ENERGY[self.goal_checker.g]/ENERGY_CAP
 
-        return (frame, proprioception)
+        return (frame, proprioceptions)
 
 
     def reset(self, env):
@@ -117,12 +111,11 @@ class Agent:
         self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
         self.total = 0
         self.suc = 0
-        return Agent.make_state(env, env_info)
+        return self.make_state(env, env_info)
 
     def act(self, env, action=None, info=None):
         env_info = env.one_step(action)
 
-        frame = get_frame_from_fields(env_info)
 
         if action >= 0:
             self.energy = ENERGY_DECAY * self.energy;
@@ -132,22 +125,8 @@ class Agent:
         if self.energy > ENERGY_CAP:
             self.energy = ENERGY_CAP
 
+        frame, proprioceptions = self.make_state(env, env_info)
 
-        frame = frame.reshape(1, 10, 10)
-        frame = np.moveaxis(frame, 0, -1)
-        
-        done = env_info['done']
-        reward = env_info['reward'];
-
-
-        reward = np.clip(reward, -1, +1)
-
-        proprioceptions = np.zeros(ARRAY_SIZE)
-
-        proprioceptions[0] = self.energy/ENERGY_CAP
-        proprioceptions[1] = MIN_ENERGY[self.goal_checker.g]/ENERGY_CAP
-        proprioceptions[2] = MAX_ENERGY[self.goal_checker.g]/ENERGY_CAP
-       
         prop = proprioceptions[:]
 
         if prop[0] >= prop[1] and prop[0] <= prop[2]:
@@ -155,13 +134,19 @@ class Agent:
 
         self.total += 1
 
+        done = env_info['done']
+        reward = env_info['reward'];
+
+
+        reward = np.clip(reward, -1, +1)
+
         reward, goal = self.goal_checker(self.goal, prop[0], prop[1], prop[2], reward)
         #proprioceptions[3] = goal
 
         proprioception = np.array(proprioceptions, dtype=np.float32)
         
         state = (frame, proprioception)
-        return (state, reward, done, fields)
+        return (state, reward, done, env_info)
 
 
 class goal_checker:

@@ -126,7 +126,7 @@ The agent implementation should follow the directives given in [site](unityremot
 	        return (state, reward, done, fields)
 
 
-# Run A3C algoritm
+# Running the A3C Algorithm
 
 Assuming you have already set up your simulation environment and agent, the next step is to start agent training. To do this, you need to call the run method of the module *unityremote.ml.a3c.train*, as shown in the following example.
 

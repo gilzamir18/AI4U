@@ -90,20 +90,8 @@ class Agent:
         self.suc = 0
         self.total = 0
 
-    def reset(self, env):
-        #print("Second goal success rate ", self.suc/self.total)
-        env_info = env.remoteenv.step("restart")
-
-
-        self.goal_checker.reset()
-        self.goal  = np.random.choice([0,1])
-        #self.goal = 1
-        self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
-        self.total = 0
-        self.suc = 0
-
+    def make_state(self, env_info):
         frame = get_frame_from_fields(env_info)
-
 
         frame = frame.reshape(1, 10, 10)
         frame = np.moveaxis(frame, 0, -1)
@@ -117,9 +105,23 @@ class Agent:
         proprioceptions[2] = MAX_ENERGY[self.goal_checker.g]/ENERGY_CAP
         proprioceptions[3] = self.goal
 
-        return (frame, proprioception)
+        return (frame, proprioceptions)
 
-    def act(self, fields, env, action=None, info=None):
+    def reset(self, env):
+        #print("Second goal success rate ", self.suc/self.total)
+        env_info = env.remoteenv.step("restart")
+
+
+        self.goal_checker.reset()
+        self.goal  = np.random.choice([0,1])
+        #self.goal = 1
+        self.energy = MIN_ENERGY[self.goal_checker.g] + (MAX_ENERGY[self.goal_checker.g]-MIN_ENERGY[self.goal_checker.g])/2.0
+        self.total = 0
+        self.suc = 0
+
+        return self.make_state(env_info)
+
+    def act(self, env, action=None, info=None):
         env_info = env.one_step(action)
 
         frame = get_frame_from_fields(env_info)
@@ -134,9 +136,6 @@ class Agent:
         if self.energy > ENERGY_CAP:
             self.energy = ENERGY_CAP
 
-
-        frame = frame.reshape(1, 10, 10)
-        frame = np.moveaxis(frame, 0, -1)
         
         done = env_info['done']
         reward = env_info['reward'];
@@ -144,12 +143,8 @@ class Agent:
 
         reward = np.clip(reward, -1, +1)
 
-        proprioceptions = np.zeros(ARRAY_SIZE)
 
-        proprioceptions[0] = self.energy/ENERGY_CAP
-        proprioceptions[1] = MIN_ENERGY[self.goal_checker.g]/ENERGY_CAP
-        proprioceptions[2] = MAX_ENERGY[self.goal_checker.g]/ENERGY_CAP
-        proprioceptions[3] = self.goal
+        frame, proprioceptions = self.make_state(env_info)
 
         prop = proprioceptions[:]
 
@@ -165,7 +160,7 @@ class Agent:
 
         
         state = (frame, proprioception)
-        return (state, reward, done, fields)
+        return (state, reward, done, env_info)
 
 
 class goal_checker:

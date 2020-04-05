@@ -60,11 +60,26 @@ If you don't specify an *agent* field, UnityRemoteGym assumes the following agen
 	class BasicAgent:
 	    def reset(self, env):
 	        envinfo = env.remoteenv.step('restart')
-	        return envinfo['state']
+	        if 'state' in envinfo:
+	            return envinfo['state']
+	        else:
+	            return None
 
 	    def act(self, env, action, info=None):
 	        envinfo = env.one_step(action)
-	        return envinfo['state'], envinfo['reward'], envinfo['done'], envinfo
+	        state = None
+	        reward = 0
+	        if 'state' in envinfo:
+	            state = envinfo['state']
+
+	        if 'reward' in envinfo:
+	            reward = envinfo['reward']
+
+	        done = True
+	        if 'done' in envinfo:
+	            done = envinfo['done']
+
+	        return state, reward, done, {}
 
 The method *reset* receives the environment reference *env* and returns the initial state of a new episode. Environment object has methods and objects that allow communicating the client-side to the server-side component of your application. Remember that the client-side is the component of your application written in Python, while the server-side is a component of your application based on Unity. For example, the *env.remoteenv* object implements a protocol to communicate with the server-side application. The method *step* of *env.remoteenv* sends a message directly to the server. The method *one_step* of *env* sends an action according to the specified list of actions in *environment_definitions*.  Awhile the method *step* receives a string and a list of arguments, the method  *one_step* receives an integer indicating an action from the list of actions specified in *environment_definitions*.
 
@@ -94,6 +109,8 @@ Then, you need to override the methods *act* and *reset*. For example
 			if not env_info['done']: #if episode not ends
 				initial_state = final_state[:] #The initial state of the next traisition is the final state of the previous trasition
 		  	return final_state, env_info['reward'], env_info['done'], env_info #It's necessary to follow the OpenAI Gym protocol.
+
+
 
 
 
