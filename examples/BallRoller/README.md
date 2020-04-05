@@ -4,6 +4,6 @@ BallRoller is a simple UnityRemote demonstration end to end with reinforcement l
 
 The best score in this environment is one (1). Using the vanilla A3C algorithm with four workers, we reach the best score of about twelve minutes. Figure 1 shows training evolution.
 
-| ![BallRoller Agent](images/ballrollertraining.png) |
+| ![BallRoller Agent](/doc/images/ballrollertraining.png) |
 | :--: |
 | Figure 1. *Training evolution.* |
