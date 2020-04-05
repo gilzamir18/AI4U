@@ -1,4 +1,4 @@
-#Environment BallRoller
+# Environment BallRoller
 
 BallRoller is a simple UnityRemote demonstration end to end with reinforcement learning. The agent's goal is to push the red ball forward to the green box.  Agent can run any actions of these actions: turn left, turn right, forward, and backward. The agent receives a pain equals to -1 when the ball falls from the plane and gains a reward equals to +1 when the ball touches the box. 
 
