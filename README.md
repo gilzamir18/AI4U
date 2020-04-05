@@ -4,7 +4,7 @@ UnityRemotePlugin is a way to connect your Unity application to Python code. The
 # How to use the UnityRemotePlugin?
 UnityRemotePlugin has two components. The first component is the *server-side* code written in C#. The second component is the *client-side* code written in Python.
 
-We recommend that you have some version of Unity 2019 and start by looking at the examples available in the directories *examples*, *unityplugin/UnityRemoteExample*, and *clientside/examples*. Start by example *examples/CubeAgent* for the first look in UnityRemotePlugin. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
+We recommend that you have some version of Unity 2019 and start by looking at the examples available in the directories *examples*, and *unityplugin/UnityRemoteExample*. Start by example *examples/CubeAgent* for the first look in UnityRemotePlugin. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
 
 Table 1: Documentation.
 
