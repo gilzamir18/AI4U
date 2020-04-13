@@ -83,6 +83,8 @@ public class petanim : Agent
     private float[] personlity_weights = new float[NB_PERSONALITY_VARS];
     //END::::PERSONALITY VARIABLES  
 
+    private bool energyGainLocker = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -103,6 +105,8 @@ public class petanim : Agent
         onGround = false;
         touched_id = -1;
         signal = 0;
+        energyGainLocker = false;
+        energy_delta_time = 0;
     }
 
     public int Energy {
@@ -161,7 +165,10 @@ public class petanim : Agent
                     break;
                 case 10:
                     //Debug.Log("signal");
-                    signal = 1-signal;
+                    signal = 0;
+                    break;
+                case 11:
+                    signal = 1;
                     break;
             }
         } else if (actionName == "emotion"){
@@ -174,7 +181,7 @@ public class petanim : Agent
             neutral = args[5];
             anger = args[6];
         } else if (actionName == "get_status"){
-            Debug.Log("checking status...");
+            //Debug.Log("checking status...");
         } else if (actionName == "restart") {
             if (IsDone()) {
                 Manager.instance.Respawn(gameObject);
@@ -185,11 +192,16 @@ public class petanim : Agent
         }
     }
 
+    public int[,] GetViewMatrix() {
+        return this.viewMatrix;
+    }
+
     private byte[] updateCurrentRayCastingFrame()
     {
         UpdateRaysMatrix(eye.transform.position, eye.transform.forward, eye.transform.up, eye.transform.right);
         UpdateViewMatrix();
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < verticalResolution; i++)
         {
             for (int j = 0; j < horizontalResolution; j++)
@@ -250,17 +262,17 @@ public class petanim : Agent
                         string objtag = hitinfo.collider.gameObject.tag;
                         if (objtag == "eating")
                         {
-                            viewMatrix[i, j] = 2;
+                            viewMatrix[i, j] = 4;
                         } else if (objname.StartsWith("block"))
                         {
                             viewMatrix[i, j] = 3;
                         } else if (objtag == "wall"){
-                            viewMatrix[i, j] = 4;
+                            viewMatrix[i, j] = 2;
                         } else if (objtag == "agent") {
                             int code = int.Parse(objname.Split('_')[1]);
                             viewMatrix[i, j] = code + 10;
                         } else {
-                            viewMatrix[i, j] = -1;
+                            viewMatrix[i, j] = 0;
                         }
                     }
                 }
@@ -280,7 +292,15 @@ public class petanim : Agent
             }
             return;
         }
+        surprise = signal;
+        happiness = signal;
+        if (surprise<0){
+            surprise = 0;
+        }
 
+        if (happiness<0){
+            happiness = 0;
+        }
         //BEGIN::UPDATE EMOTIONAL STATE
         m_Animator.SetFloat("happiness", happiness);
         m_Animator.SetFloat("surprise", surprise);
@@ -321,6 +341,7 @@ public class petanim : Agent
         v = 0; h = 0; jump = 0; push = 0; //signal = 0;
     }
 
+
     /// <summary>
     /// OnCollisionEnter is called when this collider/rigidbody has begun
     /// touching another rigidbody/collider.
@@ -336,7 +357,7 @@ public class petanim : Agent
         string objname = other.gameObject.name;
         if (objtag == "eating")
         {
-            touched_id = 2;
+            touched_id = 4;
             //Debug.Log("Signal " + signal);
             if (signal > 0){
                 energy += eggValue;
@@ -348,15 +369,23 @@ public class petanim : Agent
             int code = int.Parse(other.gameObject.name.Split('_')[1]);
             petanim anim = other.gameObject.GetComponent<petanim>();
             touched_id = code + 10;
-            if (signal > 0) {
-                this.energy += 10;
-                anim.energy += 10;
+            if (!energyGainLocker){
+                energyGainLocker = true;
+                if (signal > 0 && anim.signal > 0) {
+                    this.energy += 10;
+                } else if (signal > 0 && anim.signal < 0) {
+                    this.energy -= 10;
+                } else if (signal < 0 && anim.signal > 0) {
+                    this.energy += 10;
+                } else if (signal < 0 && anim.signal < 0) {
+                    this.energy -= 5;
+                }
             }
         } else if (objname.StartsWith("block"))
         {
             touched_id = 3;
         } else if (objtag == "wall"){
-            touched_id = 4;
+            touched_id = 2;
         } else if (objname == "Terrain") {
             touched_id = 1;
         } else {
@@ -384,6 +413,7 @@ public class petanim : Agent
     /// <param name="other">The Collision data associated with this collision.</param>
     void OnCollisionExit(Collision other)
     {
+        energyGainLocker = false;
         if (IsDone()) {
             return;
         }

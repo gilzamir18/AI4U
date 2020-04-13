@@ -6,35 +6,12 @@ import numpy as np
 import argparse
 from gym.core import Wrapper
 from unityremote.utils import image_decode
-from unityremote.ml.a3c.preprocessing import RandomStartWrapper, EndEpisodeOnLifeLossWrapper, ClipRewardsWrapper
 from collections import deque
 
 
 IMAGE_SHAPE = (20, 20, 4)
 ARRAY_SIZE = 3
-ACTION_SIZE = 7
-
-class FrameSkipWrapper(Wrapper):
-    def __init__(self, env, k=4):
-        Wrapper.__init__(self, env)
-        self.k = k
-
-    """
-    Repeat the chosen action for k frames, only returning the last frame.
-    """
-    def reset(self):
-        return self.env.reset()
-
-    def step(self, action):
-        reward_sum = 0
-        for _ in range(self.k):
-            obs, reward, done, info = self.env.step(action)
-            reward_sum += reward
-            if done:
-                break
-        if not done:
-            obs, _, done, info = self.env.step(-1)
-        return obs, reward_sum, done, info
+ACTION_SIZE = 8
 
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
@@ -83,16 +60,6 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     return (observations, proprioceptions), action_logits, action_probs, values, layers
 
 
-def agent_preprocessing(env, max_n_noops, clip_rewards=True):
-    env = RandomStartWrapper(env, max_n_noops)
-    #env = FrameSkipWrapper(env)
-    env = FrameSkipWrapper(env, 8)
-    env = EndEpisodeOnLifeLossWrapper(env)
-    if clip_rewards:
-        env = ClipRewardsWrapper(env)
-    return env
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run",
@@ -108,66 +75,99 @@ def get_frame_from_fields(fields):
 
 class Agent:
     def __init__(self):
-        self.energy = None
+        self.energy = 0
         self.buf = deque(maxlen=4)
         mem = np.zeros(shape=(20, 20))
         self.buf.append(mem.copy())
         self.buf.append(mem.copy())
         self.buf.append(mem.copy())
         self.buf.append(mem.copy())
+        self.entropy_hist = deque(maxlen=30)
 
     def __make_state__(env_info, imageseq):
         proprioceptions = np.zeros(ARRAY_SIZE)
-        frameseq = np.array(imageseq, dtype=np.float32)
-        frameseq = np.moveaxis(frameseq, 0, -1)
         frameseq = np.array(imageseq, dtype=np.float32)
         frameseq = np.moveaxis(frameseq, 0, -1)
         proprioceptions[0] = env_info['touched']
         proprioceptions[1] = env_info['energy']/300.0
         proprioceptions[2] = env_info['signal']
         proprioception = np.array(proprioceptions, dtype=np.float32)
-        state = (frameseq, proprioception)
+        return (frameseq, proprioception)
+
+    def reset(self, env):
+        env_info = env.remoteenv.step("restart")
+        frame = get_frame_from_fields(env_info)
+        self.buf.append(frame)
+        self.buf.append(frame)
+        self.buf.append(frame)
+        self.buf.append(frame)
+        self.energy = env_info['energy']
+        self.avg_entropy = 0.0;
+        return Agent.__make_state__(env_info, self.buf)
+
+
+
+    def calc_reward(self, env_info):
+        reward = 0
+        delta = env_info['energy'] - self.energy
+        if self.energy > 200:
+            if delta > 0:
+                reward = -delta
+        else:
+            reward = delta
+            if reward < 0:
+                reward = 0;
+        return reward
 
     def act(self, env, action=0, info=None):
-        env_info = env.one_step(action)
+        reward_sum = 0
+        touched = -1
+        for _ in range(8):
+            env.one_step(action)
+            env_info = env.remoteenv.step("get_status")
+            reward = self.calc_reward(env_info)
+            if reward != 0 or env_info['done']:
+                #print(reward)
+                #print(env_info['touched'])
+                break
+
+        reward_sum += reward
+
+        self.energy = env_info['energy']
+
+        if reward_sum == 0:
+            reward_sum = np.random.choice([0.0, 0.01])
+
+        '''action_probs, value_estimate = info
+            
+        if reward_sum == 0 and len(self.entropy_hist)>0:
+            entropy_list = np.array(self.entropy_hist)
+            em = np.mean(entropy_list)
+            st = np.std(entropy_list)
+            e = -np.sum(action_probs * np.log2(action_probs))
+            if (e-em > st):
+                reward_sum = 0.01
+        Shannon2 = -np.sum(action_probs*np.log2(action_probs))
+        self.entropy_hist.append(Shannon2)
+        '''
 
         frame = get_frame_from_fields(env_info)
-
-        if self.energy is None:
-            self.energy = env_info['energy']
-
-        done = env_info['done']
-        delta = env_info['energy'] - self.energy
-        reward = 0
-        if not done:
-            if self.energy > 200:
-                if delta > 0:
-                    reward = -delta
-            else:
-                reward = delta
-                if reward < 0:
-                    reward = 0;
-            info = fields
-            self.energy = env_info['energy']
-        else:
-            self.energy = None
-
         self.buf.append(frame)
+
         state = Agent.__make_state__(env_info, self.buf)
 
-        return (state, reward, done, fields)
+        return (state, reward_sum, env_info['done'], env_info)
 
 def make_env_def():
         environment_definitions['state_shape'] = IMAGE_SHAPE
         environment_definitions['action_shape'] = (ACTION_SIZE,)
-        environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1), ('act', 10)]
-        environment_definitions['action_meaning'] = ['forward', 'right', 'backward', 'left', 'jump', 'NOOP', 'PickUp']
+        environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1), ('act', 10), ('act', 11)]
         environment_definitions['agent'] = Agent
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
 
 def train():
-        args = ['--n_workers=4', '--preprocessing=user_defined', 'UnityRemote-v0']
+        args = ['--n_workers=8', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 

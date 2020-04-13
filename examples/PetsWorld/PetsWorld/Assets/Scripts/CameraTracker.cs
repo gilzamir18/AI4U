@@ -13,6 +13,10 @@ public class CameraTracker : MonoBehaviour
 
 	public Dropdown agentList;
     
+	private RawImage agentViewAsImage;
+
+	public GameObject agentView;
+
 	private float displayDelta = 0;
 
     public GameObject target;
@@ -25,9 +29,15 @@ public class CameraTracker : MonoBehaviour
 
 	public float speed = 30;
 
+	private Texture2D agentViewTexture = null;
+
     // Start is called before the first frame update
     void Start()
     {
+
+		if (agentView != null) {
+			agentViewAsImage = agentView.GetComponent<RawImage>();
+		}
         displayDelta = 0;
 		refreshDisplayFreq = 1;
 		manager = Manager.instance.GetComponent<Manager>();
@@ -38,6 +48,7 @@ public class CameraTracker : MonoBehaviour
 		);
 		UpdateTargetValue(agentList);
 		UpdateWASDIndicator();
+		UpdateAgentView();
 	}
 
 
@@ -55,6 +66,40 @@ public class CameraTracker : MonoBehaviour
 		
 	}
 
+	private Color eatingColor = new Color(0.96f, 0.96f, 0.86f, 1.0f);
+	private Color rockColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+	private Color skyColor = new Color(0.6f, 0.6f, 1.0f, 1.0f);
+	private Color wallColor = Color.yellow;
+	private void UpdateAgentView(){
+		if (agentView != null) {
+			if (target != null) {
+				if (this.agentViewTexture == null) {
+					this.agentViewTexture = new Texture2D(20, 20);
+				}
+				int[,] img = target.GetComponent<petanim>().GetViewMatrix();
+				for (int i = 0; i < 20; i++) {
+					for (int j = 0; j < 20; j++) {
+						if (img[i, j] == 0){
+							agentViewTexture.SetPixel(i, j, skyColor);
+						} else if (img[i, j] == 1) {
+							agentViewTexture.SetPixel(i, j, Color.green);
+						} else if (img[i, j] == 2) {
+							agentViewTexture.SetPixel(i, j, wallColor);
+						} else if (img[i, j] == 3) {
+							agentViewTexture.SetPixel(i, j, rockColor);
+						} else if (img[i, j] == 4) {
+							agentViewTexture.SetPixel(i, j, eatingColor);
+						} else {
+							agentViewTexture.SetPixel(i, j, Color.magenta);
+						}
+					}
+				}
+				agentViewAsImage.texture = agentViewTexture;
+				agentViewTexture.Apply();
+			}
+		}
+	}
+
     // Update is called once per frame
     void Update()
     {
@@ -63,10 +108,6 @@ public class CameraTracker : MonoBehaviour
 		Vector3 p = gameObject.transform.position;
 		p.y = height;
 		gameObject.transform.position = p;
-		if (Input.GetKey(KeyCode.F)){
-			WASD = !WASD;
-			UpdateWASDIndicator();
-		}
 
 		if (WASD) {
 			// Get the horizontal and vertical axis.
@@ -87,19 +128,19 @@ public class CameraTracker : MonoBehaviour
 		} else if (target != null) {
 			gameObject.transform.position = new Vector3(target.transform.position.x,
 						gameObject.transform.position.y, target.transform.position.z + distance);
-		} 
-
-		if (target != null) {
-			gameObject.transform.LookAt(target.transform);
-			float energy  = target.GetComponent<petanim>().Energy;
-			displayDelta += Time.deltaTime;
-			if (displayDelta > refreshDisplayFreq ) {
-				if (manager.SumOfEnergy <= 0) {
-					displayEnergy.text = "GameOver!";
-				} else if (displayEnergy != null) {
-					displayEnergy.text = energy + "";
+			if (target != null) {
+				UpdateAgentView();
+				gameObject.transform.LookAt(target.transform);
+				float energy  = target.GetComponent<petanim>().Energy;
+				displayDelta += Time.deltaTime;
+				if (displayDelta > refreshDisplayFreq ) {
+					if (manager.SumOfEnergy <= 0) {
+						displayEnergy.text = "GameOver!";
+					} else if (displayEnergy != null) {
+						displayEnergy.text = energy + "";
+					}
+					displayDelta = 0;
 				}
-				displayDelta = 0;
 			}
 		}
     }
@@ -107,13 +148,17 @@ public class CameraTracker : MonoBehaviour
 
 	private void UpdateTargetValue(Dropdown dropdown){
 		int idx = dropdown.value - 1;
-		Debug.Log("Selected Agent " + idx);
+		//Debug.Log("Selected Agent " + idx);
 		if (idx >= 0) {
 			target = manager.Agents[idx];
+			WASD = false;
 		} else {
+			WASD = true;
 			target = null;
 			displayEnergy.text = "";
+			transform.rotation = Quaternion.identity;
 		}
+		UpdateWASDIndicator();
 	}
 
 	public void OnValueChanged(Dropdown dropdown){

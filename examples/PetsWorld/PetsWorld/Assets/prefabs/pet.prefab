@@ -410,6 +410,7 @@ MonoBehaviour:
   buffer_size: 8192
   remoteIP: 127.0.0.1
   remotePort: 8080
+  alwaysUpdate: 0
 --- !u!1 &3959695059571358197
 GameObject:
   m_ObjectHideFlags: 0
@@ -730,8 +731,8 @@ MonoBehaviour:
   ID: 0
   maxEnergy: 300
   initialEnergy: 30
-  speed: 25
-  angularSpeed: 3
+  speed: 50
+  angularSpeed: 4
   jumpPower: 20000
   verticalSpeed: 50
   visionMaxDistance: 500
