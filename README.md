@@ -53,7 +53,7 @@ Output logs:
 
 If no error message was displayed, then UnityRemotePlugin was installed correctly.
 
-# OS Support and Software Compatibility
+# Requirements
 
 - Operation System: Ubuntu >= 19.10.
 - Python >= 3.7.5
