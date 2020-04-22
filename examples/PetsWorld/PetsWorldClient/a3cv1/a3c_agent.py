@@ -2,6 +2,7 @@ from unityremote.ml.a3c.train import run as run_train
 from unityremote.ml.a3c.run_checkpoint import run as run_test
 from unityremote.utils import environment_definitions
 import UnityRemoteGym
+from UnityRemoteGym import BasicAgent
 import numpy as np
 import argparse
 from gym.core import Wrapper
@@ -65,6 +66,7 @@ def parse_args():
     parser.add_argument("--run",
                         choices=['train', 'test'],
                         default='train')
+    parser.add_argument("--id", default='0')
     parser.add_argument('--path', default='.')
     parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
     return parser.parse_args()
@@ -73,8 +75,9 @@ def get_frame_from_fields(fields):
     imgdata = image_decode(fields['frame'], 20, 20)
     return imgdata
 
-class Agent:
+class Agent(BasicAgent):
     def __init__(self):
+        super().__init__()
         self.energy = 0
         self.buf = deque(maxlen=4)
         mem = np.zeros(shape=(20, 20))
@@ -138,18 +141,17 @@ class Agent:
         if reward_sum == 0:
             reward_sum = np.random.choice([0.0, 0.01])
 
-        '''action_probs, value_estimate = info
+        action_probs, value_estimate = info
             
         if reward_sum == 0 and len(self.entropy_hist)>0:
             entropy_list = np.array(self.entropy_hist)
             em = np.mean(entropy_list)
             st = np.std(entropy_list)
-            e = -np.sum(action_probs * np.log2(action_probs))
+            e = -np.sum(action_probs * np.log2(action_probs)/np.log2(len(action_probs)) )
             if (e-em > st):
                 reward_sum = 0.01
-        Shannon2 = -np.sum(action_probs*np.log2(action_probs))
+        Shannon2 = -np.sum(action_probs * np.log2(action_probs)/np.log2(len(action_probs)) )
         self.entropy_hist.append(Shannon2)
-        '''
 
         frame = get_frame_from_fields(env_info)
         self.buf.append(frame)
@@ -158,22 +160,24 @@ class Agent:
 
         return (state, reward_sum, env_info['done'], env_info)
 
-def make_env_def():
+def make_env_def(id=0):
         environment_definitions['state_shape'] = IMAGE_SHAPE
         environment_definitions['action_shape'] = (ACTION_SIZE,)
         environment_definitions['actions'] = [('act',0), ('act', 1), ('act', 3), ('act', 4), ('act', 8), ('act', -1), ('act', 10), ('act', 11)]
         environment_definitions['agent'] = Agent
         environment_definitions['extra_inputs_shape'] = (ARRAY_SIZE,)
         environment_definitions['make_inference_network'] = make_inference_network
+        environment_definitions['input_port'] = 8080 + id
+        environment_definitions['output_port'] = 7070 + id
 
 def train():
         args = ['--n_workers=8', '--steps_per_update=30', 'UnityRemote-v0']
         make_env_def()
         run_train(environment_definitions, args)
 
-def test(path):
-        args = ['UnityRemote-v0', path, '--preprocessing=user_defined']
-        make_env_def()
+def test(path, id=0):
+        args = ['UnityRemote-v0', path]
+        make_env_def(id)
         run_test(environment_definitions, args)
 
 
@@ -182,4 +186,4 @@ if __name__ == '__main__':
    if args.run == "train":
         train()
    elif args.run == "test":
-        test(args.path)
+        test(args.path, int(args.id))

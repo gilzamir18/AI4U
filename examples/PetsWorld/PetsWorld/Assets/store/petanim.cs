@@ -85,9 +85,13 @@ public class petanim : Agent
 
     private bool energyGainLocker = false;
 
+    private GameObject body;
+
     // Start is called before the first frame update
     void Start()
     {
+
+        body = transform.GetChild(2).gameObject;
         manager = Manager.instance;
         m_Animator = GetComponent<Animator>();
         mRigidBody = GetComponent<Rigidbody>();
@@ -107,6 +111,13 @@ public class petanim : Agent
         signal = 0;
         energyGainLocker = false;
         energy_delta_time = 0;
+    }
+
+
+    public float Signal {
+        get {
+            return this.signal;
+        }
     }
 
     public int Energy {
@@ -254,12 +265,14 @@ public class petanim : Agent
                 {
                     //Debug.DrawRay(raysMatrix[i,j].origin, raysMatrix[i,j].direction * visionMaxDistance, Color.yellow);
    
-                    string objname = hitinfo.collider.gameObject.name;
-                    
+                    GameObject gobj = hitinfo.collider.gameObject;
+                    petanim other = gobj.GetComponent<petanim>();         
+        
+                    string objname = gobj.name;
                     if (objname == "Terrain") {
                         viewMatrix[i, j] = 1;
                     } else {
-                        string objtag = hitinfo.collider.gameObject.tag;
+                        string objtag = gobj.tag;
                         if (objtag == "eating")
                         {
                             viewMatrix[i, j] = 4;
@@ -270,7 +283,8 @@ public class petanim : Agent
                             viewMatrix[i, j] = 2;
                         } else if (objtag == "agent") {
                             int code = int.Parse(objname.Split('_')[1]);
-                            viewMatrix[i, j] = code + 10;
+                            viewMatrix[i, j] = code + 10 + (int)other.Signal * 10;
+                            //viewMatrix[i, j] = code + 10;
                         } else {
                             viewMatrix[i, j] = 0;
                         }
@@ -284,6 +298,7 @@ public class petanim : Agent
         }
     }
 
+    private Color petOriginalColor = new Color(1.0f, 0.0f, 0.7451f, 1.0f);
     override public void UpdatePhysics()
     {
         if (IsDone()){
@@ -292,15 +307,14 @@ public class petanim : Agent
             }
             return;
         }
-        surprise = signal;
-        happiness = signal;
-        if (surprise<0){
-            surprise = 0;
-        }
 
-        if (happiness<0){
-            happiness = 0;
-        }
+        anger = signal;
+        happiness = signal;
+        if (signal > 0)
+            body.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
+        else
+            body.GetComponent<Renderer>().material.SetColor("_Color", petOriginalColor);
+        
         //BEGIN::UPDATE EMOTIONAL STATE
         m_Animator.SetFloat("happiness", happiness);
         m_Animator.SetFloat("surprise", surprise);
@@ -373,11 +387,11 @@ public class petanim : Agent
                 energyGainLocker = true;
                 if (signal > 0 && anim.signal > 0) {
                     this.energy += 10;
-                } else if (signal > 0 && anim.signal < 0) {
+                } else if (signal > 0 && anim.signal == 0) {
                     this.energy -= 10;
-                } else if (signal < 0 && anim.signal > 0) {
+                } else if (signal == 0 && anim.signal > 0) {
                     this.energy += 10;
-                } else if (signal < 0 && anim.signal < 0) {
+                } else if (signal == 0 && anim.signal == 0) {
                     this.energy -= 5;
                 }
             }

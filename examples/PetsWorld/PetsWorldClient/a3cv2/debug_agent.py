@@ -3,13 +3,12 @@ import numpy as np
 from unityremote.utils import image_decode
 
 def agent():
-    env = RemoteEnv(IN_PORT=8080, OUT_PORT=7070)
+    env = RemoteEnv(IN_PORT=8085, OUT_PORT=7075)
     env.open(0)
     for i in range(10000000):
         state = env.step("restart")
         prev_energy = state['energy']
         done = state['done']
-        env.step('act', 11)
         while not done:
             action = int(input('action'))
             #action = np.random.choice([0, 1])

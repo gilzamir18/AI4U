@@ -70,6 +70,7 @@ public class CameraTracker : MonoBehaviour
 	private Color rockColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
 	private Color skyColor = new Color(0.6f, 0.6f, 1.0f, 1.0f);
 	private Color wallColor = Color.yellow;
+	private Color bocaColor = Color.red;
 	private void UpdateAgentView(){
 		if (agentView != null) {
 			if (target != null) {
@@ -89,8 +90,10 @@ public class CameraTracker : MonoBehaviour
 							agentViewTexture.SetPixel(i, j, rockColor);
 						} else if (img[i, j] == 4) {
 							agentViewTexture.SetPixel(i, j, eatingColor);
-						} else {
+						} else if (img[i,j] < 20) {
 							agentViewTexture.SetPixel(i, j, Color.magenta);
+						} else {
+							agentViewTexture.SetPixel(i, j, Color.red);
 						}
 					}
 				}

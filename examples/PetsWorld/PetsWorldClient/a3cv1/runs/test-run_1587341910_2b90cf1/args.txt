@@ -1,0 +1,3 @@
+a3c_agent.py
+
+Namespace(ckpt_interval_seconds=300, debug=False, detailed_logs=False, entropy_bonus=0.01, env_id='UnityRemote-v0', initial_lr=0.0001, load_ckpt=None, log_dir=None, lr_decay_to_zero_by_n_steps=None, lr_schedule='constant', manager_wake_interval_seconds=60, max_grad_norm=5.0, max_n_noops=30, n_steps=10000000.0, n_workers=8, preprocessing='generic', run_name='test-run_1587341910', seed=0, steps_per_update=30, value_loss_coef=0.5)

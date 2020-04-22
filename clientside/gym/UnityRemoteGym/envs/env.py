@@ -29,6 +29,9 @@ class BasicAgent:
         else:
             return None
 
+    def render(self):
+        pass
+
     def act(self, env, action, info=None):
         envinfo = env.one_step(action)
         state = None
@@ -80,6 +83,7 @@ class Environment(gym.Env):
         self.remoteenv.open(0)
         self.nlives = 1
         self.configureFlag = True
+        self.state = None
 
     def get_action_meanings(self):
         self.__check_configuration_()
@@ -91,7 +95,7 @@ class Environment(gym.Env):
  
     def render(self, mode='human', close=False):
         self.__check_configuration_()
-        return self.state
+        self.agent.render()
        
     def close(self):
         self.__check_configuration_()

@@ -8,7 +8,8 @@ import time
 import gym
 import numpy as np
 import tensorflow as tf
-from .preprocessing import generic_preprocess
+from unityremote.ml.a3c import preprocessing
+from unityremote.ml.a3c.preprocessing import generic_preprocess
 from threading import Thread
 import threading
 
@@ -33,7 +34,7 @@ def parse_args(env_defs, kargs=None):
     parser.add_argument("ckpt_dir")
     parser.add_argument('--n_workers', type=int, default=1)
     parser.add_argument("--preprocessing",
-                        choices=['generic', 'from_image', 'external'],
+                        choices=['generic', 'user_defined'],
                         default='generic')
 
     if not kargs:
@@ -41,13 +42,11 @@ def parse_args(env_defs, kargs=None):
     else:
         args = parser.parse_args(args=kargs)
 
+
     if args.preprocessing == 'generic':
         preprocess_wrapper = preprocessing.generic_preprocess
-    elif args.preprocessing == 'from_image':
-        preprocess_wrapper = preprocessing.imageinput_preprocess
-    elif args.preprocessing == 'external':
+    elif args.preprocessing == 'user_defined':
         preprocess_wrapper = env_defs['preprocessing']
-
 
     return args, preprocess_wrapper
 
