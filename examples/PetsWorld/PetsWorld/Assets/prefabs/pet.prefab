@@ -764,7 +764,7 @@ MonoBehaviour:
   maxEnergy: 300
   initialEnergy: 30
   speed: 50
-  angularSpeed: 4
+  angularSpeed: 5
   jumpPower: 20000
   verticalSpeed: 50
   visionMaxDistance: 500

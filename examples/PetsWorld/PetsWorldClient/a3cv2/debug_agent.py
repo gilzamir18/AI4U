@@ -13,15 +13,12 @@ def agent():
             action = int(input('action'))
             #action = np.random.choice([0, 1])
             reward_sum = 0
-            touched = -1
+            touched = np.zeros(8)
             for i in range(8):
                 state = env.step("act", action)
                 state = env.step('get_status')
                 energy = state['energy']
-                if touched == -1:
-                    touched = state['touched']
-                elif not state['touched'] in [0, 1]:
-                    touched = state['touched']
+                touched[i] = state['touched']
                 if state['done']:
                     break
             done = state['done']

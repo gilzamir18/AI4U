@@ -107,17 +107,9 @@ public class petanim : Agent
         touched_id = 0;
         energy = initialEnergy;
         onGround = false;
-        touched_id = -1;
         signal = 0;
         energyGainLocker = false;
         energy_delta_time = 0;
-    }
-
-
-    public float Signal {
-        get {
-            return this.signal;
-        }
     }
 
     public int Energy {
@@ -265,14 +257,13 @@ public class petanim : Agent
                 {
                     //Debug.DrawRay(raysMatrix[i,j].origin, raysMatrix[i,j].direction * visionMaxDistance, Color.yellow);
    
-                    GameObject gobj = hitinfo.collider.gameObject;
-                    petanim other = gobj.GetComponent<petanim>();         
-        
-                    string objname = gobj.name;
+                    string objname = hitinfo.collider.gameObject.name;
+                    petanim other = hitinfo.collider.gameObject.GetComponent<petanim>();
+                    
                     if (objname == "Terrain") {
                         viewMatrix[i, j] = 1;
                     } else {
-                        string objtag = gobj.tag;
+                        string objtag = hitinfo.collider.gameObject.tag;
                         if (objtag == "eating")
                         {
                             viewMatrix[i, j] = 4;
@@ -283,8 +274,7 @@ public class petanim : Agent
                             viewMatrix[i, j] = 2;
                         } else if (objtag == "agent") {
                             int code = int.Parse(objname.Split('_')[1]);
-                            viewMatrix[i, j] = code + 10 + (int)other.Signal * 10;
-                            //viewMatrix[i, j] = code + 10;
+                            viewMatrix[i, j] = code + 10 + (int)other.signal * 10;
                         } else {
                             viewMatrix[i, j] = 0;
                         }
@@ -382,7 +372,7 @@ public class petanim : Agent
         } else if (other.gameObject.tag == "agent") {
             int code = int.Parse(other.gameObject.name.Split('_')[1]);
             petanim anim = other.gameObject.GetComponent<petanim>();
-            touched_id = code + 10;
+            touched_id = code + 10 + (int)anim.signal * 10;
             if (!energyGainLocker){
                 energyGainLocker = true;
                 if (signal > 0 && anim.signal > 0) {
@@ -441,7 +431,7 @@ public class petanim : Agent
     override public void UpdateState()
     {
         //BEGIN::UPDATE AGENT VISION
-        UpdateRaysMatrix(eye.transform.position + 1.5f * gameObject.transform.forward, gameObject.transform.forward, gameObject.transform.up, gameObject.transform.right, 45);
+        UpdateRaysMatrix(eye.transform.position + 1.25f * gameObject.transform.forward, gameObject.transform.forward, gameObject.transform.up, gameObject.transform.right, 75);
         UpdateViewMatrix(visionMaxDistance);
         byte[] frame = updateCurrentRayCastingFrame();
         SetStateAsByteArray(0, "frame", frame);

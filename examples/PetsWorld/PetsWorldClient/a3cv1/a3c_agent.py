@@ -11,7 +11,8 @@ from collections import deque
 
 
 IMAGE_SHAPE = (20, 20, 4)
-ARRAY_SIZE = 3
+TOUCH_SIZE = 4
+ARRAY_SIZE = TOUCH_SIZE + 3
 ACTION_SIZE = 8
 
 
@@ -24,7 +25,7 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
     proprioceptions = tf.placeholder(tf.float32, (None, ARRAY_SIZE) )
 
-    normalized_obs = tf.keras.layers.Lambda(lambda x : x/20.0)(observations)
+    normalized_obs = tf.keras.layers.Lambda(lambda x : x/30.0)(observations)
 
     # Numerical arguments are filters, kernel_size, strides
     conv1 = tf.keras.layers.Conv2D(16, (1,1), (1,1), activation='relu', name='conv1')(normalized_obs)
@@ -87,13 +88,14 @@ class Agent(BasicAgent):
         self.buf.append(mem.copy())
         self.entropy_hist = deque(maxlen=30)
 
-    def __make_state__(env_info, imageseq):
+    def __make_state__(env_info, imageseq, touched):
         proprioceptions = np.zeros(ARRAY_SIZE)
         frameseq = np.array(imageseq, dtype=np.float32)
         frameseq = np.moveaxis(frameseq, 0, -1)
-        proprioceptions[0] = env_info['touched']
-        proprioceptions[1] = env_info['energy']/300.0
-        proprioceptions[2] = env_info['signal']
+        proprioceptions[0] = env_info['energy']/300.0
+        proprioceptions[1] = env_info['signal']
+        for i in range(TOUCH_SIZE):
+            proprioceptions[i+2] = touched[i]/30.0
         proprioception = np.array(proprioceptions, dtype=np.float32)
         return (frameseq, proprioception)
 
@@ -106,41 +108,38 @@ class Agent(BasicAgent):
         self.buf.append(frame)
         self.energy = env_info['energy']
         self.avg_entropy = 0.0;
-        return Agent.__make_state__(env_info, self.buf)
-
-
+        return Agent.__make_state__(env_info, self.buf, np.zeros(TOUCH_SIZE))
 
     def calc_reward(self, env_info):
         reward = 0
         delta = env_info['energy'] - self.energy
         if self.energy > 200:
-            if delta > 0:
+            if delta < 0 and delta > -5:
+                reward = 0
+            else:
                 reward = -delta
         else:
             reward = delta
-            if reward < 0:
+            if delta < 0 and delta > -5:
                 reward = 0;
         return reward
 
     def act(self, env, action=0, info=None):
         reward_sum = 0
-        touched = -1
-        for _ in range(8):
+        touched = np.zeros(TOUCH_SIZE)
+        for i in range(TOUCH_SIZE):
             env.one_step(action)
             env_info = env.remoteenv.step("get_status")
-            reward = self.calc_reward(env_info)
-            if reward != 0 or env_info['done']:
-                #print(reward)
-                #print(env_info['touched'])
+            reward_sum += self.calc_reward(env_info)
+            touched[i] = env_info['touched']
+            if env_info['done']:
                 break
-
-        reward_sum += reward
 
         self.energy = env_info['energy']
 
-        if reward_sum == 0:
+        '''if reward_sum == 0:
             reward_sum = np.random.choice([0.0, 0.01])
-
+        '''
         action_probs, value_estimate = info
             
         if reward_sum == 0 and len(self.entropy_hist)>0:
@@ -156,7 +155,7 @@ class Agent(BasicAgent):
         frame = get_frame_from_fields(env_info)
         self.buf.append(frame)
 
-        state = Agent.__make_state__(env_info, self.buf)
+        state = Agent.__make_state__(env_info, self.buf, touched)
 
         return (state, reward_sum, env_info['done'], env_info)
 
