@@ -63,7 +63,7 @@ Tested Systems
      * Unity >= 2019.3.0f6 (64 bits for GNU/Linux or Windows).
 
 - Operation System: Ubuntu >= 20.04
-    * UnityRemote A3C default implementation depends on TensorFlow "1.4". *TensorFlow 1.4* is not supported by *Python3.8*. However, running *apt install python3* installs Python 3.8 by default. Therefore, it's necessary gets Python3.7 or before on *Ubuntu 20.04*. Also, it's recommended creating a virtual environment with virtual env and running the flow command in this virtual environment:
+    * UnityRemote A3C default implementation depends on TensorFlow "1.4". *TensorFlow 1.4* is not supported by *Python3.8*. However, running *apt install python3* installs Python 3.8 by default. Therefore, it is necessary to get Python3.7 or before on *Ubuntu 20.04*. Also, it is recommended creating a virtual environment with virtual env and running the following command in this virtual environment:
 
         pip3 install tensorflow==1.4
  
