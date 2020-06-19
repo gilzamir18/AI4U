@@ -1,9 +1,0 @@
-Experimento 1
-	Agente padrão.
-
-Experimento 2
-	Agente com motivação intrínseca, recompensa pelo aumento da entropia.
-
-
-Experimento 3
-	Agente com geração aleatória da recompensa quando a recompensa externa for zero.
