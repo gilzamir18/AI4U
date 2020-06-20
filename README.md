@@ -1,3 +1,4 @@
+
 # What is UnityRemotePlugin?
 UnityRemotePlugin is a way to connect your Unity application to Python code. Therefore, it's possible with UnityRemote connecting your games and virtual reality applications to vast libraries set written in Python. For example, there are many deep reinforcement learning algorithms written in Python. Here we provide some examples with the A3C (Asynchronous Advantage Actor-Critic) algorithm. Moreover, you can write your code in Python to control game aspects better controlled in Python.
 
@@ -63,15 +64,12 @@ Tested Systems
      * Unity >= 2019.3.0f6 (64 bits for GNU/Linux or Windows).
 
 - Operation System: Ubuntu >= 20.04
-    * UnityRemote A3C default implementation depends on TensorFlow "1.4". *TensorFlow 1.4* is not supported by *Python3.8*. However, running *apt install python3* installs Python 3.8 by default. Therefore, it is necessary to get Python3.7 or before on *Ubuntu 20.04*. Also, it is recommended creating a virtual environment with virtual env and running the following command in this virtual environment:
-
-        pip3 install tensorflow==1.4
- 
+    * Anaconda with Python3.7: UnityRemote A3C default implementation depends on a version of the *TensorFlow API* smaller than 2 (1.4 recommended). *TensorFlow 1.4* is not supported by *Python3.8*. However, running ***apt install python3*** installs Python 3.8 by default. Therefore, it is necessary to get Python3.7 or before on *Ubuntu 20.04*.  ***Anaconda Python3.7*** version is a principal solution for this problem. Ensure that the conda environment created is referring to Python version 3.7.
     * Unity >= 2019.3.0f6 (64 bits for GNU/Linux or Windows).
 
 
 Unfortunately, UnityRemotePlugin does not have support for mobile applications.
 
 
-# Development Stage: Alpha 2.
+# Development Stage: Alpha 3.
 
