@@ -160,7 +160,7 @@ class RemoteEnv:
 
     def open_receive(self):
         try:
-            server_address = (self.HOST, self.INPUT_PORT)
+            server_address = ('', self.INPUT_PORT)
             #print('starting up on %s port %s' % server_address)
             self.UDP.settimeout(self.timeout)
             self.UDP.bind(server_address)
