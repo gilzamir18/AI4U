@@ -78,7 +78,7 @@ Unfortunately, UnityRemotePlugin does not have support for mobile applications.
 
 The Alpha development stage ranges from 0 to 10. In this stage, the API is still in the formulation stage, meaning that the API of the mode application undergoes future changes that make it incompatible with the current version.
 
-In the Beta development stage, new features can be added, but without changing the programming interface. The interface is stable at this stage, but its implementation is not complete and is not considered stable. The Beta stage goes from level 1 to level 4. Levels 2 and 3 are considered pre-launch.
+In the Beta development stage, new features can be added, but without changing the programming interface. The interface is stable at this stage, but its implementation is not complete and is not considered stable. The Beta stage goes from level 1 to level 4. Levels 2 and 3 are considered pre-release.
 
 The final version ends a development cycle and is given a version name. Version names start at 01 to infinity and are followed by an underline plus the year of release.
 

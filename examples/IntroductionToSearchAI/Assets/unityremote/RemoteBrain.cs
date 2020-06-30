@@ -8,7 +8,7 @@ namespace unityremote
     public class RemoteBrain : Brain
     {
         public int port = 8081;
-        public int buffer_size = 8192; 
+        public int buffer_size = 8192;
         private UdpClient udpSocket;
 
         private UdpClient socket;
@@ -43,16 +43,17 @@ namespace unityremote
             }
             serverAddr = IPAddress.Parse(remoteIP);
             endPoint = new IPEndPoint(serverAddr, remotePort);
-            Reset();
             agent.SetBrain(this);
             agent.StartData();
+            Reset();
         }
 
         public void Reset()
         {
             try
             {
-                udpSocket = new UdpClient(port);
+                IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, port);
+                udpSocket = new UdpClient(remoteIpEndPoint);
                 udpSocket.BeginReceive(async_call, udpSocket);
                 //Debug.Log("Listening");
             }
