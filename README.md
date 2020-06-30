@@ -11,7 +11,7 @@ Table 1: Documentation.
 
 | Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|
-| API Overview    |  [doc/overeview.md](doc/overview.md)                                           |
+| API Overview    |  [doc/README.md](doc/README.md)                                           |
 | UnityRemote with OpenAI Gym      | [doc/unityremotegym.md](doc/unityremotegym.md)                         |
 | A3C Implementation     |  [doc/a3cintro.md](doc/a3cintro.md)                        |
 | GMPROC (multiprocessing) | [GMPROC](clientside/unityremote/unityremote/gmproc/README.md)
