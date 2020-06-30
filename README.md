@@ -61,20 +61,20 @@ Tested Systems
 
 - Operation System: Ubuntu 18.04, and 19.10.
      * Python >= 3.7.5.
-     * Unity >= 2019.3.0f6 (64 bits for GNU/Linux or Windows).
+     * Unity >= 2019.4 (64 bits for GNU/Linux).
 
 - Operation System: Ubuntu >= 20.04
-    * Anaconda with Python3.7: UnityRemote A3C default implementation depends on a version of the *TensorFlow API* smaller than 2 (1.4 recommended). *TensorFlow 1.4* is not supported by *Python3.8*. However, running ***apt install python3*** installs Python 3.8 by default. Therefore, it is necessary to get Python3.7 or before on *Ubuntu 20.04*.  ***Anaconda Python3.7*** version is a principal solution for this problem. Ensure that the conda environment created is referring to Python version 3.7.
-    * Unity >= 2019.3.0f6 (64 bits for GNU/Linux or Windows).
+    * Anaconda Python "3.7" version
+    * Unity >= 2019.4 (64 bits for GNU/Linux).
 
-- Operation System: Windows 10 >= 19041.329
-    * It's possible run UnityRemote on Windows 10, however, default machine learning features don't work, except if UnityRemote run on WSL1 or WSL2. Soon I will publish a tutorial explaining how this is possible.
-    * Unity >= 2019.4
+- Operation System: Windows 10
+    * Anaconda Python "3.7" version.
+    * Unity >= 2019.4 (64 bits for Windows)
 
 Unfortunately, UnityRemotePlugin does not have support for mobile applications.
 
 
-# Development Stage: Alpha 4.
+# Development Stage: Alpha 5.
 
 The Alpha development stage ranges from 0 to 10. In this stage, the API is still in the formulation stage, meaning that the API of the mode application undergoes future changes that make it incompatible with the current version.
 
