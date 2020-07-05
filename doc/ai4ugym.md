@@ -116,7 +116,7 @@ Then, you need to override the methods *act* and *reset*. For example
 
 # Final Considerations
 
-The complete example used in this guide can be found at [here](https://github.com/gilcoder/AI4UExamples/CubeAgent/CubeExampleClient).
+The complete example used in this guide can be found at [here](https://github.com/gilcoder/AI4UExamples/tree/master/CubeAgent/CubeExampleClient).
 
 [1] A3C: Asynchronous Advantage Actor-Critic.
 
