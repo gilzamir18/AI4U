@@ -1,3 +1,4 @@
+![Running example ballroller](doc/images/ai4u1.PNG)
 
 # What is AI4U?
 AI4U is a neat and easy way to connect a Unity application to Python code. Therefore, it is possible with AI4U plugin connecting games and virtual reality applications to vast libraries set written in Python. Moreover, One provides integration with the latest algorithms implemented by OpenAI, e.g., PPO and PPO2. So, people interested in AI4U can use more recent advances given by OpenAI researchers.
@@ -7,14 +8,14 @@ AI4U has two components:
     * the *server-side* code written in C#. The second is the
     * *client-side* code written in Python.
 
-For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository *ai4u_examples*. Start by example *ai4u_examples/CubeAgent* for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
+For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository [AI4UExamples](https://github.com/gilcoder/AI4U). Start by example [AI4UExamples/CubeAgent](https://github.com/gilcoder/AI4UExamples/CubeAgent) for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
 
 Table 1: Documentation.
 
 | Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|
 | API Overview    |  [doc/README.md](doc/README.md)                                           |
-| UnityRemote with OpenAI Gym      | [doc/unityremotegym.md](doc/unityremotegym.md)                         |
+| UnityRemote with OpenAI Gym      | [doc/unityremotegym.md](doc/ai4ugym.md)                         |
 | A3C Implementation     |  [doc/a3cintro.md](doc/a3cintro.md)                        |
 | GMPROC (multiprocessing) | [GMPROC](clientside/unityremote/unityremote/gmproc/README.md)
 

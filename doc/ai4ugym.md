@@ -1,12 +1,12 @@
-# UnityRemote with Gym
+# AI4U with Gym
 
-We can use unity remote as a gym environment, but there is a complex flow in this case. First, you import UnityRemoteGym and gym modules
+We can use AI4U as a gym environment. First, you import AI4UGym and gym modules
 
-    import UnityRemoteGym, gym
+    import AI4U, gym
 
 After this, you can make a environment instance:
 
-    env = gym.make('UnityRemote-v0')
+    env = gym.make('AI4U-v0')
  
 Environment object `env`  performed communication with the server-side of your unity application. It's necessary to define the environment configuration using a dictionary. For example:
 
@@ -34,9 +34,9 @@ Table 1: show the means of each key in dictionary `environment_definitions`.
 | make_inference_network | Method used only by A3C algorithm.                                             |
 
 
-The next step is to set up the environment. To do this, you call the method 'configure' from the object `env` passing the dictionary `environment_definition` as an argument. If you don't want to create the dictionary from scratch, you can import a preconfigured dictionary from the `unityremote.utils` module. Most parameters do not need to be specified. For example, the following attributes are likely to have to be modified:
+The next step is to set up the environment. To do this, you call the method 'configure' from the object `env` passing the dictionary `environment_definition` as an argument. If you don't want to create the dictionary from scratch, you can import a preconfigured dictionary from the `ai4u.utils` module. Most parameters do not need to be specified. For example, the following attributes are likely to have to be modified:
 
-	from unityremote.utils import environment_definitions as env_def
+	from ai4u.utils import environment_definitions as env_def
 	#set new values
 	env_def['actions'] = [('tx', 10)]
 	env_def['actions_meaning'] = ['horizontal movement']
@@ -55,7 +55,7 @@ The reset command should restart the environment for a new simulated episode. Fi
 
 #The Agent Class
 
-If you don't specify an *agent* field, UnityRemoteGym assumes the following agent behavior as the default
+If you don't specify an *agent* field, AI4UGym assumes the following agent behavior as the default
 
 	class BasicAgent:
 	    def reset(self, env):
@@ -87,9 +87,9 @@ The method *act* receives an environment reference (named *env*), the action ind
 
 If you use this basic agent class, your Unity application should have support for a command named *restart*, support the actions specified in *environment_definitions*, and return fields named *state*, *reward* and *done*.
 
-The default behavior of the UnityRemoteGym perhaps is not sufficient for your necessities. You can modify this bahavior by inheriting the class BasicAgent from the module UnityRemoteGym. 
+The default behavior of the AI4UGym perhaps is not sufficient for your necessities. You can modify this bahavior by inheriting the class BasicAgent from the module AI4UGym. 
 
-	from UnityRemoteGym import BasicAgent
+	from AI4UGym import BasicAgent
 
 Then, you need to override the methods *act* and *reset*. For example
 
@@ -116,7 +116,7 @@ Then, you need to override the methods *act* and *reset*. For example
 
 # Final Considerations
 
-The complete example used in this guide can be found at [here](/examples/CubeAgent/CubeExampleClient/).
+The complete example used in this guide can be found at [here](https://github.com/gilcoder/AI4UExamples/CubeAgent/CubeExampleClient).
 
 [1] A3C: Asynchronous Advantage Actor-Critic.
 
