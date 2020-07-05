@@ -20,7 +20,6 @@ def image_from_str(imgstr, w, h, dtype=np.uint8):
         i += 1
     return result
 
-
 def get_image(frame, width=84, height=84, dtype=np.float32):
     inputdata = image_decode(frame, width, height, dtype)
     img = cv2.imdecode(inputdata, cv2.IMREAD_COLOR)
@@ -29,8 +28,8 @@ def get_image(frame, width=84, height=84, dtype=np.float32):
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
     import tensorflow as tf
-    from unityremote.ml.a3c.multi_scope_train_op import make_train_op 
-    from unityremote.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
+    from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
+    from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
         logit_entropy, make_copy_ops
 
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))

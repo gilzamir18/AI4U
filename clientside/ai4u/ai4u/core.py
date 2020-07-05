@@ -18,7 +18,8 @@ def __get_state__(netcon, get_state = True, waiting=0, verbose=True):
         except:
             if verbose:
                 print("waiting for connection...\r", end="")
-            e = sys.exc_info()[1]
+                #e = sys.exc_info()[1]
+                #print(e)
             netcon.open(waiting)
             if waiting > 0:
                 time.sleep(waiting)

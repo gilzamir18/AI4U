@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace unityremote.ext {
+namespace ai4u.ext {
 
     public class RLAgent : Agent
     {

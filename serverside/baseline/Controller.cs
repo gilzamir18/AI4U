@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-namespace unityremote
+namespace ai4u
 {
     public abstract class Controller: MonoBehaviour
     {

@@ -5,7 +5,7 @@ import numpy as np
 from gym import spaces
 from gym.core import Wrapper, ObservationWrapper, RewardWrapper
 from gym.spaces import Box
-from unityremote.utils import image_decode
+from ai4u.utils import image_decode
 
 """
 Observation preprocessing and environment tweaks.

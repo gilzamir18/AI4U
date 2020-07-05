@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace unityremote
+namespace ai4u
 {
 
     public interface IAgentResetListener

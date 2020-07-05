@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using unityremote;
+using ai4u;
 
-namespace unityremote.ext {
+namespace ai4u.ext {
     public class RewardFunc : MonoBehaviour, IAgentResetListener
     {
         public RLAgent[] agents;

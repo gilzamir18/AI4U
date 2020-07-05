@@ -1,4 +1,4 @@
-﻿namespace unityremote
+﻿namespace ai4u
 {
     public class LocalBrain : Brain
     {

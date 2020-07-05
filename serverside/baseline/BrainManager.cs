@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace unityremote
+namespace ai4u
 {
     public class BrainManager : MonoBehaviour
     {

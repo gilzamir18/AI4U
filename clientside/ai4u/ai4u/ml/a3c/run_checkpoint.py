@@ -8,8 +8,8 @@ import time
 import gym
 import numpy as np
 import tensorflow as tf
-from unityremote.ml.a3c import preprocessing
-from unityremote.ml.a3c.preprocessing import generic_preprocess
+from ai4u.ml.a3c import preprocessing
+from ai4u.ml.a3c.preprocessing import generic_preprocess
 from threading import Thread
 import threading
 

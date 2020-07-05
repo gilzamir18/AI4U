@@ -15,12 +15,12 @@ Table 1: Documentation.
 | Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|
 | API Overview    |  [doc/README.md](doc/README.md)                                           |
-| UnityRemote with OpenAI Gym      | [doc/unityremotegym.md](doc/ai4ugym.md)                         |
+| AI4U with OpenAI Gym      | [doc/ai4ugym.md](doc/ai4ugym.md)                         |
 | A3C Implementation     |  [doc/a3cintro.md](doc/a3cintro.md)                        |
-| GMPROC (multiprocessing) | [GMPROC](clientside/unityremote/unityremote/gmproc/README.md)
+| GMPROC (multiprocessing) | [GMPROC](clientside/ai4u/ai4u/gmproc/README.md)
 
 ## Installation
-First, it needs to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/unityremote*. Run the following command:
+First, it needs to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/ai4u*. Run the following command:
 
 ```
 pip3 install -e .

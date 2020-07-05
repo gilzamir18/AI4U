@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from unityremote.core import RemoteEnv
+from ai4u.core import RemoteEnv
 import threading as td
 import numpy as np
 import io
@@ -22,6 +22,9 @@ class AleWrapper:
         return self.env.nlives
 
 class BasicAgent:
+    environment_definitions = None
+    environment_port_id = 0
+
     def reset(self, env):
         envinfo = env.remoteenv.step('restart')
         if 'state' in envinfo:
@@ -48,12 +51,16 @@ class BasicAgent:
 
         return state, reward, done, {}
 
+
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
         self.ale = AleWrapper(self)
         self.configureFlag = False
-    
+        if not (BasicAgent.environment_definitions is None):
+            self.configure(BasicAgent.environment_definitions, BasicAgent.environment_port_id)
+            BasicAgent.environment_port_id += 1
+
     def configure(self, environment_definitions, port_inc=0):
         self.action_space = spaces.Discrete(environment_definitions['action_shape'][0])
         min_value = environment_definitions['min_value']
@@ -82,8 +89,8 @@ class Environment(gym.Env):
         self.remoteenv = RemoteEnv(host, output_port+port_inc, input_port+port_inc)
         self.remoteenv.open(0)
         self.nlives = 1
-        self.configureFlag = True
         self.state = None
+        self.configureFlag = True
 
     def get_action_meanings(self):
         self.__check_configuration_()

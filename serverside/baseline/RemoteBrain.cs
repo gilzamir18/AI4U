@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 
-namespace unityremote
+namespace ai4u
 {
     public class RemoteBrain : Brain
     {
@@ -12,8 +12,7 @@ namespace unityremote
         private UdpClient udpSocket;
 
         private UdpClient socket;
-        private bool commandReceived;
-
+        
         private Socket sock;
         private IPAddress serverAddr;
         private EndPoint endPoint;
@@ -35,7 +34,6 @@ namespace unityremote
         {
             source = null;
             async_call = new System.AsyncCallback(ReceiveData);
-            commandReceived = false;
             firstMsgSended = false;
             if (sock == null)
             {
