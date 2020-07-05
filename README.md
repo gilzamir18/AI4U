@@ -1,11 +1,13 @@
 
-# What is UnityRemotePlugin?
-UnityRemotePlugin is a way to connect your Unity application to Python code. Therefore, it's possible with UnityRemote connecting your games and virtual reality applications to vast libraries set written in Python. For example, there are many deep reinforcement learning algorithms written in Python. Here we provide some examples with the A3C (Asynchronous Advantage Actor-Critic) algorithm. Moreover, you can write your code in Python to control game aspects better controlled in Python.
+# What is AI4U?
+AI4U is a neat and easy way to connect a Unity application to Python code. Therefore, it is possible with AI4U plugin connecting games and virtual reality applications to vast libraries set written in Python. Moreover, One provides integration with the latest algorithms implemented by OpenAI, e.g., PPO and PPO2. So, people interested in AI4U can use more recent advances given by OpenAI researchers.
 
-# How to use the UnityRemotePlugin?
-UnityRemotePlugin has two components. The first component is the *server-side* code written in C#. The second component is the *client-side* code written in Python.
+# How to use the AI4U?
+AI4U has two components:
+    * the *server-side* code written in C#. The second is the
+    * *client-side* code written in Python.
 
-We recommend that you have some version of Unity 2019 and start by looking at the examples available in the directories *examples*. Start by example *examples/CubeAgent* for the first look in UnityRemotePlugin. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
+For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository *ai4u_examples*. Start by example *ai4u_examples/CubeAgent* for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
 
 Table 1: Documentation.
 
@@ -17,14 +19,13 @@ Table 1: Documentation.
 | GMPROC (multiprocessing) | [GMPROC](clientside/unityremote/unityremote/gmproc/README.md)
 
 ## Installation
-
-First, you need to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/unityremote*. Run the following command:
+First, it needs to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/unityremote*. Run the following command:
 
 ```
 pip3 install -e .
 ```
 
-Waiting for the installation ends, this may take a while. If you want to install gym and a3c algorithm support, go to directory *clientside/gym* and run the following command:
+Waiting for the installation ends, this may take a while. To install gym and a3c algorithm support, go to directory *clientside/gym* and run the following command:
 
 ```
 pip3 install -e .
@@ -52,7 +53,7 @@ python3 random_ballroller.py
 Output logs:
 ![See output logs ](doc/images/ballrollerlog.PNG)
 
-If no error message was displayed, then UnityRemotePlugin was installed correctly.
+If no error message was displayed, then AI4U was installed correctly.
 
 # Requirements
 
@@ -71,7 +72,7 @@ Tested Systems
     * Anaconda Python "3.7" version.
     * Unity >= 2019.4 (64 bits for Windows)
 
-Unfortunately, UnityRemotePlugin does not have support for mobile applications.
+Unfortunately, AI4U does not have support for mobile applications.
 
 
 # Development Stage: Alpha 5.
