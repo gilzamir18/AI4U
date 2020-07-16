@@ -1,4 +1,4 @@
-![Running example ballroller](doc/images/ai4u1.PNG)
+![Running example ballroller](doc/images/AI4U1.png)
 
 # What is AI4U?
 AI4U is a neat and easy way to connect a Unity application to Python code. Therefore, it is possible with AI4U plugin connecting games and virtual reality applications to vast libraries set written in Python. Moreover, One provides integration with the latest algorithms implemented by OpenAI, e.g., PPO and PPO2. So, people interested in AI4U can use more recent advances given by OpenAI researchers.
