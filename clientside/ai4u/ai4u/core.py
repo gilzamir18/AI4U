@@ -132,12 +132,14 @@ class RemoteEnv:
         self.INPUT_PORT = 8080
         self.HOST = "127.0.0.1"
         self.BUFFER_SIZE = 100000
+        self.verbose = True
 
     def configure(self, host="127.0.0.1", OUT_PORT=8081, IN_PORT=8080, bs=100000):
         self.OUTPUT_PORT = OUT_PORT
         self.INPUT_PORT = IN_PORT
         self.HOST = host
         self.BUFFER_SIZE = bs
+        self.verbose = True
 
     def make(self):
         self.UDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -148,6 +150,7 @@ class RemoteEnv:
         self.HOST = host
         self.BUFFER_SIZE = bs
         self.UDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.verbose = True
 
     def close(self):
         self.UDP.close()
@@ -228,7 +231,7 @@ class RemoteEnv:
         command = "%s;%d;%s"%(cmdname, nsize, cmd)
         self.UDP.sendto(command.encode(encoding="utf-8"), dest)
         #self.UDP.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8192)
-        return __get_state__(self, False)
+        return __get_state__(self, False, verbose=self.verbose)
 
     def step(self, action, value=None):
         if value is not None:

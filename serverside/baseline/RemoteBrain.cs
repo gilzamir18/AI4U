@@ -20,6 +20,8 @@ namespace ai4u
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
         public bool alwaysUpdate = false;
+
+        public bool managed = false;
    
 
         private string cmdname;
@@ -28,7 +30,49 @@ namespace ai4u
         private bool firstMsgSended = false;
         private System.AsyncCallback async_call;
         private IPEndPoint source;
+
+        private bool runFirstTime = true;
         
+        void Awake(){
+            if (!managed && runFirstTime){
+                runFirstTime =false;
+                string[] args = System.Environment.GetCommandLineArgs ();
+                int i = 0;
+                while (i < args.Length){
+                    switch (args[i]) {
+                        case "--ai4u_inputport":
+                            port = int.Parse(args[i+1]);
+                            i += 2;
+                            break;
+                        case "--ai4u_outputport":
+                            remotePort = int.Parse(args[i+1]);
+                            i += 2;
+                            break;
+                        case "--ai4u_timescale":
+                            Time.timeScale = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                            i += 2;
+                            break;
+                        case "--ai4u_remoteip":
+                            remoteIP = args[i+1];
+                            i += 2;
+                            break;
+                        case "--ai4u_targetframerate":
+                            Application.targetFrameRate = int.Parse(args[i+1]);
+                            i += 2;
+                            break;
+                        case "--ai4u_vsynccount":
+                            QualitySettings.vSyncCount = int.Parse(args[i+1]);
+                            i += 2;
+                            break;
+                        default:
+                            i+=1;
+                            break;
+                    }
+                }
+            }
+        }
+
+
         // Use this for initialization
         void Start()
         {

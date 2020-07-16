@@ -157,5 +157,5 @@ def run(env_defs, kargs=None):
 
 
 if __name__ == '__main__':
-    from unityremote.core import environment_definitions
+    from ai4u.core import environment_definitions
     run(environment_definitions)

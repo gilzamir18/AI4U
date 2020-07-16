@@ -35,6 +35,11 @@ class BasicAgent:
     def render(self):
         pass
 
+    def seed(self, seed=None):
+        self.np_random, seed1 = seeding.np_random(seed)
+        env.remoteenv.step('seed', seed1)
+        return [seed1]
+
     def act(self, env, action, info=None):
         envinfo = env.one_step(action)
         state = None
@@ -55,6 +60,7 @@ class BasicAgent:
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
+        super(Environment, self).__init__()
         self.ale = AleWrapper(self)
         self.configureFlag = False
         if not (BasicAgent.environment_definitions is None):
@@ -70,10 +76,20 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(low=min_value, high=max_value, shape=state_shape, dtype=state_type)
         self.n_envs = environment_definitions['n_envs']
         self.actions = environment_definitions['actions']
+        self.verbose = False
+
+        if 'verbose' in environment_definitions:
+            self.verbose = environment_definitions['verbose']
+
         if 'action_meaning' in environment_definitions:
             self.action_meaning = environment_definitions['action_meaning']
         else:
             self.action_meaning = ['action']*len(self.actions)
+
+        if 'seed' in environment_definitions:
+            self.seed = environment_definitions['seed']
+        else:
+            self.seed = 0
 
         if 'agent' in environment_definitions:
             if inspect.isclass(environment_definitions['agent']):
@@ -87,10 +103,14 @@ class Environment(gym.Env):
         input_port = environment_definitions['input_port']
         output_port = environment_definitions['output_port']
         self.remoteenv = RemoteEnv(host, output_port+port_inc, input_port+port_inc)
+        self.remoteenv.verbose = self.verbose
         self.remoteenv.open(0)
         self.nlives = 1
         self.state = None
         self.configureFlag = True
+
+    def seed(self, seed=None):
+        self.agent.seed(seed)
 
     def get_action_meanings(self):
         self.__check_configuration_()

@@ -3,6 +3,23 @@
 # What is AI4U?
 AI4U is a neat and easy way to connect a Unity application to Python code. Therefore, it is possible with AI4U plugin connecting games and virtual reality applications to vast libraries set written in Python. Moreover, One provides integration with the latest algorithms implemented by OpenAI, e.g., PPO and PPO2. So, people interested in AI4U can use more recent advances given by OpenAI researchers.
 
+## Features
+
+- Some examples.
+- Support for multiple environment configurations and training scenarios
+- Flexible SDK that can be integrated into your game or custom Unity scene
+- API agnostic, but one provides support to all algorithms implemented by [stable-basiles](https://github.com/hill-a/stable-baselines).
+- Integrated A3C implementation.
+- Tools for facilated no-markovian decision making.
+- AI4U can be integrated to Imitation Learning through Behavioral Cloning or
+  Generative Adversarial Imitation Learning present on [stable-baslines](https://github.com/hill-a/stable-baselines).
+- Train robust agents using environment randomization.
+- Flexible agent control with On Demand Decision Making.
+- Train using multiple concurrent Unity environment instances.
+- Unity environment partial control from Python.
+- Wrap Unity learning environments as a [gym][doc/ai4ugym.md](doc/ai4ugym.md).
+
+
 # How to use the AI4U?
 AI4U has two components:
     * the *server-side* code written in C#. The second is the
@@ -74,13 +91,4 @@ Tested Systems
     * Unity >= 2019.4 (64 bits for Windows)
 
 Unfortunately, AI4U does not have support for mobile applications.
-
-
-# Development Stage: Alpha 5.
-
-The Alpha development stage ranges from 0 to 10. In this stage, the API is still in the formulation stage, meaning that the API of the mode application undergoes future changes that make it incompatible with the current version.
-
-In the Beta development stage, new features can be added, but without changing the programming interface. The interface is stable at this stage, but its implementation is not complete and is not considered stable. The Beta stage goes from level 1 to level 4. Levels 2 and 3 are considered pre-release.
-
-The final version ends a development cycle and is given a version name. Version names start at 01 to infinity and are followed by an underline plus the year of release.
 

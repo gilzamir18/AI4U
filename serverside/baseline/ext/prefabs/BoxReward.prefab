@@ -60,7 +60,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 57241faf5e393c861a98b0b6afd854d6, type: 2}
+  - {fileID: 2100000, guid: 419b11b83697bcfd3aa5ee6b4ff71fca, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -110,3 +110,4 @@ MonoBehaviour:
   maxNumberOfTheRewards: 1
   rewardValue: 1
   checkInside: 1
+  triggerOnStay: 1
