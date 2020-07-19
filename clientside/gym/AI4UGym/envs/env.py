@@ -63,6 +63,7 @@ class Environment(gym.Env):
         super(Environment, self).__init__()
         self.ale = AleWrapper(self)
         self.configureFlag = False
+        self.id = 0
         if not (BasicAgent.environment_definitions is None):
             self.configure(BasicAgent.environment_definitions, BasicAgent.environment_port_id)
             BasicAgent.environment_port_id += 1
@@ -103,6 +104,7 @@ class Environment(gym.Env):
         input_port = environment_definitions['input_port']
         output_port = environment_definitions['output_port']
         self.remoteenv = RemoteEnv(host, output_port+port_inc, input_port+port_inc)
+        self.id = port_inc
         self.remoteenv.verbose = self.verbose
         self.remoteenv.open(0)
         self.nlives = 1

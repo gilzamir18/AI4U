@@ -6,6 +6,18 @@ def image_decode(frame, w, h, dtype=np.uint8):
     imgdata = base64.b64decode(frame).decode('UTF-8')
     return image_from_str(imgdata, w, h, dtype)
 
+def image_decode_asarray(frame, w, h, dtype=np.uint8):
+    imgstr = base64.b64decode(frame).decode('UTF-8')
+    lines = imgstr.strip().split(';')
+    result = np.zeros(w*h, dtype=dtype)
+    i = 0
+    for line in lines:
+        values = line.strip().split(',')
+        for value in values:
+            result[i] = int(value)
+            i += 1
+    return result
+
 def image_from_str(imgstr, w, h, dtype=np.uint8):
     lines = imgstr.strip().split(';')
     result = np.zeros(shape=(w, h), dtype=dtype)

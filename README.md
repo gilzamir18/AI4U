@@ -17,7 +17,7 @@ AI4U is a neat and easy way to connect a Unity application to Python code. There
 - Flexible agent control with On Demand Decision Making.
 - Train using multiple concurrent Unity environment instances.
 - Unity environment partial control from Python.
-- Wrap Unity learning environments as a [gym][doc/ai4ugym.md](doc/ai4ugym.md).
+- Wrap Unity learning environments as a [gym](doc/ai4ugym.md).
 
 
 # How to use the AI4U?
