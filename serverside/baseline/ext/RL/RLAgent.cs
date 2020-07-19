@@ -27,6 +27,16 @@ namespace ai4u.ext {
             reward += v;
         }
 
+        public virtual void touchListener(TouchRewardFunc origin)
+        {
+            //TODO add behavior here
+        }
+
+        public virtual void boxListener(BoxRewardFunc origin)
+        {
+            //TODO add behavior here
+        }
+
         public virtual void SubReward(float v, RewardFunc from = null) {
             reward -= v;
         }
