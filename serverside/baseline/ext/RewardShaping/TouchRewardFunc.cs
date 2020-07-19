@@ -12,22 +12,19 @@ namespace  ai4u.ext
 
         public float painForViolatinPrecondition = 0;
 
-
         public float rewardValue = 1.0f;
 
-
         public TouchRewardFunc precondition = null;
-        public int precondictionMin = 1;
-
+        public MultTouchPrecondiction multiplePrecondictions = null;
         public bool triggerOnStay = true;
         private int[] counter;
+        private bool[] touched;
         private Collider myCollider;
-
         public bool allowNext;
 
-
         void Awake() {
-            counter = new int[agents.Length]; 
+            counter = new int[agents.Length];
+            touched = new bool[agents.Length];
             myCollider = GetComponent<Collider>();
             foreach(Agent agent in agents) {
                 agent.AddResetListener(this);
@@ -59,16 +56,19 @@ namespace  ai4u.ext
         }
 
         public bool wasTouched(RLAgent agent) {
-            return counter[agent.Id] >= precondictionMin;
+            return touched[agent.Id];
         }
 
         public override void OnReset(Agent agent) {
-            counter = new int[agents.Length]; 
+            counter = new int[agents.Length];
+            touched = new bool[agents.Length];
         }
 
-        private void Check(Collider collider)
+        public void Check(Collider collider)
         {
             RLAgent agent = collider.gameObject.GetComponent<RLAgent>();
+            touched[agent.Id] = true;
+            agent.touchListener(this);  
 
             if (precondition != null) {
                 if (!precondition.allowNext || !precondition.wasTouched(agent)){
@@ -77,9 +77,18 @@ namespace  ai4u.ext
                 }
             }
 
-         
-            if ( (counter[agent.Id] < maxTouch || maxTouch < 0)  )
-            {   
+            if (multiplePrecondictions != null)
+            {
+                if (!multiplePrecondictions.allowNext || !multiplePrecondictions.wasTouched(agent))
+                {
+                    agent.AddReward(-painForViolatinPrecondition, this);
+                    return;
+                }
+            }
+
+            if ( (counter[agent.Id] <
+                maxTouch || maxTouch < 0)  )
+            {
                 counter[agent.Id]++;
                 agent.AddReward(rewardValue, this);
             } else if (maxTouch >= 0 && counter[agent.Id] >= maxTouch) {

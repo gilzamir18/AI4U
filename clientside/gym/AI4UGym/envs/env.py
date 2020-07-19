@@ -56,7 +56,6 @@ class BasicAgent:
 
         return state, reward, done, {}
 
-
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
@@ -68,14 +67,32 @@ class Environment(gym.Env):
             BasicAgent.environment_port_id += 1
 
     def configure(self, environment_definitions, port_inc=0):
-        self.action_space = spaces.Discrete(environment_definitions['action_shape'][0])
-        min_value = environment_definitions['min_value']
-        max_value = environment_definitions['max_value']
-        state_shape = environment_definitions['state_shape']
-        state_type = environment_definitions['state_type']
-        self.observation_space = spaces.Box(low=min_value, high=max_value, shape=state_shape, dtype=state_type)
-        self.n_envs = environment_definitions['n_envs']
+        if 'action_space' in environment_definitions:
+            self.action_space = environment_definitions['action_space']
+        elif 'action_shape' in environment_definitions:
+            self.action_space = spaces.Discrete(environment_definitions['action_shape'][0])
+            min_value = environment_definitions['min_value']
+            max_value = environment_definitions['max_value']
+        else:
+            raise Exception('environment_definitions do not contains action_space or action_shape')
+
+        assert 'actions' in environment_definitions, 'environment_definitions do not contain actions (a list of actions descriptors)'
         self.actions = environment_definitions['actions']
+
+        if 'observation_space' in environment_definitions:
+            self.observation_space = environment_definitions['observation_space']
+        elif 'state_shape' in environment_definitions:
+            state_shape = environment_definitions['state_shape']
+            state_type = environment_definitions['state_type']
+            self.observation_space = spaces.Box(low=min_value, high=max_value, shape=state_shape, dtype=state_type)
+        else:
+            raise Exception('environment_definitions do not contain observation_space or state_shape.')
+
+        if 'n_envs' in environment_definitions:
+            self.n_envs = environment_definitions['n_envs']
+        else:
+            self.n_envs = 1
+
         self.verbose = False
 
         if 'verbose' in environment_definitions:
@@ -98,10 +115,19 @@ class Environment(gym.Env):
                 raise Exception("Agent object is not a class!!!!")
         else:
             self.agent = BasicAgent()
-        
-        host = environment_definitions['host']
-        input_port = environment_definitions['input_port']
-        output_port = environment_definitions['output_port']
+    
+        host = '127.0.0.1'
+        if host in environment_definitions:
+            host = environment_definitions['host']
+    
+        input_port = 8080
+        if 'input_port' in environment_definitions:
+            input_port = environment_definitions['input_port']
+
+        output_port = 8081
+        if 'output_port' in environment_definitions:
+            output_port = environment_definitions['output_port']
+
         self.remoteenv = RemoteEnv(host, output_port+port_inc, input_port+port_inc)
         self.remoteenv.verbose = self.verbose
         self.remoteenv.open(0)

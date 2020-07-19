@@ -52,7 +52,7 @@ namespace ai4u.ext
         private void Check(Collider collider)
         {
             RLAgent agent = collider.gameObject.GetComponent<RLAgent>();
-            
+            agent.boxListener(this);
             if ( counter[agent.Id] < maxNumberOfTheRewards || maxNumberOfTheRewards < 0  )
             {
                 if (checkInside)
