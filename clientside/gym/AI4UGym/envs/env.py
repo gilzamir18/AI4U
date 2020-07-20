@@ -35,7 +35,9 @@ class BasicAgent:
     def render(self):
         pass
 
-    def seed(self, seed=None):
+    def seed(self, seed=None, env=None):
+        if seed is None:
+            seed = 0
         self.np_random, seed1 = seeding.np_random(seed)
         env.remoteenv.step('seed', seed1)
         return [seed1]
@@ -138,7 +140,7 @@ class Environment(gym.Env):
         self.configureFlag = True
 
     def seed(self, seed=None):
-        self.agent.seed(seed)
+        self.agent.seed(seed, self)
 
     def get_action_meanings(self):
         self.__check_configuration_()
