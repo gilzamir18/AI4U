@@ -107,9 +107,9 @@ class Environment(gym.Env):
             self.action_meaning = ['action']*len(self.actions)
 
         if 'seed' in environment_definitions:
-            self.seed = environment_definitions['seed']
+            self._seed = environment_definitions['seed']
         else:
-            self.seed = 0
+            self._seed = 0
 
         if 'agent' in environment_definitions:
             if inspect.isclass(environment_definitions['agent']):
