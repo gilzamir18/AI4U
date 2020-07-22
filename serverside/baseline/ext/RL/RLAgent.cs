@@ -41,6 +41,20 @@ namespace ai4u.ext {
             reward -= v;
         }
 
+        public virtual void Act(string actionName) 
+        {
+            //TODO IMPL
+        }
+
+        public virtual string[] GetStateList(){
+            //TODO IMPL
+            return new string[]{};
+        }
+
+        public virtual object[] GetStateValue() {
+            return new object[]{};
+        }
+
         public float Reward {
             get {
                 return this.reward;

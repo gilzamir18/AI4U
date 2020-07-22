@@ -12,7 +12,7 @@ namespace ai4u.ext
         public bool triggerOnStay = true;
 
         public bool triggerOnExit = false;
-    
+
         private int[] counter;
         private Collider myCollider;
 
@@ -64,7 +64,7 @@ namespace ai4u.ext
 
         void OnCollisionExit(Collision other) {
             if (triggerOnExit) {
-                RLAgent agent = GetComponent<Collider>().gameObject.GetComponent<RLAgent>();
+                RLAgent agent = other.gameObject.GetComponent<RLAgent>();
                 agent.boxListener(this);
                 counter[agent.Id]++;
                 agent.AddReward(rewardValue, this);
