@@ -31,7 +31,7 @@ def image_from_str(imgstr, w, h, dtype=np.uint8):
         i += 1
     return result
 
-def get_image(frame, width=84, height=84, dtype=np.float32):
+def get_cvimage(frame, width=84, height=84, dtype=np.uint):
     inputdata = image_decode(frame, width, height, dtype)
     img = cv2.imdecode(inputdata, cv2.IMREAD_COLOR)
     img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
