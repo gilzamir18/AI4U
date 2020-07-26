@@ -133,16 +133,16 @@ def run(env_defs, kargs=None):
                              debug=args.debug, env_defs=env_defs, extra_inputs_shape=extra_inputs_shape)
 
     global_vars = tf.trainable_variables('global')
+    tf.compat.v1.global_variables_initializer
     # Why save_relative_paths=True?
     # So that the plain-text 'checkpoint' file written uses relative paths, so that we can restore
     # from checkpoints created on another machine.
     saver = tf.train.Saver(global_vars, max_to_keep=1, save_relative_paths=True)
+    sess.run(tf.global_variables_initializer())
     if args.load_ckpt:
         print("Restoring from checkpoint '{}'...".format(args.load_ckpt), end='', flush=True)
         saver.restore(sess, args.load_ckpt)
         print("done!")
-    else:
-        sess.run(tf.global_variables_initializer())
 
     workers = make_workers(sess, envs, networks, args.n_workers, log_dir)
 

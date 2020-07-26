@@ -10,9 +10,6 @@ namespace ai4u.ext
         public float rewardValue = 1.0f;
         public bool checkInside = true;
         public bool triggerOnStay = true;
-
-        public bool triggerOnExit = false;
-
         private int[] counter;
         private Collider myCollider;
 
@@ -21,9 +18,6 @@ namespace ai4u.ext
             myCollider = GetComponent<Collider>();
             foreach(Agent agent in agents) {
                 agent.AddResetListener(this);
-            }
-            if (triggerOnStay) {
-                triggerOnExit = false;
             }
         }
 
@@ -34,18 +28,8 @@ namespace ai4u.ext
         }
 
         void OnTriggerEnter(Collider collider) {
-            if (!triggerOnStay && !triggerOnExit) {
+            if (!triggerOnStay) {
                 Check(collider);
-            }
-        }
-
-
-        void OnTriggerExit(Collider collider) {
-            if (triggerOnExit) {
-                RLAgent agent = collider.gameObject.GetComponent<RLAgent>();
-                agent.boxListener(this);
-                counter[agent.Id]++;
-                agent.AddReward(rewardValue, this);
             }
         }
 
@@ -58,16 +42,6 @@ namespace ai4u.ext
         void OnCollisionEnter(Collision other) {
             if (!triggerOnStay) {
                 Check(other.collider);
-            }
-        }
-
-
-        void OnCollisionExit(Collision other) {
-            if (triggerOnExit) {
-                RLAgent agent = other.gameObject.GetComponent<RLAgent>();
-                agent.boxListener(this);
-                counter[agent.Id]++;
-                agent.AddReward(rewardValue, this);
             }
         }
 

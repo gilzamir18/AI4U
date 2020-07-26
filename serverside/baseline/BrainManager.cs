@@ -42,8 +42,8 @@ namespace ai4u
                             break;
                         case "--ai4u_stepoutputport":
                             stepOutputPort = int.Parse(args[i+1]);
-                            i += 2;
                             break;
+                            i += 2;
                         case "--ai4u_timescale":
                             Time.timeScale = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                             i += 2;
