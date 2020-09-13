@@ -6,7 +6,6 @@ import multiprocessing
 import numpy as np
 from queue import Queue
 import argparse
-import matplotlib.pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
 from .gmproc import ClientServer, ClientWorker, ServerWorker
@@ -15,7 +14,6 @@ import time
 import datetime
 
 tf.compat.v1.enable_eager_execution()
-
 
 class LogManager():
 	def __init__(self, base_name, blockLines = 1000):
@@ -33,7 +31,6 @@ class LogManager():
 
 	def set_off(self):
 		self.enabled = False
-
 
 	def addline(self, line):
 		if self.verbose:
@@ -116,6 +113,7 @@ class A3CMaster(ServerWorker):
 	def __init__(self):
 		super().__init__()
 		self.id = "sharednetwork"
+		self.model_save_counter = 0
 
 
 	def start(self, params):
@@ -134,7 +132,7 @@ class A3CMaster(ServerWorker):
 
 			self.log = LogManager("logs/server.log", log_bsize)
 			self.log.verbose = log_verbose
-
+		self.model_save_counter = 0
 		self.log.addline('starting server %s on time %s'%(self.id, datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 		self.learning_rate = params['learning_rate']
 		self.action_size = params['action_size']
@@ -145,11 +143,18 @@ class A3CMaster(ServerWorker):
 		else:
 			self.initialize_model = __initialize_model__
 
+		if 'model_save_freq' in params:
+			self.model_save_freq = params['model_save_freq']
+		else:
+			self.model_save_freq = 300
 
-		if 'model' in params: 
+		if 'model' in params:
 			self.model = params['model']()
 		else:
 			self.model = A3CModel(self.state_size, self.action_size)
+
+		if 'load_model' in params:
+			self.model = tf.keras.models.load_model(params['load_model'])
 		
 		self.initialize_model(self.model, self.state_size)
 
@@ -164,16 +169,15 @@ class A3CMaster(ServerWorker):
 			for i in range(len(msg)):
 				grads[i] = tf.convert_to_tensor(msg[i], dtype=tf.float32)
 			self.opt.apply_gradients(zip(grads, self.model.trainable_weights))
+		self.model_save_counter += 1
+		if self.model_save_counter % self.model_save_freq == 0:
+			self.model.save('model')
+			self.model_save_counter = 0
 		return self.model.get_weights()
 
 
 def __act__(action, env):
 	state, reward, is_done, info = env.step(action)
-
-	if is_done:
-		reward = -1
-	else:
-		reward = 1
 	return state, reward, is_done, info
 
 def __prepare_data__(data):
@@ -184,7 +188,6 @@ def __make_transition__(mem, state, action, reward):
 
 def __prepare_array_data__(data):
 	return tf.convert_to_tensor(np.vstack(data), dtype=tf.float32)
-
 
 class A3CWorker(ClientWorker):
 	def __init__(self, id):
@@ -269,12 +272,14 @@ class A3CWorker(ClientWorker):
 		else:
 			self.initialize_model = __initialize_model__
 
-		
 		if 'model' in params:
 			self.model = params['model']()
 		else:
 			self.model = A3CModel(self.state_size, self.action_size)
-		
+
+		if 'load_model' in params:
+			self.model = tf.keras.models.load_model(params['load_model'])
+	
 		self.initialize_model(self.model, self.state_size)
 
 		self.value_loss_coef = params['value_loss_coef']
@@ -286,7 +291,7 @@ class A3CWorker(ClientWorker):
 			self.opt = params['opt']()
 		else:
 			self.opt = tf.keras.optimizers.Adam(lr=params['learning_rate'])
-	
+
 		self.current_state = self.env.reset()
 
 	def get_loss(self):
@@ -364,7 +369,7 @@ class A3CWorker(ClientWorker):
 		self.log.close()
 
 	def done(self):
-		return self.global_episodes > self.max_n_ep
+		return self.global_episodes >= self.max_n_ep
 
 	def compute_loss(self,
 				   done,
@@ -405,3 +410,85 @@ class A3CWorker(ClientWorker):
 		policy_loss -= self.entropy_bonus * entropy
 		total_loss = tf.reduce_mean((self.value_loss_coef * value_loss + policy_loss))
 		return total_loss
+
+
+class Runner:
+	def __init__(self, id=0, params=None):
+		if params is None:
+			params = {}
+		self.id = id
+		self.start(params)
+	
+	def start(self, params):
+		self.sess = tf.compat.v1.Session()
+		if 'env_name' in params:
+			self.ENV_NAME = params['env_name']
+		else:
+			self.ENV_NAME = self.id
+
+		self.env = params["env_maker"](self.ENV_NAME)
+		self.action_size = params['action_size']
+		self.state_size = params['state_size']
+
+		if 'prepare_data' in params:
+			self.prepare_data = params['prepare_data']
+		else:
+			self.prepare_data = __prepare_data__
+
+		if 'prepare_array_data' in params:
+			self.prepare_array_data = params['prepare_array_data']
+		else:
+			self.prepare_array_data = __prepare_array_data__
+
+		if 'act' in params:
+			self.act = params['act']
+		else:
+			self.act = __act__
+
+		if 'initialize_model' in params:
+			self.initialize_model = params['initialize_model']
+		else:
+			self.initialize_model = __initialize_model__
+
+		if 'model' in params:
+			self.model = params['model']()
+		else:
+			self.model = A3CModel(self.state_size, self.action_size)
+		
+		if 'load_model' in params:
+			self.model = tf.keras.models.load_model(params['load_model'])
+
+		self.initialize_model(self.model, self.state_size)
+		self.current_state = self.env.reset()
+
+	def get_model_output(self, current_state):
+		return self.model(self.prepare_data(current_state))
+		
+	def get_actions_prob(self, logits):
+		return tf.nn.softmax(logits)
+
+	def act(self, current_state):
+		logits, values = self.get_model_output(current_state)
+		probs = self.get_actions_prob(logits)
+		return np.random.choice(self.action_size, p=probs.numpy()[0])
+
+	def run(self, max_ep_len = 1000, rendering=True, delay = 0.017):
+		is_done = False
+		ep_reward = 0
+		steps = 0
+		if rendering:
+			self.env.render()
+		while not is_done and steps < max_ep_len:
+			logits, _ = self.model(self.prepare_data(self.current_state))
+			probs = tf.nn.softmax(logits)
+			action = np.random.choice(self.action_size, p=probs.numpy()[0])
+			new_state, reward, is_done, _ = self.act(action, self.env)
+			self.current_state = new_state
+			ep_reward += reward
+			steps += 1
+			time.sleep(delay)
+			if rendering:
+				self.env.render()
+		return ep_reward
+
+
