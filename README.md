@@ -19,15 +19,28 @@ AI4U is a neat and easy way to connect a Unity application to Python code. There
 - Unity environment partial control from Python.
 - Wrap Unity learning environments as a [gym](doc/ai4ugym.md).
 
+# Projects
+
+Some projects were developed with AI4U. The list of major projects is shown in Table 1.
+
+Table 2: Documentation.
+
+| Tutorial        |                                    Link                                          |
+|-----------------|---------------------------------------------------------------------------------------|
+| MazeWorld    |  [Link](https://github.com/gilcoder/MazeWorldBasic)                                           |
+| MemoryV1      | [Link](https://github.com/gilcoder/MemoryV1)                         |
+| BoxChaseBall |  [Link](https://github.com/gilcoder/BoxChaseBall)                        |
+| TMazeRegretExperiment | [Link](https://github.com/gilcoder/TMazeRegretExperiments)
+
 
 # How to use the AI4U?
 AI4U has two components:
     * the *server-side* code written in C#. The second is the
     * *client-side* code written in Python.
 
-For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository [AI4UExamples](https://github.com/gilcoder/AI4U). Start by example [AI4UExamples/CubeAgent](https://github.com/gilcoder/AI4UExamples/CubeAgent) for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 1.
+For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository [AI4UExamples](https://github.com/gilcoder/AI4U). Start by example [AI4UExamples/CubeAgent](https://github.com/gilcoder/AI4UExamples/CubeAgent) for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 2.
 
-Table 1: Documentation.
+Table 2: Documentation.
 
 | Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|

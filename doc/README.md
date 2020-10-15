@@ -1,21 +1,21 @@
-# Introduction to UnityRemotePlugin
+# Introduction to AI4U
 
-UnityRemotePlugin (URP) is composed of a client-side component and server-side component. Client-server communication is via sockets based on UDP connections. The client-side component runs Python code, while the server-side runs code written in C# for Unity applications. Then, URP available as an Application Programming Interface (API) that facilitates integrating Python agents to control Unity game aspects. Figure 1 shows an overview of the URP API logic.
+AI4U API is composed of a client-side component and a server-side component. Client-server communication is via sockets based on UDP connections. The client-side component runs Python code, while the server-side runs code written in C# for Unity applications. Then, AI4U integrates Python agents to control Unity game aspects. Figure 1 shows an overview of the API logic.
 
 | ![See output logs ](images/img_overview.jpg) |
 | :--: |
-| Figure 1. *An Overview of URP API.* |
+| Figure 1. *An Overview of AI4U API.* |
 
 # Client-Server Communication
-URP encapsulates low-level client-server communication and lets the programmer define what actions the agent can perform in the environment. Programming the server so that the environment understands the actions sent by the agent is the responsibility of the programmer.
+AI4U encapsulates low-level client-server communication and lets the programmer define what actions the agent can perform in the environment. Programming the server so that the environment understands the actions sent by the agent is the responsibility of the programmer.
 
 # Basic of Server-Side Programming
 
-Server-side programming is made with C# components. First, you must import the available scritps from the unityplugin/baseline directory into your project Assets directory.
+Server-side programming is made with C# components. First, you must import server side scritps into your project Assets directory. The server side scripts is in repository path *ai4u/serverside/baseline*.
 
 | ![Import server-side plugin to your UnityProject ](images/import_baseline.png) |
 | :--: |
-| Figure 2. *Import server-side plugin to your UnityProject.* |
+| Figure 2. *Import server-side plugin to your Unity Project.* |
 
 You can now create a empty game object and associate it with a RemoteBrain script. Then name this game object *remotebrain*. Select the game object *remotebrain*. See figures 3 and 4. 
 
@@ -41,7 +41,7 @@ Now you have to create an agent that will be remotely controlled by a Python scr
 | :--: |
 | Figure 6. *A Game Object controlled by Python script.* |
 
-Modify the **CubeAgent** script so as shown in Figure 7. Note that the **CubeAgent** class is a child of the **Agent** class. The **ApplyAction** method of the **Agent** class is called whenever a new action is submitted by the client. Then the **UpdatePhysics** and **UpdateState** methods are called. In this example, we will not use these last two methods. However, **UpdatePhysics** should be used in place of the traditional **FixedUpdate**. And the **UpdateState** method must be used to change state variables that will be provided to the client.
+Modify the **CubeAgent** script so as shown in Figure 7. Note that the **CubeAgent** class is a child of the **Agent** class. The **ApplyAction** method of the **Agent** class is called whenever a new action is submitted by the client. Then the **UpdatePhysics** and **UpdateState** methods are called. In this example, we will not use these last two methods. However, **UpdatePhysics** should be used in place of the traditional **FixedUpdate**. And the **UpdateState** must be used to change the state variables to be sent to the client.
 
 | ![CubeAgent script](images/cubagentscript.png) |
 | :--: |
