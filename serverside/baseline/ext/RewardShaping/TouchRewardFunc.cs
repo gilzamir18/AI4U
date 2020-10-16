@@ -15,7 +15,7 @@ namespace  ai4u.ext
         public float rewardValue = 1.0f;
 
         public TouchRewardFunc precondition = null;
-        public MultTouchPrecondition multiplePreconditions = null;
+        public MultTouchPrecondiction multiplePrecondictions = null;
         public bool triggerOnStay = true;
         private int[] counter;
         private bool[] touched;
@@ -73,17 +73,15 @@ namespace  ai4u.ext
             if (precondition != null) {
                 if (!precondition.allowNext || !precondition.wasTouched(agent)){
                     agent.AddReward(-painForViolatinPrecondition, this);
-                    agent.preconditionFailListener(this, precondition);
                     return;
                 }
             }
 
-            if (multiplePreconditions != null)
+            if (multiplePrecondictions != null)
             {
-                if (!multiplePreconditions.allowNext || !multiplePreconditions.wasTouched(agent))
+                if (!multiplePrecondictions.allowNext || !multiplePrecondictions.wasTouched(agent))
                 {
                     agent.AddReward(-painForViolatinPrecondition, this);
-                    agent.preconditionFailListener(this, multiplePreconditions);
                     return;
                 }
             }
