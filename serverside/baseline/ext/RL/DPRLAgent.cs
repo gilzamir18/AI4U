@@ -6,24 +6,40 @@ using ai4u;
 
 namespace ai4u.ext
 {
+
+    /// <summary>DPRLAgent - Dimentional Physical Reinforcement Learning Agent
+    /// This class models an agent with physical rigidbody control in a tridimentional world. </summary> 
     public class DPRLAgent : RLAgent
     {
 
-        public GameObject[] targets;
+        /// <summary>Targets are game objects that the agent must reach.</summary> 
+        public GameObject[] targets; 
 
+        /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
+        /// All positions are equally likely.</summary>
         public Vector3[] randomPositions;
 
+        ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
+        ///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
         public bool doneAtPositiveReward = false;
         
-        public int MaxStepsPerEpisode = 1000;
+        ///<summary>The maximum number of steps per episode.</summary>
+        public int MaxStepsPerEpisode = 0;
 
+        //Agent's ridid body
         private Rigidbody rBody;
+
+        ///<summary>Agent's speed by simulation step.</summary>
         public float speed = 10;
+        
+        //This flag indicates the end of the episode.
         private bool done = false;
 
+        //Current episode's number of steps.
         private int nSteps = 0;
 
+        //forces applied on the x, y and z axes.
         private float fx, fy, fz;
 
         private Vector3 initialLocalPosition;
@@ -33,6 +49,7 @@ namespace ai4u.ext
             rBody = GetComponent<Rigidbody>();
         }
 
+        ///<summary>This property indicates the end of the episode.</summary>
         public bool Done {
             set {
                 done = value;
@@ -59,6 +76,7 @@ namespace ai4u.ext
             fx = 0.0f;
             fy = 0.0f;
             fz = 0.0f;
+            Debug.Log(GetActionName());
             switch (GetActionName())
             {
                 case "x":
@@ -72,6 +90,13 @@ namespace ai4u.ext
                 case "y":
                     if (Done) return;
                     fy = GetActionArgAsFloat();
+                    break;
+                case "xyz":
+                    if (Done) return;
+                    float[] f = GetActionArgAsFloatArray();
+                    fx = f[0];
+                    fy = f[1];
+                    fz = f[2];
                     break;
                 case "restart":
                     ResetPlayer();
@@ -116,7 +141,7 @@ namespace ai4u.ext
         {
             nSteps ++;
 
-            if (nSteps >= MaxStepsPerEpisode) {
+            if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
                 done = true;
             }
 
@@ -141,7 +166,7 @@ namespace ai4u.ext
             }
             SetStateAsFloatArray(2, "state", frame);
             ResetReward();
+            Debug.Log("State Updated");
         }
     }
-
 }

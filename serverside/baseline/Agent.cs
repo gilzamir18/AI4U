@@ -130,6 +130,32 @@ namespace ai4u
             this.values[i] = System.Convert.ToBase64String(value);
         }
 
+        public int GetStateIndex(string description)
+        {
+            for (int i = 0; i < this.desc.Length; i++) {
+                if (desc[i] == description) 
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public string[] GetStateDescriptions()
+        {
+            return (string[])this.desc.Clone();
+        }
+
+        public byte GetStateType(int idx)
+        {
+            return this.types[idx];
+        }
+
+        public string GetStateValue(int idx)
+        {
+            return this.values[idx];
+        }
+
         public string GetActionArgAsString(int i=0)
         {
             return this.brain.GetReceivedArgs()[i];
