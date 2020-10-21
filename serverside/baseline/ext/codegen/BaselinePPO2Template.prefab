@@ -40,7 +40,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1831989979870959657}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8894a45c0897db2ebc1e51af1129656, type: 3}
+  m_Script: {fileID: 11500000, guid: d36f6f05c3054d205a02aed6cdb9338e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   replacesNames:
@@ -48,14 +48,14 @@ MonoBehaviour:
   - '#OUTPUT_PORT'
   - '#HOST'
   - '#WORKERS'
+  - '#OUTPUT_LOG'
   - '#TIMESTEPS'
   - '#MODELNAME'
-  - '#OUTPUT_LOG'
   replacesValues:
   - 8080
   - 7070
   - 127.0.0.1
-  - 1
+  - 4
+  - logs
   - 125000
-  - ppo2model
-  - ./logs/
+  - ppo2_model
