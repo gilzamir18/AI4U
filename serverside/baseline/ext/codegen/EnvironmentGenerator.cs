@@ -71,6 +71,8 @@ namespace ai4u.ext {
                         output.categorical = true;
                     }
 
+                    template.AddOutput(output);
+
                     string code = template.GenCode(this, agent);
                     string fpath = System.IO.Path.Combine(outputPath, filename);
                     System.IO.File.WriteAllText(fpath, code);
