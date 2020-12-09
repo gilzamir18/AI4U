@@ -161,6 +161,9 @@ class Environment(gym.Env):
     def one_step(self, action):
         return self.remoteenv.step(self.actions[action][0], self.actions[action][1])
 
+    def one_stepfv(self, action):
+        return self.remoteenv.stepfv(self.actions[action][0], self.actions[action][1])
+
     def step(self, action, info=None):
         self.__check_configuration_()
         return self.agent.act(self, action, info)

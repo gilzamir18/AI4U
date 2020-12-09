@@ -6,15 +6,9 @@ using ai4u;
 namespace ai4u.ext {
     public struct ModelInput
     {
-        public string name;
-        public int[] shape;
-        public Dtype type;
         public bool isImage;
-        public ModelInput(string name, int[] s, Dtype dtype=Dtype.float32, bool isImage=false)
+        public ModelInput(bool isImage=false)
         {
-            this.name = name;
-            this.shape = s;
-            this.type = dtype;
             this.isImage = isImage;
         }
     }
@@ -36,8 +30,7 @@ namespace ai4u.ext {
     public abstract class EnvironmentTemplate : MonoBehaviour
     {
 
-        public string[] replacesNames;
-        public string[] replacesValues;
+        public StringPair[] replacement;
 
         protected List<ModelInput> inputs = new List<ModelInput>();
         protected List<ModelOutput> outputs = new List<ModelOutput>();
@@ -58,6 +51,6 @@ namespace ai4u.ext {
             this.outputs.Clear();
         }
 
-        public abstract string GenCode(EnvironmentGenerator env, Agent agent);      
+        public abstract string GenCode(EnvironmentGenerator env, DPRLAgent agent);      
     }
 }

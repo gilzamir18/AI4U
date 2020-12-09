@@ -2,26 +2,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ai4u;
+using System;
 
 namespace ai4u.ext {
+
+
+    [Serializable]
+    public struct StringPair
+    {
+        public string name;
+        public string value;
+        public StringPair(string n, string v)
+        {
+            this.name = n;
+            this.value = v;
+        }
+    }
+
+    [Serializable]
+    public struct ActionDescription 
+    {
+        public string name;
+        public string value;
+        public string description;
+
+
+        public ActionDescription(string name, string value)
+        {
+            this.name = name;
+            this.value = value;
+            this.description = "";
+        }
+    }
 
 
     public class EnvironmentGenerator : MonoBehaviour
     {
         public string outputPath = "";
-        public Agent[] agents;
-        public string arrayInputName;
-        public int inputArraySize;
-        public string imageInputName;
-        public int imageInputWidth;
-        public int imageInputHeight;
-        public int imageInputChannels;
+        public DPRLAgent[] agents;
+        public bool hasLinearInput;
+        public bool hasImageInput;
         public int actionShape;
         public bool actionSpaceIsContinue = false;
         public EnvironmentTemplate template;
         public bool runAgent = false;
-        public string[] actionName;
-        public string[] actionValue;
+        public ActionDescription[] actions;
         public int skipFrames = 1;
 
         public bool render = true;
@@ -30,36 +55,16 @@ namespace ai4u.ext {
         {
             if (render) {
                 render = false;
-                foreach (Agent agent in agents)
+                foreach (DPRLAgent agent in agents)
                 {
                     string filename =  agent.name + ".py";
-                    int[] inputShape = new int[1];
-                    inputShape[0] = inputArraySize;
-                    if (arrayInputName != string.Empty) {
-                        int arrayStateIdx = agent.GetStateIndex(arrayInputName);
-                        byte arrayStateType = agent.GetStateType(arrayStateIdx);
-                        ModelInput arrayInput = new ModelInput(arrayInputName, inputShape);
-                        arrayInput.isImage = false;
-                        if (arrayStateType == Brain.FLOAT_ARRAY) {
-                            arrayInput.type = Dtype.float32;
-                        }  else {
-                            throw new System.NotSupportedException("Input array type is not supported: " + arrayStateType);
-                        }
-                        template.AddInput(arrayInput);
+                    if (hasLinearInput) {
+                        ModelInput linearInput = new ModelInput(false);
+                        template.AddInput(linearInput);
                     }
                     
-                    if (imageInputName != string.Empty) {
-                        int[] ishape = new int[]{imageInputWidth, imageInputHeight, imageInputChannels};
-                        ModelInput imageInput = new ModelInput(imageInputName, ishape);
-                        int imageStateIdx = agent.GetStateIndex(imageInputName);
-                        byte imageStateType = agent.GetStateType(imageStateIdx);
-                        if (imageStateType == Brain.STR) {
-                            imageInput.type = Dtype.str;
-                        } else if (imageStateType == Brain.OTHER) {
-                            imageInput.type = Dtype.int8;
-                        } else {
-                            throw new System.NotSupportedException("Input image type is not supported: " + imageStateType);
-                        }
+                    if (hasImageInput) {
+                        ModelInput imageInput = new ModelInput(true);
                         template.AddInput(imageInput);
                     }
 

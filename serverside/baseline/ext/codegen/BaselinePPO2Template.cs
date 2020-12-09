@@ -6,7 +6,13 @@ using ai4u;
 namespace ai4u.ext {
     public class BaselinePPO2Template: EnvironmentTemplate
     {
-        public override string GenCode(EnvironmentGenerator gen, Agent agent)
+
+        public override string GenCode(EnvironmentGenerator gen, DPRLAgent agent)
+        {
+            return "";
+        }
+        /*
+        public override string GenCode(EnvironmentGenerator gen, DPRLAgent agent)
         {
             string text = System.IO.File.ReadAllText("Assets/baseline/baselineppo2.tpl");
 
@@ -71,6 +77,6 @@ namespace ai4u.ext {
             }
             text += "\n";
             return text;
-        }
+        }*/
     }
 }

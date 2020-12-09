@@ -12,9 +12,6 @@ namespace ai4u.ext
     public class DPRLAgent : RLAgent
     {
 
-        /// <summary>Targets are game objects that the agent must reach.</summary> 
-        public GameObject[] targets; 
-
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
         public Vector3[] randomPositions;
@@ -30,8 +27,8 @@ namespace ai4u.ext
         //Agent's ridid body
         private Rigidbody rBody;
 
-        ///<summary>Agent's speed by simulation step.</summary>
-        public float speed = 10;
+        public Sensor[] sensors;
+        public Actuator[]  actuators;
         
         //This flag indicates the end of the episode.
         private bool done = false;
@@ -39,14 +36,43 @@ namespace ai4u.ext
         //Current episode's number of steps.
         private int nSteps = 0;
 
-        //forces applied on the x, y and z axes.
-        private float fx, fy, fz;
-
         private Vector3 initialLocalPosition;
 
-        void Awake() {
-            this.numberOfFields = 3;
+        private Dictionary<string, Actuator> actuatorsMap;
+        private List<Actuator> alwaysActuators = new List<Actuator>();
+        private Dictionary<string, Sensor> sensorsMap;
+
+        void Awake() 
+        {
+            actuatorsMap = new Dictionary<string, Actuator>();
+            sensorsMap = new Dictionary<string, Sensor>();
+            foreach(Sensor s in sensors)
+            {
+                s.SetAgent(this);
+
+                sensorsMap[s.perceptionKey] = s;
+            }
+            foreach(Actuator a in actuators) {
+                if (a.always) {
+                    alwaysActuators.Add(a);
+                }
+                actuatorsMap[a.actionName] = a;
+            }
             rBody = GetComponent<Rigidbody>();
+            initialLocalPosition = transform.position;
+        }
+
+        public bool TryGetSensor(string key, out Sensor s)
+        {
+            return sensorsMap.TryGetValue(key, out s);
+        }
+
+        public override void StartData()
+        {
+            int numberOfFields = 2 + sensors.Length;
+            desc = new string[numberOfFields];
+            types = new byte[numberOfFields];
+            values = new string[numberOfFields];
         }
 
         ///<summary>This property indicates the end of the episode.</summary>
@@ -71,46 +97,22 @@ namespace ai4u.ext
             reward += v;
         }
 
-        public override void ApplyAction()
-        {
-            fx = 0.0f;
-            fy = 0.0f;
-            fz = 0.0f;
-            switch (GetActionName())
-            {
-                case "x":
-                    if (Done) return;
-                    fx = GetActionArgAsFloat();
-                    break;
-                case "z":
-                    if (Done) return;
-                    fz = GetActionArgAsFloat();
-                    break;
-                case "y":
-                    if (Done) return;
-                    fy = GetActionArgAsFloat();
-                    break;
-                case "xyz":
-                    if (Done) return;
-                    float[] f = GetActionArgAsFloatArray();
-                    fx = f[0];
-                    fy = f[1];
-                    fz = f[2];
-                    break;
-                case "restart":
-                    ResetPlayer();
-                    break;
-            }
-        }
-
         public override void UpdatePhysics()
         {
-            if (Done) {
-                return;
-            }
-            if (rBody != null)
+            if (GetActionName() == "restart") {
+                ResetPlayer();
+            } else if (actuatorsMap.ContainsKey(GetActionName())) 
             {
-                rBody.AddForce(fx * speed, fy * speed, fz * speed);
+                Actuator a = actuatorsMap[GetActionName()];
+                if (!a.always) {
+                    a.Act();
+                }
+            }
+            int n = alwaysActuators.Count;
+            if (n > 0) {
+                for (int i = 0; i < n; i++) {
+                    alwaysActuators[i].Act();
+                }
             }
         }
 
@@ -121,19 +123,21 @@ namespace ai4u.ext
                 initialLocalPosition = transform.localPosition;
             }
             done = false;
-            rBody.velocity = Vector3.zero;
-            rBody.angularVelocity = Vector3.zero;
+            if (rBody != null) {
+                rBody.velocity = Vector3.zero;
+                rBody.angularVelocity = Vector3.zero;
+            }
             if (randomPositions.Length > 0) {
                 int idx = (int)Random.Range(0, randomPositions.Length-1 + 0.5f);
                 transform.localPosition = randomPositions[idx];
             } else {
                 transform.localPosition = initialLocalPosition;
             }
-
-            fx = 0;
-            fz = 0;
-            fy = 0;
             ResetReward();
+            foreach(Actuator a in actuators) {
+                a.Reset();
+            }
+            NotifyReset();
         }
 
         public override void UpdateState()
@@ -146,24 +150,31 @@ namespace ai4u.ext
 
             SetStateAsBool(0, "done", done);
             SetStateAsFloat(1, "reward", Reward);
-            int framesize = 6 + 6 * targets.Length;
-            float[] frame = new float[framesize]; 
-            frame[0] = rBody.velocity.x;
-            frame[1] = rBody.velocity.y;
-            frame[2] = rBody.velocity.z;
-            frame[3] = transform.localPosition.x;
-            frame[4] = transform.localPosition.y;
-            frame[5] = transform.localPosition.z;
-            for (int i = 0; i < targets.Length; i += 6) {
-                Rigidbody rBody = targets[i].GetComponent<Rigidbody>();
-                frame[i+6] = rBody.velocity.x;
-                frame[i+7] = rBody.velocity.y;
-                frame[i+8] = rBody.velocity.z;
-                frame[i+9] = targets[i].transform.localPosition.x;
-                frame[i+10] = targets[i].transform.localPosition.y;
-                frame[i+11] = targets[i].transform.localPosition.z;
+            for (int i = 0; i < sensors.Length; i++) {
+                switch(sensors[i].type)
+                {
+                    case SensorType.sfloatarray:
+                        SetStateAsFloatArray(i+2, sensors[i].perceptionKey, sensors[i].GetFloatArrayValue());
+                        break;
+                    case SensorType.sfloat:
+                        SetStateAsFloat(i+2, sensors[i].perceptionKey, sensors[i].GetFloatValue());
+                        break;
+                    case SensorType.sint:
+                        SetStateAsInt(i+2, sensors[i].perceptionKey, sensors[i].GetIntValue());
+                        break;
+                    case SensorType.sstring:
+                        SetStateAsString(i+2, sensors[i].perceptionKey, sensors[i].GetStringValue());
+                        break;
+                    case SensorType.sbool:
+                        SetStateAsBool(i+2, sensors[i].perceptionKey, sensors[i].GetBoolValue());
+                        break;
+                    case SensorType.sbytearray:
+                        SetStateAsByteArray(i+2, sensors[i].perceptionKey, sensors[i].GetByteArrayValue());
+                        break;
+                    default:
+                        break;
+                }
             }
-            SetStateAsFloatArray(2, "state", frame);
             ResetReward();
         }
     }

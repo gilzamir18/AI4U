@@ -42,9 +42,9 @@ namespace ai4u
         protected Brain brain;
 
         public int numberOfFields = 0;
-        private string[] desc;
-        private byte[] types;
-        private string[] values;
+        protected string[] desc;
+        protected byte[] types;
+        protected string[] values;
         private List<IAgentResetListener> resetListener = new List<IAgentResetListener>();
  
         public void AddResetListener(IAgentResetListener listener) 
@@ -67,7 +67,7 @@ namespace ai4u
         {
         }
 
-        public void StartData()
+        public virtual void StartData()
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             desc = new string[numberOfFields];
