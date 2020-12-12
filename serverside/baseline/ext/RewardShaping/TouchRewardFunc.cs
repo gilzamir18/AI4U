@@ -87,7 +87,7 @@ namespace  ai4u.ext
             }
 
             if ( (counter[agent.Id] <
-                maxTouch || maxTouch < 0)  )
+                maxTouch) || (maxTouch < 0)  )
             {
                 counter[agent.Id]++;
                 agent.AddReward(rewardValue, this);

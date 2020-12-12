@@ -14,7 +14,7 @@ namespace ai4u.ext
 
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
-        public Vector3[] randomPositions;
+        public GameObject[] randomPositions;
 
         ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
@@ -129,7 +129,7 @@ namespace ai4u.ext
             }
             if (randomPositions.Length > 0) {
                 int idx = (int)Random.Range(0, randomPositions.Length-1 + 0.5f);
-                transform.localPosition = randomPositions[idx];
+                transform.localPosition = randomPositions[idx].transform.position;
             } else {
                 transform.localPosition = initialLocalPosition;
             }

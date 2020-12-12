@@ -13,7 +13,7 @@ from ai4u.utils import image_decode
 #NETWORK    from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
 #NETWORK    from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, logit_entropy, make_copy_ops
 #NETWORK    observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
-#NETWORK    normalized_obs = tf.keras.layers.Lambda(lambda x : x/255.0)(observations)
+#NETWORK    normalized_obs = tf.keras.layers.Lambda(lambda x : x/#NUMOBJ)(observations)
 #NETWORK    conv1 = tf.keras.layers.Conv2D(128, (2,2), (1,1), activation='relu', name='conv1')(normalized_obs)
 #NETWORK    if debug:
 #NETWORK	    conv1 = tf.Print(conv1, [observations], message='\ndebug observations:', summarize=2147483647)

@@ -61,7 +61,7 @@ namespace ai4u.ext {
             return false;
         }
 
-        public bool ComputingImageInput(DPRLAgent agent, out string code, out int[] shape)
+        public bool ComputingImageInput(DPRLAgent agent, out string code, out int[] shape, out int numObjects)
         {
             Sensor sensor;
             if (agent.TryGetSensor("raycasting", out sensor) )
@@ -69,10 +69,12 @@ namespace ai4u.ext {
                 RaycastingSensor rsensor = (RaycastingSensor) sensor;
                 code = "to_image(fields['" + rsensor.perceptionKey + "'])";
                 shape = new int[]{rsensor.shape[0], rsensor.shape[1], rsensor.shape[2]};
+                numObjects = rsensor.objectMapping.Length;
                 return true;
             }
             code = "";
             shape = null;
+            numObjects = 0;
             return false;
         }
     }
@@ -103,7 +105,8 @@ namespace ai4u.ext {
                 } else {
                     string code;
                     int[] shape;
-                    if (sensorsExtractor.ComputingImageInput(agent, out code, out shape))
+                    int numObjects = 0;
+                    if (sensorsExtractor.ComputingImageInput(agent, out code, out shape, out numObjects))
                     { 
                         text = text.Replace("#IW", "" + shape[0]);
                         text = text.Replace("#IH", "" + shape[1]);
@@ -119,6 +122,7 @@ namespace ai4u.ext {
                         text = text.Replace("#SHAPE1", "" + shape[0]);
                         text = text.Replace("#SHAPE2", "" + shape[1]);
                         text = text.Replace("#NETWORK", "");
+                        text = text.Replace("#NUMOBJ", "" + numObjects);
                     }
                 }
             } else if (dim == 2) {
@@ -126,9 +130,9 @@ namespace ai4u.ext {
                 int shape1;
                 string code2;
                 int[] shape2;
-
+                int numObjects;
                 if (sensorsExtractor.ComputingLinearInput(agent, out code1, out shape1) && 
-                        sensorsExtractor.ComputingImageInput(agent, out code2, out shape2) )
+                        sensorsExtractor.ComputingImageInput(agent, out code2, out shape2, out numObjects) )
                 {
                     text = text.Replace("#IW", "" + shape2[0]);
                     text = text.Replace("#IH", "" + shape2[1]);
@@ -146,6 +150,7 @@ namespace ai4u.ext {
                     text = text.Replace("#SHAPE1", "" + shape2[0]);
                     text = text.Replace("#SHAPE2", "" + shape2[1]);
                     text = text.Replace("#NETWORK", "");
+                    text = text.Replace("#NUMOBJ", "" + numObjects);
                 }
             } else {
                 text = text.Replace("#IW", "0");
