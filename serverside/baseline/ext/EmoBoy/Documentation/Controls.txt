@@ -1,0 +1,23 @@
+Movements:
+	- Run:		WASD or Arrows
+	- Walk:		Hold Left-Shift
+	- Jump:		Space
+	- Crouch:	Hold Left-CTRL/CMD
+
+You can change these inputs in the "Settings/Inputs/Input Actions" asset.
+
+---
+
+Facial expressions:
+	- Neutral:		Numpad 0
+	- Happy:		Numpad 1
+	- Sad:			Numpad 2
+	- Angry:		Numpad 3
+	- Surprised:	Numpad 4
+	- Speak "A":	Numpad 5
+	- Speak "E":	Numpad 6
+	- Speak "O":	Numpad 7
+	- Speak "F":	Numpad 8
+	- Speak "L":	Numpad 9
+
+You can change these inputs in the InputController.cs script.
