@@ -49,28 +49,34 @@ class Agent(BasicAgent):
         #RAYCASTING2for _ in range(#HISTSIZE):
             #RAYCASTING1self.history.append( np.zeros( (#SHAPE1, #SHAPE2) ) )
 
+    def __get_state__(self, env_info):
+        li, img = get_state_from_fields(env_info)
+        state = None
+        if img is not None:
+            self.history.append(img)
+            frameseq = np.array(self.history, dtype=np.float32)
+            frameseq = np.moveaxis(frameseq, 0, -1)
+            if li is None:
+                state = [li, frameseq]
+            else:
+                state = frameseq
+        elif li is not None:
+            state = li
+        return state
+
     def reset(self, env):
         env_info = env.remoteenv.step("restart")
-        state = get_state_from_fields(env_info)
-        #RAYCASTING2self.history.append(state)
-        #RAYCASTING3frameseq = np.array(self.history, dtype=np.float32)
-        #RAYCASTING4frameseq = np.moveaxis(frameseq, 0, -1)
-        #RAYCASTING4state=frameseq
-        return state
+        return self.__get_state__(env_info)
+
     def act(self, env, action, info=None):
         reward = 0
-        for _ in range(#SKIP_FRAMES):
+        envinfo = {}
+        for _ in range(8):
             envinfo = env.one_stepfv(action)
             reward += envinfo['reward']
             if envinfo['done']:
                 break
-        state = get_state_from_fields(envinfo)
-        #RAYCASTING2self.history.append(state)
-        #RAYCASTING3frameseq = np.array(self.history, dtype=np.float32)
-        #RAYCASTING4frameseq = np.moveaxis(frameseq, 0, -1)
-        #RAYCASTING4state=frameseq
-        return state, reward, envinfo['done'], envinfo
-
+        return self.__get_state__(envinfo), reward, envinfo['done'], envinfo
 
 def parse_args():
     parser = argparse.ArgumentParser()

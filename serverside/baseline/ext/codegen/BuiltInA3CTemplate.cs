@@ -15,7 +15,7 @@ namespace ai4u.ext {
             list1.Append("[");
             int countL1 = 0;
             int countL2 = 0;
-            int i = 0;
+            int i1 = 0, i2 = 0;
             size = 0;
             foreach(Sensor s in agent.sensors) 
             {
@@ -24,23 +24,24 @@ namespace ai4u.ext {
                     if (s.type == SensorType.sfloat)
                     {
                         size ++;
-                        if (i > 0)
+                        if (i1 > 0)
                         {
                             list1.Append(",");
                         }
                         list1.Append("fields['" + s.perceptionKey + "']");
                         countL1 ++;
+                        i1++;
                     } else if (s.type == SensorType.sfloatarray) {
                         size += s.shape[0];
-                        if (i > 0) 
+                        if (i2 > 0) 
                         {
                             list2.Append("+");
                         }
                         list2.Append("fields['" + s.perceptionKey + "']");
                         countL2 ++;
+                        i2 ++;
                     }
                 }
-                i++;
             }
             list1.Append(']');
             string gen =  "";
@@ -97,7 +98,7 @@ namespace ai4u.ext {
                     if (sensorsExtractor.ComputingLinearInput(agent, out code, out shape)) 
                     {
                         text = text.Replace("#DISABLE51", "");
-                        text = text.Replace("#TPL_RETURN_STATE", "return np.array(" + code + ")");
+                        text = text.Replace("#TPL_RETURN_STATE", "return[np.array(" + code + "), None]");
                         text = text.Replace("#TPL_INPUT_SHAPE", "(" + shape + ", )");
                         text = text.Replace("#IW", "0");
                         text = text.Replace("#IH", "0");
@@ -110,14 +111,11 @@ namespace ai4u.ext {
                     { 
                         text = text.Replace("#IW", "" + shape[0]);
                         text = text.Replace("#IH", "" + shape[1]);
-                        text = text.Replace("#TPL_RETURN_STATE", "return " +  code);
+                        text = text.Replace("#TPL_RETURN_STATE", "return [None, " +  code + "]");
                         text = text.Replace("#TPL_INPUT_SHAPE", "(" + shape[0] + ", " + shape[1] + ", " + shape[2] + ")");
                         text = text.Replace("#DISABLE51", "");
                         text = text.Replace("#RAYCASTING1", "");
                         text = text.Replace("#RAYCASTING2", "");
-                        text = text.Replace("#RAYCASTING3", "");
-                        text = text.Replace("#RAYCASTING4", "");
-                        text = text.Replace("#RAYCASTING5", "");
                         text = text.Replace("#HISTSIZE", "" + shape[2]);
                         text = text.Replace("#SHAPE1", "" + shape[0]);
                         text = text.Replace("#SHAPE2", "" + shape[1]);
@@ -143,9 +141,6 @@ namespace ai4u.ext {
                     text = text.Replace("#DISABLE52", "");
                     text = text.Replace("#RAYCASTING1", "");
                     text = text.Replace("#RAYCASTING2", "");
-                    text = text.Replace("#RAYCASTING3", "");
-                    text = text.Replace("#RAYCASTING4", "");
-                    text = text.Replace("#RAYCASTING5", "");
                     text = text.Replace("#HISTSIZE", "" + shape2[2]);
                     text = text.Replace("#SHAPE1", "" + shape2[0]);
                     text = text.Replace("#SHAPE2", "" + shape2[1]);
