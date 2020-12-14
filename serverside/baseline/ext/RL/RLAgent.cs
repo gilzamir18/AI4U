@@ -23,7 +23,14 @@ namespace ai4u.ext {
             reward = 0;
         }
 
+        public virtual void RequestDoneFrom(RewardFunc rf) {
+
+        }
+
         public virtual void AddReward(float v, RewardFunc from = null) {
+            if (from.causeEpisodeToEnd) {
+                this.RequestDoneFrom(from);
+            }
             reward += v;
         }
 

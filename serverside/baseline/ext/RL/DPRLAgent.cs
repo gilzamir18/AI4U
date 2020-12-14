@@ -67,6 +67,10 @@ namespace ai4u.ext
             return sensorsMap.TryGetValue(key, out s);
         }
 
+        public override void RequestDoneFrom(RewardFunc rf) {
+            Done = true;
+        }
+
         public override void StartData()
         {
             int numberOfFields = 2 + sensors.Length;

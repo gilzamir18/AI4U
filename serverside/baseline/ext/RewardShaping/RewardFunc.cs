@@ -7,6 +7,8 @@ namespace ai4u.ext {
     public class RewardFunc : MonoBehaviour, IAgentResetListener
     {
         public RLAgent[] agents;
+
+        public bool causeEpisodeToEnd = false;
     
         public virtual void OnReset(Agent agent) {
 
