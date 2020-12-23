@@ -92,13 +92,13 @@ namespace ai4u.ext
 
         public override void AddReward(float v, RewardFunc from = null){
             if (doneAtNegativeReward && v < 0) {
-                done = true;
+                Done = true;
             }
 
             if (doneAtPositiveReward && v > 0) {
-                done = true;
+                Done = true;
             }
-            reward += v;
+            base.AddReward(v, from);
         }
 
         public override void UpdatePhysics()
@@ -107,33 +107,40 @@ namespace ai4u.ext
                 ResetPlayer();
             } else if (actuatorsMap.ContainsKey(GetActionName())) 
             {
-                Actuator a = actuatorsMap[GetActionName()];
-                if (!a.always) {
-                    a.Act();
+                if (!done) {
+                    Actuator a = actuatorsMap[GetActionName()];
+                    if (!a.always) {
+                        a.Act();
+                    }
                 }
+            } else if (GetActionName() == "ResetReward") {
+                ResetReward();
             }
-            int n = alwaysActuators.Count;
-            if (n > 0) {
-                for (int i = 0; i < n; i++) {
-                    alwaysActuators[i].Act();
+            if (!done) {
+                int n = alwaysActuators.Count;
+                if (n > 0) {
+                    for (int i = 0; i < n; i++) {
+                        alwaysActuators[i].Act();
+                    }
                 }
             }
         }
 
         private void ResetPlayer()
         {
+            done = false;
             nSteps = 0;
+            transform.rotation = Quaternion.identity;
             if (initialLocalPosition == null) {
                 initialLocalPosition = transform.localPosition;
             }
-            done = false;
             if (rBody != null) {
                 rBody.velocity = Vector3.zero;
                 rBody.angularVelocity = Vector3.zero;
             }
             if (randomPositions.Length > 0) {
                 int idx = (int)Random.Range(0, randomPositions.Length-1 + 0.5f);
-                transform.localPosition = randomPositions[idx].transform.position;
+                transform.localPosition = randomPositions[idx].transform.localPosition;
             } else {
                 transform.localPosition = initialLocalPosition;
             }
@@ -146,10 +153,20 @@ namespace ai4u.ext
 
         public override void UpdateState()
         {
+
             nSteps ++;
 
             if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
-                done = true;
+                Done = true;
+            }
+
+            if (Done) {
+                int n = alwaysActuators.Count;
+                if (n > 0) {
+                    for (int i = 0; i < n; i++) {
+                        alwaysActuators[i].NotifyEndOfEpisode();
+                    }
+                }
             }
 
             SetStateAsBool(0, "done", done);

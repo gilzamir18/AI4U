@@ -86,6 +86,7 @@ namespace ai4u.ext {
                         //run_cmd("python", fpath, "");
                     }
                 }
+                Debug.Log("Python render done.");
             }
         }
 

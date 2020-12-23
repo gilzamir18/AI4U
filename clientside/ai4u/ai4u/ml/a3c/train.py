@@ -20,27 +20,32 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # filter out INFO messages
 
 
 def make_networks(n_workers, obs_shape, n_actions, value_loss_coef, entropy_bonus, max_grad_norm,
-                  optimizer, detailed_logs, debug, env_defs, extra_inputs_shape):
+                  optimizer, detailed_logs, debug, env_defs):
     # https://www.tensorflow.org/api_docs/python/tf/Graph notes that graph construction isn't
     # thread-safe. So we all do all graph construction serially before starting the worker threads.
 
     make_inference_network = env_defs['make_inference_network']
-
     # Create shared parameters
     with tf.variable_scope('global'):
-        make_inference_network(obs_shape, n_actions)
-
+        if 'extra_inputs_shape' in env_defs:
+            make_inference_network(obs_shape, n_actions, extra_inputs_shape=env_defs['extra_inputs_shape'])
+        else:
+            make_inference_network(obs_shape, n_actions)
     # Create per-worker copies of shared parameters
     worker_networks = []
     for worker_n in range(n_workers):
         create_summary_ops = (worker_n == 0)
         worker_name = "worker_{}".format(worker_n)
+        eis = None
+        if 'extra_inputs_shape' in env_defs:
+            eis = env_defs['extra_inputs_shape']
+            
         network = Network(scope=worker_name, n_actions=n_actions, entropy_bonus=entropy_bonus,
                           value_loss_coef=value_loss_coef, max_grad_norm=max_grad_norm,
                           optimizer=optimizer, add_summaries=create_summary_ops, 
                           state_shape=env_defs['state_shape'], 
                           make_inference_network=env_defs['make_inference_network'],
-                          detailed_logs=detailed_logs, debug=debug, extra_inputs_shape=extra_inputs_shape)
+                          detailed_logs=detailed_logs, debug=debug, extra_inputs_shape=eis)
         worker_networks.append(network)
 
     return worker_networks
@@ -120,17 +125,11 @@ def run(env_defs, kargs=None):
     update_counter = utils.TensorFlowCounter(sess)
     lr = make_lr(lr_args, step_counter.value)
     optimizer = make_optimizer(lr)
-
-    extra_inputs_shape = None
-
-    if 'extra_inputs_shape' in env_defs:
-        extra_inputs_shape = env_defs['extra_inputs_shape']
-
     networks = make_networks(n_workers=args.n_workers, obs_shape=envs[0].observation_space.shape,
                              n_actions=envs[0].action_space.n, value_loss_coef=args.value_loss_coef,
                              entropy_bonus=args.entropy_bonus, max_grad_norm=args.max_grad_norm,
                              optimizer=optimizer, detailed_logs=args.detailed_logs,
-                             debug=args.debug, env_defs=env_defs, extra_inputs_shape=extra_inputs_shape)
+                             debug=args.debug, env_defs=env_defs)
 
     global_vars = tf.trainable_variables('global')
     tf.compat.v1.global_variables_initializer

@@ -1,34 +1,3 @@
-from ai4u.ml.a3c.train import run as run_train
-from ai4u.ml.a3c.run_checkpoint import run as run_test
-from ai4u.utils import environment_definitions
-import AI4UGym
-from AI4UGym import BasicAgent
-import numpy as np
-import argparse
-from collections import deque
-from ai4u.utils import image_decode
-
-#NETWORKdef make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
-#NETWORK    import tensorflow as tf
-#NETWORK    from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
-#NETWORK    from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, logit_entropy, make_copy_ops
-#NETWORK    observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
-#NETWORK    normalized_obs = tf.keras.layers.Lambda(lambda x : x/#NUMOBJ)(observations)
-#NETWORK    conv1 = tf.keras.layers.Conv2D(128, (2,2), (1,1), activation='relu', name='conv1')(normalized_obs)
-#NETWORK    if debug:
-#NETWORK	    conv1 = tf.Print(conv1, [observations], message='\ndebug observations:', summarize=2147483647)
-#NETWORK    conv2 = tf.keras.layers.Conv2D(128, (2,2), (2,2), activation='relu', name='conv2')(conv1)
-#NETWORK    flattened = tf.keras.layers.Flatten()(conv2)
-#NETWORK    hidden1 = tf.keras.layers.Dense(512, activation='relu', name='hidden1')(flattened)
-#NETWORK    hidden2 = tf.keras.layers.Dense(64, activation='relu', name='hidden2')(hidden1)
-#NETWORK    action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden2)
-#NETWORK    action_probs = tf.nn.softmax(action_logits)
-#NETWORK    values = tf.layers.Dense(1, activation=None, name='value')(hidden2)
-#NETWORK    values = values[:, 0]
-#NETWORK    layers = [conv1, conv2, hidden1, hidden2]
-#NETWORK    return observations, action_logits, action_probs, values, layers
-
-
 def to_image(img):
     imgdata = image_decode(img, #IW, #IH)
     return imgdata
@@ -50,18 +19,18 @@ class Agent(BasicAgent):
             #RAYCASTING1self.history.append( np.zeros( (#SHAPE1, #SHAPE2) ) )
 
     def __get_state__(self, env_info):
-        li, img = get_state_from_fields(env_info)
+        p = get_state_from_fields(env_info)
         state = None
-        if img is not None:
-            self.history.append(img)
+        if p[1] is not None:
+            self.history.append(p[1])
             frameseq = np.array(self.history, dtype=np.float32)
             frameseq = np.moveaxis(frameseq, 0, -1)
-            if li is None:
-                state = [li, frameseq]
+            if p[0] is not None:
+                state = (frameseq, np.array(p[0], dtype=np.float32))
             else:
                 state = frameseq
-        elif li is not None:
-            state = li
+        elif p[0] is not None:
+            state = np.array(p[0], dtype=np.float32)
         return state
 
     def reset(self, env):

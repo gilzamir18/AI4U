@@ -26,13 +26,17 @@ namespace ai4u.ext {
         private bool getpickup;
         private bool usewalkspeed = false;
         private float walkspeed = 0.5f;
-        public int nMoveUpdates = 4;
+        private bool stop = false;
         //END::motor controll variables
 
         public Camera mainCamera;
 
         void Awake()
         {
+            
+            if (agent == null) {
+                Debug.LogWarning("You don't set any agent in CharacterActuator.");
+            }
             // get the third person character ( this should never be null due to require component )
             character = agent.GetComponent<ThirdPersonCharacter>();
 
@@ -48,17 +52,7 @@ namespace ai4u.ext {
             }
         }
 
-
-        void FixedUpdate() {
-
-        }
-
-
         private void UpdateActuator(){
-            if (agent.Done) {
-                return;
-            }
-
             // read inputs
             float h = fx;
             float v = fy;
@@ -84,18 +78,20 @@ namespace ai4u.ext {
             } 
 
             // pass all parameters to the character control script
-            for (int m = 0; m < nMoveUpdates; m++) {
-                character.Move(m_Move, crouch, jump, rightTurn - leftTurn, down - up, pushing, fx, fy, getpickup);
-            }
+            character.Move(m_Move, crouch, jump, rightTurn - leftTurn, down - up, pushing, fx, fy, getpickup);
+            
             //character.Move(m_Move, crouch, m_Jump, h, v, pushing);
             jump = false;
         }
 
         public override void Act()
         {
-            Reset();
+            ResetParameters();
             if (agent.GetActionName()==actionName)
             {
+                if (actionReward != null) {
+                    actionReward.RewardFrom(actionName, agent);
+                }
                 //walk and run = 0
                 float[] args = agent.GetActionArgAsFloatArray(); 
                 fy = args[0]; 
@@ -129,9 +125,15 @@ namespace ai4u.ext {
             UpdateActuator();
         }
         
+        public override void NotifyEndOfEpisode() 
+        {   if (!stop && agent.Done)
+            {
+                stop = true;
+                agent.GetComponent<Animator>().enabled = false;
+            }
+        }
 
-        public override void Reset()
-        {
+        public void ResetParameters() {
             fx = 0;
             fy = 0;
             crouch = false;
@@ -141,6 +143,13 @@ namespace ai4u.ext {
             rightTurn = 0;
             up = 0;
             down = 0;
+        }
+
+        public override void Reset()
+        {
+            agent.GetComponent<Animator>().enabled = true;
+            ResetParameters();
+            stop = false;
         }
     }
 }

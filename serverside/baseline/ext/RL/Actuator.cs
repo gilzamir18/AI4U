@@ -10,6 +10,23 @@ namespace ai4u.ext
         public string actionName;
         public bool always;
         public DPRLAgent agent;
+        public ActionReward actionReward;
+        private bool actionDone = false;
+
+        public virtual void NotifyEndOfEpisode() 
+        {
+
+        }
+
+        public bool ActionDone{
+            get {
+                return actionDone;
+            }
+
+            set {
+                actionDone = value;
+            }
+        }
         
         public virtual void Act()
         {

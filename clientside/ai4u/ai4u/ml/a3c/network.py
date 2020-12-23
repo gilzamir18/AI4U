@@ -58,12 +58,10 @@ class Network:
 
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
                  add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None):
-
         with tf.variable_scope(scope):
             #extra_inputs is a list of input channels that it is not a main input channel
             observations, action_logits, action_probs, value, layers = \
                 make_inference_network(obs_shape=state_shape, n_actions=n_actions, debug=debug, extra_inputs_shape=extra_inputs_shape)
-
             actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss = \
                 make_loss_ops(action_logits, value, entropy_bonus, value_loss_coef, debug)
 

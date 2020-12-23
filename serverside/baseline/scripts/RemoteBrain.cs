@@ -7,6 +7,7 @@ namespace ai4u
 {
     public class RemoteBrain : Brain
     {
+        public static bool clientRequestReceived = false;
         public int port = 8081;
         public int buffer_size = 8192;
         private UdpClient udpSocket;
@@ -20,8 +21,8 @@ namespace ai4u
         public string remoteIP = "127.0.0.1";
         public int remotePort = 8080;
         public bool alwaysUpdate = false;
-
         public bool managed = false;
+        public bool waitClientRequest = true;
    
 
         private string cmdname;
@@ -30,8 +31,9 @@ namespace ai4u
         private bool firstMsgSended = false;
         private System.AsyncCallback async_call;
         private IPEndPoint source;
-
         private bool runFirstTime = true;
+        private float timeScale = 1.0f;
+    
         
         void Awake(){
             if (!managed && runFirstTime){
@@ -49,7 +51,8 @@ namespace ai4u
                             i += 2;
                             break;
                         case "--ai4u_timescale":
-                            Time.timeScale = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                            this.timeScale = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                            Time.timeScale = this.timeScale;
                             i += 2;
                             break;
                         case "--ai4u_remoteip":
@@ -87,11 +90,13 @@ namespace ai4u
             endPoint = new IPEndPoint(serverAddr, remotePort);
             agent.SetBrain(this);
             agent.StartData();
+            clientRequestReceived = false;
             Reset();
         }
 
         public void Reset()
         {
+            clientRequestReceived = false;
             try
             {
                 IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, port);
@@ -115,6 +120,12 @@ namespace ai4u
             }
         }
 
+
+        private void ApplyWaitClientRequest() {
+            if (waitClientRequest){
+                Time.timeScale = 0;
+            }
+        }
 
         void RemoteUpdate()
         {
@@ -151,6 +162,9 @@ namespace ai4u
                     firstMsgSended = true;
                 }
             }
+            if (!updateStateOnUpdate) {
+                ApplyWaitClientRequest();
+            }
         }
 
         void FixedUpdate()
@@ -161,7 +175,14 @@ namespace ai4u
             }
         }
 
-        void Update()
+        void Update() {
+            if (clientRequestReceived) {
+                clientRequestReceived = false;
+                Time.timeScale = this.timeScale;
+            }
+        }
+
+        void LateUpdate()
         {
             if (!fixedUpdate)
             {
@@ -182,6 +203,7 @@ namespace ai4u
                     agent.GetState();
                     firstMsgSended = true;
                 }
+                ApplyWaitClientRequest();
             }
         }
 
@@ -218,6 +240,7 @@ namespace ai4u
                     this.args = args;
                     message_received = true;
                 }
+                clientRequestReceived = true;
             }
             catch (System.Exception e)
             {

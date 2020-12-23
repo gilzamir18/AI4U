@@ -97,9 +97,11 @@ class Worker:
             self.episode_values.append(value_estimate)
 
             action = np.random.choice(self.env.action_space.n, p=action_probs)
+            
+            self.last_state, reward, done, envinfo = self.env.step(action, (action_probs, value_estimate) )
+            if 'action' in envinfo:
+                action = envinfo['action']
             actions.append(action)
-            self.last_state, reward, done, _ = self.env.step(action, (action_probs, value_estimate) )
-
             if type(self.last_state) is tuple:
                 self.last_extra_inputs = self.last_state[1]
                 self.last_state = self.last_state[0]

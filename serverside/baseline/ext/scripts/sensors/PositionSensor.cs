@@ -15,7 +15,7 @@ namespace ai4u.ext
 
         public override float[] GetFloatArrayValue()
         {
-            return new float[]{target.transform.position.x, target.transform.position.y, target.transform.position.z};
+            return new float[]{target.transform.localPosition.x, target.transform.localPosition.y, target.transform.localPosition.z};
         }
     }
 }

@@ -27,7 +27,7 @@ namespace ai4u.ext
         {
                 if (agent != null) 
                 {
-                    if (transform.position.y < threshold) 
+                    if (transform.localPosition.y < threshold) 
                     {
                         if (!stopRewardingAfterFall) {
                             agent.AddReward(rewardValue, this);

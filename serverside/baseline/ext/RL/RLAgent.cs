@@ -28,7 +28,7 @@ namespace ai4u.ext {
         }
 
         public virtual void AddReward(float v, RewardFunc from = null) {
-            if (from.causeEpisodeToEnd) {
+            if (from != null && from.causeEpisodeToEnd) {
                 this.RequestDoneFrom(from);
             }
             reward += v;

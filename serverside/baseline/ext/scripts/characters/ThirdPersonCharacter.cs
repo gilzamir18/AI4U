@@ -31,7 +31,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		bool m_Crouching;
         bool m_Pushing = false;
         private GameObject player;
-
+		private int movements = 2;
 		public Camera m_Cam;
 		
 		void Start()
@@ -224,7 +224,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			// this allows us to modify the positional speed before it's applied.
 			if (m_IsGrounded && Time.deltaTime > 0)
 			{
-				Vector3 v = (m_Animator.deltaPosition * m_MoveSpeedMultiplier) / Time.deltaTime;
+				Vector3 v = (m_Animator.deltaPosition * movements * m_MoveSpeedMultiplier) / Time.deltaTime;
 
 				// we preserve the existing y part of the current velocity.
 				v.y = m_Rigidbody.velocity.y;

@@ -74,8 +74,6 @@ class Environment(gym.Env):
             self.action_space = environment_definitions['action_space']
         elif 'action_shape' in environment_definitions:
             self.action_space = spaces.Discrete(environment_definitions['action_shape'][0])
-            min_value = environment_definitions['min_value']
-            max_value = environment_definitions['max_value']
         else:
             raise Exception('environment_definitions do not contains action_space or action_shape')
 
@@ -87,6 +85,8 @@ class Environment(gym.Env):
         elif 'state_shape' in environment_definitions:
             state_shape = environment_definitions['state_shape']
             state_type = environment_definitions['state_type']
+            min_value = environment_definitions['min_value']
+            max_value = environment_definitions['max_value']
             self.observation_space = spaces.Box(low=min_value, high=max_value, shape=state_shape, dtype=state_type)
         else:
             raise Exception('environment_definitions do not contain observation_space or state_shape.')

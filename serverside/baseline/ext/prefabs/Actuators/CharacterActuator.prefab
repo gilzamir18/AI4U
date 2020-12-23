@@ -46,9 +46,6 @@ MonoBehaviour:
   actionName: Character
   always: 0
   agent: {fileID: 0}
-  runningSpeed: 6
-  walkingSpeed: 2
-  crouchedSpeed: 1
-  rotationSpeed: 180
-  jumpSpeed: 8
-  gravity: 20
+  actionReward: {fileID: 0}
+  nMoveUpdates: 8
+  mainCamera: {fileID: 0}

@@ -13,6 +13,7 @@ namespace ai4u.ext {
             StringBuilder list1 = new StringBuilder();
             StringBuilder list2 = new StringBuilder();
             list1.Append("[");
+            list2.Append("np.concatenate( (");
             int countL1 = 0;
             int countL2 = 0;
             int i1 = 0, i2 = 0;
@@ -35,7 +36,7 @@ namespace ai4u.ext {
                         size += s.shape[0];
                         if (i2 > 0) 
                         {
-                            list2.Append("+");
+                            list2.Append(", ");
                         }
                         list2.Append("fields['" + s.perceptionKey + "']");
                         countL2 ++;
@@ -44,11 +45,14 @@ namespace ai4u.ext {
                 }
             }
             list1.Append(']');
+            list2.Append("))");
             string gen =  "";
             if (countL1 > 0) {
-                gen += list1.ToString();
                 if (countL2 > 0) {
-                    gen += "+" + list2.ToString();
+                    gen += "np.concatenate((" + list1.ToString();
+                    gen += ", " + list2.ToString() + "))";
+                } else {
+                    gen = list1.ToString();
                 }
                 code = gen;
                 return true;
@@ -84,31 +88,40 @@ namespace ai4u.ext {
     {
 
         private SensorsExtractor sensorsExtractor = new SensorsExtractor();
+        public float linearInputNorm = 100.0f;
 
         public override string GenCode(EnvironmentGenerator gen, DPRLAgent agent)
         {
+            string head = System.IO.File.ReadAllText("Assets/baseline/builtina3c_head.tpl");
             string text = System.IO.File.ReadAllText("Assets/baseline/builtina3c.tpl");
 
             int dim = inputs.Count;
 
             if (dim == 1) {
-                if (!inputs[0].isImage) {
+                if (!inputs[0].isImage) { //only linear input
                     string code;
                     int shape = 0;
                     if (sensorsExtractor.ComputingLinearInput(agent, out code, out shape)) 
                     {
+                        text = head + text;
                         text = text.Replace("#DISABLE51", "");
                         text = text.Replace("#TPL_RETURN_STATE", "return[np.array(" + code + "), None]");
                         text = text.Replace("#TPL_INPUT_SHAPE", "(" + shape + ", )");
+                        text = text.Replace("#ARRAY_SIZE", "" + shape);
                         text = text.Replace("#IW", "0");
                         text = text.Replace("#IH", "0");
+                    } else 
+                    {
+                        Debug.LogWarning("A3CBuiltInGenerator error: there is no enough information to generate agent program!!!");
                     }
-                } else {
+                } else { //only image input
                     string code;
                     int[] shape;
                     int numObjects = 0;
                     if (sensorsExtractor.ComputingImageInput(agent, out code, out shape, out numObjects))
                     { 
+                        string neuralCode = System.IO.File.ReadAllText("Assets/baseline/builtina3c_imageInput.tpl");
+                        text = head + neuralCode + text;                        
                         text = text.Replace("#IW", "" + shape[0]);
                         text = text.Replace("#IH", "" + shape[1]);
                         text = text.Replace("#TPL_RETURN_STATE", "return [None, " +  code + "]");
@@ -121,9 +134,13 @@ namespace ai4u.ext {
                         text = text.Replace("#SHAPE2", "" + shape[1]);
                         text = text.Replace("#NETWORK", "");
                         text = text.Replace("#NUMOBJ", "" + numObjects);
+                        text = text.Replace("#LINEARINPUTNORM", "" + linearInputNorm);
+                    } else 
+                    {
+                        Debug.LogWarning("A3CBuiltInGenerator error: there is no enough information to generate agent program!!!");
                     }
                 }
-            } else if (dim == 2) {
+            } else if (dim == 2) { //two inputs: image, and linear array.
                 string code1;
                 int shape1;
                 string code2;
@@ -132,6 +149,8 @@ namespace ai4u.ext {
                 if (sensorsExtractor.ComputingLinearInput(agent, out code1, out shape1) && 
                         sensorsExtractor.ComputingImageInput(agent, out code2, out shape2, out numObjects) )
                 {
+                    string neuralCode = System.IO.File.ReadAllText("Assets/baseline/builtina3c_linearImageInput.tpl");
+                    text = head + neuralCode + text;    
                     text = text.Replace("#IW", "" + shape2[0]);
                     text = text.Replace("#IH", "" + shape2[1]);
                     text = text.Replace("#TPL_RETURN_STATE", "return [" + code1  + ", " + code2 + "]");
@@ -146,6 +165,10 @@ namespace ai4u.ext {
                     text = text.Replace("#SHAPE2", "" + shape2[1]);
                     text = text.Replace("#NETWORK", "");
                     text = text.Replace("#NUMOBJ", "" + numObjects);
+                    text = text.Replace("#LINEARINPUTNORM", "" + linearInputNorm);
+                } else 
+                {
+                    Debug.LogWarning("A3CBuiltInGenerator error: there is no enough information to generate agent program!!!");
                 }
             } else {
                 text = text.Replace("#IW", "0");
