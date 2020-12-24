@@ -5,37 +5,61 @@ using System.Text;
 
 namespace ai4u
 {
+    ///
+    /// <summary>This class defines a remote controller for an agent of type Agent of the AI4U.
+    /// Estes agentes recebem comandos de um script por meio de uma interface de comunicação em rede.
+    /// So, Brain is a generic controller, awhile RemoteBrain implements an agent's network controller.
+    /// </summary>
     public class RemoteBrain : Brain
     {
-        public static bool clientRequestReceived = false;
-        public int port = 8081;
-        public int buffer_size = 8192;
-        private UdpClient udpSocket;
+        private static bool clientRequestReceived = false; //This flag indicates if remote message was received.
+        public int port = 8081; //defines the port on which the controller will receive remote commands.
+        public int buffer_size = 8192; //number of bytes of the network buffer.
+        private UdpClient udpSocket; //socket to start listening controller messages/requests.
 
-        private UdpClient socket;
+        private UdpClient socket; //socket to response controller messages/requests. 
         
-        private Socket sock;
-        private IPAddress serverAddr;
-        private EndPoint endPoint;
+        private Socket sockToSend; //Socket to send async message.
+        private IPAddress serverAddr; //controller address
+        private EndPoint endPoint; //controller endpoint
 
+        ///<summary>controller IP</summary>
         public string remoteIP = "127.0.0.1";
+        
+        ///<summary>controller port</summary>
         public int remotePort = 8080;
+
+        ///<summary>updates the agent's physics even if the remote controller 
+        ///has not sent any actions/messages. It's dont work very well with 
+        ///reinforcement learning algorithms. So, leave this disabled for reinforcement
+        /// learning.</summary>
         public bool alwaysUpdate = false;
+        
+        ///<summary>If true, the remote brain will be 
+        ///managed manually. Thus, in this case, command 
+        ///line arguments do not alter the properties of 
+        ///the remote brain.</summary>
         public bool managed = false;
+        
+        ///<summary>If waitClientRequest is equals true, remote brain pause physical update until it receives
+        ///another controller message. This is essential for converging the reinforcement learning training 
+        ///algorithm, as it guarantees the properties of a Markov Decision Process.
+        ///</summary>
         public bool waitClientRequest = true;
    
 
-        private string cmdname;
-        private string[] args;
-        private bool message_received = false;
-        private bool firstMsgSended = false;
-        private System.AsyncCallback async_call;
+        private string cmdname; //It's more recently received command/action name.
+        private string[] args; //It's more recently command/action arguments.
+        private bool message_received = false; //flag indicating message received.
+        private bool firstMsgSended = false; //it's true if received message is a first...
+        private System.AsyncCallback async_call; //call back function called after message received.
         private IPEndPoint source;
-        private bool runFirstTime = true;
-        private float timeScale = 1.0f;
+        private bool runFirstTime = true; //it indicates if it's the first time that aWake method runs.
+        private float timeScale = 1.0f; //unity controll of the physical time.
     
         
         void Awake(){
+            //one time configuration
             if (!managed && runFirstTime){
                 runFirstTime =false;
                 string[] args = System.Environment.GetCommandLineArgs ();
@@ -67,6 +91,10 @@ namespace ai4u
                             QualitySettings.vSyncCount = int.Parse(args[i+1]);
                             i += 2;
                             break;
+                        case "--ai4u_waitclientrequest":
+                            this.waitClientRequest = bool.Parse(args[i+1]);
+                            i += 2;
+                            break;
                         default:
                             i+=1;
                             break;
@@ -82,9 +110,9 @@ namespace ai4u
             source = null;
             async_call = new System.AsyncCallback(ReceiveData);
             firstMsgSended = false;
-            if (sock == null)
+            if (sockToSend == null)
             {
-                sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                sockToSend = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             }
             serverAddr = IPAddress.Parse(remoteIP);
             endPoint = new IPEndPoint(serverAddr, remotePort);
@@ -255,15 +283,15 @@ namespace ai4u
         }
 
         /// <summary>
-        /// Envia uma mensagem para o cliente com o seguinte formato:
-        ///     [numberofields][[descsize][desc][tipo][valorsize][valor]]+
-        ///     onde desc é uma descrição da mensagem, tipo é o tipo da mensagem dado como um inteiro tal que:
-        ///         0 = float
-        ///         1 = int
-        ///         2 = boolean
-        ///         3 = string
-        ///         4 = array de bytes
-        ///    e valor é o valor da informacao enviada.
+        /// Sends a message to the customer in the following format:
+        /// [numberofields] [[descsize] [desc] [type] [valorsize] [value]] +
+        /// where desc is a description of the message, type is the type of the message given as an integer such that:
+        /// 0 = float
+        /// 1 = int
+        /// 2 = boolean
+        /// 3 = string
+        /// 4 = byte array
+        /// e value is the value of the information sent.
         /// </summary>
         public void SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
         {
@@ -289,7 +317,7 @@ namespace ai4u
 
         public void sendData(byte[] data)
         {
-            sock.SendTo(data, endPoint);
+            sockToSend.SendTo(data, endPoint);
         }
     }
 }

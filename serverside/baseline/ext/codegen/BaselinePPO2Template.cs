@@ -41,9 +41,9 @@ namespace ai4u.ext {
                         text = text.Replace("#INPUT_PORT", ""+inputPort);
                         text = text.Replace("#OUTPUT_PORT", ""+outputPort);
                         if (useLSTM) {
-                            text = text.Replace("PPO2POLICY", "MlpLstmPolicy");
+                            text = text.Replace("#PPO2POLICY", "MlpLstmPolicy");
                         } else {
-                            text = text.Replace("PPO2POLICY", "MlpPolicy");
+                            text = text.Replace("#PPO2POLICY", "MlpPolicy");
                         }
                     } else 
                     {
@@ -69,9 +69,9 @@ namespace ai4u.ext {
                         text = text.Replace("#INPUT_PORT", ""+inputPort);
                         text = text.Replace("#OUTPUT_PORT", ""+outputPort);
                         if (useLSTM) {
-                            text = text.Replace("PPO2POLICY", "MlpLstmPolicy");
+                            text = text.Replace("#PPO2POLICY", "MlpLstmPolicy");
                         } else {
-                            text = text.Replace("PPO2POLICY", "MlpPolicy");
+                            text = text.Replace("#PPO2POLICY", "MlpPolicy");
                         }
                     } else 
                     {
@@ -112,9 +112,9 @@ namespace ai4u.ext {
                     text = text.Replace("#INPUT_PORT", ""+inputPort);
                     text = text.Replace("#OUTPUT_PORT", ""+outputPort);
                     if (useLSTM) {
-                        text = text.Replace("PPO2POLICY", "MlpLstmPolicy");
+                        text = text.Replace("#PPO2POLICY", "MlpLstmPolicy");
                     } else {
-                        text = text.Replace("PPO2POLICY", "MlpPolicy");
+                        text = text.Replace("#PPO2POLICY", "MlpPolicy");
                     }
                 } else 
                 {
