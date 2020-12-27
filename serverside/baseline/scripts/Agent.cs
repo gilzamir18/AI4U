@@ -4,38 +4,14 @@ using System.Collections.Generic;
 namespace ai4u
 {
 
-    public interface IAgentResetListener
-    {
-        void OnReset(Agent agent);
-    }
 
-    public abstract class Brain : MonoBehaviour
-    {
-        public static byte FLOAT = 0;
-        public static byte INT = 1;
-        public static byte BOOL = 2;
-        public static byte STR = 3;
-        public static byte OTHER = 4;
-        public static byte FLOAT_ARRAY = 5;
-        protected string receivedcmd; 
-        protected string[] receivedargs;
-        public abstract void SendMessage(string[] desc, byte[] tipo, string[] valor);
-
-        public Agent agent = null;
-        public bool fixedUpdate = true;
-        public bool updateStateOnUpdate = false;
-
-        public string GetReceivedCommand()
-        {
-            return receivedcmd;
-        }
-
-
-        public string[] GetReceivedArgs()
-        {
-            return receivedargs;
-        }
-    }
+    ///<summary>
+    ///An agent is an object that supports the cycle of updating the state 
+    ///represented by the tuple (s[t], a, s[t + 1]), where s [t] is the current 
+    ///state, s [t+1] is the next state and 'a' is the action taken that resulted 
+    ///in s[t+1]. An agent receives an action or command from a controlle (instance of the Brain class),
+    ///executes this action in the environment and returns to the controller the resulting 
+    ///state named s[t+t1]. </summary>
 
     public abstract class Agent : MonoBehaviour
     {
@@ -217,6 +193,50 @@ namespace ai4u
         {
             this.brain = brain;
         }
+    }
+
+    ///<summary>The Brain class communicates with the character's controller, that is, with the remote or 
+    ///local mechanism it takes, selects the next action given the current state. This class does not fix
+    /// any particular decision-making approach, but rather encapsulates a decision-making protocol that 
+    ///allows the agent to be controlled remotely (code in programming languages ​​other than those supported by Unity)
+    ///or locally (scripts that use languages ​​supported by Unity. Python is the naturally supported remote 
+    ///scripting language. But others may be supported in the future. AI4U provides two instances of Brain. 
+    ///One is a remote controller called RemoteBrain, which allows a remote controller to send 
+    ///commands to an avatar. a local controller, which allows commands to be sent without using 
+    /// network protocols. A local controller can be used to adapt the use of a trained model 
+    /// using a remote controller. This is a possible scenario given that there are many algorithms
+    ///and frameworks that they are easier for prototyping than with a Unity language.</summary>
+    public abstract class Brain : MonoBehaviour
+    {
+        public static byte FLOAT = 0;
+        public static byte INT = 1;
+        public static byte BOOL = 2;
+        public static byte STR = 3;
+        public static byte OTHER = 4;
+        public static byte FLOAT_ARRAY = 5;
+        protected string receivedcmd; 
+        protected string[] receivedargs;
+        public abstract void SendMessage(string[] desc, byte[] tipo, string[] valor);
+
+        public Agent agent = null;
+        public bool fixedUpdate = true;
+        public bool updateStateOnUpdate = false;
+
+        public string GetReceivedCommand()
+        {
+            return receivedcmd;
+        }
+
+
+        public string[] GetReceivedArgs()
+        {
+            return receivedargs;
+        }
+    }
+
+    public interface IAgentResetListener
+    {
+        void OnReset(Agent agent);
     }
 }
 

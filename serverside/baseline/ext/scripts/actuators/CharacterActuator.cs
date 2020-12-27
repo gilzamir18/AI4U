@@ -92,35 +92,41 @@ namespace ai4u.ext {
                 if (actionReward != null) {
                     actionReward.RewardFrom(actionName, agent);
                 }
-                //walk and run = 0
+
+
                 float[] args = agent.GetActionArgAsFloatArray(); 
-                fy = args[0]; 
+
+                int N = args.Length;
+
+                //walk and run = 0
+                if (N > 0) fy = args[0];
+
                 //walk_around = 1
-                fx = args[1];
+                if (N > 1) fx = args[1];
                 
                 //right_turn = 2
-                rightTurn = args[2];
+                if (N > 2) rightTurn = args[2];
 
                 //leftTurn = 3    
-                leftTurn = args[3];
+                if (N > 3) leftTurn = args[3];
                     
                 //up = 4
-                up = args[4];
+                if (N > 4) up = args[4];
                 
                 //down = 5
-                down = args[5];
+                if (N > 5) down = args[5];
 
                 //push = 6
-                pushing = args[6] > 0;
+                if (N > 6) pushing = args[6] > 0;
                 
                 //jump = 7
-                jump = args[7] > 0;
+                if (N > 7) jump = args[7] > 0;
                     
                 //crouch = 8
-                crouch = args[8] > 0;
+                if (N > 8) crouch = args[8] > 0;
 
                 //pickup = 9
-                getpickup = args[9] > 0;
+                if (N > 9) getpickup = args[9] > 0;
             }
             UpdateActuator();
         }
