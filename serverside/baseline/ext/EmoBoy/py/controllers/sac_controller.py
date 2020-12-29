@@ -25,15 +25,22 @@ def to_image(img):
     imgdata = image_decode(img, 20, 20)
     return imgdata
 
-
 #BEGIN::GENERATED CODE :: DON'T CHANGE
 '''
 get_state_from_fields receive a dictionaries with current state information
 and returns a concatenate array with all relevants features for agent decision making.
 '''
 def get_state_from_fields(fields):
-    return np.concatenate( (fields['AgentForward'], fields['AgentPosition'], fields['targetDiscrepancy'])) * 1/100.0
+    return np.concatenate( (fields['AgentForward'], fields['mdistance'], fields['targetDiscrepancy'], fields['GroundStatus']) ) * 1/100.0
 
+
+def adapted_action(action):
+    aaction = np.zeros(10)
+    aaction[0] = action[0] #forward
+    aaction[1] = action[1] #walk around
+    aaction[7] = action[2] #jump
+    aaction[9] = action[3] #pickup
+    return aaction
 
 '''
 Agent class implements a BasicAgent performer that receives a decision marker action 
@@ -52,7 +59,6 @@ class Agent(BasicAgent):
         env_info = env.remoteenv.step("restart")
         return get_state_from_fields(env_info)
 
-
     '''
     It's receives a decision marker action (named action) and convert it in action format for 
     specific implemented environment. The environment is an character controller that one receives
@@ -63,19 +69,15 @@ class Agent(BasicAgent):
     '''
     def act(self, env, action, info=None):
         reward_sum = 0
-        #convert aciton format for the suitable character controller format.
-        raction = np.zeros(10)
-        raction[0] = action[0] #forward
-        raction[1] = action[1] #walk around
-        raction[7] = action[2] #jump
-        raction[9] = action[3] #pickup
-        for _ in range(8): #skip 8 frames with repeated actions application.
-            envinfo = env.remoteenv.stepfv('Character', raction) #send action for character controller
-            reward_sum += envinfo['reward'] #agent's reward by action execution.
-            if envinfo['done']: #if episode ends.
-                break #break the loop
-        state = get_state_from_fields(envinfo) #get last state.
-        return state, reward_sum, envinfo['done'], envinfo #return state, reward, done status, and extra environment informations
+        action = adapted_action(action)
+        for _ in range(8):
+            envinfo = env.remoteenv.stepfv('Character', action)
+            reward_sum += envinfo['reward']
+            if envinfo['done']:
+                break
+        state = get_state_from_fields(envinfo)
+        return state, reward_sum, envinfo['done'], envinfo
+
 
 '''
 make_env_def configure agent-environment properties.
@@ -83,15 +85,15 @@ make_env_def configure agent-environment properties.
 def make_env_def():
     #environment_definitions['state_shape'] = (20, 20, 4)
     #environment_definitions['extra_inputs_shape'] = (8,)
-    action_low = np.array ([-100, -100, -0.1, -0.1], dtype=np.float32) #lower action's values
-    action_high = np.array([ 100,  100, 0.1, 0.1], dtype=np.float32) #higher action's values
-    environment_definitions['state_shape'] = (8,) #agent's perception shape
-    environment_definitions['action_space'] = spaces.Box(action_low, action_high) #continuos action's space
-    environment_definitions['action_shape'] = (4, ) #number of actions
-    environment_definitions['agent'] = Agent #define agent's class 
-    environment_definitions['input_port'] = 8080 #match with start output port of the object BrainManager in the server side.
-    environment_definitions['output_port'] = 7070 #match with start input port of the object BrainManager in the server side.
-    BasicAgent.environment_definitions = environment_definitions #It's define environment properties.
+    action_low = np.array ([-100, -100, -0.1, -0.1], dtype=np.float32)
+    action_high = np.array([ 100,  100, 0.1, 0.1], dtype=np.float32)
+    environment_definitions['state_shape'] = (9,)
+    environment_definitions['action_space'] = spaces.Box(action_low, action_high)
+    environment_definitions['action_shape'] = (4, )
+    environment_definitions['agent'] = Agent
+    environment_definitions['input_port'] = 8080
+    environment_definitions['output_port'] = 7070
+    BasicAgent.environment_definitions = environment_definitions
 
 make_env_def()
 #END::GENERATED CODE :: DON'T CHANGE
@@ -100,32 +102,61 @@ def train():
     import tensorflow as tf
     env = gym.make('AI4U-v0') #Make the environment
     policy_kwargs = dict(act_fun=tf.nn.tanh, layers=[128, 128])
-    model = SAC(MlpPolicy, env, verbose=1, policy_kwargs=policy_kwargs, gamma=0.99, learning_rate=0.0003, buffer_size=1000000, learning_starts=10, train_freq=1, batch_size=64, tau=0.005, ent_coef='auto', target_update_interval=20, gradient_steps=1, target_entropy='auto', tensorboard_log="sac2log")
-    model.learn(total_timesteps=500000, log_interval=10) #Training loop
+    model = SAC(MlpPolicy, env, verbose=1, policy_kwargs=policy_kwargs, gamma=0.99, learning_rate=0.0003, buffer_size=80000, learning_starts=10, train_freq=1, batch_size=64, tau=0.005, ent_coef='auto', target_update_interval=5, gradient_steps=1, target_entropy='auto', tensorboard_log="sac2log")
+    model.learn(total_timesteps=100000, log_interval=10) #Training loop
     model.save('sacmodel') #Save trained model.
     del model # remove to demonstrate saving and loading
 
-def test():
+def model_test():
     env = gym.make('AI4U-v0') #Make the environment
     model = SAC.load('sacmodel')
     # Enjoy test loop with trained agent
-    obs = env.reset()
-    while True:
-        action, _states = model.predict(obs)
-        env.step(action)
+    for i in range(100):
+        obs = env.reset()
+        reward_sum = 0.0
+        while True:
+            action, _states = model.predict(obs)
+            obs, reward, done, info = env.step(action)
+            reward_sum += reward
+            if done:
+                break
+        print("Reward sum on episode: ", i, " is equals to ", reward_sum)
+        #env.render()
+
+def manual_test():
+    env = gym.make('AI4U-v0') #Make the environment
+    #model = SAC.load('sacmodel')
+    # Enjoy test loop with trained agent
+    for i in range(100):
+        obs = env.reset()
+        reward_sum = 0.0
+        while True:
+            #action, _states = model.predict(obs)
+            action = int(input("action "))
+            actions = np.zeros(10)
+            actions[action] = 1.0
+            obs, reward, done, info = env.step(actions)
+            print('reward = ', reward)
+            print('obs: ', obs)
+            reward_sum += reward
+            if done:
+                break
+        print("Reward sum on episode: ", i, " is equals to ", reward_sum)
         #env.render()
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run",
-                        choices=['train', 'test'],
+                        choices=['train', 'test', 'manual'],
                         default='train')
     return parser.parse_args()
 
 if __name__ == '__main__':
    args = parse_args()
-   if args.run == "train":
+   if args.run == "train": #for agent training
         train()
-   elif args.run == "test":
-        test()
+   elif args.run == "test": #for model testing
+        model_test()
+   elif args.run == "manual": #for debug
+        manual_test()
 
