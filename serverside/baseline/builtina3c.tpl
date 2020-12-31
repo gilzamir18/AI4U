@@ -22,7 +22,7 @@ class Agent(BasicAgent):
         p = get_state_from_fields(env_info)
         state = None
         if p[1] is not None:
-            self.history.append(p[1])
+            #RAYCASTING1self.history.append(p[1])
             frameseq = np.array(self.history, dtype=np.float32)
             frameseq = np.moveaxis(frameseq, 0, -1)
             if p[0] is not None:
