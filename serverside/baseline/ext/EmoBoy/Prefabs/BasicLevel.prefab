@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3412606451184298773}
   - component: {fileID: 3412606451184298772}
   - component: {fileID: 3412606451184298775}
+  - component: {fileID: 1272770246847306108}
   m_Layer: 0
   m_Name: Target
   m_TagString: Target
@@ -118,6 +119,18 @@ MonoBehaviour:
   multiplePrecondictions: {fileID: 0}
   triggerOnStay: 0
   allowNext: 0
+--- !u!114 &1272770246847306108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3412606451184298762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c4908378b94441b5bad87346b4e3b86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3412606451253451811
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,7 +277,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3412606451946808294}
   m_Layer: 0
-  m_Name: BasicLevel 1
+  m_Name: BasicLevel
   m_TagString: Terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

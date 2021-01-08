@@ -17,7 +17,7 @@ namespace ai4u.ext {
         public override float[] GetFloatArrayValue()
         {
             if (target == null){
-                Debug.LogWarning("TargetOrientationSensor error: target don't specified!");
+                Debug.LogWarning("TargetDiscrepancySensor error: target don't specified!");
             }
         
             Vector3 f = reference.transform.forward;

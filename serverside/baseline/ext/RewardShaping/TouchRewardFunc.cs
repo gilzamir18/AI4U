@@ -67,32 +67,34 @@ namespace  ai4u.ext
         public void Check(Collider collider)
         {
             RLAgent agent = collider.gameObject.GetComponent<RLAgent>();
-            touched[agent.Id] = true;
-            agent.touchListener(this);  
+            if (agent != null) {
+                touched[agent.Id] = true;
+                agent.touchListener(this);  
 
-            if (precondition != null) {
-                if (!precondition.allowNext || !precondition.wasTouched(agent)){
-                    agent.AddReward(-painForViolatinPrecondition, this);
-                    return;
+                if (precondition != null) {
+                    if (!precondition.allowNext || !precondition.wasTouched(agent)){
+                        agent.AddReward(-painForViolatinPrecondition, this);
+                        return;
+                    }
                 }
-            }
 
-            if (multiplePrecondictions != null)
-            {
-                if (!multiplePrecondictions.allowNext || !multiplePrecondictions.wasTouched(agent))
+                if (multiplePrecondictions != null)
                 {
-                    agent.AddReward(-painForViolatinPrecondition, this);
-                    return;
+                    if (!multiplePrecondictions.allowNext || !multiplePrecondictions.wasTouched(agent))
+                    {
+                        agent.AddReward(-painForViolatinPrecondition, this);
+                        return;
+                    }
                 }
-            }
 
-            if ( (counter[agent.Id] <
-                maxTouch) || (maxTouch < 0)  )
-            {
-                counter[agent.Id]++;
-                agent.AddReward(rewardValue, this);
-            } else if (maxTouch >= 0 && counter[agent.Id] >= maxTouch) {
-                agent.AddReward(-painForOverTouch, this);
+                if ( (counter[agent.Id] <
+                    maxTouch) || (maxTouch < 0)  )
+                {
+                    counter[agent.Id]++;
+                    agent.AddReward(rewardValue, this);
+                } else if (maxTouch >= 0 && counter[agent.Id] >= maxTouch) {
+                    agent.AddReward(-painForOverTouch, this);
+                }
             }
         }
     }

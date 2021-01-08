@@ -60,6 +60,7 @@ namespace ai4u.ext
             }
             rBody = GetComponent<Rigidbody>();
             initialLocalPosition = transform.position;
+            ResetPlayer();
         }
 
         public bool TryGetSensor(string key, out Sensor s)
