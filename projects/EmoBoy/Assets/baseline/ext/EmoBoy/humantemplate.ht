@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1105 &110500000
+HumanTemplate:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: humantemplate
+  m_BoneTemplate:
+    Chest: Base HumanSpine2
+    Head: Base HumanHead
+    Hips: Base HumanPelvis
+    Jaw: Base HumanHeadMouseL
+    Left Index Distal: Base HumanLDigit13
+    Left Index Intermediate: Base HumanLDigit12
+    Left Index Proximal: Base HumanLDigit11 1
+    Left Middle Intermediate: Base HumanLDigit22
+    Left Middle Proximal: Base HumanLDigit21
+    Left Ring Intermediate: Base HumanLDigit32
+    Left Ring Proximal: Base HumanLDigit31
+    LeftEye: Base HumanHeadEyes
+    LeftFoot: Base HumanLFoot
+    LeftHand: Base HumanLPalm
+    LeftLowerArm: Base HumanLForearm
+    LeftLowerLeg: Base HumanLCalf
+    LeftShoulder: Base HumanLCollarbone
+    LeftToes: Base HumanLDigit11
+    LeftUpperArm: Base HumanLUpperarm
+    LeftUpperLeg: Base HumanLThigh
+    Neck: Base HumanNeck
+    Right Index Distal: Base HumanRDigit13
+    Right Index Intermediate: Base HumanRDigit12
+    Right Index Proximal: Base HumanRDigit11 1
+    Right Middle Intermediate: Base HumanRDigit22
+    Right Middle Proximal: Base HumanRDigit21
+    Right Ring Intermediate: Base HumanRDigit32
+    Right Ring Proximal: Base HumanRDigit31
+    RightEye: Base HumanHeadJaw
+    RightFoot: Base HumanRFoot
+    RightHand: Base HumanRPalm
+    RightLowerArm: Base HumanRForearm
+    RightLowerLeg: Base HumanRCalf
+    RightShoulder: Base HumanRCollarbone
+    RightToes: Base HumanRDigit11
+    RightUpperArm: Base HumanRUpperarm
+    RightUpperLeg: Base HumanRThigh
+    Spine: Base HumanSpine1
