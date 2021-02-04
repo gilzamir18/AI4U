@@ -80,7 +80,6 @@ def start_worker_threads(workers, n_steps, steps_per_update, step_counter, updat
         worker_threads.append(thread)
     return worker_threads
 
-
 def run_manager(worker_threads, sess, lr, step_counter, update_counter, log_dir, saver,
                 wake_interval_seconds, ckpt_interval_seconds):
     checkpoint_file = osp.join(log_dir, 'checkpoints', 'network.ckpt')
@@ -109,7 +108,6 @@ def run_manager(worker_threads, sess, lr, step_counter, update_counter, log_dir,
 
         if not any(alive):
             break
-
 
 def run(env_defs, kargs=None):
     args, lr_args, log_dir, preprocess_wrapper = parse_args(env_defs, kargs)

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8482642778231523867}
   - component: {fileID: 8482642778231523866}
   m_Layer: 0
-  m_Name: DiscretA3CEnvironmentGenerator 1
+  m_Name: DiscretA3CEnvironmentGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
     value: '[0, 10, 0, 0, 0, 0, 0, 0, 0, 0]'
     description: turnright
   - name: Character
-    value: '[0, 10, 0, 0, 0, 0, 0, 0, 0, 0]'
+    value: '[0, -10, 0, 0, 0, 0, 0, 0, 0, 0]'
     description: turnleft
   - name: Character
     value: '[0, 0, 0, 0, 0, 0, 0, 1, 0, 0]'

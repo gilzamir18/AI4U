@@ -56,6 +56,7 @@ namespace  ai4u.ext
             if (Input.GetKey(KeyCode.Space)) {
                 actionName = "Character";
                 actionValue[7] = 1;
+
             } else {
                 actionValue[7] = 0;
             }

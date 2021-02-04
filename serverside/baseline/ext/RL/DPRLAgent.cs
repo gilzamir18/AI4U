@@ -116,6 +116,8 @@ namespace ai4u.ext
                 }
             } else if (GetActionName() == "ResetReward") {
                 ResetReward();
+            } else if (GetActionName() == "SetMaxSteps") {
+                this.MaxStepsPerEpisode = GetActionArgAsInt();
             }
             if (!done) {
                 int n = alwaysActuators.Count;

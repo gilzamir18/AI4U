@@ -131,6 +131,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c4908378b94441b5bad87346b4e3b86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  reference: {fileID: 0}
+  radio: 0
+  inBuildingProb: 0
+  inBuildingLevel: 0
+  minDistanceRate: 0.5
+  maxHeight: 35
 --- !u!1 &3412606451253451811
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,6 +446,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_MovingTurnSpeed
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2534310535671176846, guid: 544724e2564e2f540a991df6e4b6804a,
+        type: 3}
+      propertyPath: m_JumpForwardSpeed
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2534310535671176846, guid: 544724e2564e2f540a991df6e4b6804a,
         type: 3}

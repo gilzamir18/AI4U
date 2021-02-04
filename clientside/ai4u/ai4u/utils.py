@@ -26,8 +26,14 @@ def image_from_str(imgstr, w, h, dtype=np.uint8):
         values = line.strip().split(',')
         j = 0
         for value in values:
-            result[i,j] = int(value)
-            j += 1
+            if len(value) > 0:
+                if dtype == np.uint8 or dtype == np.uint32 or dtype==np.int32:
+                    result[i,j] = int(value)
+                elif dtype == np.float32:
+                    result[i, j] = float(value)
+                else:
+                    assert False, "DTYPE informed to function image_from_str is not supported"
+                j += 1
         i += 1
     return result
 

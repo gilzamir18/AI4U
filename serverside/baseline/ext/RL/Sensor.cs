@@ -14,7 +14,7 @@ namespace ai4u.ext
         sintarray
     }
 
-    public class Sensor : MonoBehaviour
+    public class Sensor : MonoBehaviour, IAgentResetListener
     {
         public string perceptionKey;
         public SensorType type;
@@ -54,6 +54,10 @@ namespace ai4u.ext
 
         public virtual float[] GetFloatArrayValue() {
             return null;
+        }
+
+        public virtual void OnReset(Agent agent) {
+
         }
     }
 }

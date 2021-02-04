@@ -93,7 +93,6 @@ namespace ai4u.ext {
                     actionReward.RewardFrom(actionName, agent);
                 }
 
-
                 float[] args = agent.GetActionArgAsFloatArray(); 
 
                 int N = args.Length;
@@ -121,7 +120,7 @@ namespace ai4u.ext {
                 
                 //jump = 7
                 if (N > 7) jump = args[7] > 0;
-                    
+                
                 //crouch = 8
                 if (N > 8) crouch = args[8] > 0;
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ai4u.ext 
 {
-    public class Actuator : MonoBehaviour
+    public class Actuator : MonoBehaviour, IAgentResetListener
     {
 
         public string actionName;
@@ -37,5 +37,9 @@ namespace ai4u.ext
         {
             
         }
+
+        public virtual void OnReset(Agent agent) {
+
+        } 
     }
 }

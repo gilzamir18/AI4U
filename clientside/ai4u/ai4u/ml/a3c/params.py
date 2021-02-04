@@ -7,6 +7,7 @@ from os import path as osp
 from . import preprocessing
 from .utils import get_git_rev
 
+DISCOUNT_FACTOR = 0.99
 
 def parse_args(env_defs, kargs=None):
     parser = argparse.ArgumentParser()
@@ -103,4 +104,3 @@ def save_args(args, log_dir):
         args_file.write(str(args) + '\n')
 
 
-DISCOUNT_FACTOR = 0.99

@@ -7,6 +7,9 @@ TagManager:
   - Terrain
   - Wall
   - Target
+  - TargetPos
+  - TargetPos2
+  - TargetPos3
   layers:
   - Default
   - TransparentFX
