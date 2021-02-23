@@ -1,0 +1,53 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 4 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+================================================================================
+Input tree: 'easy-tf-log/'
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'easy-tf-log/demo.py'
+ outputting to 'teste\\demo.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'easy-tf-log/easy_tf_log.py'
+ outputting to 'teste\\easy_tf_log.py'
+--------------------------------------------------------------------------------
+
+69:19: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+71:18: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'easy-tf-log/setup.py'
+ outputting to 'teste\\setup.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'easy-tf-log/tests.py'
+ outputting to 'teste\\tests.py'
+--------------------------------------------------------------------------------
+
+53:21: INFO: tf.summary.FileWriter requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+53:21: INFO: Renamed 'tf.summary.FileWriter' to 'tf.compat.v1.summary.FileWriter'
+56:25: INFO: tf.summary.scalar requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+56:25: INFO: Renamed 'tf.summary.scalar' to 'tf.compat.v1.summary.scalar'
+57:19: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+70:25: INFO: Renamed 'tf.train.summary_iterator' to 'tf.compat.v1.train.summary_iterator'
+91:25: INFO: Renamed 'tf.train.summary_iterator' to 'tf.compat.v1.train.summary_iterator'
+122:25: INFO: Renamed 'tf.train.summary_iterator' to 'tf.compat.v1.train.summary_iterator'
+160:25: INFO: Renamed 'tf.train.summary_iterator' to 'tf.compat.v1.train.summary_iterator'
+--------------------------------------------------------------------------------
+

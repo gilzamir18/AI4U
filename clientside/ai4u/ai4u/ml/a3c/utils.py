@@ -5,7 +5,55 @@ from multiprocessing import Queue
 from threading import Thread
 
 import numpy as np
-import tensorflow as tf
+import tensorflow
+if tensorflow.__version__ >= "2":
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+else:
+    import tensorflow as tf
+
+class LSTMNet:
+    def __init__(self, units=256, num_layers=1):
+        self.units = units
+        k  = num_layers - 1
+        if k == 0:
+            k = 1
+        self.state_h = tf.placeholder(tf.float32, (None, k, units) )
+        self.state_c = tf.placeholder(tf.float32, (None, k, units) )
+        self.num_layers = num_layers
+        self.outputs = None
+        self.shapes = None
+        self.size = 0
+        self.layers = []
+
+    def buildlayers(self, features):
+        self.outputs = []
+        self.shapes = []
+        layers = []
+        r = self.num_layers
+        hidden = None
+        if r == 1:
+            rnn1_layers = tf.keras.layers.LSTM(self.units, return_sequences=False, return_state=True, name="rnn1")
+            hidden, stateh1, statec1 = rnn1_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
+            layers.append(hidden)
+            self.outputs.append(stateh1)
+            self.outputs.append(statec1)
+            self.shapes.append( (1, self.units) )
+            self.size += 1
+        else:
+            for i in range(r):
+                if i >= (r-1):
+                    hidden = tf.keras.layers.LSTM(self.units, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[stateh1, statec1])
+                    layers.append(hidden)
+                else:
+                    rnn_layers = tf.keras.layers.LSTM(self.units, return_sequences=True, return_state=True, name="rnn%d"%(i))
+                    features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
+                    self.outputs.append(stateh1)
+                    self.outputs.append(statec1)
+                    self.shapes.append( (1, self.units) )
+                    self.size += 1
+                    layers.append(features)
+        return hidden, layers
 
 
 def rewards_to_discounted_returns(rewards, discount_factor):
@@ -21,7 +69,7 @@ def get_git_rev():
         cmd = 'git rev-parse --short HEAD'
         git_rev = subprocess.check_output(cmd.split(' '), stderr=subprocess.PIPE).decode().rstrip()
         return git_rev
-    except subprocess.CalledProcessError:
+    except:
         return 'unkrev'
 
 

@@ -1,6 +1,11 @@
 import re
 
-import tensorflow as tf
+import tensorflow
+if tensorflow.__version__ >= "2":
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+else:
+    import tensorflow as tf
 
 """
 Create a training operator which calculates gradients in one scope (the per-worker copy of

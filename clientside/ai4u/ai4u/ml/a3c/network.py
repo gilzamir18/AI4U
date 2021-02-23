@@ -1,4 +1,9 @@
-import tensorflow as tf
+import tensorflow
+if tensorflow.__version__ >= "2":
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+else:
+    import tensorflow as tf
 
 from .multi_scope_train_op import make_train_op
 from .utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
@@ -53,15 +58,19 @@ def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
 
     return actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss
 
-
 class Network:
-
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
                  add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None):
+        self.rnn_stateh = None
+        self.rnn_statec = None
+        self.rnn_input_shapes = []
+        self.rnn_output_ops = []
+        self.rnn_size = 0
+        self.scope = scope
         with tf.variable_scope(scope):
             #extra_inputs is a list of input channels that it is not a main input channel
             observations, action_logits, action_probs, value, layers = \
-                make_inference_network(obs_shape=state_shape, n_actions=n_actions, debug=debug, extra_inputs_shape=extra_inputs_shape)
+                make_inference_network(obs_shape=state_shape, n_actions=n_actions, debug=debug, extra_inputs_shape=extra_inputs_shape, network=self)
             actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss = \
                 make_loss_ops(action_logits, value, entropy_bonus, value_loss_coef, debug)
 
@@ -100,6 +109,13 @@ class Network:
             self.summaries_op = self.make_summary_ops(scope, detailed_logs)
         else:
             self.summaries_op = None
+
+    def setLSTMLayer(self, layer):
+        self.rnn_stateh = layer.state_h
+        self.rnn_statec = layer.state_c
+        self.rnn_input_shapes = layer.shapes
+        self.rnn_output_ops = layer.outputs
+        self.rnn_size = layer.size
 
     def make_summary_ops(self, scope, detailed_logs):
         variables = tf.trainable_variables(scope)

@@ -12,6 +12,16 @@ class Worker:
         self.sess = sess
         self.env = env
         self.network = network
+        if network.rnn_size > 0:
+            self.initial_state_h = []
+            self.initial_state_c = []
+            for i in range(network.rnn_size):
+                self.initial_state_h.append(np.zeros(network.rnn_input_shapes[i][-1]))
+                self.initial_state_c.append(np.zeros(network.rnn_input_shapes[i][-1]))
+            self.initial_state_h = np.array(self.initial_state_h)
+            self.initial_state_c = np.array(self.initial_state_c)
+            self.state_h = self.initial_state_h.copy()
+            self.state_c = self.initial_state_c.copy()
 
         if network.summaries_op is not None:
             self.summary_writer = tf.summary.FileWriter(log_dir, flush_secs=1)
@@ -34,12 +44,17 @@ class Worker:
     def run_update(self, n_steps):
         self.sess.run(self.network.sync_with_global_ops)
 
-        actions, done, rewards, states, extra_inputs = self.run_steps(n_steps)
+        actions, done, rewards, states, extra_inputs, states_h, states_c = self.run_steps(n_steps)
 
         returns = self.calculate_returns(done, rewards)
 
         if done:
+            if self.network.rnn_size > 0:
+                self.state_h = self.initial_state_h.copy()
+                self.state_c = self.initial_state_c.copy()
+
             self.last_state = self.env.reset()
+
             if type(self.last_state) is tuple:
                 self.last_extra_inputs = self.last_state[1]
                 self.last_state = self.last_state[0]
@@ -50,19 +65,32 @@ class Worker:
                 episode_value_mean = sum(self.episode_values) / len(self.episode_values)
                 self.logger.logkv('rl/episode_value_mean', episode_value_mean)
             self.episode_values = []
-
-        
-        feed_dict = None
-
-        if self.last_extra_inputs is not None:
-            feed_dict = {self.network.states: states,
-                         self.network.extra_inputs: extra_inputs,
-                         self.network.actions: actions,
-                         self.network.returns: returns}
+        if self.network.rnn_size > 0: #if use recurrent layers
+            if self.last_extra_inputs is not None: #if use extra inputs
+                feed_dict = {self.network.states: states,
+                            self.network.extra_inputs: extra_inputs,
+                            self.network.actions: actions,
+                            self.network.returns: returns,
+                            self.network.rnn_stateh: states_h,
+                            self.network.rnn_statec: states_c}
+            else:
+                feed_dict = {self.network.states: states,
+                            self.network.actions: actions,
+                            self.network.returns: returns,
+                            self.network.rnn_stateh: states_h,
+                            self.network.rnn_statec: states_c}
+            self.state_h = states_h[-1]
+            self.state_c = states_c[-1]
         else:
-            feed_dict = {self.network.states: states,
-                         self.network.actions: actions,
-                         self.network.returns: returns}
+            if self.last_extra_inputs is not None:
+                feed_dict = {self.network.states: states,
+                            self.network.extra_inputs: extra_inputs,
+                            self.network.actions: actions,
+                            self.network.returns: returns}
+            else:
+                feed_dict = {self.network.states: states,
+                            self.network.actions: actions,
+                            self.network.returns: returns}
 
         self.sess.run(self.network.train_op, feed_dict)
 
@@ -80,40 +108,75 @@ class Worker:
         actions = []
         rewards = []
         extra_inputs = []
+        states_h = []
+        states_c = []
 
         for _ in range(n_steps):
             states.append(self.last_state)
             feed_dict = None
-            if self.last_extra_inputs is not None:
-                extra_inputs.append(self.last_extra_inputs)
-                feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
-            else:
-                feed_dict = {self.network.states: [self.last_state]}
 
-            [action_probs], [value_estimate] = \
-                self.sess.run([self.network.action_probs, self.network.value],
-                              feed_dict=feed_dict)
+            if self.network.rnn_size > 0:
+                if self.last_extra_inputs is not None:
+                    extra_inputs.append(self.last_extra_inputs)
+                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+                else:
+                    feed_dict = {self.network.states: [self.last_state], self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+
+                outputs = \
+                    self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops,
+                                feed_dict=feed_dict)
+
+                action_probs = outputs[0][0]
+                value_estimate = outputs[1][0]
+                if self.network.rnn_size > 0:
+                    list_state_h = []
+                    list_state_c = []
+                    k = 0
+                    for _ in range(self.network.rnn_size):
+                        list_state_h.append(outputs[2][0])
+                        list_state_c.append(outputs[2+k][0])
+                        k += 2
+                    self.state_h = np.array(list_state_h, dtype=np.float32)
+                    self.state_c = np.array(list_state_c, dtype=np.float32)
+                    states_h.append(self.state_h)
+                    states_c.append(self.state_c)
+          
+
+            else:
+                if self.last_extra_inputs is not None:
+                    extra_inputs.append(self.last_extra_inputs)
+                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+                else:
+                    feed_dict = {self.network.states: [self.last_state]}
+
+                [action_probs], [value_estimate] = \
+                    self.sess.run([self.network.action_probs, self.network.value],
+                                feed_dict=feed_dict)
 
             self.episode_values.append(value_estimate)
 
             action = np.random.choice(self.env.action_space.n, p=action_probs)
-            
+
             self.last_state, reward, done, envinfo = self.env.step(action, (action_probs, value_estimate) )
+            
             if 'action' in envinfo:
                 action = envinfo['action']
+            
             actions.append(action)
+
             if type(self.last_state) is tuple:
                 self.last_extra_inputs = self.last_state[1]
                 self.last_state = self.last_state[0]
             else:
                 self.last_extra_inputs = None
-
+            
             rewards.append(reward)
 
             if done:
                 break
 
-        return actions, done, rewards, states, extra_inputs
+        return actions, done, rewards, states, extra_inputs, states_h, states_c
 
     def calculate_returns(self, done, rewards):
         if done:
@@ -123,12 +186,21 @@ class Worker:
             # we need to know the return of the final state.
             # We estimate this using the value network.
             feed_dict = None
-            if self.last_extra_inputs is not None:
-                feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
-            else:       
-                feed_dict = {self.network.states: [self.last_state]}
+            if self.network.rnn_size > 0:
+                if self.last_extra_inputs is not None:
+                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+                else:       
+                    feed_dict = {self.network.states: [self.last_state], 
+                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+            else:
+                if self.last_extra_inputs is not None:
+                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+                else:       
+                    feed_dict = {self.network.states: [self.last_state]}
 
             last_value = self.sess.run(self.network.value, feed_dict=feed_dict)[0]
+            
             rewards += [last_value]
             returns = utils.rewards_to_discounted_returns(rewards, DISCOUNT_FACTOR)
             returns = returns[:-1]  # Chop off last_value

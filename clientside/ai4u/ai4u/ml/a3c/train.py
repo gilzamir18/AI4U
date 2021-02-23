@@ -6,8 +6,6 @@ import time
 from threading import Thread
 
 import easy_tf_log
-import tensorflow as tf
-
 from . import utils
 from . import utils_tensorflow
 from .env import make_envs
@@ -15,6 +13,12 @@ from .params import parse_args
 from .utils_tensorflow import make_lr, make_optimizer
 from .worker import Worker
 from .network import Network
+import tensorflow
+if tensorflow.__version__ >= "2":
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+else:
+    import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # filter out INFO messages
 

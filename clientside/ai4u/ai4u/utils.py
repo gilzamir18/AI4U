@@ -43,7 +43,7 @@ def get_cvimage(frame, width=84, height=84, dtype=np.uint):
     img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
+def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow as tf
     from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \

@@ -7,11 +7,16 @@ import argparse
 import time
 import gym
 import numpy as np
-import tensorflow as tf
 from ai4u.ml.a3c import preprocessing
 from ai4u.ml.a3c.preprocessing import generic_preprocess
 from threading import Thread
 import threading
+import tensorflow
+if tensorflow.__version__ >= "2":
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+else:
+    import tensorflow as tf
 
 
 def run(env_defs, kargs=None):
