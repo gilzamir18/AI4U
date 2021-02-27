@@ -114,11 +114,17 @@ def run_manager(worker_threads, sess, lr, step_counter, update_counter, log_dir,
             break
 
 def run(env_defs, kargs=None):
+
+    config_proto = None
+    if "config_proto" in env_defs:
+        config_proto = env_defs['config_proto']()
+
+
     args, lr_args, log_dir, preprocess_wrapper = parse_args(env_defs, kargs)
     easy_tf_log.set_dir(log_dir)
 
     utils_tensorflow.set_random_seeds(args.seed)
-    sess = tf.Session()
+    sess = tf.Session(config=config_proto)
 
     envs = make_envs(args.env_id, preprocess_wrapper, args.max_n_noops, args.n_workers,
                      args.seed, args.debug, log_dir, env_defs)

@@ -15,9 +15,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		[SerializeField] float m_MoveSpeedMultiplier = 1f;
 		[SerializeField] float m_AnimSpeedMultiplier = 1f;
 		[SerializeField] float m_GroundCheckDistance = 0.1f;
-		[SerializeField] float m_JumpForwardSpeed = 0.1f;
-		
 
+
+
+		private float m_JumpForwardSpeed = 0.0f;
 		Rigidbody m_Rigidbody;
 		Animator m_Animator;
 		bool m_IsGrounded;
@@ -33,7 +34,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		bool m_Crouching;
         bool m_Pushing = false;
         private GameObject player;
-		private int movements = 2;
+		//private int movements = 2;
 		public Camera m_Cam;
 		
 		void Start()
@@ -51,7 +52,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 		private float lastTurnVer = 0.0f;
 		private float lastTurnHor = 0.0f;
-        public void Move(Vector3 move, bool crouch, bool jump, float m_turnHorizontal=0.0f, float turnVertical=0.0f, bool pushing=false, float xspeed=0.0f, float yspeed=0.0f, bool pickup=false)
+        public void Move(Vector3 move, bool crouch, bool jump, float m_turnHorizontal=0.0f, float turnVertical=0.0f, bool pushing=false, float xspeed=0.0f, float yspeed=0.0f, bool pickup=false, float jumpForward = 0.0f)
 		{
             lastTurnHor = m_turnHorizontal;
             lastTurnVer = m_turnVertical;
@@ -66,7 +67,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			m_ForwardAmount = move.z;
 
             this.m_turnVertical = turnVertical;
-
+			this.m_JumpForwardSpeed = jumpForward;
 
             this.m_Pushing = pushing;
 
@@ -188,7 +189,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			if (jump && !crouch && m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded"))
 			{
 				// jump!
-				m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z + this.m_JumpForwardSpeed);
+				m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z) + transform.forward * this.m_JumpForwardSpeed;
 				m_IsGrounded = false;
 				m_Animator.applyRootMotion = false;
 				m_GroundCheckDistance = groundCheckDistanteOnJump;
@@ -226,7 +227,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			// this allows us to modify the positional speed before it's applied.
 			if (m_IsGrounded && Time.deltaTime > 0)
 			{
-				Vector3 v = (m_Animator.deltaPosition * movements * m_MoveSpeedMultiplier) / Time.deltaTime;
+				Vector3 v = (m_Animator.deltaPosition * m_MoveSpeedMultiplier) / Time.deltaTime;
 
 				// we preserve the existing y part of the current velocity.
 				v.y = m_Rigidbody.velocity.y;

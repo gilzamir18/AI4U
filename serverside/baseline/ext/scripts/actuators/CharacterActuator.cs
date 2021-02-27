@@ -27,6 +27,7 @@ namespace ai4u.ext {
         private bool usewalkspeed = false;
         private float walkspeed = 0.5f;
         private bool stop = false;
+        private float jumpForward = 0.0f;
         //END::motor controll variables
 
         public Camera mainCamera;
@@ -78,7 +79,7 @@ namespace ai4u.ext {
             } 
 
             // pass all parameters to the character control script
-            character.Move(m_Move, crouch, jump, rightTurn - leftTurn, down - up, pushing, fx, fy, getpickup);
+            character.Move(m_Move, crouch, jump, rightTurn - leftTurn, down - up, pushing, fx, fy, getpickup, this.jumpForward);
             
             //character.Move(m_Move, crouch, m_Jump, h, v, pushing);
             jump = false;
@@ -126,6 +127,11 @@ namespace ai4u.ext {
 
                 //pickup = 9
                 if (N > 9) getpickup = args[9] > 0;
+            
+                if (N > 10){
+                    jump = true;
+                    jumpForward = args[10];
+                }
             }
             UpdateActuator();
         }
@@ -148,6 +154,7 @@ namespace ai4u.ext {
             rightTurn = 0;
             up = 0;
             down = 0;
+            jumpForward = 0.0f;
         }
 
         public override void Reset()

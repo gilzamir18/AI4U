@@ -42,10 +42,7 @@ class LSTMNet:
             self.size += 1
         else:
             for i in range(r):
-                if i >= (r-1):
-                    hidden = tf.keras.layers.LSTM(self.units, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[stateh1, statec1])
-                    layers.append(hidden)
-                else:
+                if i < (r-1):
                     rnn_layers = tf.keras.layers.LSTM(self.units, return_sequences=True, return_state=True, name="rnn%d"%(i))
                     features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
                     self.outputs.append(stateh1)
@@ -53,6 +50,9 @@ class LSTMNet:
                     self.shapes.append( (1, self.units) )
                     self.size += 1
                     layers.append(features)
+                else:
+                    hidden = tf.keras.layers.LSTM(self.units, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[stateh1, statec1])
+                    layers.append(hidden)
         return hidden, layers
 
 
