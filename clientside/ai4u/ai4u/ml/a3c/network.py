@@ -60,55 +60,56 @@ def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
 
 class Network:
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
-                 add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None):
+                 add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None, training=True):
         self.rnn_stateh = None
         self.rnn_statec = None
         self.rnn_input_shapes = []
         self.rnn_output_ops = []
         self.rnn_size = 0
         self.scope = scope
-        with tf.variable_scope(scope):
-            #extra_inputs is a list of input channels that it is not a main input channel
-            observations, action_logits, action_probs, value, layers = \
-                make_inference_network(obs_shape=state_shape, n_actions=n_actions, debug=debug, extra_inputs_shape=extra_inputs_shape, network=self)
-            actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss = \
-                make_loss_ops(action_logits, value, entropy_bonus, value_loss_coef, debug)
+        if training:
+            with tf.variable_scope(scope):
+                #extra_inputs is a list of input channels that it is not a main input channel
+                observations, action_logits, action_probs, value, layers = \
+                    make_inference_network(obs_shape=state_shape, n_actions=n_actions, debug=debug, extra_inputs_shape=extra_inputs_shape, network=self)
+                actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss = \
+                    make_loss_ops(action_logits, value, entropy_bonus, value_loss_coef, debug)
 
-        sync_with_global_op = make_copy_ops(from_scope='global', to_scope=scope)
+            sync_with_global_op = make_copy_ops(from_scope='global', to_scope=scope)
 
-        train_op, grads_norm = make_train_op(loss, optimizer,
-                                             compute_scope=scope, apply_scope='global',
-                                             max_grad_norm=max_grad_norm)
+            train_op, grads_norm = make_train_op(loss, optimizer,
+                                                compute_scope=scope, apply_scope='global',
+                                                max_grad_norm=max_grad_norm)
 
-        self.states = None
-        self.extra_inputs = None
+            self.states = None
+            self.extra_inputs = None
 
-        if type(observations) is tuple:
-            self.states = observations[0]
-            self.extra_inputs = observations[1]
-        else:
-            self.states = observations
-    
-        self.action_probs = action_probs
-        self.value = value
-        self.actions = actions
-        self.returns = returns
-        self.advantage = advantage
-        self.policy_entropy = policy_entropy
-        self.policy_loss = policy_loss
-        self.value_loss = value_loss
-        self.loss = loss
-        self.layers = layers
+            if type(observations) is tuple:
+                self.states = observations[0]
+                self.extra_inputs = observations[1]
+            else:
+                self.states = observations
+        
+            self.action_probs = action_probs
+            self.value = value
+            self.actions = actions
+            self.returns = returns
+            self.advantage = advantage
+            self.policy_entropy = policy_entropy
+            self.policy_loss = policy_loss
+            self.value_loss = value_loss
+            self.loss = loss
+            self.layers = layers
 
-        self.sync_with_global_ops = sync_with_global_op
-        self.optimizer = optimizer
-        self.train_op = train_op
-        self.grads_norm = grads_norm
+            self.sync_with_global_ops = sync_with_global_op
+            self.optimizer = optimizer
+            self.train_op = train_op
+            self.grads_norm = grads_norm
 
-        if add_summaries:
-            self.summaries_op = self.make_summary_ops(scope, detailed_logs)
-        else:
-            self.summaries_op = None
+            if add_summaries:
+                self.summaries_op = self.make_summary_ops(scope, detailed_logs)
+            else:
+                self.summaries_op = None
 
     def setLSTMLayer(self, layer):
         self.rnn_stateh = layer.state_h

@@ -72,7 +72,12 @@ namespace ai4u
             this.values[i] = value.ToString();
         }
 
+        public virtual void HandleOnResetEvent() {
+
+        }
+
         public void NotifyReset() {
+            this.HandleOnResetEvent();
             foreach (IAgentResetListener listener in resetListener) {
                 listener.OnReset(this);
             }

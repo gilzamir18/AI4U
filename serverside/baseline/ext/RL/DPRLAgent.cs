@@ -29,9 +29,6 @@ namespace ai4u.ext
 
         public Sensor[] sensors;
         public Actuator[]  actuators;
-        
-        //This flag indicates the end of the episode.
-        private bool done = false;
 
         //Current episode's number of steps.
         private int nSteps = 0;
@@ -80,17 +77,6 @@ namespace ai4u.ext
             values = new string[numberOfFields];
         }
 
-        ///<summary>This property indicates the end of the episode.</summary>
-        public bool Done {
-            set {
-                done = value;
-            }
-
-            get {
-                return done;
-            }
-        }
-
         public override void AddReward(float v, RewardFunc from = null){
             if (doneAtNegativeReward && v < 0) {
                 Done = true;
@@ -108,18 +94,18 @@ namespace ai4u.ext
                 ResetPlayer();
             } else if (actuatorsMap.ContainsKey(GetActionName())) 
             {
-                if (!done) {
+                if (!Done) {
                     Actuator a = actuatorsMap[GetActionName()];
                     if (!a.always) {
                         a.Act();
                     }
                 }
             } else if (GetActionName() == "ResetReward") {
-                ResetReward();
+                reward = 0;
             } else if (GetActionName() == "SetMaxSteps") {
                 this.MaxStepsPerEpisode = GetActionArgAsInt();
             }
-            if (!done) {
+            if (!Done) {
                 int n = alwaysActuators.Count;
                 if (n > 0) {
                     for (int i = 0; i < n; i++) {
@@ -131,7 +117,6 @@ namespace ai4u.ext
 
         private void ResetPlayer()
         {
-            done = false;
             nSteps = 0;
             transform.rotation = Quaternion.identity;
             if (initialLocalPosition == null) {
@@ -147,7 +132,6 @@ namespace ai4u.ext
             } else {
                 transform.localPosition = initialLocalPosition;
             }
-            ResetReward();
             foreach(Actuator a in actuators) {
                 a.Reset();
             }
@@ -172,7 +156,7 @@ namespace ai4u.ext
                 }
             }
 
-            SetStateAsBool(0, "done", done);
+            SetStateAsBool(0, "done", Done);
             SetStateAsFloat(1, "reward", Reward);
             for (int i = 0; i < sensors.Length; i++) {
                 switch(sensors[i].type)
@@ -199,7 +183,7 @@ namespace ai4u.ext
                         break;
                 }
             }
-            ResetReward();
+            reward = 0;
         }
     }
 }
