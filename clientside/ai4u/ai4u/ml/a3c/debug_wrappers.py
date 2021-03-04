@@ -128,6 +128,10 @@ class MonitorEnv(Wrapper):
                                                                         self.episode_n,
                                                                         reward_sum))
             if self.logger:
+                if 'loginfo' in info:
+                    loginfo = info['loginfo']
+                    for key in loginfo:
+                        self.logger.logkv('rl/episode_%s'%(key), loginfo[key])
                 self.logger.logkv('rl/episode_reward_sum', reward_sum)
                 self.logger.logkv('rl/episode_length_steps', self.episode_length_steps)
 

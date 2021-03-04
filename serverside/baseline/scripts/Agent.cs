@@ -111,6 +111,10 @@ namespace ai4u
             this.values[i] = System.Convert.ToBase64String(value);
         }
 
+        private static float ParseFloat(string v) {
+            return float.Parse(v, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+        }
+
         public int GetStateIndex(string description)
         {
             for (int i = 0; i < this.desc.Length; i++) {
@@ -154,7 +158,7 @@ namespace ai4u
 
         public float[] GetActionArgAsFloatArray(int i = 0)
         {
-            return System.Array.ConvertAll(this.brain.GetReceivedArgs()[i].Split(' '), float.Parse);
+            return System.Array.ConvertAll(this.brain.GetReceivedArgs()[i].Split(' '), ParseFloat);
         }
 
         public int GetActionArgAsInt(int i = 0)
