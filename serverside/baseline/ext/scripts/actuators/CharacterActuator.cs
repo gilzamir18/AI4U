@@ -2,6 +2,9 @@
 using UnityStandardAssets.Characters.ThirdPerson;
 
 namespace ai4u.ext {
+    [RequireComponent(typeof(Animator))]
+	[RequireComponent(typeof(ThirdPersonCharacter))]
+	[RequireComponent(typeof(Camera))]
     public class CharacterActuator : Actuator
     {
 

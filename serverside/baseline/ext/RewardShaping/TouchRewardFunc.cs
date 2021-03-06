@@ -23,6 +23,11 @@ namespace  ai4u.ext
         public bool allowNext;
 
         void Awake() {
+
+            if (agents.Length==0) {
+                Debug.LogWarning("TouchRewardFunc: no agents added for this event. Game Object: " + gameObject.name);
+            }
+
             counter = new int[agents.Length];
             touched = new bool[agents.Length];
             myCollider = GetComponent<Collider>();

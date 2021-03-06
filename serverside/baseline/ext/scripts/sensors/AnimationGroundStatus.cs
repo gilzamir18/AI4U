@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ai4u.ext
 {
+	[RequireComponent(typeof(Animator))]
     public class AnimationGroundStatus : Sensor
     {
         public GameObject target;

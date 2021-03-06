@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ai4u.ext {
 
-
+	[RequireComponent(typeof(Rigidbody))]
     public class MoveActuator : Actuator
     {
 
