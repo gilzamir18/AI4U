@@ -107,6 +107,11 @@ namespace ai4u
         // Use this for initialization
         void Start()
         {
+
+            if (agent == null) {
+                Debug.LogWarning("You have not defined the agent that the remote brain must control. Game Object: " + gameObject.name);
+            }
+
             source = null;
             async_call = new System.AsyncCallback(ReceiveData);
             firstMsgSended = false;

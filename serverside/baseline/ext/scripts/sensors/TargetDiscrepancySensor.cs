@@ -9,6 +9,11 @@ namespace ai4u.ext {
         public GameObject reference = null;
 
         void Start() {
+
+            if (agent == null) {
+                Debug.LogWarning("TargetDiscrepancySensor error: agent dont't specified. Game object: " + gameObject.name);
+            }
+
             if (reference == null) {
                 reference = agent.gameObject;
             }
@@ -17,7 +22,7 @@ namespace ai4u.ext {
         public override float[] GetFloatArrayValue()
         {
             if (target == null){
-                Debug.LogWarning("TargetDiscrepancySensor error: target don't specified!");
+                Debug.LogWarning("TargetDiscrepancySensor error: target don't specified! Game Object: " + gameObject.name);
             }
         
             Vector3 f = reference.transform.forward;

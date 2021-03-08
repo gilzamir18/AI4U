@@ -32,6 +32,9 @@ namespace  ai4u.ext
             touched = new bool[agents.Length];
             myCollider = GetComponent<Collider>();
             foreach(Agent agent in agents) {
+                if (agent == null) {
+                    Debug.LogWarning("TouchRewardFunc: You have not defined the agent that will receive this event. Game Object: " + gameObject.name);
+                }
                 agent.AddResetListener(this);
             }
         }

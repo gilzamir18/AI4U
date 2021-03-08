@@ -15,8 +15,6 @@ namespace ai4u.ext {
         private Vector3 m_Move;
         //END::
         
-
-        
         //BEGIN::motor controll variables
         private float fx, fy;
         private bool crouch;

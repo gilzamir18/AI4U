@@ -273,6 +273,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 							m_IsGrounded = true;
 							m_Animator.applyRootMotion = true;
 							hit = true;
+							Debug.Log("NO CHÃO");
 							break; 
 						}
 						r = Quaternion.Euler(0f, ang, 0.0f) * r;

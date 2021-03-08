@@ -20,7 +20,7 @@ public class CameraController : MonoBehaviour
         headViewCam.enabled = true;
         topViewCam = GetComponent<Camera>();
         topViewCam.enabled = false;
-        actionerSwapCam.onClick.AddListener(OnClick);
+        if (actionerSwapCam != null) actionerSwapCam.onClick.AddListener(OnClick);
 
     }
 

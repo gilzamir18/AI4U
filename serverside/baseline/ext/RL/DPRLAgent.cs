@@ -43,11 +43,17 @@ namespace ai4u.ext
         {
             actuatorsMap = new Dictionary<string, Actuator>();
             sensorsMap = new Dictionary<string, Sensor>();
+            if (sensors.Length == 0) {
+                Debug.LogWarning("Agent without sensors. Add at least one sensor for this agent to be able to perceive the world! GameObject: " + gameObject.name);
+            }
             foreach(Sensor s in sensors)
             {
                 s.SetAgent(this);
 
                 sensorsMap[s.perceptionKey] = s;
+            }
+            if (actuators.Length == 0) {
+                Debug.LogWarning("Agent without actuators. Add at least one actuator for this agent to be able to change the world! GameObject: " + gameObject.name);
             }
             foreach(Actuator a in actuators) {
                 if (a.always) {
@@ -92,7 +98,7 @@ namespace ai4u.ext
         {
             if (GetActionName() == "restart") {
                 ResetPlayer();
-            } else if (actuatorsMap.ContainsKey(GetActionName())) 
+            } else if (GetActionName() != null && actuatorsMap.ContainsKey(GetActionName())) 
             {
                 if (!Done) {
                     Actuator a = actuatorsMap[GetActionName()];

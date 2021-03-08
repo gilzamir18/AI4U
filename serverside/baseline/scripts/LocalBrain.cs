@@ -1,4 +1,5 @@
-﻿namespace ai4u
+﻿using UnityEngine;
+namespace ai4u
 {
     public class LocalBrain : Brain
     {
@@ -6,6 +7,17 @@
         
         public void Start()
         {
+
+            if (controller == null) {
+                Debug.LogWarning("You must specify a controller for the game object: " + gameObject.name);
+            }
+
+            if (agent == null) {
+                Debug.LogWarning("You must specify an agent for the game object: " + gameObject.name);
+            }
+
+
+
             agent.SetBrain(this);
             agent.StartData();
         }

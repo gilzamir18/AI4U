@@ -1,4 +1,4 @@
-def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None):
+def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow as tf
     from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, logit_entropy, make_copy_ops

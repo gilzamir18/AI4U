@@ -18,7 +18,7 @@ public class ConfigureTarget : MonoBehaviour, IAgentResetListener
     void Start()
     {
         reference.GetComponent<RLAgent>().AddResetListener(this);
-        ResetConfig(true);
+        ResetConfig();
     }
 
     private Transform FindWithTag(GameObject parent, string tag) {
@@ -31,38 +31,35 @@ public class ConfigureTarget : MonoBehaviour, IAgentResetListener
         return null;
     }
 
-    private void ResetConfig(bool getArgs=false) {
+    private void ResetConfig() {
+        string[] args = System.Environment.GetCommandLineArgs ();
 
-        if (getArgs) {
-            string[] args = System.Environment.GetCommandLineArgs ();
-
-            int i = 0;
-            while (i < args.Length){
-                switch (args[i]) {
-                    case "--emoboy_radio":
-                        radio = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                        i += 2;
-                        break;
-                    case "--emoboy_mindistancerate":
-                        minDistanceRate = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                        i += 2;
-                        break;
-                    case "--emoboy_maxheight":
-                        maxHeight = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                        i += 2;
-                        break;
-                    case "--emoboy_inbuildingprob":
-                        inBuildingProb = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                        i += 2;
-                        break;
-                    case "--emoboy_inbuildinglevel":
-                        inBuildingLevel = int.Parse(args[i+1]);
-                        i += 2;
-                        break;
-                    default:
-                        i+=1;
-                        break;
-                }
+        int i = 0;
+        while (i < args.Length){
+            switch (args[i]) {
+                case "--emoboy_radio":
+                    radio = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    i += 2;
+                    break;
+                case "--emoboy_mindistancerate":
+                    minDistanceRate = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    i += 2;
+                    break;
+                case "--emoboy_maxheight":
+                    maxHeight = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    i += 2;
+                    break;
+                case "--emoboy_inbuildingprob":
+                    inBuildingProb = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    i += 2;
+                    break;
+                case "--emoboy_inbuildinglevel":
+                    inBuildingLevel = int.Parse(args[i+1]);
+                    i += 2;
+                    break;
+                default:
+                    i+=1;
+                    break;
             }
         }
         string buildingLevel = "TargetPos";
