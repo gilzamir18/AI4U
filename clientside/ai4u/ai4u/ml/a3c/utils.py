@@ -15,9 +15,7 @@ else:
 class LSTMNet:
     def __init__(self, units=256, num_layers=1):
         self.units = units
-        k  = num_layers - 1
-        if k == 0:
-            k = 1
+        k  = num_layers
         self.state_h = tf.placeholder(tf.float32, (None, k, units) )
         self.state_c = tf.placeholder(tf.float32, (None, k, units) )
         self.num_layers = num_layers
@@ -44,14 +42,18 @@ class LSTMNet:
             for i in range(r):
                 if i < (r-1):
                     rnn_layers = tf.keras.layers.LSTM(self.units, return_sequences=True, return_state=True, name="rnn%d"%(i))
-                    features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
+                    features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
                     self.outputs.append(stateh1)
                     self.outputs.append(statec1)
                     self.shapes.append( (1, self.units) )
                     self.size += 1
                     layers.append(features)
                 else:
-                    hidden = tf.keras.layers.LSTM(self.units, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[stateh1, statec1])
+                    hidden, stateh1, statec1 = tf.keras.layers.LSTM(self.units, return_state=True, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
+                    self.outputs.append(stateh1)
+                    self.outputs.append(statec1)
+                    self.shapes.append( (1, self.units) )
+                    self.size += 1
                     layers.append(hidden)
         return hidden, layers
 
