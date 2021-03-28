@@ -79,6 +79,8 @@ class Worker:
                             self.network.returns: returns,
                             self.network.rnn_stateh: states_h,
                             self.network.rnn_statec: states_c}
+            self.state_h = states_h[-1]
+            self.state_c = states_c[-1]
         else:
             if self.last_extra_inputs is not None:
                 feed_dict = {self.network.states: states,
