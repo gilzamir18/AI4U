@@ -18,8 +18,9 @@ class GenericEnvironment(gym.Env):
     # Example when using discrete actions:
     self.agent = None
     
-  def configure(self, defs, n_envs):
-    if 'agent' in defs:
+  def configure(self, defs, n_envs=1):
+    if 'wrapper' in defs:
+        print(defs)
         self.agent = defs['wrapper']()
     self.agent.setup(self, defs)
 
