@@ -21,10 +21,18 @@ class AleWrapper:
     def lives(self):
         return self.env.nlives
 
-class BasicAgent:
-    environment_definitions = None
-    environment_port_id = 0
 
+########################################################################################
+# Basic agent with basic interaction with AI4U environments.
+# This agent get a environment communication for send actions to 
+# remote environment (Unity game application) and receives data from remote environment.
+########################################################################################
+class BasicAgent:
+    environment_definitions = None #internal: a python dictionary with specific environment definitions.
+    environment_port_id = 0 #internal: counter for automatic communication port calculation.
+
+    #Override this method in starting of the new episode.
+    #param env: a communication environment.
     def reset(self, env):
         envinfo = env.remoteenv.step('restart')
         if 'state' in envinfo:
@@ -32,16 +40,23 @@ class BasicAgent:
         else:
             return None
 
-    def render(self):
+    #See Gym.env.render.
+    def render(self, env=None):
         pass
 
-    def seed(self, seed=None, env=None):
-        if seed is None:
-            seed = 0
+    #Define a new seed to stochasticity.
+    # param env: integer
+    # param env: a comunication environment.
+    def seed(self, seed=0, env=None):
         self.np_random, seed1 = seeding.np_random(seed)
         env.remoteenv.step('seed', seed1)
         return [seed1]
 
+    #Send a action to remote environment.
+    # param env: a communication environment.
+    # param action: command to remote environment.
+    # param info: extra information returned by decision algorithm.
+    # Decision algorithm is a algorithm selecting the action.
     def act(self, env, action, info=None):
         envinfo = env.one_step(action)
         state = None
@@ -58,6 +73,9 @@ class BasicAgent:
 
         return state, reward, done, {}
 
+###############################################################################################
+# Implements protocol to communication with remote environment (Unity game application).
+###############################################################################################
 class Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):

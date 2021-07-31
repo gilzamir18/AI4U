@@ -125,6 +125,8 @@ def make_optimizer(learning_rate):
     # the gradients can end up being very small, and we want to limit the size of the update...?
 
     optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, decay=0.99, epsilon=1e-5)
+    #optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    
     return optimizer
 
 

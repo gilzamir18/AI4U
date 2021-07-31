@@ -3,17 +3,107 @@ import subprocess
 import time
 from multiprocessing import Queue
 from threading import Thread
-
 import numpy as np
 import tensorflow
+import sys
+from warnings import warn
+import functools
+
 if tensorflow.__version__ >= "2":
     import tensorflow.compat.v1 as tf
     tf.disable_v2_behavior()
 else:
     import tensorflow as tf
 
+
+#Neural Turing Machine (A3C version)
+class NTMNet:
+    def __init__(self, lines=12, columns=10):
+        self.memory = tf.placeholder(tf.float32, (None, lines, columns))
+        self.reading = tf.placeholder(tf.float32, (None, columns))
+        self.lines = lines
+        self.columns = columns
+        self.layers = []
+        self.actvation = "sigmoid"
+        self.epsilon = 0.001
+
+    def buildWeightings(self, input_layer, strength=1.0):
+        self.layers = []
+        flattened = tf.keras.layers.Flatten()(self.memory)
+        exp_features = tf.keras.layers.Concatenate()([input_layer, flattened])
+        self.key = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_key")(exp_features)
+        self.layers.append(self.key)
+        #key = (K, M), mem = (K, N, M)
+        K = tf.keras.layers.Dot(axes=(1, 2), normalize=True, name='ntm_K')([self.key, self.memory])
+        #print_op = tf.print("K:", tf.shape(K), output_stream=sys.stdout)
+        #with tf.control_dependencies([print_op]):
+        #    self.w = tf.keras.layers.Softmax(name='ntm_w')(K*strength)
+        self.w = tf.keras.layers.Softmax(name='ntm_w')(K*strength)
+        self.layers.append(self.w)
+        return self.w
+
+    def buildWriteHead(self, input_layer, id=0):
+        flattened = tf.keras.layers.Flatten()(self.memory)
+        exp_features = tf.keras.layers.Concatenate()([input_layer, flattened])
+        self.e = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_ewrite_%d"%(id))(exp_features)
+        self.a = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_awrite_%d"%(id))(exp_features)
+        self.layers.append(self.e)
+        self.layers.append(self.a)
+        e = tf.expand_dims(self.e, axis=1)
+        w = tf.expand_dims(self.w, axis=-1)
+        # w x e => (K, 12, 1) x (K, 1, 10)
+        We = tf.matmul(w, e)
+        Me = tf.keras.layers.Multiply()([self.memory, We])
+        Me = tf.keras.layers.Subtract()([self.memory, Me])
+        a = tf.expand_dims(self.a, axis=1)
+        Wa = tf.matmul(w, a)
+        self.write_head = tf.keras.layers.Add(name='ntm_write_head%d'%(id))([Me, Wa])
+        self.layers.append(self.write_head)
+        return self.write_head
+
+    def buildReadHead(self, input_layer=None, id=0):
+        if input_layer is None:
+            input_layer = self.memory
+        else:
+            flattened = tf.keras.layers.Flatten()(self.memory)
+            input_layer = tf.keras.layers.Concatenate()([input_layer, flattened])
+
+        # w x m => (12, 1) x (12, 10)
+        w = tf.expand_dims(self.w, axis=-1)
+        self.read_head = tf.keras.layers.Multiply(name='ntm_read%d'%(id))([w, input_layer])
+        self.read_head = tf.math.reduce_sum(self.read_head, 1)
+        self.layers.append(self.read_head)
+        return self.read_head
+
+########################################################################################
+# This class  wraps tensorflow.keras.layers.LSTM for facilitating integration of LSTM  #
+# with our A3C implementation.                                                         #
+# Features: multiple layers support and easy interface.                                #
+# Use this class in callback function make_inference_network.                          #
+#                                                                                      #
+# For example:                                                                         # 
+#def make_inference_network(obs_shape, n_actions, debug=False,                         #
+#        extra_inputs_shape=None, network=None):                                       #
+#    import tensorflow as tf                                                           #
+#    from ai4u.ml.a3c.multi_scope_train_op import make_train_op                        #
+#    from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms,   #
+#        make_rmsprop_histograms, logit_entropy, make_copy_ops                         #
+#    lstm = LSTMCell(100, 1, initial_value=0.0)                                        #
+#    observations = tf.placeholder(tf.float32, [None] + list(obs_shape))               #
+#    hidden, lstm_layers = lstm.buildlayers(observations)                              #
+#    hidden = tf.keras.layers.Dense(10, activation=tf.nn.relu, name='hidden1')(hidden) #
+#    action_logits = tf.keras.layers.Dense(n_actions, activation=None,                 #
+#        name='action_logits')(hidden)                                                 #
+#    action_probs = tf.keras.layers.Softmax()(action_logits)                           #
+#    values = tf.keras.layers.Dense(1, activation=None, name='value')(hidden)          #
+#    values = values[:, 0]                                                             #
+#    layers = [] + lstm_layers                                                         #
+#    if network is not None:                                                           #
+#        network.setLSTMLayer(lstm)                                                    #
+#    return observations, action_logits, action_probs, values, layers                  #
+########################################################################################
 class LSTMNet:
-    def __init__(self, units=256, num_layers=1, return_state=False):
+    def __init__(self, units=256, num_layers=1, return_state=False, initial_value=0.01):
         self.units = units
         k  = num_layers
         self.state_h = tf.placeholder(tf.float32, (None, k, units) )
@@ -24,8 +114,12 @@ class LSTMNet:
         self.return_state = return_state
         self.size = 0
         self.layers = []
+        self.initial_value = initial_value
 
-    def buildlayers(self, features):
+    def __call__(self, features):
+        return buildlayers(self, features)
+
+    def buildlayers(self, features, **kwargs):
         self.outputs = []
         self.shapes = []
         layers = []
@@ -34,7 +128,7 @@ class LSTMNet:
         stateh1 = None
         statec1 = None
         if r == 1:
-            rnn1_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell1"), return_sequences=False, return_state=True, name="rnn1")
+            rnn1_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell1", **kwargs), return_sequences=False, return_state=True, name="rnn1")
             hidden, stateh1, statec1 = rnn1_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
             layers.append(hidden)
             self.outputs.append(stateh1)
@@ -44,7 +138,7 @@ class LSTMNet:
         else:
             for i in range(r):
                 if i < (r-1):
-                    rnn_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_sequences=True, return_state=True, name="rnn%d"%(i))
+                    rnn_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_sequences=True, return_state=True, name="rnn%d"%(i), **kwargs)
                     features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
                     self.outputs.append(stateh1)
                     self.outputs.append(statec1)
@@ -52,7 +146,7 @@ class LSTMNet:
                     self.size += 1
                     layers.append(features)
                 else:
-                    hidden, stateh1, statec1 = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_state=True, return_sequences=False, name="rnn%d"%(i))(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
+                    hidden, stateh1, statec1 = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_state=True, return_sequences=False, name="rnn%d"%(i), **kwargs)(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
                     self.outputs.append(stateh1)
                     self.outputs.append(statec1)
                     self.shapes.append( (1, self.units) )
@@ -62,6 +156,59 @@ class LSTMNet:
             return hidden, layers, stateh1, statec1
         else:
             return hidden, layers
+
+# This class  wraps tensorflow.keras.layers.LSTMCell for facilitating integration of LSTM
+# with our A3C implementation. It is deprecated, use LSTMNet instead it!
+class LSTMCell:
+    def __init__(self, units=256, num_layers=1, return_state=False, initial_value = 0.0):
+        warn("This class is deprecated! Use LSTMNet instead it!")
+        self.units = units
+        k  = num_layers
+        self.state_h = tf.placeholder(tf.float32, (None, k, units) )
+        self.state_c = tf.placeholder(tf.float32, (None, k, units) )
+        self.num_layers = num_layers
+        self.outputs = None
+        self.shapes = None
+        self.return_state = return_state
+        self.size = 0
+        self.initial_value = initial_value
+        self.layers = []
+
+    def buildlayers(self, features, activation='tanh', recurrent_activation='tanh'):
+        self.outputs = []
+        self.shapes = []
+        layers = []
+        r = self.num_layers
+        hidden = features
+        stateh1 = None
+        statec1 = None
+        if r == 1:
+            hidden, (stateh1, statec1) = tf.keras.layers.LSTMCell(self.units, recurrent_activation=recurrent_activation, activation=activation, name="cell1")(hidden, states=[self.state_h[:,0,:], self.state_c[:,0,:]])
+            layers.append(hidden)
+            self.outputs.append(stateh1)
+            self.outputs.append(statec1)
+            self.shapes.append( (1, self.units) )
+            self.size += 1
+        else:
+            for i in range(r):
+                if i < (r-1):
+                    hidden, (stateh1, statec1) = tf.keras.layers.LSTMCell(self.units, recurrent_activation=recurrent_activation, activation=activation,  name="cell%d"%(i))(hidden, states=[self.state_h[:,i,:], self.state_c[:,i,:]])
+                    self.outputs.append(stateh1)
+                    self.outputs.append(statec1)
+                    self.shapes.append( (1, self.units) )
+                    self.size += 1
+                else:
+                    hidden, (stateh1, statec1) = tf.keras.layers.LSTMCell(self.units, recurrent_activation=recurrent_activation, activation=activation, name="cell%d"%(i))(hidden, states=[self.state_h[:,i,:], self.state_c[:,i,:]])
+                    self.outputs.append(stateh1)
+                    self.outputs.append(statec1)
+                    self.shapes.append( (1, self.units) )
+                    self.size += 1
+                layers.append(hidden)
+        if self.return_state:
+            return hidden, layers, stateh1, statec1
+        else:
+            return hidden, layers
+
 
 def rewards_to_discounted_returns(rewards, discount_factor):
     returns = np.zeros_like(rewards, dtype=np.float32)
@@ -175,3 +322,6 @@ class RateMeasure:
         self.prev_value = val
 
         return rate
+
+
+

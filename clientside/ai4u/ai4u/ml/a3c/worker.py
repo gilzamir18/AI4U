@@ -5,9 +5,7 @@ from . import utils
 from .multi_scope_train_op import *
 from .params import DISCOUNT_FACTOR
 
-
 class Worker:
-
     def __init__(self, sess, env, network, log_dir):
         self.sess = sess
         self.env = env
@@ -16,12 +14,18 @@ class Worker:
             self.initial_state_h = []
             self.initial_state_c = []
             for i in range(network.rnn_size):
-                self.initial_state_h.append(np.zeros(network.rnn_input_shapes[i][-1]))
-                self.initial_state_c.append(np.zeros(network.rnn_input_shapes[i][-1]))
+                self.initial_state_h.append(np.ones(network.rnn_input_shapes[i][-1])*network.lstm_initial_value)
+                self.initial_state_c.append(np.ones(network.rnn_input_shapes[i][-1])*network.lstm_initial_value)
             self.initial_state_h = np.array(self.initial_state_h)
             self.initial_state_c = np.array(self.initial_state_c)
             self.state_h = self.initial_state_h.copy()
             self.state_c = self.initial_state_c.copy()
+
+        if network.ntm_size is not None:
+            self.initial_memory = np.ones(network.ntm_size)*network.ntm_epsilon
+            self.initial_reading = np.ones(network.ntm_size[1])*network.ntm_epsilon 
+            self.memory = self.initial_memory.copy()
+            self.reading = self.initial_reading.copy()
 
         if network.summaries_op is not None:
             self.summary_writer = tf.summary.FileWriter(log_dir, flush_secs=1)
@@ -44,7 +48,7 @@ class Worker:
     def run_update(self, n_steps):
         self.sess.run(self.network.sync_with_global_ops)
 
-        actions, done, rewards, states, extra_inputs, states_h, states_c = self.run_steps(n_steps)
+        actions, done, rewards, states, extra_inputs, states_h, states_c, memories, readings = self.run_steps(n_steps)
 
         returns = self.calculate_returns(done, rewards)
 
@@ -52,6 +56,8 @@ class Worker:
             if self.network.rnn_size > 0:
                 self.state_h = self.initial_state_h.copy()
                 self.state_c = self.initial_state_c.copy()
+            if self.network.ntm_size is not None:
+                self.memory = self.initial_memory.copy()
 
             self.last_state = self.env.reset()
 
@@ -65,32 +71,65 @@ class Worker:
                 episode_value_mean = sum(self.episode_values) / len(self.episode_values)
                 self.logger.logkv('rl/episode_value_mean', episode_value_mean)
             self.episode_values = []
-        if self.network.rnn_size > 0: #if use recurrent layers
-            if self.last_extra_inputs is not None: #if use extra inputs
-                feed_dict = {self.network.states: states,
-                            self.network.extra_inputs: extra_inputs,
-                            self.network.actions: actions,
-                            self.network.returns: returns,
-                            self.network.rnn_stateh: states_h,
-                            self.network.rnn_statec: states_c}
+
+        if self.network.ntm_size is not None:
+            if self.network.rnn_size > 0: #if use recurrent layers
+                if self.last_extra_inputs is not None: #if use extra inputs
+                    feed_dict = {self.network.states: states,
+                                self.network.extra_inputs: extra_inputs,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.rnn_stateh: states_h,
+                                self.network.rnn_statec: states_c,
+                                self.network.ntm_memory: memories,
+                                self.network.ntm_reading: readings}
+                else:
+                    feed_dict = {self.network.states: states,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.rnn_stateh: states_h,
+                                self.network.rnn_statec: states_c,
+                                self.network.ntm_memory: memories,
+                                self.network.ntm_reading: readings} 
             else:
-                feed_dict = {self.network.states: states,
-                            self.network.actions: actions,
-                            self.network.returns: returns,
-                            self.network.rnn_stateh: states_h,
-                            self.network.rnn_statec: states_c}
-            self.state_h = states_h[-1]
-            self.state_c = states_c[-1]
+                if self.last_extra_inputs is not None:
+                    feed_dict = {self.network.states: states,
+                                self.network.extra_inputs: extra_inputs,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.ntm_memory: memories,
+                                self.network.ntm_reading: readings}
+                else:
+                    feed_dict = {self.network.states: states,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.ntm_memory: memories,
+                                self.network.ntm_reading: readings}
         else:
-            if self.last_extra_inputs is not None:
-                feed_dict = {self.network.states: states,
-                            self.network.extra_inputs: extra_inputs,
-                            self.network.actions: actions,
-                            self.network.returns: returns}
+            if self.network.rnn_size > 0: #if use recurrent layers
+                if self.last_extra_inputs is not None: #if use extra inputs
+                    feed_dict = {self.network.states: states,
+                                self.network.extra_inputs: extra_inputs,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.rnn_stateh: states_h,
+                                self.network.rnn_statec: states_c}
+                else:
+                    feed_dict = {self.network.states: states,
+                                self.network.actions: actions,
+                                self.network.returns: returns,
+                                self.network.rnn_stateh: states_h,
+                                self.network.rnn_statec: states_c}
             else:
-                feed_dict = {self.network.states: states,
-                            self.network.actions: actions,
-                            self.network.returns: returns}
+                if self.last_extra_inputs is not None:
+                    feed_dict = {self.network.states: states,
+                                self.network.extra_inputs: extra_inputs,
+                                self.network.actions: actions,
+                                self.network.returns: returns}
+                else:
+                    feed_dict = {self.network.states: states,
+                                self.network.actions: actions,
+                                self.network.returns: returns}
 
         self.sess.run(self.network.train_op, feed_dict)
 
@@ -110,56 +149,101 @@ class Worker:
         extra_inputs = []
         states_h = []
         states_c = []
+        memories = []
+        readings = []
 
         for _ in range(n_steps):
             states.append(self.last_state)
             feed_dict = None
-
-            if self.network.rnn_size > 0:
-                if self.last_extra_inputs is not None:
-                    extra_inputs.append(self.last_extra_inputs)
-                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
-                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
-                else:
-                    feed_dict = {self.network.states: [self.last_state], self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
-
-                outputs = \
-                    self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops,
-                                feed_dict=feed_dict)
-
-                action_probs = outputs[0][0]
-                value_estimate = outputs[1][0]
+            if self.network.ntm_size is not None:
+                memories.append(self.memory.copy())
+                readings.append(self.reading.copy())
                 if self.network.rnn_size > 0:
+                    states_h.append(self.state_h.copy())
+                    states_c.append(self.state_c.copy())
+    
+                    if self.last_extra_inputs is not None:
+                        extra_inputs.append(self.last_extra_inputs)
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
+                    else:
+                        feed_dict = {self.network.states: [self.last_state], self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
+
+                    outputs = \
+                        self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops + [self.network.ntm_write, self.network.ntm_reading],
+                                    feed_dict=feed_dict)
+
+                    action_probs = outputs[0][0]
+                    value_estimate = outputs[1][0]
                     list_state_h = []
                     list_state_c = []
                     k = 0
                     for _ in range(self.network.rnn_size):
-                        list_state_h.append(outputs[2][0])
-                        list_state_c.append(outputs[2+k][0])
+                        list_state_h.append(outputs[k+2][0])
+                        list_state_c.append(outputs[k+3][0])
                         k += 2
                     self.state_h = np.array(list_state_h, dtype=np.float32)
                     self.state_c = np.array(list_state_c, dtype=np.float32)
-                    states_h.append(self.state_h)
-                    states_c.append(self.state_c)
-          
-
-            else:
-                if self.last_extra_inputs is not None:
-                    extra_inputs.append(self.last_extra_inputs)
-                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+                    self.memory = outputs[k+2][0].copy()
+                    self.reading = outputs[k+3][0].copy()
                 else:
-                    feed_dict = {self.network.states: [self.last_state]}
+                    if self.last_extra_inputs is not None:
+                        extra_inputs.append(self.last_extra_inputs)
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
+                    else:
+                        feed_dict = {self.network.states: [self.last_state], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
 
-                [action_probs], [value_estimate] = \
-                    self.sess.run([self.network.action_probs, self.network.value],
-                                feed_dict=feed_dict)
+                    outputs =    self.sess.run([self.network.action_probs, self.network.value, self.network.ntm_write, self.network.ntm_reading],
+                                    feed_dict=feed_dict)
+                    
+                    action_probs = outputs[0][0]
+                    value_estimate = outputs[1][0]
+                    self.memory = outputs[2][0].copy()
+                    self.reading = outputs[3][0].copy()
+            else:
+                if self.network.rnn_size > 0:
+                    states_h.append(self.state_h.copy())
+                    states_c.append(self.state_c.copy())
+
+                    if self.last_extra_inputs is not None:
+                        extra_inputs.append(self.last_extra_inputs)
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+                    else:
+                        feed_dict = {self.network.states: [self.last_state], self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+
+                    outputs = \
+                        self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops,
+                                    feed_dict=feed_dict)
+
+                    action_probs = outputs[0][0]
+                    value_estimate = outputs[1][0]
+                    list_state_h = []
+                    list_state_c = []
+                    k = 0
+                    for _ in range(self.network.rnn_size):
+                        list_state_h.append(outputs[k+2][0])
+                        list_state_c.append(outputs[k+3][0])
+                        k += 2
+                    self.state_h = np.array(list_state_h, dtype=np.float32)
+                    self.state_c = np.array(list_state_c, dtype=np.float32)
+                else:
+                    if self.last_extra_inputs is not None:
+                        extra_inputs.append(self.last_extra_inputs)
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+                    else:
+                        feed_dict = {self.network.states: [self.last_state]}
+
+                    [action_probs], [value_estimate] = \
+                        self.sess.run([self.network.action_probs, self.network.value],
+                                    feed_dict=feed_dict)
 
             self.episode_values.append(value_estimate)
 
             action = np.random.choice(self.env.action_space.n, p=action_probs)
 
             self.last_state, reward, done, envinfo = self.env.step(action, (action_probs, value_estimate) )
-            
+
             if 'action' in envinfo:
                 action = envinfo['action']
             
@@ -170,13 +254,13 @@ class Worker:
                 self.last_state = self.last_state[0]
             else:
                 self.last_extra_inputs = None
-            
+       
             rewards.append(reward)
 
             if done:
                 break
 
-        return actions, done, rewards, states, extra_inputs, states_h, states_c
+        return actions, done, rewards, states, extra_inputs, states_h, states_c, memories, readings
 
     def calculate_returns(self, done, rewards):
         if done:
@@ -186,18 +270,32 @@ class Worker:
             # we need to know the return of the final state.
             # We estimate this using the value network.
             feed_dict = None
-            if self.network.rnn_size > 0:
-                if self.last_extra_inputs is not None:
-                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
-                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
-                else:       
-                    feed_dict = {self.network.states: [self.last_state], 
-                                    self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+            if  self.network.ntm_size is not None:
+                if self.network.rnn_size > 0:
+                    if self.last_extra_inputs is not None:
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
+                    else:       
+                        feed_dict = {self.network.states: [self.last_state], 
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
+                else:
+                    if self.last_extra_inputs is not None:
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs], self.network.ntm_memory: [self.memory], self.network.ntm_reading:[self.reading]}
+                    else:       
+                        feed_dict = {self.network.states: [self.last_state], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
             else:
-                if self.last_extra_inputs is not None:
-                    feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
-                else:       
-                    feed_dict = {self.network.states: [self.last_state]}
+                if self.network.rnn_size > 0:
+                    if self.last_extra_inputs is not None:
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs],
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+                    else:       
+                        feed_dict = {self.network.states: [self.last_state], 
+                                        self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c]}
+                else:
+                    if self.last_extra_inputs is not None:
+                        feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs]}
+                    else:       
+                        feed_dict = {self.network.states: [self.last_state]}
 
             last_value = self.sess.run(self.network.value, feed_dict=feed_dict)[0]
             

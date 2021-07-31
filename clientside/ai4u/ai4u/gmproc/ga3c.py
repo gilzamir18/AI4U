@@ -171,7 +171,7 @@ class A3CMaster(ServerWorker):
 			self.opt.apply_gradients(zip(grads, self.model.trainable_weights))
 		self.model_save_counter += 1
 		if self.model_save_counter % self.model_save_freq == 0:
-			self.model.save('model')
+			self.model.save_weights('model')
 			self.model_save_counter = 0
 		return self.model.get_weights()
 

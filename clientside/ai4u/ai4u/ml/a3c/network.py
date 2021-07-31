@@ -61,12 +61,19 @@ def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
 class Network:
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
                  add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None, training=True):
+        
+        self.scope = scope
+        #RECURRENT NEURALNET CONFIGURATION
         self.rnn_stateh = None
         self.rnn_statec = None
         self.rnn_input_shapes = []
         self.rnn_output_ops = []
         self.rnn_size = 0
-        self.scope = scope
+        
+        #NTM NEURALNET CONFIGURATION
+        self.ntm_memory = None
+        self.ntm_size = None
+
         if training:
             with tf.variable_scope(scope):
                 #extra_inputs is a list of input channels that it is not a main input channel
@@ -117,6 +124,14 @@ class Network:
         self.rnn_input_shapes = layer.shapes
         self.rnn_output_ops = layer.outputs
         self.rnn_size = layer.size
+        self.lstm_initial_value = layer.initial_value
+        
+    def setNTMLayer(self, layer):
+        self.ntm_memory = layer.memory
+        self.ntm_reading = layer.reading
+        self.ntm_size = (layer.lines, layer.columns)
+        self.ntm_write = layer.write_head
+        self.ntm_epsilon = layer.epsilon
 
     def make_summary_ops(self, scope, detailed_logs):
         variables = tf.trainable_variables(scope)
