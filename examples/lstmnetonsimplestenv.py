@@ -24,6 +24,11 @@ from collections import deque
 #@param network: a Network wrapper (necessary for lstm and ntm layers). 
 # If you use a LSTM network named lstm, use network.setLSTMLayer(lstm).
 # If you use a NTM network named ntm, use network.setNTMLayer(ntm).
+#---------------------------------------------------------------------------------
+# Requeirements:
+# AI4UGenEnv:
+# enter in clientside/generic_gym and run this command:
+# > pip install -e .
 ##############################################################################################################
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow as tf
@@ -69,7 +74,7 @@ class EnvironmentWrapper:
   #setup method defines a environment initial configurations.
   #here, resources can be created or main configurations defined.
   #@param env: object that encapsulate environment properties.
-  #@param defs: dictionary containing pairs <property_name, property_value>. 
+  #@param defs: dictionary containing pairs <property_name, property_value>.
   def setup(self, env, defs):
     if 'state_shape' in defs:
         self.observation_space = spaces.Box(low=0, high=1, shape=defs['state_shape'], dtype=np.uint8)

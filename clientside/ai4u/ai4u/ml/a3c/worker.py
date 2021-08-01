@@ -58,6 +58,7 @@ class Worker:
                 self.state_c = self.initial_state_c.copy()
             if self.network.ntm_size is not None:
                 self.memory = self.initial_memory.copy()
+                self.reading = self.initial_reading.copy()
 
             self.last_state = self.env.reset()
 

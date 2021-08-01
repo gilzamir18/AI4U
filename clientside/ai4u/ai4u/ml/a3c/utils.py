@@ -15,43 +15,57 @@ if tensorflow.__version__ >= "2":
 else:
     import tensorflow as tf
 
-
-#Neural Turing Machine (A3C version)
+########################################################################################
+# This class  implements Neural Turing Machine (A3C version) integrated with our  A3C  #
+# implementation.                                                                      #
+# Features: content adressing, one write head, one read read, numeric stability.       #
+# Use this class in callback function make_inference_network.                          #
+#                                                                                      #
+# For example: see examples/ntmonsimplestenv.py.
+########################################################################################
 class NTMNet:
-    def __init__(self, lines=12, columns=10):
+    def __init__(self, lines=12, columns=10, eps=1.0e-12):
         self.memory = tf.placeholder(tf.float32, (None, lines, columns))
         self.reading = tf.placeholder(tf.float32, (None, columns))
         self.lines = lines
         self.columns = columns
         self.layers = []
-        self.actvation = "sigmoid"
-        self.epsilon = 0.001
+        self.activation = "sigmoid"
+        self.epsilon = eps
 
-    def buildWeightings(self, input_layer, strength=1.0):
+    def buildWeightings(self, input_layer, name="ntm_key"):
         self.layers = []
-        flattened = tf.keras.layers.Flatten()(self.memory)
-        exp_features = tf.keras.layers.Concatenate()([input_layer, flattened])
-        self.key = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_key")(exp_features)
+        #flattened = tf.keras.layers.Flatten()(self.memory)
+        #exp_features = tf.keras.layers.Concatenate()([input_layer, flattened])
+        exp_features = input_layer
+        self.key = tf.keras.layers.Dense(self.columns, activation=None, name=name)(exp_features)
+        self.strength = tf.keras.layers.Dense(1, activation=self.activation, name=name+"_strength")(exp_features)
         self.layers.append(self.key)
-        #key = (K, M), mem = (K, N, M)
-        K = tf.keras.layers.Dot(axes=(1, 2), normalize=True, name='ntm_K')([self.key, self.memory])
-        #print_op = tf.print("K:", tf.shape(K), output_stream=sys.stdout)
-        #with tf.control_dependencies([print_op]):
-        #    self.w = tf.keras.layers.Softmax(name='ntm_w')(K*strength)
-        self.w = tf.keras.layers.Softmax(name='ntm_w')(K*strength)
+        self.layers.append(self.strength)
+        key, _ = tf.linalg.normalize(self.key, axis=1)
+        key = tf.reshape(key, [-1, self.columns, 1]) #(-1, M, 1)
+        mem, _ = tf.linalg.normalize(self.memory, axis=[-2, -1]) #(-1, N, M)
+        K = tf.matmul(mem, key)
+        K = tf.reshape(K, (-1, self.lines))
+        #print_op = tf.print("key: ", self.key, output_stream=sys.stdout)
+        #print_op2 = tf.print("K: ", K, output_stream=sys.stdout)
+        #print_op3 = tf.print("M:", self.memory, output_stream=sys.stdout)
+        #with tf.control_dependencies([print_op, print_op2, print_op3]):
+            #self.w = tf.keras.layers.Softmax(name='ntm_w')(K*self.strength)
+        self.w = tf.keras.layers.Softmax(name='%s_output'%(name))(K*self.strength)
         self.layers.append(self.w)
         return self.w
 
-    def buildWriteHead(self, input_layer, id=0):
-        flattened = tf.keras.layers.Flatten()(self.memory)
-        exp_features = tf.keras.layers.Concatenate()([input_layer, flattened])
-        self.e = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_ewrite_%d"%(id))(exp_features)
-        self.a = tf.keras.layers.Dense(self.columns, activation=self.actvation, name="ntm_awrite_%d"%(id))(exp_features)
+    def buildWriteHead(self, input_layer, id=0, w=None):
+        if w is None:
+            w = self.w
+        self.e = tf.keras.layers.Dense(self.columns, activation='sigmoid', name="ntm_ewrite_%d"%(id))(input_layer)
+        self.a = tf.keras.layers.Dense(self.columns, activation='sigmoid', name="ntm_awrite_%d"%(id))(input_layer)
         self.layers.append(self.e)
         self.layers.append(self.a)
-        e = tf.expand_dims(self.e, axis=1)
-        w = tf.expand_dims(self.w, axis=-1)
-        # w x e => (K, 12, 1) x (K, 1, 10)
+        e = tf.expand_dims(self.e, axis=1) #(None, M) => (None, 1, M)
+        w = tf.expand_dims(w, axis=-1) #(None, N) => (None, N, 1)
+        # w x e => (None, 12, 1) x (None, 1, 10)
         We = tf.matmul(w, e)
         Me = tf.keras.layers.Multiply()([self.memory, We])
         Me = tf.keras.layers.Subtract()([self.memory, Me])
@@ -61,19 +75,22 @@ class NTMNet:
         self.layers.append(self.write_head)
         return self.write_head
 
-    def buildReadHead(self, input_layer=None, id=0):
-        if input_layer is None:
-            input_layer = self.memory
-        else:
-            flattened = tf.keras.layers.Flatten()(self.memory)
-            input_layer = tf.keras.layers.Concatenate()([input_layer, flattened])
-
-        # w x m => (12, 1) x (12, 10)
-        w = tf.expand_dims(self.w, axis=-1)
-        self.read_head = tf.keras.layers.Multiply(name='ntm_read%d'%(id))([w, input_layer])
-        self.read_head = tf.math.reduce_sum(self.read_head, 1)
+    def buildReadHead(self, mem=None, w = None, id=0):
+        if w is None:
+            w = self.w
+        if mem is None:
+            mem = self.memory
+        w = tf.expand_dims(w, axis=-1)
+        #memory is (None, N, M)
+        prod = tf.multiply(mem, w)
+        self.read_head = tf.math.reduce_sum(prod, 1)
+        #print_op1 = tf.print("mat = ", prod)
+        #print_op2 = tf.print("RS = ", self.read_head)
+        #with tf.control_dependencies([print_op1, print_op2]):
+        #self.read_head = tf.multiply(self.read_head, 1)
         self.layers.append(self.read_head)
         return self.read_head
+
 
 ########################################################################################
 # This class  wraps tensorflow.keras.layers.LSTM for facilitating integration of LSTM  #
@@ -81,26 +98,7 @@ class NTMNet:
 # Features: multiple layers support and easy interface.                                #
 # Use this class in callback function make_inference_network.                          #
 #                                                                                      #
-# For example:                                                                         # 
-#def make_inference_network(obs_shape, n_actions, debug=False,                         #
-#        extra_inputs_shape=None, network=None):                                       #
-#    import tensorflow as tf                                                           #
-#    from ai4u.ml.a3c.multi_scope_train_op import make_train_op                        #
-#    from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms,   #
-#        make_rmsprop_histograms, logit_entropy, make_copy_ops                         #
-#    lstm = LSTMCell(100, 1, initial_value=0.0)                                        #
-#    observations = tf.placeholder(tf.float32, [None] + list(obs_shape))               #
-#    hidden, lstm_layers = lstm.buildlayers(observations)                              #
-#    hidden = tf.keras.layers.Dense(10, activation=tf.nn.relu, name='hidden1')(hidden) #
-#    action_logits = tf.keras.layers.Dense(n_actions, activation=None,                 #
-#        name='action_logits')(hidden)                                                 #
-#    action_probs = tf.keras.layers.Softmax()(action_logits)                           #
-#    values = tf.keras.layers.Dense(1, activation=None, name='value')(hidden)          #
-#    values = values[:, 0]                                                             #
-#    layers = [] + lstm_layers                                                         #
-#    if network is not None:                                                           #
-#        network.setLSTMLayer(lstm)                                                    #
-#    return observations, action_logits, action_probs, values, layers                  #
+# For example: see lstmnetonsimplestenv.py.                                            #
 ########################################################################################
 class LSTMNet:
     def __init__(self, units=256, num_layers=1, return_state=False, initial_value=0.01):
