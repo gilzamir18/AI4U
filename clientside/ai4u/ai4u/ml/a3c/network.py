@@ -9,6 +9,8 @@ from .multi_scope_train_op import make_train_op
 from .utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
     logit_entropy, make_copy_ops
 
+from .layers import NTMLayer
+
 
 def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
     actions = tf.placeholder(tf.int64, [None])
@@ -127,11 +129,16 @@ class Network:
         self.lstm_initial_value = layer.initial_value
         
     def setNTMLayer(self, layer):
-        self.ntm_memory = layer.memory
-        self.ntm_reading = layer.reading
-        self.ntm_size = (layer.lines, layer.columns)
-        self.ntm_write = layer.write_head
-        self.ntm_epsilon = layer.epsilon
+        if isinstance(layer, NTMLayer):
+            self.ntm_memory = layer.memory
+            self.ntm_reading = layer.reading
+            self.ntm_size = (layer.lines, layer.columns)
+            self.ntm_write = layer.write_out
+            self.ntm_epsilon = layer.epsilon
+            self.ntm_numreaders = layer.numreaders;
+            self.ntm_numwriters = layer.numwriters;
+        else:
+            assert(False, "Parameter layer must be of the type layers.NTMLayer!")
 
     def make_summary_ops(self, scope, detailed_logs):
         variables = tf.trainable_variables(scope)

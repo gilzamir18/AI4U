@@ -23,7 +23,10 @@ class Worker:
 
         if network.ntm_size is not None:
             self.initial_memory = np.ones(network.ntm_size)*network.ntm_epsilon
-            self.initial_reading = np.ones(network.ntm_size[1])*network.ntm_epsilon 
+            self.initial_reading = []
+            for i in range(network.ntm_numreaders):
+                self.initial_reading.append(np.ones(network.ntm_size[-1])*network.ntm_epsilon )
+            self.initial_reading = np.array(self.initial_reading, dtype=np.float32)
             self.memory = self.initial_memory.copy()
             self.reading = self.initial_reading.copy()
 
@@ -171,36 +174,45 @@ class Worker:
                         feed_dict = {self.network.states: [self.last_state], self.network.rnn_stateh: [self.state_h], self.network.rnn_statec: [self.state_c], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
 
                     outputs = \
-                        self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops + [self.network.ntm_write, self.network.ntm_reading],
+                        self.sess.run([self.network.action_probs, self.network.value] + self.network.rnn_output_ops + self.network.ntm_write + [self.network.ntm_reading],
                                     feed_dict=feed_dict)
 
                     action_probs = outputs[0][0]
                     value_estimate = outputs[1][0]
                     list_state_h = []
                     list_state_c = []
-                    k = 0
+                    k = 2
                     for _ in range(self.network.rnn_size):
-                        list_state_h.append(outputs[k+2][0])
-                        list_state_c.append(outputs[k+3][0])
+                        list_state_h.append(outputs[k][0])
+                        list_state_c.append(outputs[k+1][0])
                         k += 2
                     self.state_h = np.array(list_state_h, dtype=np.float32)
                     self.state_c = np.array(list_state_c, dtype=np.float32)
-                    self.memory = outputs[k+2][0].copy()
-                    self.reading = outputs[k+3][0].copy()
+                    self.memory = outputs[k][0].copy()
+                    k += 1
+                    list_readings = []
+                    for _ in range(self.network.ntm_numreaders):
+                        list_readings.append(np.squeeze(outputs[k][0]))
+                        k += 1
+                    self.reading = np.array(list_readings, dtype=np.float32)
                 else:
                     if self.last_extra_inputs is not None:
                         extra_inputs.append(self.last_extra_inputs)
                         feed_dict = {self.network.states: [self.last_state], self.network.extra_inputs: [self.last_extra_inputs], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
                     else:
                         feed_dict = {self.network.states: [self.last_state], self.network.ntm_memory: [self.memory], self.network.ntm_reading: [self.reading]}
-
-                    outputs =    self.sess.run([self.network.action_probs, self.network.value, self.network.ntm_write, self.network.ntm_reading],
+                    outputs =    self.sess.run([self.network.action_probs, self.network.value] + self.network.ntm_write + [self.network.ntm_reading],
                                     feed_dict=feed_dict)
                     
                     action_probs = outputs[0][0]
                     value_estimate = outputs[1][0]
                     self.memory = outputs[2][0].copy()
-                    self.reading = outputs[3][0].copy()
+                    k = 3
+                    list_readings = []
+                    for _ in range(self.network.ntm_numreaders):
+                        list_readings.append(np.squeeze(outputs[k][0]))
+                        k += 1
+                    self.reading = np.array(list_readings, dtype=np.float32)
             else:
                 if self.network.rnn_size > 0:
                     states_h.append(self.state_h.copy())

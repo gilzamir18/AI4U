@@ -7,13 +7,14 @@
 # ment.                                           #
 # Gilzamir Gomes (C) 2021 - gilzamir@outlook.com  #
 ###################################################
+
 import gym
 from gym import spaces
 from ai4u.ml.a3c.train import run as run_train
 from ai4u.ml.a3c.run_checkpoint import run as run_test
 from ai4u.utils import environment_definitions
 import AI4UGenEnv
-from ai4u.ml.a3c.utils import NTMNet
+from ai4u.ml.a3c.layers import NTMLayer
 import argparse
 #import simplest
 import numpy as np
@@ -40,43 +41,31 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
         logit_entropy, make_copy_ops
 
-    ntm = NTMNet(lines=3, columns=2, eps=1.0e-12)
+    ntm_layer = NTMLayer(lines=3, columns=3)
     
-    #INPUT+MEMORY
+    #INPUT
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
-    features = tf.keras.layers.Concatenate()([observations, ntm.reading])    
     
-    #HEAD SHARED LAYERS
-    hidden1 = tf.keras.layers.Dense(100, activation=tf.nn.relu, name='hidden1')(features)
-    ctr_hidden = tf.keras.layers.Dense(100, activation=tf.nn.relu, name='ctr-hidden')(hidden1)
-
-    #WEIGHTING - FOCUSING
-    write_w = ntm.buildWeightings(ctr_hidden, name="ntm_write_key")
-    read_w  = ntm.buildWeightings(ctr_hidden, name="ntm_read_key")
-
-    #READ HEAD
-    readHead = ntm.buildReadHead(w=read_w)
-    
-    #WRITE HEAD
-    writeHead = ntm.buildWriteHead(ctr_hidden, w=write_w)
+    #NTM Layer
+    ntm_readings = ntm_layer(observations)
 
     #CONTROLLER DECISION MODULE
-    exp_features = tf.keras.layers.Concatenate()([observations, readHead])
-    hidden2 = tf.keras.layers.Dense(100, activation=tf.nn.relu, name='hidden2')(exp_features)
-    hidden3 = tf.keras.layers.Dense(100, activation=tf.nn.relu, name='hidden3')(hidden2)
-    action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden3)
+    exp_features = tf.keras.layers.Concatenate()([observations, ntm_readings])
+    hidden1 = tf.keras.layers.Dense(100, activation="tanh", name='dec_hidden1')(exp_features)
+    hidden2 = tf.keras.layers.Dense(100, activation="tanh", name='dec_hidden2')(hidden1)
+    action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden2)
     action_probs = tf.nn.softmax(action_logits)
 
     #print_op = tf.print(readHead)
     #with tf.control_dependencies([print_op]):
-    values = tf.keras.layers.Dense(1, activation=None, name='value')(hidden3)
+    values = tf.keras.layers.Dense(1, activation=None, name='value')(hidden2)
     # Shape is currently (?, 1)
     # Convert to just (?)
     values = values[:, 0]
-    layers = [ctr_hidden, hidden1, hidden2] + ntm.layers 
+    layers = [hidden1, hidden2] + ntm_layer.layers 
 
     if network is not None:
-        network.setNTMLayer(ntm)
+        network.setNTMLayer(ntm_layer) #It's necessary for A3C send right data to NTM's layers.
 
     return observations, action_logits, action_probs, values, layers
 
@@ -119,7 +108,9 @@ class Wrapper:
     if 'action_shape' in defs:
         self.action_space = spaces.Discrete(defs['action_shape'][0])
 
+    #It's mandatory, algorithms use this information for define neural network input shape. 
     env.observation_space = self.observation_space
+    #It's mandatory, algorithms use this information for define neural network output shape.
     env.action_space = self.action_space
 
   #This method get an action from policy and defines how this actin is applied on envioronment.
@@ -187,9 +178,6 @@ def parse_args():
     parser.add_argument("--id", default='0')
     parser.add_argument('--path', default='.')
     parser.add_argument('--load_ckpt')
-    parser.add_argument('--preprocessing', choices=['generic', 'user_defined'])
-    parser.add_argument("--n_steps", type=float, default=10e6)
-    parser.add_argument("--steps_per_update", type=int, default=5)
     return parser.parse_args()
 
 def make_env_def():
