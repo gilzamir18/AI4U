@@ -36,7 +36,14 @@ from collections import deque
 # > pip install -e .
 ##############################################################################################################
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
-    import tensorflow as tf
+    import tensorflow
+    #If tensorflow version is upper or equals to 2, force use of the version one tensorflow API
+    if tensorflow.__version__ >= "2.0":
+        import tensorflow.compat.v1 as tf
+        tf.disable_v2_behavior()
+    else:
+        import tensorflow as tf
+
     from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
         logit_entropy, make_copy_ops
