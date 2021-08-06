@@ -93,7 +93,7 @@ def run_agent(env, sess, obs_placeholder, action_probs_op, network):
         obsph = obs_placeholder[0]
         extraph = obs_placeholder[1]
     else:
-        objph = observations
+        obsph = obs_placeholder
 
 
     state_h = None
@@ -109,10 +109,23 @@ def run_agent(env, sess, obs_placeholder, action_probs_op, network):
         initial_state_h = np.array(initial_state_h)
         initial_state_c = np.array(initial_state_c)
 
+    initial_memory = None
+    initial_reading = None
+    if network.ntm_size is not None:
+        initial_memory = np.ones(network.ntm_size)*network.ntm_epsilon
+        initial_reading = []
+        for i in range(network.ntm_numreaders):
+            initial_reading.append(np.ones(network.ntm_size[-1])*network.ntm_epsilon )
+        initial_reading = np.array(initial_reading, dtype=np.float32)
+
     while True:
         if network.rnn_size > 0:
             state_h = initial_state_h.copy()
             state_c = initial_state_c.copy()
+
+        if network.ntm_size is not None:
+            memory = initial_memory.copy()
+            reading = initial_reading.copy()
 
         obs = env.reset()
 
@@ -120,36 +133,82 @@ def run_agent(env, sess, obs_placeholder, action_probs_op, network):
         done = False
 
         while not done:
-            if network.rnn_size > 0:
-                feed_dict = None
-                if extraph is None:
-                    feed_dict = {obsph: [obs], network.rnn_stateh: [state_h], network.rnn_statec: [state_c]}
+            if network.ntm_size is not None:
+                if network.rnn_size > 0:
+                    feed_dict = None
+                    if extraph is None:
+                        feed_dict = {obsph: [obs], network.rnn_stateh: [state_h], network.rnn_statec: [state_c], network.ntm_memory: [memory], network.ntm_reading: [reading]}
+                    else:
+                        feed_dict = {obsph: [obs[0]], extraph: [obs[1]], network.rnn_stateh: [state_h], network.rnn_statec: [state_c], network.ntm_memory: [memory], network.ntm_reading: [reading]}
+                    
+                    outputs = \
+                        sess.run([action_probs_op] + network.rnn_output_ops + network.ntm_write + [network.ntm_reading],
+                                    feed_dict=feed_dict)
+
+                    action_probs = outputs[0][0]
+                    list_state_h = []
+                    list_state_c = []
+                    k = 1
+                    for _ in range(network.rnn_size):
+                        list_state_h.append(outputs[k][0])
+                        list_state_c.append(outputs[k+1][0])
+                        k += 2
+                    state_h = np.array(list_state_h, dtype=np.float32)
+                    state_c = np.array(list_state_c, dtype=np.float32)
+                    memory = outputs[k][0].copy()
+                    k += 1
+                    list_readings = []
+                    for _ in range(network.ntm_numreaders):
+                        list_readings.append(np.squeeze(outputs[k][0]))
+                        k += 1
+                    reading = np.array(list_readings, dtype=np.float32)
+
                 else:
-                    feed_dict = {obsph: [obs[0]], extraph: [obs[1]], network.rnn_stateh: [state_h], network.rnn_statec: [state_c]}
-                
-                action_probs = sess.run( [action_probs_op, ], feed_dict)[0]
-
-                outputs = \
-                    sess.run([action_probs_op] + network.rnn_output_ops,
-                                feed_dict=feed_dict)
-
-                action_probs = outputs[0][0]
-                list_state_h = []
-                list_state_c = []
-                k = 0
-                for _ in range(network.rnn_size):
-                    list_state_h.append(outputs[1][0])
-                    list_state_c.append(outputs[1+k][0])
-                    k += 2
-                state_h = np.array(list_state_h, dtype=np.float32)
-                state_c = np.array(list_state_c, dtype=np.float32)
+                    feed_dict = None
+                    if extraph is None:
+                        feed_dict = {obsph: [obs], network.ntm_memory: [memory], network.ntm_reading: [reading]}
+                    else:
+                        feed_dict = {obsph: [obs[0]], extraph: [obs[1]], network.memory: [memory], network.ntm_reading: [reading]}
+                    outputs = sess.run([action_probs_op] + network.ntm_write + [network.ntm_reading], feed_dict)
+                    action_probs = outputs[0][0]
+                    memory = outputs[1][0].copy()
+                    k = 2
+                    list_readings = []
+                    for _ in range(network.ntm_numreaders):
+                        list_readings.append(np.squeeze(outputs[k][0]))
+                        k += 1
+                    reading = np.array(list_readings, dtype=np.float32)
             else:
-                feed_dict = None
-                if extraph is None:
-                    feed_dict = {obsph: [obs]}
+                if network.rnn_size > 0:
+                    feed_dict = None
+                    if extraph is None:
+                        feed_dict = {obsph: [obs], network.rnn_stateh: [state_h], network.rnn_statec: [state_c]}
+                    else:
+                        feed_dict = {obsph: [obs[0]], extraph: [obs[1]], network.rnn_stateh: [state_h], network.rnn_statec: [state_c]}
+                    
+                    action_probs = sess.run( [action_probs_op, ], feed_dict)[0]
+
+                    outputs = \
+                        sess.run([action_probs_op] + network.rnn_output_ops,
+                                    feed_dict=feed_dict)
+
+                    action_probs = outputs[0][0]
+                    list_state_h = []
+                    list_state_c = []
+                    k = 1
+                    for _ in range(network.rnn_size):
+                        list_state_h.append(outputs[k][0])
+                        list_state_c.append(outputs[k+1][0])
+                        k += 2
+                    state_h = np.array(list_state_h, dtype=np.float32)
+                    state_c = np.array(list_state_c, dtype=np.float32)
                 else:
-                    feed_dict = {obsph: [obs[0]], extraph: [obs[1]]}
-                action_probs = sess.run(action_probs_op, feed_dict)[0]
+                    feed_dict = None
+                    if extraph is None:
+                        feed_dict = {obsph: [obs]}
+                    else:
+                        feed_dict = {obsph: [obs[0]], extraph: [obs[1]]}
+                    action_probs = sess.run(action_probs_op, feed_dict)[0]
             action = np.random.choice(env.action_space.n, p=action_probs)
             obs, reward, done, _ = env.step(action, (action_probs, 0))
             episode_reward += reward
