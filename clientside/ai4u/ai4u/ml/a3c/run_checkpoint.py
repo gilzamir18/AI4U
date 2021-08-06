@@ -186,8 +186,6 @@ def run_agent(env, sess, obs_placeholder, action_probs_op, network):
                     else:
                         feed_dict = {obsph: [obs[0]], extraph: [obs[1]], network.rnn_stateh: [state_h], network.rnn_statec: [state_c]}
                     
-                    action_probs = sess.run( [action_probs_op, ], feed_dict)[0]
-
                     outputs = \
                         sess.run([action_probs_op] + network.rnn_output_ops,
                                     feed_dict=feed_dict)
