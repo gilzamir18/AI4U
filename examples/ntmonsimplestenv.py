@@ -14,7 +14,7 @@ from ai4u.ml.a3c.train import run as run_train
 from ai4u.ml.a3c.run_checkpoint import run as run_test
 from ai4u.utils import environment_definitions
 import AI4UGenEnv
-from ai4u.ml.a3c.layers import NTMLayer
+from ai4u.ml.a3c.layers import NTMNet
 import argparse
 #import simplest
 import numpy as np
@@ -48,13 +48,13 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
         logit_entropy, make_copy_ops
 
-    ntm_layer = NTMLayer(lines=3, columns=3)
+    ntm_layer = NTMNet(lines=3, columns=3)
     
     #INPUT
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
     
     #NTM Layer
-    ntm_readings = ntm_layer(observations)
+    ntm_readings = ntm_layer(observations, network=network)
 
     #CONTROLLER DECISION MODULE
     exp_features = tf.keras.layers.Concatenate()([observations, ntm_readings])
@@ -63,17 +63,12 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden2)
     action_probs = tf.nn.softmax(action_logits)
 
-    #print_op = tf.print(readHead)
-    #with tf.control_dependencies([print_op]):
     values = tf.keras.layers.Dense(1, activation=None, name='value')(hidden2)
+
     # Shape is currently (?, 1)
     # Convert to just (?)
     values = values[:, 0]
     layers = [hidden1, hidden2] + ntm_layer.layers 
-
-    if network is not None:
-        network.setNTMLayer(ntm_layer) #It's necessary for A3C send right data to NTM's layers.
-
     return observations, action_logits, action_probs, values, layers
 
 

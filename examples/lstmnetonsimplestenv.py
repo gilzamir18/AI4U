@@ -10,7 +10,7 @@ from ai4u.ml.a3c.train import run as run_train
 from ai4u.ml.a3c.run_checkpoint import run as run_test
 from ai4u.utils import environment_definitions
 import AI4UGenEnv
-from ai4u.ml.a3c.utils import LSTMNet
+from ai4u.ml.a3c.layers import LSTMNet
 import argparse
 import numpy as np
 from collections import deque
@@ -32,19 +32,19 @@ from collections import deque
 ##############################################################################################################
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow
-    #If tensorflow version is upper or equals to 2, force use of the version one tensorflow API
     if tensorflow.__version__ >= "2.0":
         import tensorflow.compat.v1 as tf
         tf.disable_v2_behavior()
     else:
         import tensorflow as tf
+
     from ai4u.ml.a3c.multi_scope_train_op import make_train_op 
     from ai4u.ml.a3c.utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
         logit_entropy, make_copy_ops
-    
+
     lstm = LSTMNet(100, 2, initial_value=0.0)
     observations = tf.placeholder(tf.float32, [None] + list(obs_shape))
-    hidden, lstm_layers = lstm.buildlayers(observations)
+    hidden, lstm_layers = lstm(observations, network)
     hidden = tf.keras.layers.Dense(10, activation=tf.nn.relu, name='hidden1')(hidden)
 
     action_logits = tf.keras.layers.Dense(n_actions, activation=None, name='action_logits')(hidden)
@@ -54,10 +54,8 @@ def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape
     # Shape is currently (?, 1)
     # Convert to just (?)
     values = values[:, 0]
-    layers = [] + lstm_layers
-    if network is not None:
-        network.setLSTMLayer(lstm)
-    return observations, action_logits, action_probs, values, layers
+    layers = [hidden] + lstm_layers
+    return observations, action_logits, action_probs, values, layers    
 
 #It is a environment wrapper for simple non-graphics environments.
 class EnvironmentWrapper:

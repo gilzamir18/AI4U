@@ -3,6 +3,7 @@ import tensorflow
 import sys
 from warnings import warn
 import functools
+from .network import MemorySlot
 
 if tensorflow.__version__ >= "2":
     import tensorflow.compat.v1 as tf
@@ -68,6 +69,8 @@ class NTMWriteHead:
         self.write_head = tf.keras.layers.Add(name='%s_write_head_%d'%(self.name, idx))([Me, Wa])
         self.layers.append(self.write_head)
         self.layers += self.addressing.layers
+        if ntm_layer.network is not None:
+            ntm_layer.network.AddOperator(self.write_head)
         return self.write_head
 
 
@@ -92,9 +95,10 @@ class NTMReadHead:
         self.layers += self.addressing.layers
         return self.read_head #shape = (None, N, 1)
 
-class NTMLayer(tf.keras.layers.Layer):
-  def __init__(self, lines=12, columns=10, writers=None, readers=None, name="NTMLayer"):
-    super(NTMLayer, self).__init__(name=name)
+
+class NTMNet(tf.keras.layers.Layer):
+  def __init__(self, lines=12, columns=10, writers=None, readers=None, name="NTMNet"):
+    super(NTMNet, self).__init__(name=name)
 
     if writers is None:
         self.writers = [NTMWriteHead()]
@@ -107,18 +111,21 @@ class NTMLayer(tf.keras.layers.Layer):
 
     self.numwriters = len(self.writers)
     self.numreaders = len(self.readers)
-
-    self.memory = tf.placeholder(tf.float32, (None, lines, columns))
-    self.reading = tf.placeholder(tf.float32, (None, self.numreaders, columns))
+    self.epsilon = 1.0e-12
+    self.memory_slot = MemorySlot("%s_memory"%(name), (lines, columns), epsilon=self.epsilon)#tf.placeholder(tf.float32, (None, lines, columns))
+    self.reading_slot = MemorySlot("%s_reading"%(name), (self.numreaders, columns), epsilon=self.epsilon)#tf.placeholder(tf.float32, (None, self.numreaders, columns))
+    self.memory = self.memory_slot.input
+    self.reading = self.reading_slot.input
     self.lines = lines
     self.columns = columns
     self.layers = None
-    self.epsilon = 1.0e-12
+
 
   def build(self, input_shape):
     pass
 
-  def call(self, inputs, shared_layers=None):
+  def call(self, inputs, shared_layers=None, network=None):
+    self.network = network
     last_reading = tf.keras.layers.Flatten()(self.reading)
     features = tf.keras.layers.Concatenate()([inputs, last_reading])
     self.layers = []
@@ -140,8 +147,15 @@ class NTMLayer(tf.keras.layers.Layer):
         self.read_out.append(reader.build(features, self, idx))
         self.layers += reader.layers
     for idx, writer in enumerate(self.writers):
-        self.write_out.append(writer.build(features, self, idx))
+        wh = writer.build(features, self, idx)
+        self.write_out.append(wh)
+        self.memory_slot.update.append(wh)
         self.layers += writer.layers
+
+    if network is not None:
+        network.AddMemorySlot(self.memory_slot)
+        network.AddMemorySlot(self.reading_slot)
+
     if len(self.read_out) > 1:
         return tf.keras.layers.Concatenate()(self.read_out)
     else:
@@ -159,9 +173,15 @@ class LSTMNet:
     def __init__(self, units=256, num_layers=1, return_state=False, initial_value=0.01):
         self.units = units
         k  = num_layers
-        self.state_h = tf.placeholder(tf.float32, (None, k, units) )
-        self.state_c = tf.placeholder(tf.float32, (None, k, units) )
+        name = "LSTMNet"
+        self.h_slot = MemorySlot("%s_memory"%(name), (k, units), epsilon=initial_value, updatebylayer=True )
+        self.c_slot = MemorySlot("%s_reading"%(name), (k, units), epsilon=initial_value, updatebylayer=True )
+
+        self.state_h = self.h_slot.input
+        self.state_c = self.h_slot.input
+
         self.num_layers = num_layers
+
         self.outputs = None
         self.shapes = None
         self.return_state = return_state
@@ -169,10 +189,14 @@ class LSTMNet:
         self.layers = []
         self.initial_value = initial_value
 
-    def __call__(self, features):
-        return buildlayers(self, features)
+    def __call__(self, features, network):
+        return self.buildlayers(features, network)
 
-    def buildlayers(self, features, **kwargs):
+    def buildlayers(self, features, network, **kwargs):
+        if network is not None:
+            network.AddMemorySlot(self.h_slot)
+            network.AddMemorySlot(self.c_slot)
+
         self.outputs = []
         self.shapes = []
         layers = []
@@ -184,8 +208,8 @@ class LSTMNet:
             rnn1_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell1", **kwargs), return_sequences=False, return_state=True, name="rnn1")
             hidden, stateh1, statec1 = rnn1_layers(features, initial_state=[self.state_h[:,0,:], self.state_c[:,0,:]])
             layers.append(hidden)
-            self.outputs.append(stateh1)
-            self.outputs.append(statec1)
+            self.h_slot.update.append(stateh1)
+            self.c_slot.update.append(statec1)
             self.shapes.append( (1, self.units) )
             self.size += 1
         else:
@@ -193,20 +217,16 @@ class LSTMNet:
                 if i < (r-1):
                     rnn_layers = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_sequences=True, return_state=True, name="rnn%d"%(i), **kwargs)
                     features, stateh1, statec1 = rnn_layers(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
-                    self.outputs.append(stateh1)
-                    self.outputs.append(statec1)
-                    self.shapes.append( (1, self.units) )
                     self.size += 1
                     layers.append(features)
                 else:
                     hidden, stateh1, statec1 = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(self.units, name="cell%d"%(i)), return_state=True, return_sequences=False, name="rnn%d"%(i), **kwargs)(features, initial_state=[self.state_h[:,i,:], self.state_c[:,i,:]])
-                    self.outputs.append(stateh1)
-                    self.outputs.append(statec1)
-                    self.shapes.append( (1, self.units) )
                     self.size += 1
                     layers.append(hidden)
+                self.shapes.append( (1, self.units) )
+                self.h_slot.update.append(stateh1)
+                self.c_slot.update.append(statec1)
         if self.return_state:
             return hidden, layers, stateh1, statec1
         else:
             return hidden, layers
-

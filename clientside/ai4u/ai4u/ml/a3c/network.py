@@ -8,9 +8,8 @@ else:
 from .multi_scope_train_op import make_train_op
 from .utils_tensorflow import make_grad_histograms, make_histograms, make_rmsprop_histograms, \
     logit_entropy, make_copy_ops
-
-from .layers import NTMLayer
-
+import numpy as np
+from collections import OrderedDict
 
 def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
     actions = tf.placeholder(tf.int64, [None])
@@ -60,6 +59,21 @@ def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
 
     return actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss
 
+class MemorySlot:
+    def __init__(self, name, shape, initial_value = None, epsilon = 10e-12, updatebylayer=False):
+        self.name = name
+        self.shape = [None] + list(shape)
+        if initial_value is None:
+            initial_value = np.ones(shape) * epsilon
+        self.initial_value = initial_value
+        self.value = self.initial_value.copy()
+        self.input = tf.placeholder(tf.float32, self.shape, name="%s_input"%(name))
+        self.update = []
+        self.updatebylayer = updatebylayer
+
+    def reset(self):
+        self.value = self.initial_value.copy()
+
 class Network:
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
                  add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None, training=True):
@@ -75,6 +89,9 @@ class Network:
         #NTM NEURALNET CONFIGURATION
         self.ntm_memory = None
         self.ntm_size = None
+
+        self.memory_bank = OrderedDict()
+        self.operators = []
 
         if training:
             with tf.variable_scope(scope):
@@ -120,6 +137,12 @@ class Network:
             else:
                 self.summaries_op = None
 
+    def AddOperator(self, op):
+        self.operators.append(op)
+
+    def AddMemorySlot(self, slot):
+        self.memory_bank[slot.name] = slot
+
     def setLSTMLayer(self, layer):
         self.rnn_stateh = layer.state_h
         self.rnn_statec = layer.state_c
@@ -129,16 +152,13 @@ class Network:
         self.lstm_initial_value = layer.initial_value
         
     def setNTMLayer(self, layer):
-        if isinstance(layer, NTMLayer):
-            self.ntm_memory = layer.memory
-            self.ntm_reading = layer.reading
-            self.ntm_size = (layer.lines, layer.columns)
-            self.ntm_write = layer.write_out
-            self.ntm_epsilon = layer.epsilon
-            self.ntm_numreaders = layer.numreaders;
-            self.ntm_numwriters = layer.numwriters;
-        else:
-            assert(False, "Parameter layer must be of the type layers.NTMLayer!")
+        self.ntm_memory = layer.memory
+        self.ntm_reading = layer.reading
+        self.ntm_size = (layer.lines, layer.columns)
+        self.ntm_write = layer.write_out
+        self.ntm_epsilon = layer.epsilon
+        self.ntm_numreaders = layer.numreaders
+        self.ntm_numwriters = layer.numwriters
 
     def make_summary_ops(self, scope, detailed_logs):
         variables = tf.trainable_variables(scope)
