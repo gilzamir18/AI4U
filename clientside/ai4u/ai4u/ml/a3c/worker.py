@@ -65,18 +65,18 @@ class Worker:
                 self.logger.logkv('rl/episode_value_mean', episode_value_mean)
             self.episode_values = []
 
-            if self.last_extra_inputs is not None:
-                feed_dict = {self.network.states: states,
-                            self.network.extra_inputs: extra_inputs,
-                            self.network.actions: actions,
-                            self.network.returns: returns}
-            else:
-                feed_dict = {self.network.states: states,
-                            self.network.actions: actions,
-                            self.network.returns: returns}
+        if self.last_extra_inputs is not None:
+            feed_dict = {self.network.states: states,
+                        self.network.extra_inputs: extra_inputs,
+                        self.network.actions: actions,
+                        self.network.returns: returns}
+        else:
+            feed_dict = {self.network.states: states,
+                        self.network.actions: actions,
+                        self.network.returns: returns}
 
-            for key in self.network.memory_bank:
-                feed_dict[self.network.memory_bank[key].input] = banks[key]
+        for key in self.network.memory_bank:
+            feed_dict[self.network.memory_bank[key].input] = banks[key]
 
         self.sess.run(self.network.train_op, feed_dict)
 
