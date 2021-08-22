@@ -47,7 +47,7 @@ def make_networks(n_workers, obs_shape, n_actions, value_loss_coef, entropy_bonu
         network = Network(scope=worker_name, n_actions=n_actions, entropy_bonus=entropy_bonus,
                           value_loss_coef=value_loss_coef, max_grad_norm=max_grad_norm,
                           optimizer=optimizer, add_summaries=create_summary_ops, 
-                          state_shape=env_defs['state_shape'], 
+                          state_shape=obs_shape, 
                           make_inference_network=env_defs['make_inference_network'],
                           detailed_logs=detailed_logs, debug=debug, extra_inputs_shape=eis)
         worker_networks.append(network)

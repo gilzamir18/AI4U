@@ -60,7 +60,7 @@ def make_loss_ops(action_logits, values, entropy_bonus, value_loss_coef, debug):
     return actions, returns, advantage, policy_entropy, policy_loss, value_loss, loss
 
 class MemorySlot:
-    def __init__(self, name, shape, initial_value = None, epsilon = 10e-12, updatebylayer=False):
+    def __init__(self, name, shape, initial_value = None, epsilon = 1.0e-12, singleslot=False):
         self.name = name
         self.shape = [None] + list(shape)
         if initial_value is None:
@@ -69,30 +69,17 @@ class MemorySlot:
         self.value = self.initial_value.copy()
         self.input = tf.placeholder(tf.float32, self.shape, name="%s_input"%(name))
         self.update = []
-        self.updatebylayer = updatebylayer
-
+        self.isSingle = singleslot
     def reset(self):
         self.value = self.initial_value.copy()
 
 class Network:
     def __init__(self, scope, n_actions, entropy_bonus, value_loss_coef, max_grad_norm, optimizer,
                  add_summaries, state_shape, make_inference_network, detailed_logs=False, debug=False, extra_inputs_shape=None, training=True):
-        
-        self.scope = scope
-        #RECURRENT NEURALNET CONFIGURATION
-        self.rnn_stateh = None
-        self.rnn_statec = None
-        self.rnn_input_shapes = []
-        self.rnn_output_ops = []
-        self.rnn_size = 0
-        
-        #NTM NEURALNET CONFIGURATION
-        self.ntm_memory = None
-        self.ntm_size = None
-
+        self.timesteps = 0
         self.memory_bank = OrderedDict()
-        self.operators = []
-
+        self.resetables = []
+        self.syncAtEndOfEpisode = False
         if training:
             with tf.variable_scope(scope):
                 #extra_inputs is a list of input channels that it is not a main input channel
@@ -102,7 +89,7 @@ class Network:
                     make_loss_ops(action_logits, value, entropy_bonus, value_loss_coef, debug)
 
             sync_with_global_op = make_copy_ops(from_scope='global', to_scope=scope)
-
+            
             train_op, grads_norm = make_train_op(loss, optimizer,
                                                 compute_scope=scope, apply_scope='global',
                                                 max_grad_norm=max_grad_norm)
@@ -137,28 +124,11 @@ class Network:
             else:
                 self.summaries_op = None
 
-    def AddOperator(self, op):
-        self.operators.append(op)
+    def AddResetable(self, r):
+        self.resetables.append(r)
 
     def AddMemorySlot(self, slot):
         self.memory_bank[slot.name] = slot
-
-    def setLSTMLayer(self, layer):
-        self.rnn_stateh = layer.state_h
-        self.rnn_statec = layer.state_c
-        self.rnn_input_shapes = layer.shapes
-        self.rnn_output_ops = layer.outputs
-        self.rnn_size = layer.size
-        self.lstm_initial_value = layer.initial_value
-        
-    def setNTMLayer(self, layer):
-        self.ntm_memory = layer.memory
-        self.ntm_reading = layer.reading
-        self.ntm_size = (layer.lines, layer.columns)
-        self.ntm_write = layer.write_out
-        self.ntm_epsilon = layer.epsilon
-        self.ntm_numreaders = layer.numreaders
-        self.ntm_numwriters = layer.numwriters
 
     def make_summary_ops(self, scope, detailed_logs):
         variables = tf.trainable_variables(scope)

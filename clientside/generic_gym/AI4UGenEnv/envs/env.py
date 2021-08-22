@@ -10,6 +10,7 @@ from gym.utils import seeding
 class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
+  defs = None
 
   def __init__(self):
     super(GenericEnvironment, self).__init__()
@@ -17,10 +18,11 @@ class GenericEnvironment(gym.Env):
     # They must be gym.spaces objects
     # Example when using discrete actions:
     self.agent = None
+    if GenericEnvironment.defs is not None:
+      self.configure(GenericEnvironment.defs)
     
   def configure(self, defs, n_envs=1):
     if 'wrapper' in defs:
-        print(defs)
         self.agent = defs['wrapper']()
     self.agent.setup(self, defs)
 

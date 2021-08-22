@@ -126,7 +126,7 @@ def make_optimizer(learning_rate):
 
     optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, decay=0.99, epsilon=1e-5)
     #optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    
+    #optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, epsilon=1e-5)
     return optimizer
 
 
