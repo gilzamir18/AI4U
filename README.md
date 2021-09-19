@@ -1,7 +1,7 @@
 ![Running example ballroller](doc/images/AI4U1.png)
 
 # What is AI4U?
-AI4U is a plugin for Unity that allows you to specify agents with reinforcement learning visually. Non-Player Characters (NPCs) of games can be designed using ready-made components. In addition, AI4U has a low-level API that allows you to connect the agent to any algorithm made available in Python by the reinforcement learning community specifically and by the Articial Intelligence community in general.
+AI4U is a multi-engine plugin (Godot and Unity) that allows you to specify agents with reinforcement learning visually. Non-Player Characters (NPCs) of games can be designed using ready-made components. In addition, AI4U has a low-level API that allows you to connect the agent to any algorithm made available in Python by the reinforcement learning community specifically and by the Articial Intelligence community in general.
 
 ## Features
 
@@ -14,9 +14,9 @@ AI4U is a plugin for Unity that allows you to specify agents with reinforcement 
 - AI4U can be integrated to Imitation Learning through Behavioral Cloning or
   Generative Adversarial Imitation Learning present on [stable-baslines](https://github.com/hill-a/stable-baselines).
 - Train robust agents using environment randomization.
-- Train using multiple concurrent Unity environment instances.
-- Unity environment partial control from Python.
-- Wrap Unity learning environments as a [gym](doc/ai4ugym.md).
+- Train using multiple concurrent Unity/Godot environment instances.
+- Unity/Godot environment partial control from Python.
+- Wrap Unity/Godot learning environments as a [gym](doc/ai4ugym.md).
 
 # Projects
 
@@ -35,7 +35,7 @@ AI4U has two components:
     * the *server-side* code written in C#. The second is the
     * *client-side* code written in Python.
 
-For using AI4U, we recommend to have some version of Unity 2019 and start by looking at the examples available in the repository [AI4UExamples](https://github.com/gilcoder/AI4U). Start by example [AI4UExamples/CubeAgent](https://github.com/gilcoder/AI4UExamples/CubeAgent) for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 2.
+For using AI4U, we recommend to have some mono version of Godot (with C# support) or Unity 2019 and start by looking at the examples available in the repository [AI4UExamples](https://github.com/gilcoder/AI4U). Start by example [AI4UExamples/CubeAgent](https://github.com/gilcoder/AI4UExamples/CubeAgent) for the first look in AI4U. Also, see the documentation available in directory *doc*. See the complete documentation in Table 2.
 
 Table 2: Documentation.
 
