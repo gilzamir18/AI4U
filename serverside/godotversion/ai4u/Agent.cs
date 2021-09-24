@@ -1,17 +1,134 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using ai4u.ext;
 
 namespace ai4u
 {
-	public class Agent : Node
+	public abstract class Agent : Node
 	{
 		protected Brain brain;
-		public int numberOfFields = 0;
 		protected string[] desc;
 		protected byte[] types;
 		protected string[] values;
+		
+		protected List<Sensor> sensors;
+		protected List<Actuator> actuators; 
+			
 		private List<IAgentResetListener> resetListener = new List<IAgentResetListener>();
+		private int numberOfFields = 0;
+		private int numberOfActions = 0;
+		
+		public Agent() {
+			
+		}
+		
+		public virtual void StartData()
+		{
+			OnSetup();
+			sensors = new List<Sensor>();
+			actuators = new List<Actuator>();
+			foreach (Node node in GetChildren())
+			{
+				if ( node.GetType().IsSubclassOf(typeof(Sensor)) ) {
+					Sensor s = node as Sensor;
+					sensors.Add(s);
+					if (s.resettable)
+					{
+						AddResetListener(s);	
+					}
+					s.OnBinding(this);
+				}
+				if ( node.GetType().IsSubclassOf(typeof(Actuator)) ) {
+					Actuator a = node as Actuator;
+					actuators.Add(a);
+					if (a.resettable)
+					{
+						AddResetListener(a);	
+					}
+					a.OnBinding(this);
+				}
+			}
+			
+			numberOfFields = sensors.Count;
+			numberOfActions = actuators.Count;
+			
+			if (numberOfFields == 0) {
+				GD.Print("The agent should have at least one sensor! Target name: " + GetParent().Name);
+			}
+			
+			if (numberOfActions == 0) {
+				GD.Print("The agent should have at least one actuator! Target name: " + GetParent().Name);
+			}
+
+			System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+			desc = new string[numberOfFields];
+			types = new byte[numberOfFields];
+			values = new string[numberOfFields];
+		}
+
+		public virtual void OnSetup() 
+		{
+			
+		}
+		
+		public virtual void AtBeginingOfTheStateUpdate()
+		{
+			
+		}
+		
+		public virtual void AtEndOfTheStateUpdate()
+		{
+			
+		}
+
+		public abstract Node GetBody();
+		
+		/***
+		This method receives client's command to apply to remote environment.
+		***/
+		public virtual void ApplyAction()
+		{
+			for (int i = 0; i < numberOfActions; i++) {
+				actuators[i].Act();
+			}
+		}
+		
+					
+		public virtual void UpdatePhysics()
+		{
+		}
+
+		public virtual void UpdateState()
+		{
+			AtBeginingOfTheStateUpdate();
+			for (int i = 0; i < numberOfFields; i++) {
+				switch(sensors[i].type)
+				{
+					case SensorType.sfloatarray:
+						SetStateAsFloatArray(i, sensors[i].perceptionKey, sensors[i].GetFloatArrayValue());
+						break;
+					case SensorType.sfloat:
+						SetStateAsFloat(i, sensors[i].perceptionKey, sensors[i].GetFloatValue());
+						break;
+					case SensorType.sint:
+						SetStateAsInt(i, sensors[i].perceptionKey, sensors[i].GetIntValue());
+						break;
+					case SensorType.sstring:
+						SetStateAsString(i, sensors[i].perceptionKey, sensors[i].GetStringValue());
+						break;
+					case SensorType.sbool:
+						SetStateAsBool(i, sensors[i].perceptionKey, sensors[i].GetBoolValue());
+						break;
+					case SensorType.sbytearray:
+						SetStateAsByteArray(i, sensors[i].perceptionKey, sensors[i].GetByteArrayValue());
+						break;
+					default:
+						break;
+				}
+			}
+			AtEndOfTheStateUpdate();
+		}
 
 		public void AddResetListener(IAgentResetListener listener) 
 		{
@@ -24,21 +141,6 @@ namespace ai4u
 
 		public bool RemoveResetListenerAt(IAgentResetListener listener) {
 			return resetListener.Remove(listener);
-		}
-
-		/***
-		This method receives client's command to apply to remote environment.
-		***/
-		public virtual void ApplyAction()
-		{
-		}
-
-		public virtual void StartData()
-		{
-			System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-			desc = new string[numberOfFields];
-			types = new byte[numberOfFields];
-			values = new string[numberOfFields];
 		}
 		
 		public void SetState(int i, string desc, byte type, string value)
@@ -63,7 +165,6 @@ namespace ai4u
 		}
 
 		public virtual void HandleOnResetEvent() {
-
 		}
 
 		public void NotifyReset() {
@@ -178,29 +279,11 @@ namespace ai4u
 				GD.Print(e.StackTrace);
 			}
 		}
-			
-		public virtual void UpdatePhysics()
-		{
-		}
-
-		public virtual void UpdateState()
-		{
-		}
 
 		public void SetBrain(Brain brain)
 		{
 			this.brain = brain;
 		}
-		// Called when the node enters the scene tree for the first time.
-		public override void _Ready()
-		{
-			
-		}
-	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-	//  public override void _Process(float delta)
-	//  {
-	//      
-	//  }
 	}
 
 	public interface IAgentResetListener

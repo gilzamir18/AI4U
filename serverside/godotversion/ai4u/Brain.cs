@@ -17,9 +17,6 @@ namespace ai4u
 
 		public abstract void SendMessage(string[] desc, byte[] tipo, string[] valor);
 
-		[Export]
-		protected NodePath agentNode;
-
 		protected Agent agent = null;
 		
 		[Export]
@@ -41,12 +38,7 @@ namespace ai4u
 		public override void _Ready()
 		{
 			
+			agent = GetParent() as Agent;
 		}
-
-	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-	//  public override void _Process(float delta)
-	//  {
-	//      
-	//  }
 	}
 }

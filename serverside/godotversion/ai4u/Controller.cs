@@ -8,6 +8,9 @@ namespace ai4u
 		private string[] desc;
 		private byte[] type;
 		private string[] value;
+		
+		[Export]
+		public bool resettable = true;
 
 
 		public Controller(): base()

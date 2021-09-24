@@ -59,8 +59,7 @@ namespace ai4u
 		private bool runFirstTime = true; //it indicates if it's the first time that aWake method runs.
 		
 		void Awake(){
-			
-			agent = GetNode<Agent>(agentNode);
+			agent = GetParent() as Agent;
 			
 			//one time configuration
 			if (!managed && runFirstTime){
