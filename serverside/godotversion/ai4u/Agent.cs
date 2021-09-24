@@ -23,6 +23,21 @@ namespace ai4u
 			
 		}
 		
+		public Sensor GetSensor(int i)
+		{
+			return this.sensors[i];	
+		}
+		
+		public int GetNumberOfSensors()
+		{
+			return this.numberOfFields;
+		}
+		
+		public int GetNumberOfActions()
+		{
+			return this.numberOfActions;
+		}
+		
 		public virtual void StartData()
 		{
 			OnSetup();

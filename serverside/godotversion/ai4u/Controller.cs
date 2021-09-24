@@ -3,14 +3,14 @@ using System;
 
 namespace ai4u
 {
-	public abstract class Controller: Node
+	public abstract class Controller: Node, IAgentResetListener
 	{
-		private string[] desc;
-		private byte[] type;
-		private string[] value;
+		protected string[] desc;
+		protected byte[] type;
+		protected string[] value;
 		
 		[Export]
-		public bool resettable = true;
+		public bool resettable = false;
 
 
 		public Controller(): base()
@@ -96,6 +96,10 @@ namespace ai4u
 			this.value = val;
 			this.desc = desc;
 			this.NewStateEvent();
+		}
+		
+		public virtual void OnReset(Agent agent) {
+			
 		}
 	}
 }

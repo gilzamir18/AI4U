@@ -5,16 +5,31 @@ namespace ai4u
 {
 	public class LocalBrain : Brain
 	{
-		public Controller controller;
+		private Controller controller;
 		
 		public void Start()
 		{
+			agent = GetParent() as Agent;
+			
+			foreach (Node node in GetChildren())
+			{
+				if ( node.GetType().IsSubclassOf(typeof(Controller)) ) 
+				{
+					controller = node as Controller;
+					break;
+				}
+			}
+
 			if (controller == null) {
-				GD.Print("You must specify a controller for the game object: " + Name);
+				GD.Print("You must specify a controller for the game object: " + GetParent().GetParent().Name);
 			}
 
 			if (agent == null) {
-				GD.Print("You must specify an agent for the game object: " + Name);
+				GD.Print("You must specify an agent for the game object: " + GetParent().GetParent().Name);
+			}
+			
+			if (controller.resettable) {
+				agent.AddResetListener(controller);
 			}
 			agent.SetBrain(this);
 			agent.StartData();
