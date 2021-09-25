@@ -6,7 +6,7 @@ namespace ai4u.ext
 	public class PositionSensor : Sensor
 	{
 		[Export]
-		public NodePath positionFrom = null;
+		public NodePath targetPath ;
 		
 		[Export]
 		public bool is2D = false;
@@ -28,8 +28,8 @@ namespace ai4u.ext
 		{
 			this.agent = GetParent() as Agent;
 			
-			if (this.positionFrom != null) {
-				this.target = GetNode(this.positionFrom);
+			if (this.targetPath != "") {
+				this.target = GetNode(this.targetPath);
 			} else {
 				this.target = agent.GetBody();
 			}

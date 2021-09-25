@@ -10,7 +10,6 @@ namespace ai4u
 		public void Start()
 		{
 			agent = GetParent() as Agent;
-			
 			foreach (Node node in GetChildren())
 			{
 				if ( node.GetType().IsSubclassOf(typeof(Controller)) ) 

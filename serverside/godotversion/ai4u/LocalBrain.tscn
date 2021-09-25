@@ -1,10 +1,6 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://ai4u/ext/Interaction/SimpleWSDLController.cs" type="Script" id=1]
 [ext_resource path="res://ai4u/LocalBrain.cs" type="Script" id=2]
 
 [node name="LocalBrain" type="Node"]
 script = ExtResource( 2 )
-
-[node name="SimpleWSDLController" type="Node" parent="."]
-script = ExtResource( 1 )

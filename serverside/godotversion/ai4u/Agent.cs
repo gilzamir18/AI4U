@@ -40,9 +40,9 @@ namespace ai4u
 		
 		public virtual void StartData()
 		{
-			OnSetup();
 			sensors = new List<Sensor>();
 			actuators = new List<Actuator>();
+			OnSetup();
 			foreach (Node node in GetChildren())
 			{
 				if ( node.GetType().IsSubclassOf(typeof(Sensor)) ) {
@@ -80,9 +80,25 @@ namespace ai4u
 			desc = new string[numberOfFields];
 			types = new byte[numberOfFields];
 			values = new string[numberOfFields];
+			OnSetupDone();
+		}
+		
+		public void AddSensor(Sensor s) 
+		{
+			this.sensors.Add(s);
+		}
+		
+		public void AddActuator(Actuator a)
+		{
+			this.actuators.Add(a);
 		}
 
 		public virtual void OnSetup() 
+		{
+
+		}
+		
+		public virtual void OnSetupDone()
 		{
 			
 		}
@@ -96,6 +112,11 @@ namespace ai4u
 		{
 			
 		}
+		
+		public virtual bool FilterAction(Actuator a)
+		{
+			return true;
+		}
 
 		public abstract Node GetBody();
 		
@@ -104,8 +125,15 @@ namespace ai4u
 		***/
 		public virtual void ApplyAction()
 		{
-			for (int i = 0; i < numberOfActions; i++) {
-				actuators[i].Act();
+			for (int i = 0; i < numberOfActions; i++)
+			{
+				if (
+					actuators[i].always ||
+					(actuators[i].actionName == GetActionName() && FilterAction(actuators[i]))
+				)
+				{
+					actuators[i].Act();	
+				}
 			}
 		}
 		

@@ -6,7 +6,7 @@ using Godot;
 namespace ai4u.ext {
 	public class ActionReward: RewardFunc
 	{
-		public virtual void RewardFrom(string actionName, RLAgent agent) {
+		public virtual void RewardFrom(RLAgent agent) {
 			
 		}
 	}

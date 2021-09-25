@@ -16,13 +16,28 @@ namespace ai4u.ext
 		public bool always = false;
 		
 		[Export]
-		public NodePath ActionRewardPath;
+		public NodePath actionRewardPath;
+		
+		private bool isOperation = false;
 		
 		public ActionReward actionReward;
 
 		protected Agent agent;
 		
 		private bool actionDone = false;
+
+		public bool IsOperation
+		{
+			get
+			{
+				return this.isOperation;
+			}
+			
+			set
+			{
+				this.isOperation = value;
+			}
+		}
 
 		public virtual void NotifyEndOfEpisode() 
 		{
@@ -44,10 +59,12 @@ namespace ai4u.ext
 
 		}
 		
-		public virtual void OnBinding(Agent agent) {
-			agent = GetParent() as Agent;
-			if (ActionRewardPath != null) {
-				actionReward = GetNode(ActionRewardPath) as ActionReward;
+		public virtual void OnBinding(Agent agent) 
+		{
+			this.agent = agent;
+			
+			if (actionRewardPath != null && !actionRewardPath.Equals("")) {
+				actionReward = GetNode(actionRewardPath) as ActionReward;
 			}
 		}
 

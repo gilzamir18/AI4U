@@ -12,61 +12,60 @@ namespace ai4u.ext
 		[Export]
 		public string actionName = "move";
 		
-		[Export]
-		public bool showLastStateDescription = false;
-
 		override public object[] GetAction()
 		{
+			string action = "";
 			float[] actionValue = new float[3];
 			if (Input.IsKeyPressed((int)KeyList.W))
 			{
+				action = actionName;
 				actionValue[2] += -speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.S))
 			{
+				action = actionName;
 				actionValue[2] += speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.U))
 			{
+				action = actionName;
 				actionValue[1] += speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.J))
 			{
+				action = actionName;
 				actionValue[1] += -speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.A))
 			{
+				action = actionName;
 				actionValue[0] += -speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.D))
 			{
+				action = actionName;
 				actionValue[0] += speed;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.R))
 			{
-				actionName = "restart";
+				action = "restart";
 			}
 
-			if (actionName != "restart")
+			if (action == actionName)
 			{
-				return GetFloatArrayAction(actionName, actionValue);
-			} else
+				return GetFloatArrayAction(action, actionValue);
+			} else if (action == "restart")
 			{
 				return GetBoolAction("restart", true);
-			}
-		}
-
-		override public void NewStateEvent()
-		{
-			if (showLastStateDescription)
-			for (int i = 0; i < desc.Length; i++) {
-				GD.Print("States(" + desc[i] + ") = " + value[i]);		
+			} else 
+			{
+				return GetStringAction("noop", "nooperation");
 			}
 		}
 	} 

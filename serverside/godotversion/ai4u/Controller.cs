@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 namespace ai4u
 {
@@ -10,8 +11,14 @@ namespace ai4u
 		protected string[] value;
 		
 		[Export]
-		public bool resettable = false;
+		public bool showLastStateDescription = true;
+		
+		[Export]
+		public bool resettable = true;
 
+		private Dictionary<string, object> lastValues = new Dictionary<string, object>();
+
+		private int printCounter = 0;
 
 		public Controller(): base()
 		{
@@ -27,6 +34,16 @@ namespace ai4u
 
 		public virtual void NewStateEvent()
 		{
+			if (showLastStateDescription)
+				for (int i = 0; i < desc.Length; i++) 
+				{
+					if (printCounter == 0 || !lastValues[desc[i]].Equals(value[i]))
+					{
+						GD.Print("States(" + desc[i] + ") = " + value[i]);		
+					}
+					lastValues[desc[i]] = value[i];
+				}
+			printCounter += 1;
 		}
 
 		public object[] GetFloatArrayAction(string action, float[] value)
@@ -98,8 +115,10 @@ namespace ai4u
 			this.NewStateEvent();
 		}
 		
-		public virtual void OnReset(Agent agent) {
-			
+		public virtual void OnReset(Agent agent) 
+		{
+			lastValues = new Dictionary<string, object>();	
+			printCounter = 0;
 		}
 	}
 }
