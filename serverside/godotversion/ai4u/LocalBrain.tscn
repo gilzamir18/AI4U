@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://ai4u/LocalBrain.cs" type="Script" id=2]
+[ext_resource path="res://ai4u/src/LocalBrain.cs" type="Script" id=2]
 
 [node name="LocalBrain" type="Node"]
 script = ExtResource( 2 )
