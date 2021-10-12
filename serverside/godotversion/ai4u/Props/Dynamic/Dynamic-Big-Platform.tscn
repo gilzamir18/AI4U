@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="CubeMesh" id=1]
+size = Vector3( 8, 1, 8 )
+
+[sub_resource type="ConvexPolygonShape" id=2]
+points = PoolVector3Array( -4, 0.5, 4, 4, 0.5, -4, 4, 0.5, 4, -4, 0.5, -4, -4, -0.5, 4, 4, -0.5, -4, 4, -0.5, 4, -4, -0.5, -4, 4, 0.5, 4, -4, 0.5, -4, 4, 0.5, -4, -4, 0.5, 4, 4, -0.5, 4, -4, -0.5, -4, 4, -0.5, -4, -4, -0.5, 4, 4, 0.5, 4, -4, -0.5, 4, -4, 0.5, 4, 4, -0.5, 4, 4, 0.5, -4, -4, -0.5, -4, -4, 0.5, -4, 4, -0.5, -4 )
+
+[node name="Dynamic-Big-Platform" type="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="RigidBody" type="RigidBody" parent="."]
+mode = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="RigidBody"]
+shape = SubResource( 2 )
+

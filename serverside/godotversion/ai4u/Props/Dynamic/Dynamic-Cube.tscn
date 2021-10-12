@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=2]
+
+[sub_resource type="CubeMesh" id=1]
+
+[sub_resource type="ConvexPolygonShape" id=2]
+points = PoolVector3Array( -1, 1, 1, 1, 1, -1, 1, 1, 1, -1, 1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1 )
+
+[sub_resource type="CubeMesh" id=3]
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 1, 1, 0, 1 )
+
+[node name="Dynamic-Cube" type="MeshInstance"]
+editor/display_folded = true
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="RigidBody" type="RigidBody" parent="."]
+mode = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="RigidBody"]
+shape = SubResource( 2 )
+
+[node name="Edge" type="MeshInstance" parent="."]
+transform = Transform( 1.08, 0, -1.26222e-07, 0, 0.06, 0, 1.26222e-07, 0, 1.08, 0, 0.94061, 0 )
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
+

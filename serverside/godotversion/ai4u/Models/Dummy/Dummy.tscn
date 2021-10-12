@@ -1,0 +1,88 @@
+[gd_scene load_steps=19 format=2]
+
+[ext_resource path="res://ai4u/Animations/Running-01.anim" type="Animation" id=1]
+[ext_resource path="res://ai4u/Animations/Running-02.anim" type="Animation" id=2]
+[ext_resource path="res://ai4u/Animations/Iddle.anim" type="Animation" id=3]
+[ext_resource path="res://ai4u/Animations/Braced-Hang-Shimmy-R.anim" type="Animation" id=4]
+[ext_resource path="res://ai4u/Animations/Braced-Hang-Shimmy-L.anim" type="Animation" id=5]
+[ext_resource path="res://ai4u/Animations/Hanging-Idle.anim" type="Animation" id=6]
+[ext_resource path="res://ai4u/Models/Dummy/player.dae" type="PackedScene" id=7]
+[ext_resource path="res://ai4u/Animations/Jump.anim" type="Animation" id=8]
+
+[sub_resource type="AnimationNodeAnimation" id=1]
+animation = "Jump"
+
+[sub_resource type="AnimationNodeAnimation" id=2]
+animation = "Braced-Hang-Shimmy-L"
+
+[sub_resource type="AnimationNodeAnimation" id=3]
+animation = "Hanging-Idle"
+
+[sub_resource type="AnimationNodeAnimation" id=4]
+animation = "Braced-Hang-Shimmy-R"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id=5]
+blend_point_0/node = SubResource( 2 )
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource( 3 )
+blend_point_1/pos = 0.0
+blend_point_2/node = SubResource( 4 )
+blend_point_2/pos = 1.0
+value_label = "moveDir"
+
+[sub_resource type="AnimationNodeAnimation" id=6]
+animation = "Iddle"
+
+[sub_resource type="AnimationNodeAnimation" id=7]
+animation = "Running-01"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id=8]
+blend_point_0/node = SubResource( 6 )
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource( 7 )
+blend_point_1/pos = 1.0
+min_space = 0.0
+value_label = "speed"
+
+[sub_resource type="AnimationNodeTransition" id=9]
+input_count = 3
+xfade_time = 0.15
+input_0/name = "Iddle-Run"
+input_0/auto_advance = false
+input_1/name = "Hanging"
+input_1/auto_advance = false
+input_2/name = "Jump"
+input_2/auto_advance = false
+
+[sub_resource type="AnimationNodeBlendTree" id=10]
+graph_offset = Vector2( -200, 41 )
+nodes/Animation/node = SubResource( 1 )
+nodes/Animation/position = Vector2( -240, 420 )
+nodes/Hanging/node = SubResource( 5 )
+nodes/Hanging/position = Vector2( -260, 280 )
+nodes/Iddle-Run/node = SubResource( 8 )
+nodes/Iddle-Run/position = Vector2( -260, 140 )
+nodes/State/node = SubResource( 9 )
+nodes/State/position = Vector2( 40, 140 )
+nodes/output/position = Vector2( 240, 140 )
+node_connections = [ "output", 0, "State", "State", 0, "Iddle-Run", "State", 1, "Hanging", "State", 2, "Animation" ]
+
+[node name="Dummy" index="0" instance=ExtResource( 7 )]
+
+[node name="AnimationPlayer" parent="." index="1"]
+autoplay = "Iddle"
+anims/Braced-Hang-Shimmy-L = ExtResource( 5 )
+anims/Braced-Hang-Shimmy-R = ExtResource( 4 )
+anims/Hanging-Idle = ExtResource( 6 )
+anims/Iddle = ExtResource( 3 )
+anims/Jump = ExtResource( 8 )
+anims/Running-01 = ExtResource( 1 )
+anims/Running-02 = ExtResource( 2 )
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+tree_root = SubResource( 10 )
+anim_player = NodePath("../AnimationPlayer")
+active = true
+parameters/Hanging/blend_position = 0.0
+parameters/Iddle-Run/blend_position = 0
+parameters/State/current = 0

@@ -110,6 +110,8 @@ namespace ai4u
 			if (agent == null) {
 				GD.Print("You have not defined the agent that the remote brain must control. Game Object: " + Name);
 			}
+			agent.SetBrain(this);
+			agent.StartData();
 
 			source = null;
 			async_call = new System.AsyncCallback(ReceiveData);
@@ -120,8 +122,7 @@ namespace ai4u
 			}
 			serverAddr = IPAddress.Parse(remoteIP);
 			endPoint = new IPEndPoint(serverAddr, remotePort);
-			agent.SetBrain(this);
-			agent.StartData();
+			
 			clientRequestReceived = false;
 			Reset();
 		}
@@ -333,12 +334,14 @@ namespace ai4u
 	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
 	 	public override void _Process(float delta)
 	  	{
+			DeltaTime = delta;
 			Update();
 			LateUpdate();
 		}
 
 		public override void _PhysicsProcess(float delta)
 		{
+			DeltaTime = delta;
 			FixedUpdate();
 		}
 	}

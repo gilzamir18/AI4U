@@ -38,6 +38,14 @@ namespace ai4u
 			return this.numberOfActions;
 		}
 		
+		public float DeltaTime
+		{
+			get 
+			{
+				return brain.DeltaTime;
+			}
+		}
+		
 		public virtual void StartData()
 		{
 			sensors = new List<Sensor>();

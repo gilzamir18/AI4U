@@ -75,11 +75,13 @@ namespace ai4u
 	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
 	 	public override void _Process(float delta)
 	  	{
+			DeltaTime = delta;
 			Update();
 		}
 
 		public override void _PhysicsProcess(float delta)
 		{
+			DeltaTime = delta;
 			FixedUpdate();
 		}
 	}

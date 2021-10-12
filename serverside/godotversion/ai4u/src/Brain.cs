@@ -24,6 +24,21 @@ namespace ai4u
 		[Export]
 		public bool updateStateOnUpdate = false;
 
+		private float deltaTime;
+
+		public float DeltaTime
+		{
+			get
+			{
+				return deltaTime;
+			}
+			
+			set
+			{
+				deltaTime = value;
+			}
+		}
+
 		public string GetReceivedCommand()
 		{
 			return receivedcmd;

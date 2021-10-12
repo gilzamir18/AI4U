@@ -1,0 +1,53 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://ai4u/ext/Agents/src/RLRigidBodyAgent.cs" type="Script" id=1]
+[ext_resource path="res://ai4u/ext/Interaction/src/SimpleWSDLController.cs" type="Script" id=2]
+[ext_resource path="res://ai4u/ext/Agents/src/RigidBodyMoveActuator.cs" type="Script" id=3]
+[ext_resource path="res://ai4u/ext/Interaction/SimpleWSDLController.tscn" type="PackedScene" id=4]
+[ext_resource path="res://ai4u/ext/RL/src/TouchRewardFunc.cs" type="Script" id=5]
+[ext_resource path="res://ai4u/ext/Agents/PositionSensor.tscn" type="PackedScene" id=6]
+[ext_resource path="res://ai4u/LocalBrain.tscn" type="PackedScene" id=7]
+[ext_resource path="res://ai4u/src/LocalBrain.cs" type="Script" id=8]
+[ext_resource path="res://ai4u/ext/Agents/src/PositionSensor.cs" type="Script" id=9]
+
+[sub_resource type="PhysicsMaterial" id=1]
+
+[sub_resource type="BoxShape" id=2]
+
+[node name="RigidBody" type="RigidBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.74626, 0 )
+physics_material_override = SubResource( 1 )
+contacts_reported = 1
+contact_monitor = true
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 2 )
+
+[node name="CSGBox" type="CSGBox" parent="CollisionShape"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00607538, -0.0649562, 0.0399226 )
+
+[node name="Agente" type="Node" parent="."]
+script = ExtResource( 1 )
+
+[node name="PositionSensor" type="Node" parent="Agente" instance=ExtResource( 6 )]
+script = ExtResource( 9 )
+resettable = false
+perceptionKey = "position"
+isState = true
+shape = PoolIntArray( 1, 1, 1 )
+
+[node name="LocalBrain" type="Node" parent="Agente" instance=ExtResource( 7 )]
+script = ExtResource( 8 )
+
+[node name="SimpleWSDLController" type="Node" parent="Agente/LocalBrain" instance=ExtResource( 4 )]
+script = ExtResource( 2 )
+
+[node name="Reward" type="Node" parent="Agente"]
+script = ExtResource( 5 )
+reward = 1.0
+targetPath = NodePath("../../../floor")
+
+[node name="RBMoveActuator" type="Node" parent="Agente"]
+script = ExtResource( 3 )
+actionName = "move"
+speed = 10.0

@@ -1,10 +1,6 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://ai4u/ext/RL/src/FallReward.cs" type="Script" id=1]
-[ext_resource path="res://ai4u/src/LocalBrain.cs" type="Script" id=2]
-[ext_resource path="res://ai4u/ext/Agents/src/MoveActuator.cs" type="Script" id=3]
-[ext_resource path="res://ai4u/ext/Agents/src/PositionSensor.cs" type="Script" id=4]
-[ext_resource path="res://ai4u/ext/Interaction/src/SimpleWSDLController.cs" type="Script" id=5]
 [ext_resource path="res://ai4u/ext/Agents/src/RLCSGBoxAgent.cs" type="Script" id=6]
 [ext_resource path="res://ai4u/LocalBrain.tscn" type="PackedScene" id=7]
 [ext_resource path="res://ai4u/ext/Agents/MoveActuator.tscn" type="PackedScene" id=8]
@@ -14,23 +10,13 @@
 [node name="RLAgent" type="Node"]
 script = ExtResource( 6 )
 
-[node name="PositionSensor" type="Node" parent="." instance=ExtResource( 9 )]
-script = ExtResource( 4 )
-resettable = false
-perceptionKey = "position"
-isState = true
-shape = PoolIntArray( 1, 1, 1 )
+[node name="PositionSensor" parent="." instance=ExtResource( 9 )]
 
 [node name="FallReward" type="Node" parent="."]
 script = ExtResource( 1 )
 
-[node name="MoveActuator" type="Node" parent="." instance=ExtResource( 8 )]
-script = ExtResource( 3 )
-actionName = "move"
+[node name="MoveActuator" parent="." instance=ExtResource( 8 )]
 
-[node name="LocalBrain" type="Node" parent="." instance=ExtResource( 7 )]
-script = ExtResource( 2 )
+[node name="LocalBrain" parent="." instance=ExtResource( 7 )]
 
-[node name="SimpleWSDLController" type="Node" parent="LocalBrain" instance=ExtResource( 10 )]
-script = ExtResource( 5 )
-printDelay = 1
+[node name="SimpleWSDLController" parent="LocalBrain" instance=ExtResource( 10 )]

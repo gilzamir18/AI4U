@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="PlaneMesh" id=1]
+size = Vector2( 8, 8 )
+
+[sub_resource type="ConvexPolygonShape" id=2]
+points = PoolVector3Array( 4, 0, 4, -4, 0, 4, 4, 0, -4, -4, 0, -4 )
+
+[node name="Static-Floor" type="MeshInstance"]
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
+shape = SubResource( 2 )
+

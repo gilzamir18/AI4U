@@ -23,6 +23,7 @@ namespace ai4u.ext {
 			rewardSensor.shape = new int[]{};
 			rewardSensor.isState = false;
 			rewardSensor.resettable = true;
+			rewardSensor.OnBinding(this);
 			AddSensor(rewardSensor);
 
 			doneSensor = new BoolSensor();
@@ -31,6 +32,7 @@ namespace ai4u.ext {
 			doneSensor.shape = new int[]{};
 			doneSensor.isState = false;
 			doneSensor.resettable = true;
+			doneSensor.OnBinding(this);
 			AddSensor(doneSensor);
 			
 			RestartActuator restartActuator = new RestartActuator();
@@ -38,6 +40,12 @@ namespace ai4u.ext {
 			restartActuator.IsOperation = true;
 			restartActuator.OnBinding(this);
 			AddActuator(restartActuator);
+			
+			NoOpActuator noOpActuator = new NoOpActuator();
+			noOpActuator.actionName = "noop";
+			noOpActuator.IsOperation = false;
+			noOpActuator.OnBinding(this);
+			AddActuator(noOpActuator);
 		}
 
 		public virtual bool Done {
@@ -60,7 +68,8 @@ namespace ai4u.ext {
 			}
 		}
 
-		public override void HandleOnResetEvent(){
+		public override void HandleOnResetEvent()
+		{
 			reward = 0;
 			done = false;
 			nSteps = 0;
@@ -77,6 +86,7 @@ namespace ai4u.ext {
 		{
 			this.Done = true;
 			this.doneSensor.Data = this.Done;
+			HandleOnDone();
 		}
 
 		public virtual void AddReward(float v, RewardFunc from = null, bool causeEpisodeToEnd = false) {
@@ -92,10 +102,16 @@ namespace ai4u.ext {
 			if (nSteps > maxSteps)
 			{
 				Done = true;
+				HandleOnDone();
 			} 
 			
 			if (rewardSensor != null) rewardSensor.Data = reward;
 			if (doneSensor != null) doneSensor.Data = Done;
+		}
+		
+		public virtual void HandleOnDone() 
+		{
+			
 		}
 		
 		public override void AtEndOfTheStateUpdate()
