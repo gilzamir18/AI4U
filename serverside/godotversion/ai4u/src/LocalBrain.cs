@@ -44,6 +44,7 @@ namespace ai4u
 			
 			agent.UpdateState();
 			agent.GetState();
+			controller.HandleActionApplied(msg);
 		}
 
 		public void FixedUpdate()

@@ -43,6 +43,24 @@ def get_cvimage(frame, width=84, height=84, dtype=np.uint):
     img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+
+def str_as_dictlist(src, sep=";", type=str):
+    objlist = src.split(sep)
+    result = []
+    for obj in objlist:
+        if len(obj) > 0:
+            result.append(type(obj))
+    return result
+
+def get_string_as_dict_list(src):
+    objlist = eval(src)
+    result = []
+    for obj in objlist:
+        if len(obj) > 0:
+            result.append(eval(obj))
+    return result
+
+
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow as tf
     from ai4u.ml.a3c.multi_scope_train_op import make_train_op 

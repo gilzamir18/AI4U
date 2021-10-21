@@ -11,12 +11,13 @@ points = PoolVector3Array( -1, 1, 1, 1, 1, -1, 1, 1, 1, -1, 1, -1, -1, -1, 1, 1,
 albedo_color = Color( 1, 1, 0, 1 )
 
 [node name="Dynamic-Cube" type="MeshInstance"]
-editor/display_folded = true
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
 mesh = SubResource( 1 )
 material/0 = null
 
-[node name="RigidBody" type="RigidBody" parent="."]
+[node name="RigidBody" type="RigidBody" parent="." groups=[
+"awall",
+]]
 mode = 3
 
 [node name="CollisionShape" type="CollisionShape" parent="RigidBody"]
@@ -26,4 +27,3 @@ shape = SubResource( 2 )
 transform = Transform( 1.08, 0, -1.26222e-07, 0, 0.06, 0, 1.26222e-07, 0, 1.08, 0, 0.94061, 0 )
 mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
-

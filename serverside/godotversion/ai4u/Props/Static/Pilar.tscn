@@ -16,10 +16,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0 )
 mesh = SubResource( 1 )
 material/0 = SubResource( 2 )
 
-[node name="StaticBody" type="StaticBody" parent="Pilar"]
+[node name="StaticBody" type="StaticBody" parent="Pilar" groups=[
+"wall",
+]]
 collision_layer = 2
 collision_mask = 2
 
 [node name="CollisionShape" type="CollisionShape" parent="Pilar/StaticBody"]
 shape = SubResource( 3 )
-

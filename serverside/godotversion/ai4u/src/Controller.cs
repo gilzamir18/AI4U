@@ -23,14 +23,23 @@ namespace ai4u
 		public Controller(): base()
 		{
 			System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+			OnCreate();
+		}
+		
+		public virtual void OnCreate()
+		{
+			
 		}
 
+		public virtual void HandleActionApplied(object[] args)
+		{
+			
+		}
 
 		public virtual object[] GetAction()
 		{
 			return new System.Object[] { };
 		}
-
 
 		public virtual void NewStateEvent()
 		{

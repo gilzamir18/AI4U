@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ai4u/ext/RL/src/SequencialReward.cs" type="Script" id=1]
+
+[node name="IfAllOccurSequence" type="Node"]
+script = ExtResource( 1 )
+isJustAnEvent = true
+successReward = 0.0
+failReward = 0.0

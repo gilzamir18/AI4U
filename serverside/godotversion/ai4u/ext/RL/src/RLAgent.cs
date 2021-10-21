@@ -2,8 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using Godot;
 using ai4u;
+using System.Text;
 
-namespace ai4u.ext {	
+namespace ai4u.ext {
+	
+	public struct RewardInfo
+	{
+		public float reward;
+		public int timeStep;
+		public string name;
+		public NodePath nodePath;
+		
+		public RewardInfo(string name, float r, int ts, NodePath path)
+		{
+			this.name = name;
+			this.reward = r;
+			this.timeStep = ts;
+			this.nodePath = path;
+		}
+		
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.Append("{");
+			sb.Append("\"name\":");
+			sb.Append("\"" + name + "\"");
+			sb.Append(",");
+			sb.Append("\"reward\":");
+			sb.Append("" + reward);
+			sb.Append(",");
+			sb.Append("\"timeStep\":");
+			sb.Append("" + timeStep);
+			sb.Append("}");
+			return sb.ToString();
+		}
+	} 
+		
 	public abstract class RLAgent : Agent
 	{
 		protected float reward;
@@ -15,8 +49,21 @@ namespace ai4u.ext {
 		[Export]
 		public int maxSteps = 500;
 
+		private List<RewardInfo> rewardOcurrence; //store the ocurrence of reward groups
+		private Dictionary<string, bool> rewardRegistry;
+		
+		public List<RewardInfo> RewardOcurrence
+		{
+			get
+			{
+				return rewardOcurrence;	
+			}
+		}
+
 		public override void OnSetup()
 		{
+			rewardOcurrence = new List<RewardInfo>();
+			rewardRegistry = new Dictionary<string, bool>();
 			rewardSensor = new FloatSensor();
 			rewardSensor.perceptionKey = "reward";
 			rewardSensor.type = SensorType.sfloat;
@@ -54,6 +101,8 @@ namespace ai4u.ext {
 			}
 
 			set {
+				if (value)
+					HandleOnDone();
 				done = value;
 			}
 		}
@@ -70,8 +119,10 @@ namespace ai4u.ext {
 
 		public override void HandleOnResetEvent()
 		{
+			rewardRegistry = new Dictionary<string, bool>();
+			rewardOcurrence = new List<RewardInfo>();
 			reward = 0;
-			done = false;
+			Done = false;
 			nSteps = 0;
 		}
 		
@@ -86,15 +137,31 @@ namespace ai4u.ext {
 		{
 			this.Done = true;
 			this.doneSensor.Data = this.Done;
-			HandleOnDone();
 		}
 
-		public virtual void AddReward(float v, RewardFunc from = null, bool causeEpisodeToEnd = false) {
-			if (from != null && causeEpisodeToEnd) 
+
+		public virtual void AddReward(float v, RewardFunc from = null, bool causeEpisodeToEnd = false) 
+		{
+			if (from.isJustAnEvent)
 			{
-					this.RequestDoneFrom(from);
+				return;
 			}
+			RewardInfo info = new RewardInfo(null, v, nSteps, null);
 			reward += v;
+			if (from != null) 
+			{
+					info.name = from.Name;
+					info.nodePath = from.GetPath();
+					if (!rewardRegistry.ContainsKey(from.Name))
+					{
+						rewardOcurrence.Add(info);
+						rewardRegistry[from.Name] = true;
+					}
+					if (causeEpisodeToEnd) 
+					{
+						this.RequestDoneFrom(from);	
+					}
+			}
 		}
 
 		public override void AtBeginingOfTheStateUpdate()
@@ -102,7 +169,6 @@ namespace ai4u.ext {
 			if (nSteps > maxSteps)
 			{
 				Done = true;
-				HandleOnDone();
 			} 
 			
 			if (rewardSensor != null) rewardSensor.Data = reward;
@@ -111,7 +177,10 @@ namespace ai4u.ext {
 		
 		public virtual void HandleOnDone() 
 		{
-			
+			foreach(Actuator a in actuators)
+			{
+				a.OnDone();
+			}
 		}
 		
 		public override void AtEndOfTheStateUpdate()

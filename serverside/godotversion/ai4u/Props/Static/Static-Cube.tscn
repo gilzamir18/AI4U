@@ -15,7 +15,9 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
 mesh = SubResource( 1 )
 material/0 = null
 
-[node name="StaticBody" type="StaticBody" parent="."]
+[node name="StaticBody" type="StaticBody" parent="." groups=[
+"wall",
+]]
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
 shape = SubResource( 2 )
@@ -24,4 +26,3 @@ shape = SubResource( 2 )
 transform = Transform( 1.08, 0, -1.26222e-07, 0, 0.06, 0, 1.26222e-07, 0, 1.08, 0, 0.94061, 0 )
 mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
-

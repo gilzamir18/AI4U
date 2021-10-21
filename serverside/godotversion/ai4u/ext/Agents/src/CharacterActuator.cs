@@ -7,10 +7,11 @@ namespace ai4u.ext
 	public class CharacterActuator : Actuator
 	{
 		private KinematicBody body;
+		private bool done = false;
 		
 		public override void Act()
 		{
-			if (agent.GetActionName()==actionName)
+			if (!done && agent.GetActionName()==actionName)
 			{
 				float[] f = agent.GetActionArgAsFloatArray();
 				if (f[0] >= 0)
@@ -43,11 +44,26 @@ namespace ai4u.ext
 		{
 			this.agent = GetParent() as Agent;
 			body = this.agent.GetBody() as KinematicBody;
+			done = false;
+		}
+		
+		public override void OnDone()
+		{
+			done = true;
+			body.Set("left_strength", 0);
+			body.Set("right_strength", 0);
+			body.Set("down_strength", 0);
+			body.Set("up_strength", 0);
+			body.Set("jump", false);
+			body.Set("jumpSpeed", 0);	
 		}
 
 		public override void OnReset(Agent agent)
 		{
-			body.Set("jump", false);
+			body.Call("reload");
+			body.Call("clear_parent");
+			body.Call("rotateCharacter", new Vector3(0, 0, 1), 0);
+			done = false;
 		}
 	}
 }

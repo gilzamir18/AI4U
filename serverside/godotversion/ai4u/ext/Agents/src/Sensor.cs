@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Godot;
 
 namespace ai4u.ext
-{
+{	
 	public enum SensorType {
 		sfloat,
 		sstring,
@@ -30,9 +30,6 @@ namespace ai4u.ext
 		
 		[Export]
 		public int[] shape;
-
-		[Export]
-		public NodePath agentPath;
 		
 		protected Agent agent;
 

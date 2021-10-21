@@ -1,0 +1,120 @@
+[gd_scene load_steps=15 format=2]
+
+[ext_resource path="res://ai4u/ext/Agents/src/KinematicBodyCollisionSensor.cs" type="Script" id=1]
+[ext_resource path="res://ai4u/ext/RL/src/OrRewardFunc.cs" type="Script" id=2]
+[ext_resource path="res://ai4u/ext/RL/src/AndNotRewardFunc.cs" type="Script" id=3]
+[ext_resource path="res://ai4u/src/LocalBrain.cs" type="Script" id=4]
+[ext_resource path="res://ai4u/ext/Agents/src/CharacterActuator.cs" type="Script" id=5]
+[ext_resource path="res://ai4u/ext/Agents/src/RayCastingSensor.cs" type="Script" id=6]
+[ext_resource path="res://ai4u/ext/Agents/src/RewardEventsSensor.cs" type="Script" id=7]
+[ext_resource path="res://TeleTransportNPC.cs" type="Script" id=8]
+[ext_resource path="res://ai4u/ext/RL/src/UnionReward.cs" type="Script" id=9]
+[ext_resource path="res://ai4u/ext/RL/src/XorRewardFunc.cs" type="Script" id=10]
+[ext_resource path="res://ai4u/ext/RL/src/KinematicBodyTouchRewardFunc.cs" type="Script" id=11]
+[ext_resource path="res://ai4u/ext/Agents/src/RLCharacterAgent.cs" type="Script" id=12]
+[ext_resource path="res://ai4u/ext/Agents/RayCastingSensor.tscn" type="PackedScene" id=13]
+[ext_resource path="res://ai4u/ext/Agents/LocalBrainWithCharacterController.tscn" type="PackedScene" id=14]
+
+[node name="RLCharacterAgent" type="Node"]
+script = ExtResource( 12 )
+
+[node name="CharacterActuator" type="Node" parent="."]
+script = ExtResource( 5 )
+actionName = "character"
+always = true
+
+[node name="LocalBrain" type="Node" parent="." instance=ExtResource( 14 )]
+script = ExtResource( 4 )
+
+[node name="RayCastingSensor" type="Node" parent="." instance=ExtResource( 13 )]
+script = ExtResource( 6 )
+perceptionKey = "raycasting"
+type = 1
+isState = true
+shape = PoolIntArray( 20, 20, 1 )
+groupCode = PoolIntArray( 1, 50, 100, 8 )
+groupName = PoolStringArray( "floor", "wall", "awall", "player" )
+eyePath = NodePath("../../CameraBase/CameraPivot/CameraOffset/Camera")
+
+[node name="KinematicBodyCollisionSensor" type="Node" parent="."]
+script = ExtResource( 1 )
+perceptionKey = "collision"
+type = 1
+isState = true
+shape = PoolIntArray( 0 )
+
+[node name="RewardEventsSensor" type="Node" parent="."]
+script = ExtResource( 7 )
+perceptionKey = "reward_events"
+type = 1
+isState = true
+shape = PoolIntArray(  )
+
+[node name="TeletransportOnGreen" type="Node" parent="."]
+script = ExtResource( 8 )
+rewardEventPath = NodePath("../XorRewardFunc/GreenAndNotYellow/UnionOfTouchGreenReward/TouchRewardGreen2")
+
+[node name="TeletransportOnYellow" type="Node" parent="."]
+script = ExtResource( 8 )
+rewardEventPath = NodePath("../XorRewardFunc/YellowAndNotGreen/UnionOfTouchYellowReward/TouchRewardYellow2")
+
+[node name="XorRewardFunc" type="Node" parent="."]
+script = ExtResource( 10 )
+endEpisodeInSuccess = true
+
+[node name="GreenAndNotYellow" type="Node" parent="XorRewardFunc"]
+script = ExtResource( 3 )
+alfa = 0.0
+
+[node name="UnionOfTouchGreenReward" type="Node" parent="XorRewardFunc/GreenAndNotYellow"]
+script = ExtResource( 9 )
+successReward = 0.0
+
+[node name="TouchRewardGreen1" type="Node" parent="XorRewardFunc/GreenAndNotYellow/UnionOfTouchGreenReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem1")
+
+[node name="TouchRewardGreen2" type="Node" parent="XorRewardFunc/GreenAndNotYellow/UnionOfTouchGreenReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem3")
+
+[node name="OrTouchYellowReward" type="Node" parent="XorRewardFunc/GreenAndNotYellow"]
+script = ExtResource( 2 )
+successReward = 0.0
+
+[node name="TouchRewardYellow1" type="Node" parent="XorRewardFunc/GreenAndNotYellow/OrTouchYellowReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem2")
+
+[node name="TouchRewardYellow2" type="Node" parent="XorRewardFunc/GreenAndNotYellow/OrTouchYellowReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem4")
+
+[node name="YellowAndNotGreen" type="Node" parent="XorRewardFunc"]
+script = ExtResource( 3 )
+alfa = 0.0
+
+[node name="UnionOfTouchYellowReward" type="Node" parent="XorRewardFunc/YellowAndNotGreen"]
+script = ExtResource( 9 )
+successReward = 0.0
+
+[node name="TouchRewardYellow1" type="Node" parent="XorRewardFunc/YellowAndNotGreen/UnionOfTouchYellowReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem2")
+
+[node name="TouchRewardYellow2" type="Node" parent="XorRewardFunc/YellowAndNotGreen/UnionOfTouchYellowReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem4")
+
+[node name="OrTouchGreenReward" type="Node" parent="XorRewardFunc/YellowAndNotGreen"]
+script = ExtResource( 2 )
+alfa = 0.0
+successReward = 0.0
+
+[node name="TouchRewardGreen1" type="Node" parent="XorRewardFunc/YellowAndNotGreen/OrTouchGreenReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem1")
+
+[node name="TouchRewardGreen2" type="Node" parent="XorRewardFunc/YellowAndNotGreen/OrTouchGreenReward"]
+script = ExtResource( 11 )
+targetPath = NodePath("../../../../../../../Walls/FlagStem3")

@@ -56,6 +56,8 @@ var rayMaxRight
 var animationTree
 var originParent
 
+var animationPlayer
+
 
 #func _init():
 	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -79,6 +81,7 @@ func _ready():
 	
 	#Gets the animations of the charctermehs
 	animationTree = characterMesh.find_node("AnimationTree")
+	animationPlayer = characterMesh.find_node("AnimationPlayer")
 	
 	#Gets the original parent and basis, needed to reset some parameters
 	originParent = get_parent()
@@ -93,7 +96,6 @@ var up_strength = 0.0
 
 func set_done_false():
 	done = false
-	print(done)
 
 func set_done_true():
 	done = true
@@ -101,6 +103,19 @@ func set_done_true():
 func process_commands(delta): 
 	#Quits the game
 	if cmd_cancel: get_tree().quit()
+
+
+var last_anim_pos = 0.0
+var last_anim = null
+
+func pause_animation():
+	last_anim_pos = animationPlayer.current_animation_position
+	last_anim = animationPlayer.current_animation
+	animationPlayer.stop()
+
+func continue_animation():
+	animationPlayer.play(last_anim)
+	animationPlayer.seek(last_anim_pos)
 
 func reload():
 	isMovingCamera = false
@@ -258,7 +273,7 @@ func update_physics(delta):
 		if letGo:
 			letGo = false
 			is_hanging = false
-			
+
 			clear_parent()
 			
 			letGoPosition = translation

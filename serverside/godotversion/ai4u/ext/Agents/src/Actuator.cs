@@ -67,6 +67,11 @@ namespace ai4u.ext
 				actionReward = GetNode(actionRewardPath) as ActionReward;
 			}
 		}
+		
+		public virtual void OnDone()
+		{
+			
+		}
 
 		public virtual void OnReset(Agent agent) {
 

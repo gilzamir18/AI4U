@@ -52,7 +52,9 @@ namespace ai4u.ext
 		
 		public override void HandleOnDone() 
 		{
+			base.HandleOnDone();
 			body.Call("set_done_true");
+			body.Call("reload");
 		}
 	}
 }

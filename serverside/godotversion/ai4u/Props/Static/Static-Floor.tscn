@@ -10,8 +10,9 @@ points = PoolVector3Array( 4, 0, 4, -4, 0, 4, 4, 0, -4, -4, 0, -4 )
 mesh = SubResource( 1 )
 material/0 = null
 
-[node name="StaticBody" type="StaticBody" parent="."]
+[node name="StaticBody" type="StaticBody" parent="." groups=[
+"floor",
+]]
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
 shape = SubResource( 2 )
-

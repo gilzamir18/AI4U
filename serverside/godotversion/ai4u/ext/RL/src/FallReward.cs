@@ -19,12 +19,6 @@ namespace ai4u.ext
 		[Export]
 		public bool onlyOnce = true;
 		
-		[Export]
-		public bool endEpisodeInFail = false;
-		
-		[Export]
-		public bool endEpisodeInSuccess = true;
-		
 		private bool applied = false;
 		
 		[Export(PropertyHint.Range, "0,2")]
@@ -56,6 +50,7 @@ namespace ai4u.ext
 					}
 					if (pos[axis] < threshold)
 					{
+						NotifyAll(successReward);
 						agent.AddReward(successReward, this, endEpisodeInSuccess);
 						if (onlyOnce){
 							applied = true;
@@ -63,6 +58,7 @@ namespace ai4u.ext
 					}
 					else 
 					{
+						NotifyAll(failReward);
 						agent.AddReward(failReward, this, endEpisodeInFail);
 					}
 				} else 
@@ -80,6 +76,7 @@ namespace ai4u.ext
 					
 					if (pos[axis] < threshold)
 					{
+						NotifyAll(successReward);
 						agent.AddReward(successReward, this, endEpisodeInSuccess);
 						if (onlyOnce){
 							applied = true;
@@ -87,6 +84,7 @@ namespace ai4u.ext
 					}
 					else 
 					{
+						NotifyAll(failReward);
 						agent.AddReward(failReward, this, endEpisodeInFail);
 					}
 				}						
