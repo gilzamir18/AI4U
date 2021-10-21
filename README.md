@@ -1,4 +1,4 @@
-![Running example ballroller](doc/images/AI4U1.png)
+![Running example ballroller](doc/images/ai4u1.PNG)
 
 # What is AI4U?
 AI4U is a multi-engine plugin (Godot and Unity) that allows you designing Non-Player Characters (NPCs) of games using a agent abstraction. In addition, AI4U has a low-level API that allows you to connect the agent to any algorithm made available in Python by the reinforcement learning community specifically and by the Articial Intelligence community in general. Reiforcement learning promises overcome tradicional navigation mesh mechanism in games and to provide more autonomous characters.
