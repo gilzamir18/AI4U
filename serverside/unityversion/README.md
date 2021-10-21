@@ -1,5 +1,5 @@
 
-# AI4U for Godot
+# AI4U for Unity
 
 This is the Unity version of the AI4U tool. The Godot version of the AI4U get advantage of the Unity architecture and facilitate agent specification by means of an agent abstraction. In Unity, AI4U provides a alternative approach to modeling Non-Player Characters (NPC). Although, the developer can apply this tool in others situations as the environment modeling as an artificial intelligence test bed. 
 
