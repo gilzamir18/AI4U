@@ -31,6 +31,8 @@ namespace ai4u.ext
 		[Export]
 		public int[] shape;
 		
+		private bool enabled = true;
+		
 		protected Agent agent;
 
 		public void SetAgent(Agent own)
@@ -68,6 +70,19 @@ namespace ai4u.ext
 
 		public virtual void OnBinding(Agent agent) {
 			
+		}
+
+		public bool Enabled
+		{
+			get
+			{
+				return enabled;
+			}
+			
+			set
+			{
+				enabled = value;
+			}
 		}
 
 		public virtual void OnReset(Agent agent) {

@@ -4,7 +4,7 @@
 [ext_resource path="res://ai4u/ext/Agents/src/RewardEventsSensor.cs" type="Script" id=2]
 [ext_resource path="res://TeleTransportNPC.cs" type="Script" id=3]
 [ext_resource path="res://ai4u/ext/Agents/src/CharacterActuator.cs" type="Script" id=4]
-[ext_resource path="res://ai4u/ext/Agents/LocalBrainWithCharacterController.tscn" type="PackedScene" id=5]
+[ext_resource path="res://ai4u/RemoteBrain.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ai4u/ext/Agents/RayCastingSensor.tscn" type="PackedScene" id=6]
 [ext_resource path="res://ai4u/ext/Agents/src/KinematicBodyCollisionSensor.cs" type="Script" id=7]
 [ext_resource path="res://ai4u/ext/Agents/src/RLCharacterAgent.cs" type="Script" id=8]
@@ -98,16 +98,12 @@ transform = Transform( 1, 0, 0, 0, 1, -3.12924e-07, 0, 3.12924e-07, 1, -1.84869e
 [node name="RLCharacterAgent" type="Node" parent="Misc/Player"]
 script = ExtResource( 8 )
 
+[node name="RemoteBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 5 )]
+
 [node name="CharacterActuator" type="Node" parent="Misc/Player/RLCharacterAgent"]
 script = ExtResource( 4 )
 actionName = "character"
 always = true
-
-[node name="LocalBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 5 )]
-
-[node name="Controller" parent="Misc/Player/RLCharacterAgent/LocalBrain" index="0"]
-debugModeExclusionFilter = "raycasting collision"
-debugMode = false
 
 [node name="RayCastingSensor" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 6 )]
 shape = PoolIntArray( 20, 20, 1 )
@@ -278,4 +274,3 @@ material = SubResource( 7 )
 
 [editable path="Misc/Player"]
 [editable path="Misc/Player/CharacterMesh/Dummy"]
-[editable path="Misc/Player/RLCharacterAgent/LocalBrain"]

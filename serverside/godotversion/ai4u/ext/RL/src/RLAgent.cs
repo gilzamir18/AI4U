@@ -170,7 +170,6 @@ namespace ai4u.ext {
 			{
 				Done = true;
 			} 
-			
 			if (rewardSensor != null) rewardSensor.Data = reward;
 			if (doneSensor != null) doneSensor.Data = Done;
 		}
@@ -185,8 +184,8 @@ namespace ai4u.ext {
 		
 		public override void AtEndOfTheStateUpdate()
 		{
-			reward = 0.0f;
-			if (rewardSensor != null) rewardSensor.Data = reward;
+			if (!Done)
+				reward = 0.0f;
 		}
 	}
 }
