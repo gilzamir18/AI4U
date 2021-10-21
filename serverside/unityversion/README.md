@@ -30,10 +30,10 @@ Table 2: Documentation.
 
 | Tutorial        |                                    Link                                          |
 |-----------------|---------------------------------------------------------------------------------------|
-| API Overview    |  [doc/README.md](../doc/README.md)                                           |
-| AI4U with OpenAI Gym      | [doc/ai4ugym.md](../doc/ai4ugym.md)                         |
-| A3C Implementation     |  [doc/a3cintro.md](../doc/a3cintro.md)                        |
-| GMPROC (multiprocessing) | [GMPROC](../clientside/ai4u/ai4u/gmproc/README.md)
+| API Overview    |  [doc/README.md](../../doc/README.md)                                           |
+| AI4U with OpenAI Gym      | [doc/ai4ugym.md](../../doc/ai4ugym.md)                         |
+| A3C Implementation     |  [doc/a3cintro.md](../../doc/a3cintro.md)                        |
+| GMPROC (multiprocessing) | [GMPROC](../../clientside/ai4u/ai4u/gmproc/README.md)
 
 ## Installation
 First, it needs to install *clientside* component. Open the Ubuntu command-line console and enter in directory *clientside/ai4u*. Run the following command:
@@ -52,23 +52,23 @@ Waiting for the installation ends.
 
 Now, run Unity and open project available in *exemples/BallRoller*.  Then open the BallRoller scene (available on *Assets/scenes*) if it is not already loaded.
 
-![Menu File --> Open Scene ](../doc/images/openscene.PNG)
+![Menu File --> Open Scene ](../../doc/images/openscene.PNG)
 
 
-![Menu File --> Open Scene ](../doc/images/scenesmarked.PNG)
+![Menu File --> Open Scene ](../../doc/images/scenesmarked.PNG)
 
 Then, press the play button and run the random_ballroller.py script located in *examples/BallRoller/Client*.
 
-![Pressing play button](../doc/images/ballrollerplay.PNG)
+![Pressing play button](../../doc/images/ballrollerplay.PNG)
 
 ```
 python3 random_ballroller.py
 ```
 
-![Running example ballroller](../doc/images/ballrollerexec.PNG)
+![Running example ballroller](../../doc/images/ballrollerexec.PNG)
 
 Output logs:
-![See output logs ](../doc/images/ballrollerlog.PNG)
+![See output logs ](../../doc/images/ballrollerlog.PNG)
 
 If no error message was displayed, then AI4U was installed correctly.
 
