@@ -19,8 +19,23 @@ namespace ai4u
 		private int numberOfFields = 0;
 		private int numberOfActions = 0;
 		
+		private bool sensorsEnabled = true;
+		
 		public Agent() {
 			
+		}
+		
+		public bool SensorsEnabled
+		{
+			get
+			{
+				return sensorsEnabled;
+			}
+			
+			set
+			{
+				sensorsEnabled = value;
+			}
 		}
 		
 		public Sensor GetSensor(int i)
@@ -153,29 +168,32 @@ namespace ai4u
 		public virtual void UpdateState()
 		{
 			AtBeginingOfTheStateUpdate();
-			for (int i = 0; i < numberOfFields; i++) {
-				switch(sensors[i].type)
-				{
-					case SensorType.sfloatarray:
-						SetStateAsFloatArray(i, sensors[i].perceptionKey, sensors[i].GetFloatArrayValue());
-						break;
-					case SensorType.sfloat:
-						SetStateAsFloat(i, sensors[i].perceptionKey, sensors[i].GetFloatValue());
-						break;
-					case SensorType.sint:
-						SetStateAsInt(i, sensors[i].perceptionKey, sensors[i].GetIntValue());
-						break;
-					case SensorType.sstring:
-						SetStateAsString(i, sensors[i].perceptionKey, sensors[i].GetStringValue());
-						break;
-					case SensorType.sbool:
-						SetStateAsBool(i, sensors[i].perceptionKey, sensors[i].GetBoolValue());
-						break;
-					case SensorType.sbytearray:
-						SetStateAsByteArray(i, sensors[i].perceptionKey, sensors[i].GetByteArrayValue());
-						break;
-					default:
-						break;
+			if (sensorsEnabled)
+			{
+				for (int i = 0; i < numberOfFields; i++) {
+					switch(sensors[i].type)
+					{
+						case SensorType.sfloatarray:
+							SetStateAsFloatArray(i, sensors[i].perceptionKey, sensors[i].GetFloatArrayValue());
+							break;
+						case SensorType.sfloat:
+							SetStateAsFloat(i, sensors[i].perceptionKey, sensors[i].GetFloatValue());
+							break;
+						case SensorType.sint:
+							SetStateAsInt(i, sensors[i].perceptionKey, sensors[i].GetIntValue());
+							break;
+						case SensorType.sstring:
+							SetStateAsString(i, sensors[i].perceptionKey, sensors[i].GetStringValue());
+							break;
+						case SensorType.sbool:
+							SetStateAsBool(i, sensors[i].perceptionKey, sensors[i].GetBoolValue());
+							break;
+						case SensorType.sbytearray:
+							SetStateAsByteArray(i, sensors[i].perceptionKey, sensors[i].GetByteArrayValue());
+							break;
+						default:
+							break;
+					}
 				}
 			}
 			AtEndOfTheStateUpdate();

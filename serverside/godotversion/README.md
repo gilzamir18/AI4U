@@ -10,7 +10,11 @@ We map components of the Godot architecture to agents components. So, agents com
 The Godot version of the AI4U is availale as a basic 3D platformer made in Godot (adapted from https://github.com/Janders1800/3D-Platformer). Thus, you can download this version and get a fuctional example on the hand. However, AI4U for Godot can be installed on any game. For this, you must make a copy of ai4u file in your project. While we don't produce more robust documentation, we recommend that you download this directory and import the project into it for Godot. So study the code, see the connection between the components and experiment.
 
 ## Controls
-The basic 3D plataformer  has a simple controller with WASD movements. For Jump action, press the key U.
+The basic 3D plataformer has a simple controller with WASD movements. For Jump action, press the key U.
+
+
+## Training
+You can train the agent by exchanging the component called LocalBrain for a RemoteBrain component. Then you must compile and run the scene and then run the training_scripts/sacagent.py script.
 
 # Requirements
 

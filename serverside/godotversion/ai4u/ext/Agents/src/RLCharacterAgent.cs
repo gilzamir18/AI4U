@@ -9,7 +9,7 @@ namespace ai4u.ext
 		public bool globalPositionSensor = false;
 		
 		private KinematicBody body;
-		private Vector3 initialPosition;
+		private Vector3 initialPosition, initialRotation;
 		private KinematicBodyOnFloorSensor onFloorSensor;
 		private PositionSensor positionSensor;
 		
@@ -17,6 +17,7 @@ namespace ai4u.ext
 		{
 			body = GetParent()  as KinematicBody;
 			initialPosition = body.Translation;
+			initialRotation = body.Rotation;
 			base.OnSetup();
 			onFloorSensor = new KinematicBodyOnFloorSensor();
 			onFloorSensor.perceptionKey = "is_on_floor";
@@ -47,6 +48,7 @@ namespace ai4u.ext
 		{
 			base.HandleOnResetEvent();
 			body.Translation = this.initialPosition;
+			body.Rotation = this.initialRotation;
 			body.Call("reload");
 		}
 		

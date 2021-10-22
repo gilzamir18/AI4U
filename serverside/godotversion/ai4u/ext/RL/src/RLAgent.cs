@@ -124,6 +124,7 @@ namespace ai4u.ext {
 			reward = 0;
 			Done = false;
 			nSteps = 0;
+			SensorsEnabled = true;
 		}
 		
 		public override bool FilterAction(Actuator actuator) {

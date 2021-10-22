@@ -35,7 +35,7 @@ public class Utils
 			U dvalue = p.Value;
 			if (i > 0) 
 			{
-				r.Append(";");
+				r.Append(",");
 			}
 			r.Append("\"");
 			r.Append(key.ToString());

@@ -49,17 +49,8 @@ def str_as_dictlist(src, sep=";", type=str):
     result = []
     for obj in objlist:
         if len(obj) > 0:
-            result.append(type(obj))
-    return result
-
-def get_string_as_dict_list(src):
-    objlist = eval(src)
-    result = []
-    for obj in objlist:
-        if len(obj) > 0:
             result.append(eval(obj))
     return result
-
 
 def make_inference_network(obs_shape, n_actions, debug=False, extra_inputs_shape=None, network=None):
     import tensorflow as tf

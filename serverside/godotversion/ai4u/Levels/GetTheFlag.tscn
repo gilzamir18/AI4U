@@ -4,7 +4,7 @@
 [ext_resource path="res://ai4u/ext/Agents/src/RewardEventsSensor.cs" type="Script" id=2]
 [ext_resource path="res://TeleTransportNPC.cs" type="Script" id=3]
 [ext_resource path="res://ai4u/ext/Agents/src/CharacterActuator.cs" type="Script" id=4]
-[ext_resource path="res://ai4u/RemoteBrain.tscn" type="PackedScene" id=5]
+[ext_resource path="res://ai4u/ext/Agents/LocalBrainWithCharacterController.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ai4u/ext/Agents/RayCastingSensor.tscn" type="PackedScene" id=6]
 [ext_resource path="res://ai4u/ext/Agents/src/KinematicBodyCollisionSensor.cs" type="Script" id=7]
 [ext_resource path="res://ai4u/ext/Agents/src/RLCharacterAgent.cs" type="Script" id=8]
@@ -98,7 +98,7 @@ transform = Transform( 1, 0, 0, 0, 1, -3.12924e-07, 0, 3.12924e-07, 1, -1.84869e
 [node name="RLCharacterAgent" type="Node" parent="Misc/Player"]
 script = ExtResource( 8 )
 
-[node name="RemoteBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 5 )]
+[node name="LocalBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 5 )]
 
 [node name="CharacterActuator" type="Node" parent="Misc/Player/RLCharacterAgent"]
 script = ExtResource( 4 )
@@ -109,13 +109,6 @@ always = true
 shape = PoolIntArray( 20, 20, 1 )
 groupCode = PoolIntArray( 1, 50, 100, 8 )
 eyePath = NodePath("../../CameraBase/CameraPivot/CameraOffset/Camera")
-
-[node name="KinematicBodyCollisionSensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
-script = ExtResource( 7 )
-perceptionKey = "collision"
-type = 1
-isState = true
-shape = PoolIntArray( 0 )
 
 [node name="RewardEventsSensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
 script = ExtResource( 2 )
@@ -183,6 +176,15 @@ isJustAnEvent = false
 successReward = -1.0
 argOneRewardFuncPath = NodePath("../XOR/GreenOccurWithoutYellowOccur/AtLeastOneYellowOccur")
 argTwoRewardFuncPath = NodePath("../XOR/YellowOccurWithoutGreenOccur/AtLeastOneGreenOccur")
+
+[node name="KBCollisionSensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
+script = ExtResource( 7 )
+perceptionKey = "collisions"
+type = 5
+isState = true
+shape = PoolIntArray( 8 )
+itemName = PoolStringArray( "green", "yellow" )
+itemCode = PoolRealArray( -0.5, 0.5 )
 
 [node name="Floors" type="Spatial" parent="."]
 
@@ -274,3 +276,4 @@ material = SubResource( 7 )
 
 [editable path="Misc/Player"]
 [editable path="Misc/Player/CharacterMesh/Dummy"]
+[editable path="Misc/Player/RLCharacterAgent/LocalBrain"]

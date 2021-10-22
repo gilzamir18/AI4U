@@ -10,70 +10,76 @@ namespace ai4u.ext
 {
 	public class KinematicBodyCollisionSensor : Sensor
 	{	
-			[Export]
-			public bool returnGroups = true;
-			
-			[Export]
-			public string separator = ";";
-		
 			private KinematicBody body;
-
-			private List< Dictionary<string, string> > list;
-
-			public override string GetStringValue() 
-			{
-				StringBuilder r = new StringBuilder();
-				var j = 0;
-				foreach(Dictionary<string, string> d in list) 
-				{
-					if (j > 0)
-					{
-						r.Append(",");
-					}
-					r.Append(Utils.DictToPythonDict<string, string>(d));
-					j++;
-				}
-				list.Clear();
-				return r.ToString();
-			}
+			[Export]
+			public bool codeByGroup = true;
 			
-			public override void _PhysicsProcess(float delta)
+			[Export]
+			public string[] itemName;
+			[Export]
+			public float[] itemCode;
+
+			private Dictionary<string, float> nameCode = new Dictionary<string, float>();
+			
+			public override float[] GetFloatArrayValue() 
 			{
+				List<float> codes = new List<float>();
 				for (int i = 0; i < body.GetSlideCount(); i++)
 				{
 					var collision = body.GetSlideCollision(i);
 					Node node = (Spatial)collision.Collider;
-					Dictionary<string, string> result = new Dictionary<string, string>();
-					if (returnGroups)
-					{
-						string gs = "";
+					if (codeByGroup)
+					{						
 						var groups = node.GetGroups();
 						foreach(string g in groups)
 						{
-							gs += g + ";";
+							if (nameCode.ContainsKey(g))
+							{
+								codes.Add(nameCode[g]);
+							}
+							else
+							{
+								codes.Add(1);
+							}
 						}
-						result["groups"] = gs;
+					} 
+					else
+					{
+						if (nameCode.ContainsKey(node.Name))
+						{
+							codes.Add(nameCode[node.Name]);
+						}
+						else
+						{
+							codes.Add(1);
+						}
 					}
-					result["name"] = node.Name;
-					Vector3 position = collision.Position;
-					Vector3 normal = collision.Normal;
-					result["position"] = "[" + position.x + ", " + position.y + ", " + position.z + "]";			
-					result["normal"] = "[" + normal.x + ", " + normal.y + ", " + normal.z + "]";
-					list.Add(result);
+				}				
+				float[] r =  new float[shape[0]];
+				for (int i = 0; i < codes.Count; i++)
+				{
+					r[i] = codes[i];
+					if (i >= shape[0]) break;
 				}
+				
+				return r;
 			}
 
 			public override void OnBinding(Agent agent) 
 			{
-				type = SensorType.sstring;
-				list = new List< Dictionary<string, string> > ();
+				type = SensorType.sfloatarray;
 				body = agent.GetBody() as KinematicBody;
+				if (itemName != null)
+				{
+					for (int i = 0; i < itemName.Length; i++)
+					{
+						nameCode[itemName[i]] = itemCode[i];
+					}
+				}
 			}
 			
 			public override void OnReset(Agent agent) 
 			{
-				type = SensorType.sstring;
-				list = new List< Dictionary<string, string> > ();
 			}
 	}
 }
