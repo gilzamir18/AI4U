@@ -4,6 +4,12 @@ using Godot;
 
 namespace ai4u.ext
 {	
+	
+	public interface ISensorListener
+	{
+		void OnSensor(Sensor sensor);
+	}
+	
 	public enum SensorType {
 		sfloat,
 		sstring,
@@ -14,8 +20,11 @@ namespace ai4u.ext
 		sintarray
 	}
 
-	public class Sensor : Node, IAgentResetListener
+	public class Sensor : Node, IAgentResetListener, IActionListener
 	{
+		
+		private List<ISensorListener> sensorListeners = new List<ISensorListener>();
+		
 		[Export]
 		public bool resettable = true;
 		
@@ -38,6 +47,11 @@ namespace ai4u.ext
 		public void SetAgent(Agent own)
 		{
 			agent = own;
+		}
+		
+		public virtual void OnAction(Actuator actuator)
+		{
+			
 		}
 
 		public virtual float GetFloatValue() {
@@ -70,6 +84,24 @@ namespace ai4u.ext
 
 		public virtual void OnBinding(Agent agent) {
 			
+		}
+		
+		public void Subscribe(ISensorListener listener)
+		{
+			sensorListeners.Add(listener);
+		}
+		
+		public void Unsubscribe(ISensorListener listener)
+		{
+			sensorListeners.Remove(listener);
+		}
+		
+		public void NotifyListeners()
+		{
+			foreach(ISensorListener s in sensorListeners)
+			{
+				s.OnSensor(this);
+			}
 		}
 
 		public bool Enabled

@@ -13,19 +13,31 @@ namespace ai4u.ext
 		{
 			if (!done && agent.GetActionName()==actionName)
 			{
+				float value = 0;
 				float[] f = agent.GetActionArgAsFloatArray();
 				if (f[0] >= 0)
+				{
 					body.Set("left_strength", f[0]);
+					value -= f[0];
+				}
 				
 				if (f[1] >= 0)
+				{
 					body.Set("right_strength", f[1]);
+					value -= f[1];
+				}
 				
 				if (f[2] >= 0)
+				{
 					body.Set("down_strength", f[2]);
-	
+					value -= f[2];
+				}
+				
 				if (f[3] >= 0)
+				{
 					body.Set("up_strength", f[3]);
-	
+					value -= f[3];
+				}
 				if (f[4] > 0)
 				{
 					body.Set("jump", true);
@@ -34,7 +46,13 @@ namespace ai4u.ext
 				if (f[5] >= 0)
 				{
 					body.Set("jumpSpeed", f[5]);
+					if (f[4] > 0)
+					{
+						value -= f[5];
+					}
 				}
+				
+				ActionValue = value;
 			}
 			body.Call("process_commands", agent.DeltaTime);
 			body.Call("update_physics", agent.DeltaTime);

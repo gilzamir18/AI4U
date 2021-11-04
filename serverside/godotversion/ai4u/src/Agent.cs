@@ -155,7 +155,8 @@ namespace ai4u
 					(actuators[i].actionName == GetActionName() && FilterAction(actuators[i]))
 				)
 				{
-					actuators[i].Act();	
+					actuators[i].Act();
+					actuators[i].NotifyListeners();
 				}
 			}
 		}
@@ -175,21 +176,27 @@ namespace ai4u
 					{
 						case SensorType.sfloatarray:
 							SetStateAsFloatArray(i, sensors[i].perceptionKey, sensors[i].GetFloatArrayValue());
+							sensors[i].NotifyListeners();
 							break;
 						case SensorType.sfloat:
 							SetStateAsFloat(i, sensors[i].perceptionKey, sensors[i].GetFloatValue());
+							sensors[i].NotifyListeners();
 							break;
 						case SensorType.sint:
 							SetStateAsInt(i, sensors[i].perceptionKey, sensors[i].GetIntValue());
+							sensors[i].NotifyListeners();
 							break;
 						case SensorType.sstring:
 							SetStateAsString(i, sensors[i].perceptionKey, sensors[i].GetStringValue());
+							sensors[i].NotifyListeners();
 							break;
 						case SensorType.sbool:
 							SetStateAsBool(i, sensors[i].perceptionKey, sensors[i].GetBoolValue());
+							sensors[i].NotifyListeners();
 							break;
 						case SensorType.sbytearray:
 							SetStateAsByteArray(i, sensors[i].perceptionKey, sensors[i].GetByteArrayValue());
+							sensors[i].NotifyListeners();
 							break;
 						default:
 							break;

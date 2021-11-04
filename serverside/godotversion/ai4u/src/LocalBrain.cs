@@ -5,6 +5,8 @@ namespace ai4u
 {
 	public class LocalBrain : Brain
 	{
+		[Export]
+		public bool enabled = true;
 		private Controller controller;
 		
 		public void Start()
@@ -70,20 +72,27 @@ namespace ai4u
 		
 		public override void _Ready()
 		{
-			Start();
+			if (enabled)
+				Start();
 		}	
 
 	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
 	 	public override void _Process(float delta)
 	  	{
-			DeltaTime = delta;
-			Update();
+			if (enabled)
+			{
+				DeltaTime = delta;
+				Update();
+			}
 		}
 
 		public override void _PhysicsProcess(float delta)
 		{
-			DeltaTime = delta;
-			FixedUpdate();
+			if (enabled)
+			{
+				DeltaTime = delta;
+				FixedUpdate();
+			}
 		}
 	}
 }

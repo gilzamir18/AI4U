@@ -12,6 +12,9 @@ namespace ai4u
 		private static bool clientRequestReceived = false; //This flag indicates if remote message was received.
 
 		[Export]
+		public bool enabled = false;
+
+		[Export]
 		public int port = 8081; //defines the port on which the controller will receive remote commands.
 		[Export]
 		public int buffer_size = 8192; //number of bytes of the network buffer.
@@ -327,22 +330,31 @@ namespace ai4u
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready()
 		{
-			Awake();
-			Start();		
+			if (enabled)
+			{
+				Awake();
+				Start();		
+			}
 		}
 
 	//  // Called every frame. 'delta' is the elapsed time since the previous frame.
 	 	public override void _Process(float delta)
 	  	{
-			DeltaTime = delta;
-			Update();
-			LateUpdate();
+			if (enabled)
+			{
+				DeltaTime = delta;
+				Update();
+				LateUpdate();
+			}
 		}
 
 		public override void _PhysicsProcess(float delta)
 		{
-			DeltaTime = delta;
-			FixedUpdate();
+			if (enabled)
+			{
+				DeltaTime = delta;
+				FixedUpdate();
+			}
 		}
 	}
 }

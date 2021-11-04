@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://ai4u/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ai4u/ext/Agents/src/RewardEventsSensor.cs" type="Script" id=2]
@@ -16,6 +16,10 @@
 [ext_resource path="res://ai4u/ext/CookedEvents/EventOneAndEventTwo.tscn" type="PackedScene" id=14]
 [ext_resource path="res://ai4u/Scripts/CharacterController.gd" type="Script" id=15]
 [ext_resource path="res://SwapPositions.cs" type="Script" id=16]
+[ext_resource path="res://ai4u/ext/NPCs/src/EnergySensor.cs" type="Script" id=17]
+[ext_resource path="res://ShowHUD.cs" type="Script" id=18]
+[ext_resource path="res://ai4u/RemoteBrain.tscn" type="PackedScene" id=19]
+[ext_resource path="res://ai4u/ext/NPCs/src/TimeStepSensor.cs" type="Script" id=20]
 
 [sub_resource type="ProceduralSky" id=1]
 ground_bottom_color = Color( 0, 0, 0, 1 )
@@ -34,7 +38,9 @@ ssao_enabled = true
 
 [sub_resource type="SphereMesh" id=3]
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="CanvasItemMaterial" id=4]
+
+[sub_resource type="SpatialMaterial" id=5]
 albedo_color = Color( 0.435294, 0.964706, 0, 1 )
 emission_enabled = true
 emission = Color( 0, 0.929412, 0.0352941, 1 )
@@ -42,7 +48,7 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="SpatialMaterial" id=6]
 albedo_color = Color( 0.360784, 0.415686, 0.00392157, 1 )
 metallic_specular = 0.54
 emission_enabled = true
@@ -51,7 +57,7 @@ emission_energy = 3.7
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=6]
+[sub_resource type="SpatialMaterial" id=7]
 albedo_color = Color( 0.12549, 1, 0, 1 )
 emission_enabled = true
 emission = Color( 0, 1, 0.0156863, 1 )
@@ -59,7 +65,7 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="SpatialMaterial" id=8]
 albedo_color = Color( 0.682353, 0.670588, 1, 1 )
 emission_enabled = true
 emission = Color( 0.301961, 0.294118, 0.984314, 1 )
@@ -91,14 +97,28 @@ material/0 = null
 ] instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.847596, -6.36409 )
 script = ExtResource( 15 )
+cameraFollowsRotation = true
+
+[node name="CameraPivot" parent="Misc/Player/CameraBase" index="0"]
+transform = Transform( -1, 0, 8.74228e-08, 4.65416e-08, 0.846509, 0.532374, -7.40042e-08, 0.532374, -0.846509, 0, 1.52362, 0.5 )
 
 [node name="Camera" parent="Misc/Player/CameraBase/CameraPivot/CameraOffset" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, -3.12924e-07, 0, 3.12924e-07, 1, -1.84869e-08, 0.0355208, -0.208461 )
+transform = Transform( 1, -3.93927e-08, -1.74901e-08, 4.2962e-08, 0.878467, 0.477802, -3.45737e-09, -0.477802, 0.878467, -1.2383, 0.796094, 1.08693 )
+doppler_tracking = 2
+projection = 1
+fov = 60.0
+size = 8.0
 
 [node name="RLCharacterAgent" type="Node" parent="Misc/Player"]
 script = ExtResource( 8 )
+maxSteps = 1500
 
 [node name="LocalBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 5 )]
+
+[node name="Controller" parent="Misc/Player/RLCharacterAgent/LocalBrain" index="0"]
+debugMode = false
+
+[node name="RemoteBrain" parent="Misc/Player/RLCharacterAgent" instance=ExtResource( 19 )]
 
 [node name="CharacterActuator" type="Node" parent="Misc/Player/RLCharacterAgent"]
 script = ExtResource( 4 )
@@ -109,6 +129,7 @@ always = true
 shape = PoolIntArray( 20, 20, 1 )
 groupCode = PoolIntArray( 1, 50, 100, 8 )
 eyePath = NodePath("../../CameraBase/CameraPivot/CameraOffset/Camera")
+debugEnabled = true
 
 [node name="RewardEventsSensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
 script = ExtResource( 2 )
@@ -186,6 +207,74 @@ shape = PoolIntArray( 8 )
 itemName = PoolStringArray( "green", "yellow" )
 itemCode = PoolRealArray( -0.5, 0.5 )
 
+[node name="EnergySensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
+script = ExtResource( 17 )
+perceptionKey = "energy"
+type = 3
+isState = true
+shape = PoolIntArray(  )
+maxEnergy = 10000
+actionPath = [ NodePath("../CharacterActuator") ]
+
+[node name="TimeStepSensor" type="Node" parent="Misc/Player/RLCharacterAgent"]
+script = ExtResource( 20 )
+perceptionKey = "time_step"
+type = 3
+isState = true
+shape = PoolIntArray(  )
+
+[node name="MemoryAgent" type="Node" parent="Misc/Player"]
+
+[node name="HUD" type="Node" parent="Misc"]
+script = ExtResource( 18 )
+energySensor = NodePath("../Player/RLCharacterAgent/EnergySensor")
+stepsLabelPath = NodePath("LblSteps")
+energyLabelOutput = NodePath("LblDisplayOut")
+rewardLabelPath = NodePath("LblReward")
+agentPath = NodePath("../Player/RLCharacterAgent")
+
+[node name="LblEnergy" type="Label" parent="Misc/HUD"]
+material = SubResource( 4 )
+anchor_left = 0.00580665
+anchor_top = 0.0118921
+anchor_right = 0.0263145
+anchor_bottom = 0.0118921
+margin_right = 46.0
+margin_bottom = 18.0
+text = "Energy"
+autowrap = true
+uppercase = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblDisplayOut" type="Label" parent="Misc/HUD"]
+margin_left = 62.8648
+margin_top = 5.75684
+margin_right = 132.865
+margin_bottom = 24.7568
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblSteps" type="Label" parent="Misc/HUD"]
+margin_left = 294.923
+margin_top = 5.94604
+margin_right = 334.923
+margin_bottom = 19.946
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblReward" type="Label" parent="Misc/HUD"]
+margin_left = 624.334
+margin_top = 4.75684
+margin_right = 664.334
+margin_bottom = 18.7568
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Floors" type="Spatial" parent="."]
 
 [node name="floor" type="CSGBox" parent="Floors" groups=[
@@ -202,7 +291,7 @@ use_collision = true
 ]]
 transform = Transform( 1, 0, 0, 0, 2.93076, 0, 0, 0, 1, -0.285502, -0.319569, 5.04183 )
 use_collision = true
-material = SubResource( 4 )
+material = SubResource( 5 )
 script = ExtResource( 16 )
 otherObject = NodePath("../FlagStem2")
 agent = NodePath("../../Misc/Player/RLCharacterAgent")
@@ -213,7 +302,7 @@ agent = NodePath("../../Misc/Player/RLCharacterAgent")
 ]]
 transform = Transform( 1, 0, 0, 0, 2.93076, 0, 0, 0, 1, 4.84765, -0.319569, 5.36327 )
 use_collision = true
-material = SubResource( 5 )
+material = SubResource( 6 )
 
 [node name="FlagStem3" type="CSGCylinder" parent="Walls" groups=[
 "green",
@@ -221,10 +310,11 @@ material = SubResource( 5 )
 ]]
 transform = Transform( 1, 0, 0, 0, 2.93076, 0, 0, 0, 1, 4.61817, -0.319569, -5.86354 )
 use_collision = true
-material = SubResource( 6 )
+material = SubResource( 7 )
 script = ExtResource( 16 )
 otherObject = NodePath("../FlagStem4")
 agent = NodePath("../../Misc/Player/RLCharacterAgent")
+hide = true
 
 [node name="FlagStem4" type="CSGCylinder" parent="Walls" groups=[
 "wall",
@@ -232,7 +322,7 @@ agent = NodePath("../../Misc/Player/RLCharacterAgent")
 ]]
 transform = Transform( 1, 0, 0, 0, 2.93076, 0, 0, 0, 1, -3.33422, -0.319569, -4.02656 )
 use_collision = true
-material = SubResource( 5 )
+material = SubResource( 6 )
 
 [node name="Block1" type="CSGBox" parent="Walls" groups=[
 "wall",
@@ -240,7 +330,7 @@ material = SubResource( 5 )
 transform = Transform( 1.28451, 0, 0, 0, 4.83337, 0, 0, 0, 0.395323, 0.0816984, 4.01136, -9.50705 )
 use_collision = true
 width = 15.5178
-material = SubResource( 7 )
+material = SubResource( 8 )
 
 [node name="Block2" type="CSGBox" parent="Walls" groups=[
 "wall",
@@ -248,7 +338,7 @@ material = SubResource( 7 )
 transform = Transform( -5.61477e-08, 0, 0.395323, 0, 4.83337, 0, -1.28451, 0, -1.72801e-08, 9.53231, 4.01136, 0.0130582 )
 use_collision = true
 width = 15.5178
-material = SubResource( 7 )
+material = SubResource( 8 )
 
 [node name="Block3" type="CSGBox" parent="Walls" groups=[
 "wall",
@@ -256,7 +346,7 @@ material = SubResource( 7 )
 transform = Transform( 1.28451, 0, 0, 0, 4.83337, 0, 0, 0, 0.395323, 0.151187, 4.01136, 9.53316 )
 use_collision = true
 width = 15.5178
-material = SubResource( 7 )
+material = SubResource( 8 )
 
 [node name="Block4" type="CSGBox" parent="Walls" groups=[
 "wall",
@@ -264,7 +354,7 @@ material = SubResource( 7 )
 transform = Transform( 1.28451, 0, 0, 0, 4.83337, 0, 0, 0, 0.395323, 0.000105858, 4.01136, 0.0130582 )
 use_collision = true
 width = 15.5178
-material = SubResource( 7 )
+material = SubResource( 8 )
 
 [node name="Block5" type="CSGBox" parent="Walls" groups=[
 "wall",
@@ -272,7 +362,7 @@ material = SubResource( 7 )
 transform = Transform( -5.61477e-08, 0, 0.395323, 0, 4.83337, 0, -1.28451, 0, -1.72801e-08, -9.59305, 4.01136, 0.0130591 )
 use_collision = true
 width = 15.5178
-material = SubResource( 7 )
+material = SubResource( 8 )
 
 [editable path="Misc/Player"]
 [editable path="Misc/Player/CharacterMesh/Dummy"]

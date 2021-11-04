@@ -4,6 +4,12 @@ using Godot;
 
 namespace ai4u.ext 
 {
+	
+	public interface IActionListener
+	{
+		void OnAction(Actuator actuator);
+	}
+	
 	public class Actuator : Node, IAgentResetListener
 	{
 		[Export]
@@ -18,6 +24,8 @@ namespace ai4u.ext
 		[Export]
 		public NodePath actionRewardPath;
 		
+		private List<IActionListener> listeners = new List<IActionListener>();
+		
 		private bool isOperation = false;
 		
 		public ActionReward actionReward;
@@ -25,6 +33,30 @@ namespace ai4u.ext
 		protected Agent agent;
 		
 		private bool actionDone = false;
+		
+		private float actionValue;
+
+		public float ActionValue
+		{
+			get
+			{
+				return actionValue;
+			}
+			
+			set 
+			{
+				actionValue = value;
+			}
+		}
+
+
+		public void NotifyListeners()
+		{
+			foreach(IActionListener a in listeners)
+			{
+				a.OnAction(this);
+			}
+		}
 
 		public bool IsOperation
 		{
@@ -37,6 +69,16 @@ namespace ai4u.ext
 			{
 				this.isOperation = value;
 			}
+		}
+		
+		public void Subscribe(IActionListener listener)
+		{
+			this.listeners.Add(listener);
+		}
+		
+		public void Unsubscribe(IActionListener listener)
+		{
+			this.listeners.Remove(listener);
 		}
 
 		public virtual void NotifyEndOfEpisode() 
@@ -56,7 +98,7 @@ namespace ai4u.ext
 		
 		public virtual void Act()
 		{
-
+			
 		}
 		
 		public virtual void OnBinding(Agent agent) 

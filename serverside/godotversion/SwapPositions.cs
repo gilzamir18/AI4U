@@ -10,6 +10,9 @@ public class SwapPositions : Spatial, IAgentResetListener
 	[Export]
 	public NodePath agent;
 	
+	[Export]
+	public bool hide = false;
+	
 	private Random random;
 	public override void _Ready()
 	{
@@ -20,12 +23,26 @@ public class SwapPositions : Spatial, IAgentResetListener
 	
 	public void OnReset(Agent agent)
 	{
+			Spatial node = (GetNode(otherObject) as Spatial);
 			if (random.Next(0,2) == 1)
 			{
 				Vector3 pos = (GetNode(otherObject) as Spatial).Translation;
 				Vector3 tmp = Translation;
 				Translation = pos;
-				(GetNode(otherObject) as Spatial).Translation = tmp;
-			}		
+				node.Translation = tmp;
+				if (hide)
+				{
+					this.Hide();
+					node.Show();
+				}
+			}
+			else
+			{
+				if (hide)
+				{
+					this.Show();
+					node.Hide();
+				}
+			}
 	}
 }

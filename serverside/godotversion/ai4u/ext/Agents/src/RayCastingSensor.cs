@@ -67,6 +67,9 @@ namespace ai4u.ext
 
 		[Export]
 		public float visionMaxDistance = 500f;
+		
+		[Export]
+		public float fieldOfView = 90.0f;
 
 		private Dictionary<string, int> mapping;
 		private Ray[,] raysMatrix = null;
@@ -74,6 +77,9 @@ namespace ai4u.ext
 		private PhysicsDirectSpaceState spaceState;
 		private int[,] viewMatrix = null;
 		private float[,] depthMatrix = null;
+		
+		[Export]
+		public bool debugEnabled = false;
 		
 		public override float[] GetFloatArrayValue() {
 			return new float[]{};
@@ -112,7 +118,7 @@ namespace ai4u.ext
 			Vector3 forward = -aim.z.Normalized();
 			Vector3 up = aim.y.Normalized();
 			Vector3 right = aim.x.Normalized();
-			UpdateRaysMatrix(eye.GlobalTransform.origin, forward, up, right);
+			UpdateRaysMatrix(eye.GlobalTransform.origin, forward, up, right, fieldOfView);
 			UpdateViewMatrix();
 			StringBuilder sb = new StringBuilder();
 			StringBuilder dp = new StringBuilder();
@@ -120,7 +126,6 @@ namespace ai4u.ext
 			{
 				for (int j = 0; j < shape[1]; j++)
 				{
-					//Debug.DrawRay(raysMatrix[i, j].origin, raysMatrix[i, j].direction, Color.red);
 					sb.Append(viewMatrix[i, j]);
 					dp.Append( depthMatrix[i, j].ToString(System.Globalization.CultureInfo.InvariantCulture.NumberFormat) );
 					if (j <= shape[1]-2) {
@@ -158,15 +163,18 @@ namespace ai4u.ext
 		
 		public void UpdateViewMatrix(float maxDistance = 500.0f)
 		{
-			//var debug_line = 0;
+			var debug_line = 0;
 			for (int i = 0; i < shape[0]; i++)
 			{
 				for (int j = 0; j < shape[1]; j++)
 				{				
 					var myray = raysMatrix[i,j];
 					var result = this.spaceState.IntersectRay(myray.Origin, myray.Origin + myray.Direction*maxDistance);//new Godot.Collections.Array { agent.GetBody() }
-					//GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
-					//debug_line += 1;
+					if (debugEnabled)
+					{
+						GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
+						debug_line += 1;
+					}
 					float t = -1;
 					if (result.Count > 0)
 					{

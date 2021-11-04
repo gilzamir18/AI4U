@@ -18,6 +18,7 @@ namespace ai4u.ext
 			body = GetParent()  as KinematicBody;
 			initialPosition = body.Translation;
 			initialRotation = body.Rotation;
+			
 			base.OnSetup();
 			onFloorSensor = new KinematicBodyOnFloorSensor();
 			onFloorSensor.perceptionKey = "is_on_floor";

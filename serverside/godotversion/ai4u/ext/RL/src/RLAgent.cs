@@ -52,11 +52,43 @@ namespace ai4u.ext {
 		private List<RewardInfo> rewardOcurrence; //store the ocurrence of reward groups
 		private Dictionary<string, bool> rewardRegistry;
 		
+		public float Reward
+		{
+			get
+			{
+				return reward;
+			}
+		}
+		
 		public List<RewardInfo> RewardOcurrence
 		{
 			get
 			{
 				return rewardOcurrence;	
+			}
+		}
+		
+		public FloatSensor RewardSensor
+		{
+			get
+			{
+				return rewardSensor;
+			}
+		}
+		
+		public BoolSensor BoolSensor
+		{
+			get
+			{
+				return doneSensor;
+			}
+		}
+		
+		public int CurrentStep
+		{
+			get 
+			{
+				return nSteps;	
 			}
 		}
 
@@ -134,7 +166,7 @@ namespace ai4u.ext {
 			return !Done || actuator.IsOperation;
 		}
 
-		public virtual void RequestDoneFrom(RewardFunc rf)
+		public virtual void RequestDoneFrom(object rf)
 		{
 			this.Done = true;
 			this.doneSensor.Data = this.Done;
@@ -185,6 +217,7 @@ namespace ai4u.ext {
 		
 		public override void AtEndOfTheStateUpdate()
 		{
+			nSteps++;
 			if (!Done)
 				reward = 0.0f;
 		}
