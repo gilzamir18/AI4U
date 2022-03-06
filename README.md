@@ -1,6 +1,6 @@
 ![Running example ballroller](doc/images/ai4u1.PNG)
 
-There is a newer project than this one that is being actively maintained. USBP (Unity Stable Baselines Project) is maintained at: ![USBP](https://github.com/sindcomputing/usbp).
+There is a newer project than this one that is being actively maintained. USBP (Unity Stable Baselines Project) is maintained at: [USBP](https://github.com/sindcomputing/usbp).
 
 # What is AI4U?
 AI4U is a multi-engine plugin (Godot and Unity) that allows you designing Non-Player Characters (NPCs) of games using a agent abstraction. In addition, AI4U has a low-level API that allows you to connect the agent to any algorithm made available in Python by the reinforcement learning community specifically and by the Articial Intelligence community in general. Reiforcement learning promises overcome tradicional navigation mesh mechanism in games and to provide more autonomous characters.
