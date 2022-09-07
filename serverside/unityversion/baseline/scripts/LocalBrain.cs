@@ -5,9 +5,12 @@ namespace ai4u
     {
         public Controller controller;
         
-        public void Start()
+        public void Awake()
         {
-
+            if (agent == null)
+            {
+                agent = GetComponent<Agent>();
+            }
             if (controller == null) {
                 Debug.LogWarning("You must specify a controller for the game object: " + gameObject.name);
             }
@@ -16,43 +19,14 @@ namespace ai4u
                 Debug.LogWarning("You must specify an agent for the game object: " + gameObject.name);
             }
 
-
-
             agent.SetBrain(this);
-            agent.StartData();
+            agent.Setup();
         }
 
-        private void LocalDecision()
-        {
-            object[] msg = controller.GetAction();
-            receivedcmd = (string)msg[0];
-            receivedargs = (string[])msg[1];
-            agent.ApplyAction();
-            agent.UpdatePhysics();
-            
-            agent.UpdateState();
-            agent.GetState();
-        }
-
-        public void FixedUpdate()
-        {
-            if (fixedUpdate)
-            {
-                LocalDecision();
-            }
-        }
-
-        public void Update()
-        {
-            if (!fixedUpdate)
-            {
-                LocalDecision();
-            }
-        }
-
-        public override void SendMessage(string[] desc, byte[] tipo, string[] valor)
+        public string SendMessage(string[] desc, byte[] tipo, string[] valor)
         {
             controller.ReceiveState(desc, tipo, valor);
+            return controller.GetAction();
         }
     }
 }

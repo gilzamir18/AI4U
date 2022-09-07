@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System.Text;
 
 namespace ai4u
 {
@@ -16,51 +16,25 @@ namespace ai4u
         }
 
 
-        public virtual object[] GetAction()
+        public virtual string GetAction()
         {
-            return new Object[] { };
+            return "";
         }
 
 
         public virtual void NewStateEvent()
         {
         }
-
-        public object[] GetFloatArrayAction(string action, float[] value)
-        {
-            return new object[] { action, new string[] { string.Join(" ", value) } };
-        }
-
-        public object[] GetIntAction(string action, int value)
-        {
-            return new object[] { action, new string[] { value.ToString() } };
-        }
-
-        public object[] GetFloatAction(string action, float value)
-        {
-            return new object[] { action, new string[] { value.ToString(System.Globalization.CultureInfo.InvariantCulture) } };
-        }
-
-        public object[] GetStringAction(string action, string value)
-        {
-
-            return new object[] {action, new string[] { value }};
-        }
-
-        public object[] GetBoolAction(string action, bool value)
-        {
-                return new object[] { action, new string[] { value ? "1" : "0" } };
-        }
-
-        public object[] GetByteArrayAction(string action, byte[] value)
-        {
-            return new object[] { action, new string[] { System.Convert.ToBase64String(value) }};
-        }
         
         //----------------------
         public string GetStateAsString(int i = 0)
         {
             return value[i];
+        }
+
+        public int GetStateSize()
+        {
+            return this.desc.Length;
         }
 
         public float GetStateAsFloat(int i = 0)

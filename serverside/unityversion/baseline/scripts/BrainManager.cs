@@ -8,12 +8,10 @@ namespace ai4u
     {
         public RemoteBrain[] brainList;
         public bool autoConfiguration = true;
-        public int startInputPort = 7070;
-        public int stepInputPort = 1;
-        public int startOuputPort = 8080;
-        public int stepOutputPort = 1;
-
-        public string remoteIP = "127.0.0.1";
+        public int startPort = 8080;
+        public int stepPort = 1;
+       
+        public string host = "127.0.0.1";
 
         public bool acceptRemoteConfiguration = true;
 
@@ -28,28 +26,20 @@ namespace ai4u
                 int i = 0;
                 while (i < args.Length){
                     switch (args[i]) {
-                        case "--ai4u_inputport":
-                            startInputPort = int.Parse(args[i+1]);
+                        case "--ai4u_port":
+                            startPort = int.Parse(args[i+1]);
                             i += 2;
                             break;
-                        case "--ai4u_outputport":
-                            startOuputPort = int.Parse(args[i+1]);
-                            i += 2;
-                            break;
-                        case "--ai4u_stepinputport":
-                            stepInputPort = int.Parse(args[i+1]);
-                            i += 2;
-                            break;
-                        case "--ai4u_stepoutputport":
-                            stepOutputPort = int.Parse(args[i+1]);
+                        case "--ai4u_stepport":
+                            stepPort = int.Parse(args[i+1]);
                             i += 2;
                             break;
                         case "--ai4u_timescale":
                             Time.timeScale = float.Parse(args[i+1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                             i += 2;
                             break;
-                        case "--ai4u_remoteip":
-                            remoteIP = args[i+1];
+                        case "--ai4u_host":
+                            host = args[i+1];
                             i += 2;
                             break;
                         case "--ai4u_targetframerate":
@@ -73,19 +63,18 @@ namespace ai4u
         }
 
         public void Configure() {
-            int inputPort = startInputPort;
-            int outputPort = startOuputPort;
-            int stepIn = stepInputPort;
-            int stepOut = stepOutputPort;
+            int port = startPort;
+            int step = stepPort;
 
-
+            int p = 0;
             foreach (RemoteBrain rb in brainList)
             {
-                rb.remoteIP = remoteIP;
-                rb.port = inputPort;
-                rb.remotePort = outputPort;
-                inputPort += stepIn;
-                outputPort += stepOut;
+                if (rb.ControlRequestor != null)
+                {
+                    rb.ControlRequestor.host = host;
+                    rb.ControlRequestor.port = startPort + p;
+                    p += step;
+                }
             }
         }
     }

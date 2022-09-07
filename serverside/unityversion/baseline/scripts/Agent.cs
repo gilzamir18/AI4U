@@ -18,11 +18,53 @@ namespace ai4u
         protected Brain brain;
 
         public int numberOfFields = 0;
+        
+        protected int nSteps;
         protected string[] desc;
         protected byte[] types;
         protected string[] values;
         private List<IAgentResetListener> resetListener = new List<IAgentResetListener>();
  
+
+        protected bool setupIsDone = false;
+
+        public byte[] MessageType
+        {
+            get
+            {
+                return types;
+            }
+        }
+
+        public int NSteps
+        {
+            get
+            {
+               return nSteps; 
+            }
+
+            set
+            {
+                nSteps = value;
+            }
+        }
+
+        public string[] MessageValue
+        {
+            get 
+            {
+                return values;
+            }
+        }
+
+        public string[] MessageID
+        {
+            get
+            {
+                return desc;
+            }
+        }
+
         public void AddResetListener(IAgentResetListener listener) 
         {
             resetListener.Add(listener);
@@ -36,14 +78,35 @@ namespace ai4u
             return resetListener.Remove(listener);
         }
 
+        public Brain Brain
+        {
+            get
+            {
+                return brain;
+            }
+        }
+
         /***
         This method receives client's command to apply to remote environment.
         ***/
         public virtual void ApplyAction()
         {
+        }  
+
+        public virtual void EndOfEpisode()
+        {
+
         }
 
-        public virtual void StartData()
+        public bool SetupIsDone
+        {
+            get
+            {
+                return setupIsDone;
+            }
+        }
+
+        public virtual void Setup()
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             desc = new string[numberOfFields];
@@ -170,32 +233,19 @@ namespace ai4u
         {
             return this.brain.GetReceivedCommand();
         }
-        
-        public virtual void UpdatePhysics()
-        {
-
-        }
 
         public virtual void UpdateState()
         {
         }
 
-        public void GetState()
+        public virtual void Reset()
         {
-            if (this.brain == null)
-            {
-                Debug.Log("Remote not found!");
-                return;
-            }
-            try
-            {
-                this.brain.SendMessage(desc, types, values);
-            }
-            catch (System.Exception e)
-            {
-                Debug.Log(e.Message);
-                Debug.Log(e.StackTrace);
-            }
+            nSteps = 0;
+        }
+
+        public virtual bool Alive()
+        {
+            return true;
         }
 
         public void SetBrain(Brain brain)
@@ -225,11 +275,18 @@ namespace ai4u
         public static byte FLOAT_ARRAY = 5;
         protected string receivedcmd; 
         protected string[] receivedargs;
-        public abstract void SendMessage(string[] desc, byte[] tipo, string[] valor);
 
         public Agent agent = null;
-        public bool fixedUpdate = true;
-        public bool updateStateOnUpdate = false;
+
+        public void SetReceivedCommandName(string cmdname)
+        {
+            this.receivedcmd = cmdname;
+        }
+
+        public void SetReceivedCommandArgs(string[] args)
+        {
+            this.receivedargs = args;
+        }
 
         public string GetReceivedCommand()
         {

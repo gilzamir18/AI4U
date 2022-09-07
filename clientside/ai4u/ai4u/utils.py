@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import base64
 
@@ -37,13 +36,6 @@ def image_from_str(imgstr, w, h, dtype=np.uint8):
         i += 1
     return result
 
-def get_cvimage(frame, width=84, height=84, dtype=np.uint):
-    inputdata = image_decode(frame, width, height, dtype)
-    img = cv2.imdecode(inputdata, cv2.IMREAD_COLOR)
-    img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
-    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-
 def str_as_dictlist(src, sep=";", type=str):
     objlist = src.split(sep)
     result = []
@@ -79,3 +71,25 @@ environment_definitions = {'host': '127.0.0.1', 'input_port': 8080, 'output_port
                                 "action_shape": (1, ), "state_shape": (1, ), 'min_value': -100.0, 
                                     'max_value': 100.0, 'state_type': np.float32,  'actions': [], 
                                         'action_meaning':[], 'make_inference_network': make_inference_network}
+
+def ai4ucmd_parser(cmdname, args=[]):
+    nsize = len(args)
+    cmd = ""
+    for a in args:
+        cmd += str(a) + ";"
+    command = "%s;%d;%s"%(cmdname, nsize, cmd)
+    return command
+
+def step(action, value=None):
+    if value is not None:
+        return format_ai4ucmd(action, [value])
+    else:
+        return ai4ucmd_parser(action)
+
+def stepfv(action, values):
+    strvalues = None
+    if not isinstance(values, list):
+        values = list(values)
+    strvalues = str(values)
+    strvalues = strvalues.replace(' ', '').replace(',', ' ').replace('[','').replace(']', '')
+    return ai4ucmd_parser(action, [strvalues])
