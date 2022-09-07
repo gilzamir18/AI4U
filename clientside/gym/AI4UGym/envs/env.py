@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ai4u.core import RemoteEnv
+from ai4u.agents import BasicAgent as Agent
 import threading as td
 import numpy as np
 import io
@@ -27,9 +27,12 @@ class AleWrapper:
 # This agent get a environment communication for send actions to 
 # remote environment (Unity game application) and receives data from remote environment.
 ########################################################################################
-class BasicAgent:
+class BasicAgent(Agent):
     environment_definitions = None #internal: a python dictionary with specific environment definitions.
     environment_port_id = 0 #internal: counter for automatic communication port calculation.
+
+    def __init__(self):
+        super().__init__()
 
     #Override this method in starting of the new episode.
     #param env: a communication environment.

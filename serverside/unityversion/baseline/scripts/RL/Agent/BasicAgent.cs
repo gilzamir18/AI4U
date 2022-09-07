@@ -137,7 +137,10 @@ namespace ai4u
             request.SetMessage(2, "id", ai4u.Brain.INT, id);
 
             var cmds = controlRequestor.RequestEnvControl(request);
-
+            if (cmds == null)
+            {
+                throw new System.Exception("ai4u2unity connection error!");
+            }
             foreach(Command cmd in cmds)
             {
                 if (cmd.name == "max_steps")

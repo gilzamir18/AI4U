@@ -36,7 +36,25 @@ class AI4UUDPHandler(socketserver.DatagramRequestHandler):
         # Send a message from a client
         self.wfile.write(content.encode(encoding="utf-8"))
 
-if __name__ == "__main__":
+def create_server(agent, server_IP="127.0.0.1", server_port=8080):
+    AI4UWorker.agent = agent()
+    dirs = dir(agent)
+    if  "act" in dirs  and  "handleEnvCtrl" in dirs:
+        sig = signature(agent.act)
+        sig2 = signature(agent.handleEnvCtrl)
+        if len(sig.parameters) != 2 or len(sig2.parameters) != 2:
+            print('''Error: invalid agent class signature. 
+                    Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
+            sys.exit(-1)
+    else:
+        print('''Error: invalid agent class signature. 
+                Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
+        sys.exit(-1)
+    serverAddress   = (server_IP, server_port)
+    serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
+    serverUDP.serve_forever()
+
+def main():
     n = len(sys.argv) 
     args = parser.parse_args()
     server_IP = args.host
@@ -64,9 +82,11 @@ if __name__ == "__main__":
                         Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
                 sys.exit(-1)
         except Exception as e:
-            print(e)
             print("Invalid agent module. Try <modulename>.<agentclass>!")
-            sys.exit(-1)
+            raise e
     serverAddress   = (server_IP, server_port)
     serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
     serverUDP.serve_forever()
+
+if __name__ == "__main__":
+    main()
