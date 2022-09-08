@@ -165,19 +165,18 @@ namespace ai4u
 
         void FixedUpdate()
         {
-            if (autoMode && !stoped && agent.SetupIsDone)
+            if (agent != null && autoMode && !stoped && agent.SetupIsDone)
             {
                 if (agent == null)
                 {
                     Debug.LogWarning("ControlRequest requires an Agent! Use the method 'SetAgent' of the ControlRequest" 
                                       + " component to set an agent!");
                 }
-
                 if (frameCounter < 0)
                 {
                     agent.Reset();
                 }
-                if (frameCounter < 0 || frameCounter >=  skipFrame)
+                if (frameCounter <= 0)
                 {
                     bool palive = agent.Alive();
 
@@ -190,6 +189,7 @@ namespace ai4u
                     if (CheckCmd(cmd, "__stop__"))
                     {
                         stoped = true;
+                        frameCounter = -1;
                         agent.NSteps = 0;
                         agent.Reset();
                     }
@@ -202,7 +202,7 @@ namespace ai4u
                     else
                     {
                         agent.NSteps = agent.NSteps + 1;
-                        frameCounter = 0;
+                        frameCounter = 1;
                     }
                 }
                 else
@@ -211,7 +211,31 @@ namespace ai4u
                     {
                         agent.ApplyAction();
                     }
-                    skipFrame++;
+                    frameCounter ++;
+                    if (frameCounter >= skipFrame)
+                    {
+                        frameCounter = 0;
+                    }
+                }
+            } else
+            {
+                RequestCommand request = new RequestCommand(3);
+                request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
+                request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart");
+                request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
+            
+                var cmds = RequestEnvControl(request);
+                if (cmds == null)
+                {
+                    throw new System.Exception("ai4u2unity connection error!");
+                }
+
+                if (CheckCmd(cmds, "__restart__"))
+                {
+                    frameCounter = -1;
+                    agent.NSteps = 0;
+                    stoped = false;
+                    agent.Reset();
                 }
             }
         }

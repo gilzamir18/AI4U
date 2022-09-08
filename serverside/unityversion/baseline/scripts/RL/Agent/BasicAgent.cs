@@ -5,19 +5,22 @@ using ai4u;
 
 namespace ai4u
 {
+    
 
     /// <summary>DPRLAgent - Dimentional Physical Reinforcement Learning Agent
     /// This class models an agent with physical rigidbody control in a tridimentional world. </summary> 
     [RequireComponent(typeof(ControlRequestor))]
     [RequireComponent(typeof(DoneSensor))]
     [RequireComponent(typeof(RewardSensor))]
+    [RequireComponent(typeof(StepSensor))]
+    [RequireComponent(typeof(IDSensor))]
     public class BasicAgent : Agent
     {
 
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
         public GameObject[] randomPositions;
-
+    
         ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
         ///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
@@ -36,7 +39,6 @@ namespace ai4u
 
         private bool done;
         protected float reward;
-        private int id;
         private ControlRequestor controlRequestor;
         private Dictionary<string, bool> firstTouch;
 
@@ -45,13 +47,15 @@ namespace ai4u
         private List<Actuator> actuatorList;
         private List<Sensor> sensorList;
 
+        public int rewardIndex;
+
         public int Id
         {
             get
             {
-                return id;
+                return rewardIndex;
             }
-        }
+        } 
 
         public bool Done
         {
@@ -99,6 +103,16 @@ namespace ai4u
             sensorList.Add(rewardSensor);
             sensorsMap[rewardSensor.perceptionKey] = rewardSensor;
 
+            IDSensor idSensor = GetComponent<IDSensor>();
+            idSensor.SetAgent(this);
+            sensorList.Add(idSensor);
+            sensorsMap[idSensor.perceptionKey] = idSensor;
+
+            StepSensor stepSensor = GetComponent<StepSensor>();
+            stepSensor.SetAgent(this);
+            sensorList.Add(stepSensor);
+            sensorsMap[stepSensor.perceptionKey] = stepSensor;
+
             foreach(Sensor s in sensors)
             {
                 if (s == null)
@@ -134,22 +148,12 @@ namespace ai4u
             RequestCommand request = new RequestCommand(3);
             request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
             request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
-            request.SetMessage(2, "id", ai4u.Brain.INT, id);
+            request.SetMessage(2, "id", ai4u.Brain.STR, ID);
 
             var cmds = controlRequestor.RequestEnvControl(request);
             if (cmds == null)
             {
                 throw new System.Exception("ai4u2unity connection error!");
-            }
-            foreach(Command cmd in cmds)
-            {
-                if (cmd.name == "max_steps")
-                {
-                    MaxStepsPerEpisode = ai4u.Utils.GetActionArgAsInt(cmd.args[0]);
-                } else if (cmd.name == "id")
-                {
-                    id = ai4u.Utils.GetActionArgAsInt(cmd.args[0]);
-                }
             }
             setupIsDone = true;
         }
@@ -227,6 +231,8 @@ namespace ai4u
         {
             nSteps = 0;
             reward = 0;
+            Done = false;
+    
             firstTouch = new Dictionary<string, bool>(); 
             
             transform.rotation = Quaternion.identity;

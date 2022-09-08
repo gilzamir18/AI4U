@@ -3,7 +3,6 @@ from multiprocessing import Process
 import socketserver
 from .workers import TestWorker, AI4UWorker
 import argparse
-from inspect import signature
 import importlib
 
 parser = argparse.ArgumentParser()
@@ -26,6 +25,12 @@ parser.add_argument('--agent',
                     default='ai4u.agents.BasicAgent',
                     help='user worker.'
                     )
+                
+parser.add_argument('--agent_id',
+                    default='0',
+                    help='user worker.'
+                    )
+                
 
 class AI4UUDPHandler(socketserver.DatagramRequestHandler):
     worker = AI4UWorker()
@@ -34,22 +39,16 @@ class AI4UUDPHandler(socketserver.DatagramRequestHandler):
         msgRecvd = self.rfile.read(None)
         content = AI4UUDPHandler.worker.proccess(msgRecvd)
         # Send a message from a client
-        self.wfile.write(content.encode(encoding="utf-8"))
+        if  content is not None:
+            self.wfile.write(content.encode(encoding="utf-8"))
+        else:
+            print("WARNING: returning empty message!")
+            self.wfile.write("".encode(encoding="utf-8"))
 
-def create_server(agent, server_IP="127.0.0.1", server_port=8080):
-    AI4UWorker.agent = agent()
-    dirs = dir(agent)
-    if  "act" in dirs  and  "handleEnvCtrl" in dirs:
-        sig = signature(agent.act)
-        sig2 = signature(agent.handleEnvCtrl)
-        if len(sig.parameters) != 2 or len(sig2.parameters) != 2:
-            print('''Error: invalid agent class signature. 
-                    Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
+def create_server(agents, ids, server_IP="127.0.0.1", server_port=8080):
+    for i in range(len(agents)):
+        if not AI4UWorker.register_agent(agents[i], ids[i]):
             sys.exit(-1)
-    else:
-        print('''Error: invalid agent class signature. 
-                Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
-        sys.exit(-1)
     serverAddress   = (server_IP, server_port)
     serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
     serverUDP.serve_forever()
@@ -59,7 +58,7 @@ def main():
     args = parser.parse_args()
     server_IP = args.host
     server_port = int(args.port)
-
+    id = int(args.id)
     if args.worker:
         print("--worker argument is not implemented. Use the argument --agent instead!")
         sys.exit(-1)
@@ -68,22 +67,12 @@ def main():
             names = args.agent.split('.')
             Agent = importlib.import_module('.'.join(names[0:-1]))
             Agent = getattr(Agent,  names[-1])
-            AI4UWorker.agent = Agent()
-            dirs = dir(Agent)
-            if  "act" in dirs  and  "handleEnvCtrl" in dirs:
-                sig = signature(Agent.act)
-                sig2 = signature(Agent.handleEnvCtrl)
-                if len(sig.parameters) != 2 or len(sig2.parameters) != 2:
-                    print('''Error: invalid agent class signature. 
-                            Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
-                    sys.exit(-1)
-            else:
-                print('''Error: invalid agent class signature. 
-                        Expected methods: act(self, action) and handleEnvCtrl(self, action).''')
+            if not AI4UWorker.register_agent([Agent], [id]):
                 sys.exit(-1)
         except Exception as e:
             print("Invalid agent module. Try <modulename>.<agentclass>!")
             raise e
+    
     serverAddress   = (server_IP, server_port)
     serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
     serverUDP.serve_forever()

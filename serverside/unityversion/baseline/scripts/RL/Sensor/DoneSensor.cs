@@ -17,7 +17,7 @@ namespace ai4u
         {
             perceptionKey = "done";
             type = SensorType.sbool;
-            shape = new int[0];
+            shape = new int[1]{1};
         }
 
         public override bool GetBoolValue()

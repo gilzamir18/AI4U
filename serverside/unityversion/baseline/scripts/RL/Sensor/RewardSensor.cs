@@ -15,7 +15,7 @@ namespace ai4u
         {
             perceptionKey = "reward";
             type = SensorType.sfloat;
-            shape = new int[0];
+            shape = new int[1]{1};
         }
 
         public override float GetFloatValue()

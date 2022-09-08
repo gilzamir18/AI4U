@@ -16,6 +16,7 @@ namespace ai4u
     public abstract class Agent : MonoBehaviour
     {
         protected Brain brain;
+        public string ID = "0";
 
         public int numberOfFields = 0;
         
