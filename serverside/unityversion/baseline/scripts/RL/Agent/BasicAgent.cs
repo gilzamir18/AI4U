@@ -166,6 +166,14 @@ namespace ai4u
             if (doneAtPositiveReward && v > 0) {
                 Done = true;
             }
+
+            if (from != null)
+            {
+                if (from.causeEpisodeToEnd)
+                {
+                    Done = true;
+                }
+            }
             reward += v;
         }
 
@@ -179,7 +187,10 @@ namespace ai4u
             {
                 if (!Done)
                 {
-                    actuatorList[i].Act();
+                    if (GetActionName() == actuatorList[i].actionName)
+                    {
+                        actuatorList[i].Act();
+                    }
                 }
                 else
                 {
@@ -276,7 +287,7 @@ namespace ai4u
                         var fv = s.GetFloatArrayValue();
                         if (fv == null)
                         {
-                            Debug.Log("Error: array of float sensor " + s.name + " returning null value!");
+                            Debug.LogWarning("Error: array of float sensor " + s.name + " returning null value!");
                         }
                         SetStateAsFloatArray(i, s.perceptionKey, fv);
                         break;
@@ -292,7 +303,7 @@ namespace ai4u
                         var fv4 = s.GetStringValue();
                         if (fv4 == null)
                         {
-                            Debug.Log("Error: string sensor " + s.name + " returning null value!");
+                            Debug.LogWarning("Error: string sensor " + s.name + " returning null value!");
                         }
                         SetStateAsString(i, s.perceptionKey, fv4);
                         break;
@@ -304,7 +315,7 @@ namespace ai4u
                         var fv6 = s.GetByteArrayValue();
                         if (fv6 == null)
                         {
-                            Debug.Log("Error: byte array sensor " + s.name + " returning null value!");
+                            Debug.LogWarning("Error: byte array sensor " + s.name + " returning null value!");
                         }
                         SetStateAsByteArray(i, s.perceptionKey, fv6);
                         break;

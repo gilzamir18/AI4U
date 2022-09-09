@@ -11,7 +11,7 @@ ids = ["0"]
 controllers_classes =  [SimpleController]
 controller = startasdaemon(ids, controllers_classes)[0]
 
-map = {'A': 1, 'D': 2, 'W': 3, 'S': 4, 'P': 5, 'R': 6}
+map = {'A': 1, 'D': 2, 'W': 3, 'S': 4, 'P': 5, 'R': 6, 'U': 0}
 
 state = reset("0")
 print(state)
