@@ -15,37 +15,37 @@ namespace  ai4u
 
             if (Input.GetKey(KeyCode.W))
             {
-                actionValue[2] = speed;
+                actionValue[0] = speed;
             }
 
             if (Input.GetKey(KeyCode.S))
             {
-                actionValue[2] = -speed;
+                actionValue[0] = -speed;
             }
 
             if (Input.GetKey(KeyCode.U))
             {
-                actionValue[1] = speed;
+                actionValue[2] = speed;
             }
 
             if (Input.GetKey(KeyCode.J))
             {
-                actionValue[1] = -speed;
+                actionValue[2] = -speed;
             }
 
             if (Input.GetKey(KeyCode.A))
             {
-                actionValue[0] = -speed;
+                actionValue[1] = -speed;
             }
 
             if (Input.GetKey(KeyCode.D))
             {
-                actionValue[0] = speed;
+                actionValue[1] = speed;
             }
 
             if (Input.GetKey(KeyCode.R))
             {
-                actionName = "restart";
+                actionName = "__restart__";
             }
 
             if (actionName != "restart")
@@ -54,7 +54,7 @@ namespace  ai4u
                 return ai4u.Utils.ParseAction(actionName, actionValue);
             } else
             {
-                return ai4u.Utils.ParseAction("restart");
+                return ai4u.Utils.ParseAction("__restart__");
             }
         }
 

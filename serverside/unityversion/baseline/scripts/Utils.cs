@@ -112,7 +112,7 @@ namespace ai4u
 
         public static string ParseAction(string actionName)
         {
-            return ";" + actionName + ";0;";
+            return actionName + ";0";
         }
     }
 }

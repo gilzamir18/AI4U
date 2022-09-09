@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ai4u;
@@ -169,7 +169,7 @@ namespace ai4u
             reward += v;
         }
 
-        public override void ApplyAction()
+        public override void  ApplyAction()
         {
             if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
                 Done = true;
@@ -273,22 +273,40 @@ namespace ai4u
                 switch(s.type)
                 {
                     case SensorType.sfloatarray:
-                        SetStateAsFloatArray(i, s.perceptionKey, s.GetFloatArrayValue());
+                        var fv = s.GetFloatArrayValue();
+                        if (fv == null)
+                        {
+                            Debug.Log("Error: array of float sensor " + s.name + " returning null value!");
+                        }
+                        SetStateAsFloatArray(i, s.perceptionKey, fv);
                         break;
                     case SensorType.sfloat:
-                        SetStateAsFloat(i, s.perceptionKey, s.GetFloatValue());
+                        var fv2 = s.GetFloatValue();
+                        SetStateAsFloat(i, s.perceptionKey, fv2);
                         break;
                     case SensorType.sint:
-                        SetStateAsInt(i, s.perceptionKey, s.GetIntValue());
+                        var fv3 = s.GetIntValue();
+                        SetStateAsInt(i, s.perceptionKey, fv3);
                         break;
                     case SensorType.sstring:
-                        SetStateAsString(i, s.perceptionKey, s.GetStringValue());
+                        var fv4 = s.GetStringValue();
+                        if (fv4 == null)
+                        {
+                            Debug.Log("Error: string sensor " + s.name + " returning null value!");
+                        }
+                        SetStateAsString(i, s.perceptionKey, fv4);
                         break;
                     case SensorType.sbool:
-                        SetStateAsBool(i, s.perceptionKey, s.GetBoolValue());
+                        var fv5 = s.GetBoolValue();
+                        SetStateAsBool(i, s.perceptionKey, fv5);
                         break;
                     case SensorType.sbytearray:
-                        SetStateAsByteArray(i, s.perceptionKey, s.GetByteArrayValue());
+                        var fv6 = s.GetByteArrayValue();
+                        if (fv6 == null)
+                        {
+                            Debug.Log("Error: byte array sensor " + s.name + " returning null value!");
+                        }
+                        SetStateAsByteArray(i, s.perceptionKey, fv6);
                         break;
                     default:
                         break;
