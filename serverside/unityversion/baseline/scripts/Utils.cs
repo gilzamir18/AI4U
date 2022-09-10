@@ -63,7 +63,7 @@ namespace ai4u
         }
     }
 
-    public class Utils
+    public sealed class Utils
     {
         private Utils()
         {
@@ -113,6 +113,72 @@ namespace ai4u
         public static string ParseAction(string actionName)
         {
             return actionName + ";0";
+        }
+    
+        public static string ToPythonTuple(int[] a)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("(");
+            for (int i = 0; i < a.Length; i++)
+            {
+                sb.Append(a[i]);
+                sb.Append(",");
+            }
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    public class HistoryStack<T>
+    {
+        private T[] values;
+        private int pos;
+        private int capacity;
+
+        public HistoryStack(int capacity)
+        {
+            this.capacity = capacity;
+            values = new T[capacity];
+            pos = 0;
+        }
+
+        public int Capacity
+        {
+            get 
+            {
+                return capacity;
+            }
+        }
+
+        public void Push(T item)
+        {
+            values[pos] = item;
+            pos ++;
+            if (pos >= Capacity)
+            {
+                pos = 0;
+            }
+        }
+
+        public T[] Values 
+        {
+            get
+            {
+                T[] copy = new T[capacity];
+                int k = 0;
+                int p = pos;
+                while (k < capacity)
+                {
+                    copy[k] = values[p];
+                    p++;
+                    if (p >= capacity)
+                    {
+                        p = 0;
+                    }
+                    k++;
+                }
+                return copy;
+            }
         }
     }
 }

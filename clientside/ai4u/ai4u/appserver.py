@@ -23,3 +23,13 @@ def startasdaemon(ids, controllers_classes=None, waitfor=0.1):
 
 def reset(id):
     return AI4UWorker.get_agent(id).controller.reset()
+
+def stop(id):
+    return AI4UWorker.get_agent(id).stop()
+
+def pause(id):
+    AI4UWorker.get_agent(id).pause()
+
+def resume(id):
+    return AI4UWorker.get_agent(id).resume()
+

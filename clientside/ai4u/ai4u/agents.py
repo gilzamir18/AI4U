@@ -4,13 +4,14 @@ import random
 import time
 from threading import Thread
 from .workers import AI4UWorker
+import sys
 
 class BasicController:    
     def __init__(self):
         self.initialState = None
         self.actionName = "move"
-        self.actionArgs = [0, 0, 0]
-        self.defaultActionArgs = [0, 0, 0]
+        self.actionArgs = [0, 0, 0, 0]
+        self.defaultActionArgs = [0, 0, 0, 0]
         self.lastinfo = None
         self.waitfornextstate = 0.001
         self.waitforinitialstate = 0.01
@@ -20,7 +21,7 @@ class BasicController:
         self.max_steps = 0
 
     def reset_behavior(self):
-        self.actionArgs = [0, 0, 0]
+        self.actionArgs = [0, 0, 0, 0]
 
     def reset(self):
         print("Begin Reseting....")
@@ -32,6 +33,7 @@ class BasicController:
         info = self.initialState
         self.initialState = None
         print("Reseting Ending... ", info)
+        self.paused = False
         return info
 
     def newEpisode(self, info):
@@ -42,6 +44,15 @@ class BasicController:
         self.done = True
         self.initialState = None
     
+    def stop(self):
+        self.agent.stopped = True
+
+    def pause(self):
+        self.agent.paused = True
+    
+    def resume(self):
+        self.agent.paused = False
+
     def configure(self, id, max_step):
         self.id = id
         self.max_steps = max_step
@@ -63,10 +74,15 @@ class BasicController:
         """
         self.nextstate = None
         self.step_behavior(action)
-        while not self.done and self.nextstate is None:
+        while (not self.done and self.nextstate) is None and (not self.agent.paused) and (not self.agent.stopped):
             time.sleep(self.waitfornextstate)
-        #rewards = AI4UWorker.agent.steps_reward
-        #AI4UWorker.agent.steps_reward = 0
+        if self.agent.stopped:
+            sys.exit(0)
+        elif self.agent.paused:
+            if self.actionName == '__resume__':
+                self.resume()
+                return {"paused": False}, 0, False, {'paused': False}
+            return {'paused': True}, 0, False, {'paused': True}
         state = self.nextstate
         if not state:
             state = self.agent.lastinfo
@@ -78,6 +94,12 @@ class BasicController:
         """
         self.lastinfo = info.copy()
         self.nextstate = info.copy()
+        if (self.actionName == '__pause__') and not self.agent.paused:
+            return self.agent.pause() #environment is in action mode
+        elif (self.actionName == '__resume__') and self.agent.paused:
+            return self.resume() #environment is in envcontrolmode 
+        elif (self.actionName == '__stop__'):
+            return self.agent.stop()
         action = stepfv(self.actionName,  self.actionArgs)
         self.actionArgs = self.defaultActionArgs.copy()
         return action
@@ -96,11 +118,15 @@ class BasicAgent:
         self.controller = BasicController()
         self.newInfo = True
         self.lastinfo = None
+        self.stopped = False
+        self.paused = False
 
     def stop(self): 
         """
         Stop agent simulation in Unity.
         """
+        self.stopped = True
+        self.paused = False
         return step("__stop__")
 
     def restart(self):
@@ -108,7 +134,23 @@ class BasicAgent:
         Restart agent simulation in Unity.
         """
         self.lastinfo = None
+        self.stopped = False
+        self.paused = False
         return step("__restart__")
+    
+    def pause(self):
+        """
+        Pause agent simulation in Unity.
+        """
+        self.paused = True
+        return step("__pause__")
+    
+    def resume(self):
+        """
+        Resume agent simulation in Unity.
+        """
+        self.paused = False
+        return step("__resume__")
 
     def endOfEpisode(self):
         """
@@ -139,6 +181,13 @@ class BasicAgent:
             self.createANewEpisode = False
             self.newInfo = True
             return self.restart()
+        
+        if self.paused:
+            return self.pause()
+
+        if  self.stopped:
+            return self.stop()
+
         if info['done']:
             if self.controller:
                 t = Thread(target=self.controller.endOfEpisode, args=[info])
@@ -165,5 +214,7 @@ class BasicAgent:
                 self.createANewEpisode = False
                 self.newInfo = True
                 return self.restart()
-        return stepfv('noop', [0])
+            if self.paused == False:
+                return self.resume()
+        return stepfv('__noop__', [0])
     

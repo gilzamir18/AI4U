@@ -29,6 +29,8 @@ namespace ai4u
         ///<summary>The maximum number of steps per episode.</summary>
         public int MaxStepsPerEpisode = 0;
 
+        public bool childrenSensors = true;
+
         //Agent's ridid body
         private Rigidbody rBody;
 
@@ -48,6 +50,9 @@ namespace ai4u
         private List<Sensor> sensorList;
 
         public int rewardIndex;
+
+        private int numberOfSensors = 0;
+        private int numberOfActuators = 0;
 
         public int Id
         {
@@ -112,16 +117,35 @@ namespace ai4u
             stepSensor.SetAgent(this);
             sensorList.Add(stepSensor);
             sensorsMap[stepSensor.perceptionKey] = stepSensor;
+            numberOfSensors = 4;
+
+            if (childrenSensors)
+            {
+                for (int i = 0; i < transform.childCount; i++) 
+                {
+                    GameObject obj = transform.GetChild(i).gameObject;
+                    Sensor s = obj.GetComponent<Sensor>();
+                    if (s != null && s.isActive)
+                    {
+                        sensorList.Add(s);
+                        numberOfSensors++;
+                        sensorsMap[s.perceptionKey] = s;
+                    }
+                }
+            }
+
 
             foreach(Sensor s in sensors)
             {
                 if (s == null)
                 {
                     Debug.LogWarning("Sensor is null!!! Set a valid sensor in agent's sensor list!");
+                } else if (s.isActive)
+                {
+                    s.SetAgent(this);
+                    sensorList.Add(s);
+                    sensorsMap[s.perceptionKey] = s;
                 }
-                s.SetAgent(this);
-                sensorList.Add(s);
-                sensorsMap[s.perceptionKey] = s;
             }
 
             if (actuators.Length == 0) {
@@ -133,6 +157,7 @@ namespace ai4u
                     Debug.LogWarning("Actuator is null!!! Set a valid actuator in agent's actuators list!");
                 }
                 actuatorList.Add(a);
+                numberOfActuators++;
             }
 
             rBody = GetComponent<Rigidbody>();
@@ -156,6 +181,10 @@ namespace ai4u
                 throw new System.Exception("ai4u2unity connection error!");
             }
             setupIsDone = true;
+            foreach (Sensor sensor in sensorList)
+            {
+                sensor.OnSetup(this);
+            }
         }
 
         public virtual void AddReward(float v, RewardFunc from = null){

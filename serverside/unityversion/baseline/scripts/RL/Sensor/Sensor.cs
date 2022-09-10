@@ -20,12 +20,22 @@ namespace ai4u
         public SensorType type;
         public bool isState;
         public int[] shape;
+        [Tooltip("The maximum number of observations to be appended to this sensor.")]
+        public int stackedObservations = 1;
+        [Tooltip("If active, the sensor is processed and sent to the controller, otherwise it is as if it does not exist.")]
+        public bool isActive = true;
+        [Tooltip("Determines whether observation data must be transformed to stay within a certain range before being sent to the controller.")]
+        public bool  normalized = true;
 
         protected BasicAgent agent;
 
         public void SetAgent(BasicAgent own)
         {
             agent = own;
+        }
+
+        public virtual void OnSetup(Agent agent)
+        {
         }
 
         public virtual float GetFloatValue() {

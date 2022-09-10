@@ -30,18 +30,20 @@ namespace ai4u
 
         public int receiveTimeout = 10;
 
-        ///<summary>If autoMode is True, ControlRequestor runs itself according to 'Skip Frame' and 'Repeat Action' attributes.</summary>
-        public bool autoMode = true;
-
         public int skipFrame = 0;
         public bool repeatAction = false;
+
+        public bool waitControllerResponse = false;
+        public float defaultTimeScale = 1.0f; 
+
 
         private IPAddress serverAddr; //controller address
         private EndPoint endPoint; //controller endpoint
         private Socket sockToSend; //Socket to send async message.
         private int frameCounter = -1;
         private Agent agent;
-        private bool stoped = false;
+        private bool paused = false;
+    
 
         public void SetAgent(Agent agent)
         {
@@ -51,6 +53,7 @@ namespace ai4u
         // Start is called before the first frame update
         void Awake()
         {
+            paused = false;
             frameCounter = -1;
             sockToSend = TrySocket();
         }
@@ -165,7 +168,7 @@ namespace ai4u
 
         void FixedUpdate()
         {
-            if (agent != null && autoMode && !stoped && agent.SetupIsDone)
+            if (agent != null && !paused && agent.SetupIsDone)
             {
                 if (agent == null)
                 {
@@ -186,18 +189,24 @@ namespace ai4u
                     {
                         agent.EndOfEpisode();
                     }
+                    
                     if (CheckCmd(cmd, "__stop__"))
                     {
-                        stoped = true;
-                        frameCounter = -1;
-                        agent.NSteps = 0;
-                        agent.Reset();
+                        #if UNITY_EDITOR
+                            EditorApplication.isPlaying = false;
+                        #endif
+                        Application.Quit();
                     }
                     else if (CheckCmd(cmd, "__restart__"))
                     {
                         frameCounter = -1;
                         agent.NSteps = 0;
+                        paused = false;
                         agent.Reset();
+                    }
+                    else if (CheckCmd(cmd, "__pause__"))
+                    {
+                        paused = true;
                     }
                     else
                     {
@@ -221,7 +230,7 @@ namespace ai4u
             {
                 RequestCommand request = new RequestCommand(3);
                 request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-                request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart");
+                request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
                 request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
             
                 var cmds = RequestEnvControl(request);
@@ -234,8 +243,11 @@ namespace ai4u
                 {
                     frameCounter = -1;
                     agent.NSteps = 0;
-                    stoped = false;
+                    paused = false;
                     agent.Reset();
+                } else if (CheckCmd(cmds, "__resume__"))
+                {
+                    paused = false;
                 }
             }
         }
@@ -286,15 +298,24 @@ namespace ai4u
             total = 0;
             try 
             {
+                if (waitControllerResponse)
+                {
+                    Time.timeScale = 0;
+                } 
                 total = sockToSend.Receive(received);
+                if (waitControllerResponse)
+                {
+                    Time.timeScale = defaultTimeScale;
+                } 
                 return true;
             }
             catch(System.Exception e)
             {
                 Debug.LogWarning("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
-                 #if UNITY_EDITOR
-                EditorApplication.isPlaying = false;
+                #if UNITY_EDITOR
+                    EditorApplication.isPlaying = false;
                 #endif
+                Application.Quit();
                 return false;
             }
         }
