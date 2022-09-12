@@ -16,5 +16,7 @@ amap = {'A': [0, -1, 0, 0], 'D': [0, 1, 0, 0], 'W': [1, 0, 0, 0], 'S': [0, -1, 0
 while  not done:
     action = input("action: ")
     action = amap[action.upper()]
-    state = env.step(action)
-    print(state)
+    if type(action) is not str:
+        state, reward, done, info = env.step(action)
+    else:
+        env.step(action)

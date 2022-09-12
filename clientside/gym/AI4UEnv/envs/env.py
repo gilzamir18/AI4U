@@ -27,13 +27,13 @@ class GenericEnvironment(gym.Env):
     self.observation_space = self.controller.observation_space
 
   def step(self, action):
-    return self.controller.toGymState(self.controller.step(action))
+    return self.controller.get_state(self.controller.request_step(action))
 
   def seed(self, seed=0):
     self.controller.seed(seed)
 
   def reset(self):
-    return self.controller.toGymState(self.controller.reset())
+    return self.controller.request_reset()
   
   def render(self, mode='human'):
     return self.controller.render()

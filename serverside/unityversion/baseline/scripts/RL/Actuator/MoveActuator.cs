@@ -17,6 +17,14 @@ namespace ai4u {
 
         private bool onGround = false;
 
+        public bool OnGround
+        {
+            get
+            {
+                return onGround;
+            }
+        }
+
         public override void Act()
         {
             if (!agent.Done)
@@ -41,7 +49,7 @@ namespace ai4u {
                         onGround = true;
                     }
 
-                    Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount * Time.fixedDeltaTime);
+                    Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
                     rBody.MoveRotation(rBody.rotation * deltaRotation);
                     if (onGround)
                     {

@@ -27,15 +27,18 @@ namespace ai4u
         public float fieldOfView = 90.0f;
         public float visionMaxDistance = 500f;
         public bool returnDepthMatrix = false;
+        public int vSize = 10;
+        public int hSize = 10;
 
         private Dictionary<string, int> mapping;
         private Ray[,] raysMatrix = null;
         private Vector3 fw1 = new Vector3(), fw2 = new Vector3();
         private HistoryStack<float> stack;
 
-
         public override void OnSetup(Agent agent)
         {
+            type = SensorType.sfloatarray;
+            shape = new int[2]{hSize,  vSize};
             stack = new HistoryStack<float>(stackedObservations * shape[0] * shape[1]);
             agent.AddResetListener(this);
             mapping = new Dictionary<string, int>();

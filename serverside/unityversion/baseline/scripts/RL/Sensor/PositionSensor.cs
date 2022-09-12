@@ -31,8 +31,9 @@ namespace ai4u
 
         public override void OnSetup(Agent agent)
         {
+            this.type = SensorType.sfloatarray;
+            this.shape = new int[1]{3};
             this.agent = (BasicAgent) agent;
-            agent.AddResetListener(this);
             stack = new HistoryStack<float>(3 * stackedObservations);
         }
 

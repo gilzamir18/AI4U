@@ -7,35 +7,41 @@ namespace  ai4u
     public class TouchRewardFunc : RewardFunc
     {
         public int maxTouch = -1;
-
         public float painForOverTouch = 0;
-
         public float painForViolatinPrecondition = 0;
-
         public float rewardValue = 1.0f;
-
         public TouchRewardFunc precondition = null;
         public MultTouchPrecondition multiplePreconditions = null;
         public bool triggerOnStay = true;
-        private int[] counter;
-        private bool[] touched;
-        private Collider myCollider;
         public bool allowNext;
+        public GameObject target;
 
-        void Awake() {
+        private int counter;
+        private bool touched;
+        private Collider myCollider;
+        private float acmReward = 0.0f;
+        private BasicAgent agent;
 
-            if (agents.Length==0) {
-                Debug.LogWarning("TouchRewardFunc: no agents added for this event. Game Object: " + gameObject.name);
+        public override void OnSetup(Agent agent) {
+            this.agent = (BasicAgent) agent;
+            counter = 0;
+            touched = false;
+            acmReward = 0;
+            if (target == null)
+            {
+                target = gameObject;
             }
+            myCollider = target.GetComponent<Collider>();
+            agent.AddResetListener(this);
+        }
 
-            counter = new int[agents.Length];
-            touched = new bool[agents.Length];
-            myCollider = GetComponent<Collider>();
-            foreach(Agent agent in agents) {
-                if (agent == null) {
-                    Debug.LogWarning("TouchRewardFunc: You have not defined the agent that will receive this event. Game Object: " + gameObject.name);
-                }
-                agent.AddResetListener(this);
+
+        public override void OnUpdate() 
+        {
+            if (acmReward != 0)
+            {
+                agent.AddReward(acmReward, this);
+                acmReward = 0;
             }
         }
 
@@ -64,19 +70,19 @@ namespace  ai4u
         }
 
         public bool wasTouched(BasicAgent agent) {
-            return touched[agent.Id];
+            return touched;
         }
 
         public override void OnReset(Agent agent) {
-            counter = new int[agents.Length];
-            touched = new bool[agents.Length];
+            counter = 0;
+            touched = false;
+            acmReward = 0;
         }
 
         public void Check(Collider collider)
         {
-            BasicAgent agent = collider.gameObject.GetComponent<BasicAgent>();
-            if (agent != null) {
-                touched[agent.Id] = true;
+            if (agent.gameObject.GetComponent<Collider>() == collider) {
+                touched = true;
                 agent.touchListener(this);  
 
                 if (precondition != null) {
@@ -97,13 +103,12 @@ namespace  ai4u
                     }
                 }
 
-                if ( (counter[agent.Id] <
-                    maxTouch) || (maxTouch < 0)  )
+                if ( (counter < maxTouch) || (maxTouch < 0)  )
                 {
-                    counter[agent.Id]++;
-                    agent.AddReward(rewardValue, this);
-                } else if (maxTouch >= 0 && counter[agent.Id] >= maxTouch) {
-                    agent.AddReward(-painForOverTouch, this);
+                    counter++;
+                    acmReward += rewardValue;
+                } else if (maxTouch >= 0 && counter >= maxTouch) {
+                    acmReward -= painForOverTouch;
                 }
             }
         }

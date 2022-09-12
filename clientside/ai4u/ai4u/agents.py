@@ -19,41 +19,48 @@ class BasicController:
         self.agent = None
         self.id = 0
         self.max_steps = 0
+        self.newaction = False
 
-    def reset_behavior(self):
+    def reset_behavior(self, info):
         self.actionArgs = [0, 0, 0, 0]
-
-    def reset(self):
-        print("Begin Reseting....")
-        self.reset_behavior()
-        self.done = False
-        self.agent.createANewEpisode = True
-        while self.initialState is None:
-            time.sleep(self.waitforinitialstate)
-        info = self.initialState
-        self.initialState = None
-        print("Reseting Ending... ", info)
-        self.paused = False
         return info
 
-    def newEpisode(self, info):
+    def request_reset(self):
+        #print("Begin Reseting....")
+        self.agent.createANewEpisode = True
+        self.newaction = True
+        while self.initialState is None:
+            time.sleep(self.waitforinitialstate)
+            self.agent.createANewEpisode = True
+        self.done = False
+        info = self.initialState
+        self.initialState = None
+        #print("Reseting Ending... ", info)
+        self.paused = False
+        return self.reset_behavior(info)
+
+    def handleNewEpisode(self, info):
         self.initialState = info
 
-    def endOfEpisode(self, info):
+    def handleEndOfEpisode():
+        pass
+
+    def _endOfEpisode(self, info):
+        self.handleEndOfEpisode(info)
         self.nextstate = info
         self.done = True
         self.initialState = None
     
     def stop(self):
-        self.agent.stopped = True
+        self.agent.request_stop()
 
     def pause(self):
-        self.agent.paused = True
+        self.agent.request_pause()
     
     def resume(self):
-        self.agent.paused = False
+        self.agent.request_resume()
 
-    def configure(self, id, max_step):
+    def handleConfiguration(self, id, max_step):
         self.id = id
         self.max_steps = max_step
 
@@ -65,8 +72,7 @@ class BasicController:
         self.actionName = "move"
         self.actionArgs = [random.choice([0, 500]), 0, random.choice([0, 500])]
         
-
-    def step(self, action):
+    def request_step(self, action):
         """
         This method change environment state under action named 'action'.
         Never override this method. If you want change step behavior,
@@ -74,11 +80,10 @@ class BasicController:
         """
         self.nextstate = None
         self.step_behavior(action)
-        while (not self.done and self.nextstate) is None and (not self.agent.paused) and (not self.agent.stopped):
+        self.newaction = True
+        while (not self.done) and (self.nextstate is None) and (not self.agent.paused):
             time.sleep(self.waitfornextstate)
-        if self.agent.stopped:
-            sys.exit(0)
-        elif self.agent.paused:
+        if self.agent.paused:
             if self.actionName == '__resume__':
                 self.resume()
                 return {"paused": False}, 0, False, {'paused': False}
@@ -93,23 +98,27 @@ class BasicController:
         Return a new action based in new info 'info'.
         """
         self.lastinfo = info.copy()
-        self.nextstate = info.copy()
         if (self.actionName == '__pause__') and not self.agent.paused:
-            return self.agent.pause() #environment is in action mode
+            return self.agent._pause() #environment is in action mode
         elif (self.actionName == '__resume__') and self.agent.paused:
-            return self.resume() #environment is in envcontrolmode 
+            return self.agent._resume() #environment is in envcontrolmode 
         elif (self.actionName == '__stop__'):
-            return self.agent.stop()
+            return self.agent._stop()
+        self.nextstate = info.copy()
         action = stepfv(self.actionName,  self.actionArgs)
-        self.actionArgs = self.defaultActionArgs.copy()
-        return action
+        if self.newaction:
+            self.actionArgs = self.defaultActionArgs.copy()
+            self.newaction = False
+            return action
+        else:
+            return step("__waitnewaction__")
 
 class BasicAgent:
     rl_env_control = {
         'max_steps': 1000,
         'agent_id': 0
     }
-    
+
     def __init__(self):
         self.max_step = 0
         self.id = 0
@@ -121,7 +130,26 @@ class BasicAgent:
         self.stopped = False
         self.paused = False
 
-    def stop(self): 
+
+    def request_stop(self):
+        self.stopped = True
+    
+    def request_pause(self):
+        if not self.stopped:
+            self.paused = True
+
+    def request_newepisode(self):
+        self.createANewEpisode = True
+    
+    def request_restart(self):
+        if self.stopped:
+            self.stopped = False
+    
+    def request_resume(self):
+        if self.paused and not self.stopped:
+            self.paused = False
+
+    def _stop(self): 
         """
         Stop agent simulation in Unity.
         """
@@ -129,7 +157,7 @@ class BasicAgent:
         self.paused = False
         return step("__stop__")
 
-    def restart(self):
+    def _restart(self):
         """
         Restart agent simulation in Unity.
         """
@@ -138,65 +166,48 @@ class BasicAgent:
         self.paused = False
         return step("__restart__")
     
-    def pause(self):
+    def _pause(self):
         """
         Pause agent simulation in Unity.
         """
         self.paused = True
         return step("__pause__")
     
-    def resume(self):
+    def _resume(self):
         """
         Resume agent simulation in Unity.
         """
         self.paused = False
         return step("__resume__")
 
-    def endOfEpisode(self):
-        """
-        Callback function for end of episode detected in Unity environment.
-        """
-        return self.stop() #by default, end simulation
-
-    def step(self, info):
-        """
-        Callback function that returns an action. Use methdos stepfv or step
-        from ai4u.utils to format an action.
-        """
-        assert info['id'] == self.id, "Error: inconsistent agent identification!"
-        if (self.controller):
-            return self.controller.getaction(info)
-        else:
-            return stepfv( 'move', [random.choice([0, 30]), 0, random.choice([0, 30])] )
+    def _step(self, info):
+        assert info['id'] == self.id, "Error: inconsistent agent identification!"       
+        return self.__get_controller().getaction(info)
 
     def act(self, info):
         if self.newInfo:
             self.lastinfo = None
-            if self.controller:
-                t = Thread(target=self.controller.newEpisode, args=[info])
-                t.start()
+            self.__get_controller().handleNewEpisode(info)
             self.newInfo = False
 
         if self.createANewEpisode:
             self.createANewEpisode = False
             self.newInfo = True
-            return self.restart()
+            return self._restart()
         
         if self.paused:
-            return self.pause()
+            return self._pause()
 
         if  self.stopped:
-            return self.stop()
+            return self._stop()
 
         if info['done']:
-            if self.controller:
-                t = Thread(target=self.controller.endOfEpisode, args=[info])
-                t.start()
+            self.__get_controller()._endOfEpisode(info)
             self.newInfo = True
             self.lastinfo = info
-            return self.endOfEpisode()
+            return self._stop()
         self.steps = self.steps + 1
-        return self.step(info)
+        return self._step(info)
 
     def handleEnvCtrl(self, a):
         if 'config' in a:
@@ -205,16 +216,24 @@ class BasicAgent:
             control = []
             control.append(stepfv('max_steps', [self.max_steps]))
             control.append(stepfv('id', [self.id]))
-            if self.controller:
-                t = Thread(target=self.controller.configure, args=[self.id, self.max_step])
-                t.start()
+            self.__get_controller().handleConfiguration(self.id, self.max_step)
             return ("@".join(control))
         if 'wait_command' in a:
             if self.createANewEpisode:
                 self.createANewEpisode = False
                 self.newInfo = True
-                return self.restart()
+                return self._restart()
             if self.paused == False:
-                return self.resume()
+                return self._resume()
+            elif self.stopped == false:
+                self.createANewEpisode = False
+                self.newInfo = True
+                return self._restart()
         return stepfv('__noop__', [0])
-    
+
+    def __get_controller(self):
+        if (self.controller):
+            return self.controller
+        else:
+            print("ERROR(agents.py): agent without controller!")
+            sys.exit(0)

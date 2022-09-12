@@ -6,7 +6,6 @@ using ai4u;
 namespace ai4u
 {
     
-
     /// <summary>DPRLAgent - Dimentional Physical Reinforcement Learning Agent
     /// This class models an agent with physical rigidbody control in a tridimentional world. </summary> 
     [RequireComponent(typeof(ControlRequestor))]
@@ -16,51 +15,32 @@ namespace ai4u
     [RequireComponent(typeof(IDSensor))]
     public class BasicAgent : Agent
     {
-
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
         public GameObject[] randomPositions;
-    
         ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
         ///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
         public bool doneAtPositiveReward = false;
-        
         ///<summary>The maximum number of steps per episode.</summary>
         public int MaxStepsPerEpisode = 0;
-
         public bool childrenSensors = true;
+        public Sensor[] sensors;
+        public Actuator[]  actuators;
+        public List<RewardFunc> rewards;
 
         //Agent's ridid body
         private Rigidbody rBody;
-
-        public Sensor[] sensors;
-        public Actuator[]  actuators;
-
         private Vector3 initialLocalPosition;
-
         private bool done;
         protected float reward;
         private ControlRequestor controlRequestor;
         private Dictionary<string, bool> firstTouch;
-
         private Dictionary<string, Sensor> sensorsMap;
-
         private List<Actuator> actuatorList;
         private List<Sensor> sensorList;
-
-        public int rewardIndex;
-
         private int numberOfSensors = 0;
         private int numberOfActuators = 0;
-
-        public int Id
-        {
-            get
-            {
-                return rewardIndex;
-            }
-        } 
 
         public bool Done
         {
@@ -90,13 +70,13 @@ namespace ai4u
             controlRequestor = GetComponent<ControlRequestor>();
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
-            if (sensors.Length == 0) {
-                Debug.LogWarning("Agent without sensors. Add at least one sensor for this agent to be able to perceive the world! GameObject: " + gameObject.name);
-            }
-
             actuatorList = new List<Actuator>();
             sensorList = new List<Sensor>();
             sensorsMap = new Dictionary<string, Sensor>();
+            if (rewards == null)
+            {
+                rewards = new List<RewardFunc>();
+            }
 
             DoneSensor doneSensor = GetComponent<DoneSensor>();
             doneSensor.SetAgent(this);
@@ -119,11 +99,12 @@ namespace ai4u
             sensorsMap[stepSensor.perceptionKey] = stepSensor;
             numberOfSensors = 4;
 
-            if (childrenSensors)
+            for (int i = 0; i < transform.childCount; i++) 
             {
-                for (int i = 0; i < transform.childCount; i++) 
+                GameObject obj = transform.GetChild(i).gameObject;
+                
+                if (childrenSensors)
                 {
-                    GameObject obj = transform.GetChild(i).gameObject;
                     Sensor s = obj.GetComponent<Sensor>();
                     if (s != null && s.isActive)
                     {
@@ -132,8 +113,25 @@ namespace ai4u
                         sensorsMap[s.perceptionKey] = s;
                     }
                 }
+
+                RewardFunc r = obj.GetComponent<RewardFunc>();
+                if ( r != null)
+                {
+                    rewards.Add(r);
+                }
             }
 
+            foreach(RewardFunc r in rewards)
+            {
+                if (r == null)
+                {
+                    Debug.LogWarning("You add a null reward func for agent " + ID + "! Fix it!");
+                }
+                else
+                {
+                    r.OnSetup(this);
+                }
+            }
 
             foreach(Sensor s in sensors)
             {
@@ -148,9 +146,10 @@ namespace ai4u
                 }
             }
 
-            if (actuators.Length == 0) {
-                Debug.LogWarning("Agent without actuators. Add at least one actuator for this agent to be able to change the world! GameObject: " + gameObject.name);
+            if (sensorList.Count == 0) {
+                Debug.LogWarning("Agent without sensors. Add at least one sensor for this agent to be able to perceive the world! GameObject: " + gameObject.name);
             }
+            
             foreach(Actuator a in actuators) {
                 if (a == null)
                 {
@@ -158,6 +157,10 @@ namespace ai4u
                 }
                 actuatorList.Add(a);
                 numberOfActuators++;
+            }
+
+            if (actuatorList.Count == 0) {
+                Debug.LogWarning("Agent without actuators. Add at least one actuator for this agent to be able to change the world! GameObject: " + gameObject.name);
             }
 
             rBody = GetComponent<Rigidbody>();
@@ -183,6 +186,10 @@ namespace ai4u
             setupIsDone = true;
             foreach (Sensor sensor in sensorList)
             {
+                if (sensor.resetable)
+                {
+                    AddResetListener(sensor);
+                }
                 sensor.OnSetup(this);
             }
         }
@@ -267,6 +274,11 @@ namespace ai4u
             }
         }
 
+        public void ResetReward()
+        {
+            reward = 0;
+        }
+
         private void ResetPlayer()
         {
             nSteps = 0;
@@ -302,6 +314,16 @@ namespace ai4u
             get
             {
                 return reward;
+            }
+        }
+        
+        public void UpdateReward()
+        {
+            int n = rewards.Count;
+
+            for (int i = 0; i < n; i++)
+            {
+                rewards[i].OnUpdate();
             }
         }
 
@@ -352,7 +374,6 @@ namespace ai4u
                         break;
                 }
             }
-            reward = 0;
         }
     }
 }

@@ -1,11 +1,15 @@
 ![Running example ballroller](doc/images/ai4u1.PNG)
 
 
-# What is AI4U?
-AI4U is a multi-engine plugin (Godot and Unity) that allows you designing Non-Player Characters (NPCs) of games using a agent abstraction. In addition, AI4U has a low-level API that allows you to connect the agent to any algorithm made available in Python by the reinforcement learning community specifically and by the Articial Intelligence community in general. Reiforcement learning promises overcome tradicional navigation mesh mechanism in games and to provide more autonomous characters.
+# What is AI4U Connect?
+AI4U Connect is the backbone infrastructure for various flavors of AI4U. AI4U is separated into several subprojects. The AI4USB3 project, for example, is a full integration with the stable-baselines3 framework. AI4U Connect is the foundation on which many other projects are built.
 
-# News
-AI4U is in alpha stage. We are refactoring it for a more flexible and robust API. First, let's refactor the Unity version of this API and then the Godot version. If you want to help and speed up the development of this API, please contact me (gilzamir@outlook.com).
+AI4U Connect's role is to connect third-party applications to Unity through the Python language and providing an agent abstraction.
+
+Also, AI4U supports Godot and Unity. We are currently focused on refactoring an old, clunky API into a more robust simplified version to work smoothly with Unity. Then we will implement this new version in Godot.
+
+# Warning
+Currently, AI4U Connect is under intense development. The API is not yet stable. We hope to soon stabilize the API.
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir@ufc.alu.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).

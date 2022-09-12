@@ -43,7 +43,8 @@ namespace ai4u
         private int frameCounter = -1;
         private Agent agent;
         private bool paused = false;
-    
+        private bool stopped = false;
+        private bool applyingAction = false;
 
         public void SetAgent(Agent agent)
         {
@@ -54,8 +55,10 @@ namespace ai4u
         void Awake()
         {
             paused = false;
+            stopped = false;
             frameCounter = -1;
             sockToSend = TrySocket();
+            applyingAction = false;
         }
 
         public Socket TrySocket()
@@ -77,8 +80,6 @@ namespace ai4u
                 sockToSend.Close();
             }
         }
-
-
 
         public Command[] RequestEnvControl(RequestCommand request)
         {
@@ -111,6 +112,7 @@ namespace ai4u
             }
             else
             {
+
                 cmdstr = SendMessageFrom(agent.MessageID, agent.MessageType, agent.MessageValue);
             }
 
@@ -121,7 +123,6 @@ namespace ai4u
                 {
                     agent.Brain.SetReceivedCommandName(cmd.name);
                     agent.Brain.SetReceivedCommandArgs(cmd.args);
-                    agent.ApplyAction();
                 }
                 return cmds;
             }
@@ -168,7 +169,11 @@ namespace ai4u
 
         void FixedUpdate()
         {
-            if (agent != null && !paused && agent.SetupIsDone)
+            if (!agent.SetupIsDone)
+            {
+                return;
+            }
+            if (agent != null && !stopped && !paused)
             {
                 if (agent == null)
                 {
@@ -179,7 +184,7 @@ namespace ai4u
                 {
                     agent.Reset();
                 }
-                if (frameCounter <= 0)
+                if (!applyingAction)
                 {
                     bool palive = agent.Alive();
 
@@ -187,31 +192,41 @@ namespace ai4u
 
                     if (palive  && !agent.Alive())
                     {
+                        applyingAction = false;
                         agent.EndOfEpisode();
                     }
-                    
-                    if (CheckCmd(cmd, "__stop__"))
+
+                    if (CheckCmd(cmd, "__waitnewaction__"))
                     {
-                        #if UNITY_EDITOR
-                            EditorApplication.isPlaying = false;
-                        #endif
-                        Application.Quit();
+                        //TODO something about this..
+                    }
+                    else if (CheckCmd(cmd, "__stop__"))
+                    {
+                        stopped = true;
+                        applyingAction = false;
+                        frameCounter = -1;
+                        agent.NSteps = 0;
+                        agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__restart__"))
                     {
                         frameCounter = -1;
                         agent.NSteps = 0;
+                        applyingAction = false;
                         paused = false;
                         agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__pause__"))
                     {
+                        applyingAction = false;
                         paused = true;
                     }
                     else
                     {
-                        agent.NSteps = agent.NSteps + 1;
+                        applyingAction = true;
                         frameCounter = 1;
+                        ((BasicAgent)agent).ResetReward();
+                        agent.ApplyAction();
                     }
                 }
                 else
@@ -223,7 +238,10 @@ namespace ai4u
                     frameCounter ++;
                     if (frameCounter >= skipFrame)
                     {
+                        ((BasicAgent)agent).UpdateReward();
                         frameCounter = 0;
+                        applyingAction = false;
+                        agent.NSteps = agent.NSteps + 1;
                     }
                 }
             } else
@@ -244,6 +262,7 @@ namespace ai4u
                     frameCounter = -1;
                     agent.NSteps = 0;
                     paused = false;
+                    stopped = false;
                     agent.Reset();
                 } else if (CheckCmd(cmds, "__resume__"))
                 {

@@ -10,21 +10,29 @@ namespace ai4u
         public float rewardValue = 1.0f;
         public bool checkInside = true;
         public bool triggerOnStay = true;
+        public GameObject target;
 
         public bool triggerOnExit = false;
-
-        private int[] counter;
+        private float acmReward = 0.0f;
+        private int counter;
         private Collider myCollider;
 
-        void Awake() {
-            counter = new int[agents.Length]; 
-            myCollider = GetComponent<Collider>();
-            foreach(Agent agent in agents) {
-                agent.AddResetListener(this);
+        private BasicAgent agent;
+
+        public override void OnSetup(Agent agent) 
+        {
+            this.agent = (BasicAgent) agent;
+            counter = 0; 
+            if (target == null)
+            {
+                target = gameObject;
             }
+            myCollider = target.GetComponent<Collider>();
+            agent.AddResetListener(this);
             if (triggerOnStay) {
                 triggerOnExit = false;
             }
+            acmReward = 0;
         }
 
         void OnTriggerStay(Collider collider) {
@@ -42,9 +50,8 @@ namespace ai4u
 
         void OnTriggerExit(Collider collider) {
             if (triggerOnExit) {
-                BasicAgent agent = collider.gameObject.GetComponent<BasicAgent>();
                 agent.boxListener(this);
-                counter[agent.Id]++;
+                counter++;
                 agent.AddReward(rewardValue, this);
             }
         }
@@ -64,22 +71,30 @@ namespace ai4u
 
         void OnCollisionExit(Collision other) {
             if (triggerOnExit) {
-                BasicAgent agent = other.gameObject.GetComponent<BasicAgent>();
                 agent.boxListener(this);
-                counter[agent.Id]++;
+                counter++;
                 agent.AddReward(rewardValue, this);
             }
         }
 
+        public override void OnUpdate()
+        {
+            if (acmReward != 0)
+            {
+                agent.AddReward(acmReward, this);
+                acmReward = 0;
+            }
+        }
+
         public override void OnReset(Agent agent) {
-            counter = new int[agents.Length]; 
+            counter = 0; 
+            acmReward = 0;
         }
 
         private void Check(Collider collider)
         {
-            BasicAgent agent = collider.gameObject.GetComponent<BasicAgent>();
             agent.boxListener(this);
-            if ( counter[agent.Id] < maxNumberOfTheRewards || maxNumberOfTheRewards < 0  )
+            if ( counter < maxNumberOfTheRewards || maxNumberOfTheRewards < 0  )
             {
                 if (checkInside)
                 {
@@ -88,12 +103,12 @@ namespace ai4u
                     int idx = System.Array.IndexOf(colliders, collider);
                     if (idx >= 0)
                     {
-                        counter[agent.Id]++;
-                        agent.AddReward(rewardValue, this);
+                        counter++;
+                        acmReward += rewardValue;
                     }
                 } else  {
-                    counter[agent.Id]++;
-                    agent.AddReward(rewardValue, this);
+                    counter++;
+                    acmReward += rewardValue;
                 }
             }
         }

@@ -3,36 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace ai4u {
-    public class TargetDiscrepancySensor : Sensor
+    public class OrientationSensor : Sensor
     {
         public GameObject target;
         public GameObject reference = null;
+        public float maxDistance = 100;
 
-        void Start() {
+        private HistoryStack<float> history;
 
-            if (agent == null) {
-                Debug.LogWarning("TargetDiscrepancySensor error: agent dont't specified. Game object: " + gameObject.name);
-            }
+        public override void OnSetup(Agent agent) {
+
+            this.agent = (BasicAgent)agent;
 
             if (reference == null) {
                 reference = agent.gameObject;
             }
+
+            type = SensorType.sfloatarray;
+            shape = new int[1]{2};
+            history = new HistoryStack<float>(shape[0]*stackedObservations);
+        }
+
+        public override void OnReset(Agent aget)
+        {
+            history = new HistoryStack<float>(shape[0]*stackedObservations);
         }
         
         public override float[] GetFloatArrayValue()
         {
             if (target == null){
-                Debug.LogWarning("TargetDiscrepancySensor error: target don't specified! Game Object: " + gameObject.name);
+                Debug.LogWarning("OrientationSensor error: target don't specified! Game Object: " + gameObject.name);
             }
         
             Vector3 f = reference.transform.forward;
             //Debug.Log("f = " + f.x  + ", " + f.y + ", " + f.z);
             Vector3 d = target.transform.position - reference.transform.position;
-            d = Vector3.Normalize(d);
             //Debug.Log("d = " + d.x + ", " + d.y + ", " + d.z);
             float c = Vector3.Dot(f, d);
             //Debug.Log("c == " + c);
-            return new float[]{c, target.transform.position.y - reference.transform.position.y};
+            history.Push(c);
+            history.Push(d.magnitude/maxDistance);
+            return history.Values;
         }
     }
 }
