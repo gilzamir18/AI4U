@@ -13,13 +13,6 @@ from stable_baselines3.sac import MultiInputPolicy
 
 env = gym.make("AI4UEnv-v0")
 
-'''model = SAC(MultiInputPolicy, env, verbose=1)
-print("Training....")
-model.learn(total_timesteps=10000, log_interval=4)
-model.save("sac_ai4u")
-print("Trained...")
-del model # remove to demonstrate saving and loading
-'''
 model = SAC.load("sac_ai4u")
 
 print("Testing...")
@@ -32,6 +25,7 @@ while True:
     env.render()
     if done:
       print("Testing Reward: ", reward_sum)
+      reward_sum = 0
       obs = env.reset()
 
 

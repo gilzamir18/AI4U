@@ -27,11 +27,10 @@ class BasicController:
 
     def request_reset(self):
         #print("Begin Reseting....")
-        self.agent.createANewEpisode = True
+        self.agent.request_newepisode()
         self.newaction = True
         while self.initialState is None:
             time.sleep(self.waitforinitialstate)
-            self.agent.createANewEpisode = True
         self.done = False
         info = self.initialState
         self.initialState = None
@@ -40,7 +39,7 @@ class BasicController:
         return self.reset_behavior(info)
 
     def handleNewEpisode(self, info):
-        self.initialState = info
+        pass
 
     def handleEndOfEpisode():
         pass
@@ -48,8 +47,8 @@ class BasicController:
     def _endOfEpisode(self, info):
         self.handleEndOfEpisode(info)
         self.nextstate = info
-        self.done = True
         self.initialState = None
+        self.done = True
     
     def stop(self):
         self.agent.request_stop()
@@ -124,30 +123,32 @@ class BasicAgent:
         self.id = 0
         self.steps = 0
         self.createANewEpisode = False
+        self.newStopCommand = False
+        self.newPauseCommand = False
+        self.newResumeCommand = False
+        self.newRestartCommand = False
         self.controller = BasicController()
         self.newInfo = True
         self.lastinfo = None
         self.stopped = False
         self.paused = False
 
-
     def request_stop(self):
-        self.stopped = True
+        self.newStopCommand = True
     
     def request_pause(self):
         if not self.stopped:
-            self.paused = True
+            self.newPauseCommand = True
 
     def request_newepisode(self):
         self.createANewEpisode = True
     
     def request_restart(self):
-        if self.stopped:
-            self.stopped = False
+        self.newRestartCommand = True
     
     def request_resume(self):
         if self.paused and not self.stopped:
-            self.paused = False
+            self.newResumeCommand = True
 
     def _stop(self): 
         """
@@ -161,7 +162,6 @@ class BasicAgent:
         """
         Restart agent simulation in Unity.
         """
-        self.lastinfo = None
         self.stopped = False
         self.paused = False
         return step("__restart__")
@@ -186,8 +186,10 @@ class BasicAgent:
 
     def act(self, info):
         if self.newInfo:
-            self.lastinfo = None
-            self.__get_controller().handleNewEpisode(info)
+            self.lastinfo = info
+            ctrl = self.__get_controller()
+            ctrl.initialState = info
+            ctrl.handleNewEpisode(info)
             self.newInfo = False
 
         if self.createANewEpisode:
@@ -195,10 +197,12 @@ class BasicAgent:
             self.newInfo = True
             return self._restart()
         
-        if self.paused:
+        if self.newPauseCommand:
+            self.newPauseCommand = False
             return self._pause()
 
-        if  self.stopped:
+        if  self.newStopCommand:
+            self.newStopCommand = False
             return self._stop()
 
         if info['done']:
@@ -223,12 +227,15 @@ class BasicAgent:
                 self.createANewEpisode = False
                 self.newInfo = True
                 return self._restart()
-            if self.paused == False:
+            if self.newResumeCommand:
                 return self._resume()
-            elif self.stopped == false:
-                self.createANewEpisode = False
+            elif self.newRestartCommand:
+                self.newRestartCommand = False
                 self.newInfo = True
                 return self._restart()
+            elif self.newStopCommand:
+                self.newStopCommand = False
+                return self._stop()
         return stepfv('__noop__', [0])
 
     def __get_controller(self):

@@ -53,29 +53,10 @@ def create_server(agents, ids, server_IP="127.0.0.1", server_port=8080):
     serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
     serverUDP.serve_forever()
 
-def main():
-    n = len(sys.argv) 
-    args = parser.parse_args()
-    server_IP = args.host
-    server_port = int(args.port)
-    id = int(args.id)
-    if args.worker:
-        print("--worker argument is not implemented. Use the argument --agent instead!")
-        sys.exit(-1)
-    if args.agent:
-        try:
-            names = args.agent.split('.')
-            Agent = importlib.import_module('.'.join(names[0:-1]))
-            Agent = getattr(Agent,  names[-1])
-            if not AI4UWorker.register_agent([Agent], [id]):
-                sys.exit(-1)
-        except Exception as e:
-            print("Invalid agent module. Try <modulename>.<agentclass>!")
-            raise e
-    
-    serverAddress   = (server_IP, server_port)
-    serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
-    serverUDP.serve_forever()
-
 if __name__ == "__main__":
-    main()
+    print('''
+    AI4U2Unity it is not an application.
+    Use ai4u.appserver.startasdaemon function
+    to initialize an controller to control
+    an unity application.
+    ''')

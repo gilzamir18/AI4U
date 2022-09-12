@@ -7,7 +7,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 from ai4u.controllers import BasicGymController
-from ai4u.appserver import startasdaemon, reset
+from ai4u.appserver import startasdaemon
 
 class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
