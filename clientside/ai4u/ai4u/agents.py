@@ -11,6 +11,7 @@ class BasicController:
         self.initialState = None
         self.actionName = "move"
         self.actionArgs = [0, 0, 0, 0]
+        self.defaultAction = "move"
         self.defaultActionArgs = [0, 0, 0, 0]
         self.lastinfo = None
         self.waitfornextstate = 0.001
@@ -98,11 +99,17 @@ class BasicController:
         """
         self.lastinfo = info.copy()
         if (self.actionName == '__pause__') and not self.agent.paused:
+            self.actionName = self.defaultAction
             return self.agent._pause() #environment is in action mode
         elif (self.actionName == '__resume__') and self.agent.paused:
+            self.actionName = self.defaultAction
             return self.agent._resume() #environment is in envcontrolmode 
         elif (self.actionName == '__stop__'):
+            self.actionName = self.defaultAction
             return self.agent._stop()
+        elif (self.actionName == "__restart__"):
+            self.actionName = self.defaultAction
+            return self.agent._restart()
         self.nextstate = info.copy()
         action = stepfv(self.actionName,  self.actionArgs)
         if self.newaction:
@@ -205,6 +212,12 @@ class BasicAgent:
             self.newStopCommand = False
             return self._stop()
 
+        if self.newRestartCommand:
+            self.newInfo = True
+            self.newRestartCommand = False
+            self.paused = False
+            return self._restart()
+
         if info['done']:
             self.__get_controller()._endOfEpisode(info)
             self.newInfo = True
@@ -232,6 +245,7 @@ class BasicAgent:
             elif self.newRestartCommand:
                 self.newRestartCommand = False
                 self.newInfo = True
+                self.paused = False
                 return self._restart()
             elif self.newStopCommand:
                 self.newStopCommand = False

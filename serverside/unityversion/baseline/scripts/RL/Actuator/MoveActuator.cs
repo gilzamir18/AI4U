@@ -4,8 +4,6 @@ using UnityEngine;
 
 
 namespace ai4u {
-
-	[RequireComponent(typeof(Rigidbody))]
     public class MoveActuator : Actuator
     {
         //forces applied on the x, y and z axes.    
@@ -27,7 +25,7 @@ namespace ai4u {
 
         public override void Act()
         {
-            if (!agent.Done)
+            if (agent != null && !agent.Done)
             {
                 float[] action = agent.GetActionArgAsFloatArray();
 
@@ -63,7 +61,12 @@ namespace ai4u {
             }
         }
 
-        public override void Reset()
+        public override void OnSetup(Agent agent)
+        {
+            agent.AddResetListener(this);
+        }
+
+        public override void OnReset(Agent agent)
         {
             turn = 0;
             move = 0;

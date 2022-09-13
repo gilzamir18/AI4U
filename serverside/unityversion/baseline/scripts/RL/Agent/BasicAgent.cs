@@ -184,6 +184,7 @@ namespace ai4u
                 throw new System.Exception("ai4u2unity connection error!");
             }
             setupIsDone = true;
+
             foreach (Sensor sensor in sensorList)
             {
                 if (sensor.resetable)
@@ -191,6 +192,11 @@ namespace ai4u
                     AddResetListener(sensor);
                 }
                 sensor.OnSetup(this);
+            }
+
+            foreach(Actuator a in actuatorList)
+            {
+                a.OnSetup(this);
             }
         }
 
@@ -300,10 +306,6 @@ namespace ai4u
                 transform.localPosition = randomPositions[idx].transform.localPosition;
             } else {
                 transform.localPosition = initialLocalPosition;
-            }
-            foreach(Actuator a in actuatorList) {
-                a.Reset();
-
             }
             UpdateState();
             NotifyReset();

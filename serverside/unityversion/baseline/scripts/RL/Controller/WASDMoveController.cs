@@ -7,11 +7,12 @@ namespace  ai4u
 {
     public class WASDMoveController : Controller
     {
+        public string actuatorName = "move";
         public float speed = 10.0f;
         override public string GetAction()
         {
-            float[] actionValue = new float[3];
-            string actionName="move";
+            float[] actionValue = new float[4];
+            string actionName = actuatorName;
 
             if (Input.GetKey(KeyCode.W))
             {

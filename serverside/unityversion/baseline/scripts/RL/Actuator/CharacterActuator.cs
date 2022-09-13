@@ -158,7 +158,7 @@ namespace ai4u {
             jumpForward = 0.0f;
         }
 
-        public override void Reset()
+        public override void OnReset(Agent agent)
         {
             agent.GetComponent<Animator>().enabled = true;
             ResetParameters();

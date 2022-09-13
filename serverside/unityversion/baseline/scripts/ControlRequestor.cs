@@ -32,8 +32,6 @@ namespace ai4u
 
         public int skipFrame = 0;
         public bool repeatAction = false;
-
-        public bool waitControllerResponse = false;
         public float defaultTimeScale = 1.0f; 
 
 
@@ -316,16 +314,8 @@ namespace ai4u
             sockToSend.SendTo(data, endPoint);
             total = 0;
             try 
-            {
-                if (waitControllerResponse)
-                {
-                    Time.timeScale = 0;
-                } 
+            { 
                 total = sockToSend.Receive(received);
-                if (waitControllerResponse)
-                {
-                    Time.timeScale = defaultTimeScale;
-                } 
                 return true;
             }
             catch(System.Exception e)

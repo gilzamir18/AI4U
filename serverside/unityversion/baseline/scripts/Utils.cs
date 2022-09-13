@@ -114,7 +114,12 @@ namespace ai4u
         {
             return actionName + ";0";
         }
-    
+        
+        public static string ParseAction(string actionName, int value)
+        {
+            return actionName + ";1;" + value;
+        }
+
         public static string ToPythonTuple(int[] a)
         {
             StringBuilder sb = new StringBuilder();
