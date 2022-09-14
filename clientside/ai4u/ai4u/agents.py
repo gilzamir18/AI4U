@@ -72,7 +72,7 @@ class BasicController:
         self.actionName = "move"
         self.actionArgs = [random.choice([0, 500]), 0, random.choice([0, 500])]
         
-    def request_step(self, action):
+    def request_step(self, action, gymformat=True):
         """
         This method change environment state under action named 'action'.
         Never override this method. If you want change step behavior,
@@ -91,7 +91,10 @@ class BasicController:
         state = self.nextstate
         if not state:
             state = self.agent.lastinfo
-        return state, state['reward'], state['done'], {} 
+        if gymformat:
+            return state, state['reward'], state['done'], {} 
+        else:
+            return state
 
     def getaction(self, info):
         """
