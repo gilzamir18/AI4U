@@ -5,8 +5,6 @@ import numpy as np
 import base64
 import sys
 from typing import Callable
-from torch import nn
-import torch as th
 
 INVALID_TYPE_ERROR = 1
 NAN_DETECTED_ERROR = 2
