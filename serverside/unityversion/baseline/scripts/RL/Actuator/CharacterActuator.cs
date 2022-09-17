@@ -7,7 +7,6 @@ namespace ai4u {
 	[RequireComponent(typeof(Camera))]
     public class CharacterActuator : Actuator
     {
-
         //BEGIN::Game controller variables
         private ThirdPersonCharacter character;
         private Transform m_CamTransform;
@@ -33,7 +32,7 @@ namespace ai4u {
 
         public Camera mainCamera;
 
-        void Awake()
+        public override void OnSetup(Agent agent)
         {
             
             if (agent == null) {
@@ -41,6 +40,8 @@ namespace ai4u {
             }
             // get the third person character ( this should never be null due to require component )
             character = agent.GetComponent<ThirdPersonCharacter>();
+            BasicAgent bAgent = (BasicAgent)agent;
+            bAgent.endOfEpisodeEvent += EndOfEpisode;
 
             if (mainCamera != null)
             {
@@ -91,10 +92,6 @@ namespace ai4u {
             ResetParameters();
             if (agent.GetActionName()==actionName)
             {
-                if (actionReward != null) {
-                    actionReward.RewardFrom(actionName, agent);
-                }
-
                 float[] args = agent.GetActionArgAsFloatArray(); 
 
                 int N = args.Length;
@@ -137,7 +134,7 @@ namespace ai4u {
             UpdateActuator();
         }
         
-        public override void NotifyEndOfEpisode() 
+        public void EndOfEpisode(BasicAgent agent) 
         {   if (!stop && agent.Done)
             {
                 stop = true;

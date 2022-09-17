@@ -38,7 +38,7 @@ namespace ai4u {
                 Transform reference = agent.gameObject.transform;
                 if (rBody != null)
                 {
-                    if (Mathf.Abs(rBody.velocity.y) > 0.01)
+                    if (Mathf.Abs(rBody.velocity.y) > 0.0001)
                     {
                         onGround = false;
                     }
@@ -46,12 +46,17 @@ namespace ai4u {
                     {
                         onGround = true;
                     }
-
-                    Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
-                    rBody.MoveRotation(rBody.rotation * deltaRotation);
                     if (onGround)
                     {
-                        rBody.AddForce(jump * jumpPower * reference.up + move * speed * reference.forward + (jumpPower * jumpForward * reference.up + jumpForward * jumpForwardPower * reference.forward)   );
+                        Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
+                        rBody.MoveRotation(rBody.rotation * deltaRotation);
+                        rBody.AddForce(jump * jumpPower * reference.up + move * 
+                                        speed * reference.forward + 
+                                        (
+                                            jumpPower * jumpForward * reference.up + 
+                                            jumpForward * jumpForwardPower * 
+                                            reference.forward)   
+                                      );
                     }
                 }
                 move = 0;

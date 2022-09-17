@@ -7,17 +7,11 @@ namespace ai4u
 {
     public class DoneSensor : Sensor
     {
-
-        public DoneSensor()
-        {
-            Start();
-        }
-
-        void Start()
+        public override void OnSetup(Agent agent)
         {
             perceptionKey = "done";
             type = SensorType.sbool;
-            shape = new int[1]{1};
+            shape = new int[0];
         }
 
         public override bool GetBoolValue()

@@ -6,12 +6,7 @@ namespace ai4u
 {
     public class RewardSensor : Sensor
     {
-        public RewardSensor()
-        {
-            Start();
-        }
-
-        void Start()
+        public override void OnSetup(Agent agent)
         {
             perceptionKey = "reward";
             type = SensorType.sfloat;

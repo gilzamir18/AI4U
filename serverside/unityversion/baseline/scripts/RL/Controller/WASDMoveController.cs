@@ -49,7 +49,7 @@ namespace  ai4u
                 actionName = "__restart__";
             }
 
-            if (actionName != "restart")
+            if (actionName != "__restart__")
             {
                 //Debug.Log(ai4u.Utils.ParseAction(actionName, actionValue));
                 return ai4u.Utils.ParseAction(actionName, actionValue);

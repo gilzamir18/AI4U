@@ -24,11 +24,6 @@ namespace ai4u
             return (v - min)/(max-min);
         }
 
-        public PositionSensor()
-        {
-
-        }
-
         public override void OnSetup(Agent agent)
         {
             this.type = SensorType.sfloatarray;

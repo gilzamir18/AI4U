@@ -167,6 +167,14 @@ namespace ai4u
 
         public T[] Values 
         {
+            set
+            {
+                for (int i = 0; i < value.Length; i++)
+                {
+                    Push(value[i]);
+                }
+            }
+
             get
             {
                 T[] copy = new T[capacity];

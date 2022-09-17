@@ -6,12 +6,7 @@ namespace ai4u
 {
     public class IDSensor : Sensor
     {
-        public IDSensor()
-        {
-            Start();
-        }
-
-        void Start()
+        public override void OnSetup(Agent agent)
         {
             perceptionKey = "id";
             type = SensorType.sstring;

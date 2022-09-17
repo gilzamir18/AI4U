@@ -15,6 +15,10 @@ namespace ai4u
 
     public abstract class Agent : MonoBehaviour
     {
+        public delegate void ResetHandler(Agent source);
+
+        public event ResetHandler resetEvent;
+
         protected Brain brain;
         public string ID = "0";
 
@@ -24,9 +28,6 @@ namespace ai4u
         protected string[] desc;
         protected byte[] types;
         protected string[] values;
-        private List<IAgentResetListener> resetListener = new List<IAgentResetListener>();
- 
-
         protected bool setupIsDone = false;
 
         public byte[] MessageType
@@ -68,15 +69,7 @@ namespace ai4u
 
         public void AddResetListener(IAgentResetListener listener) 
         {
-            resetListener.Add(listener);
-        }
-
-        public void RemoveResetListenerAt(int pos) {
-            resetListener.RemoveAt(pos);
-        }
-
-        public bool RemoveResetListenerAt(IAgentResetListener listener) {
-            return resetListener.Remove(listener);
+            resetEvent += listener.OnReset;
         }
 
         public Brain Brain
@@ -136,14 +129,10 @@ namespace ai4u
             this.values[i] = value.ToString();
         }
 
-        public virtual void HandleOnResetEvent() {
-
-        }
-
         public void NotifyReset() {
-            this.HandleOnResetEvent();
-            foreach (IAgentResetListener listener in resetListener) {
-                listener.OnReset(this);
+            if (resetEvent != null)
+            {
+                resetEvent(this);
             }
         }
 

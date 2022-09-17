@@ -57,6 +57,7 @@ namespace ai4u
             frameCounter = -1;
             sockToSend = TrySocket();
             applyingAction = false;
+            Time.timeScale = defaultTimeScale;
         }
 
         public Socket TrySocket()

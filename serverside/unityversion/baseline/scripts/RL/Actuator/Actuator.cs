@@ -9,13 +9,7 @@ namespace ai4u
 
         public string actionName;
         public BasicAgent agent;
-        public ActionReward actionReward;
         private bool actionDone = false;
-
-        public virtual void NotifyEndOfEpisode() 
-        {
-
-        }
 
         public bool ActionDone{
             get {

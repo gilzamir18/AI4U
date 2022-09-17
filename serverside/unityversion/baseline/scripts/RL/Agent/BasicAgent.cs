@@ -15,6 +15,12 @@ namespace ai4u
     [RequireComponent(typeof(IDSensor))]
     public class BasicAgent : Agent
     {
+        public delegate void AgentEpisodeHandler(BasicAgent agent);
+        public event AgentEpisodeHandler endOfEpisodeEvent;
+        public event AgentEpisodeHandler beginOfEpisodeEvent;
+        public event AgentEpisodeHandler endOfStepEvent;
+        public event AgentEpisodeHandler beginOfStepEvent;
+
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
         public GameObject[] randomPositions;
@@ -51,6 +57,13 @@ namespace ai4u
 
             set
             {
+                if (!done && value)
+                {
+                    if (endOfEpisodeEvent != null)
+                    {
+                        endOfEpisodeEvent(this);
+                    }
+                }
                 done = value;
             }
         }
@@ -234,10 +247,6 @@ namespace ai4u
                         actuatorList[i].Act();
                     }
                 }
-                else
-                {
-                    actuatorList[i].NotifyEndOfEpisode();
-                }
             }
         }
 
@@ -269,6 +278,10 @@ namespace ai4u
         public override void Reset() 
         {
             ResetPlayer();
+            if (beginOfEpisodeEvent != null)
+            {
+                beginOfEpisodeEvent(this);
+            }
         }
 
         private bool checkFirstTouch(string tag){
@@ -283,6 +296,10 @@ namespace ai4u
         public void ResetReward()
         {
             reward = 0;
+            if (beginOfStepEvent != null)
+            {
+                beginOfStepEvent(this);
+            }
         }
 
         private void ResetPlayer()
@@ -326,6 +343,10 @@ namespace ai4u
             for (int i = 0; i < n; i++)
             {
                 rewards[i].OnUpdate();
+            }
+            if (endOfStepEvent != null)
+            {
+                endOfStepEvent(this);
             }
         }
 

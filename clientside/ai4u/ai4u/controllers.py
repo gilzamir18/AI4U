@@ -1,11 +1,12 @@
-from ai4u.utils import stepfv
-from ai4u.ai4u2unity import create_server
+from .utils import stepfv
+from .ai4u2unity import create_server
+from .agents import BasicController
 import ai4u
 import gym
 import numpy as np
 import sys
 
-class BasicGymController(ai4u.agents.BasicController):
+class BasicGymController(BasicController):
     """
     This basic controller only works with Unity or Godot AI4UTesting
     application or similar environments. For a custom controller,
@@ -32,7 +33,7 @@ class BasicGymController(ai4u.agents.BasicController):
         self.observation_space = gym.spaces.Dict(
             {
                 "array": gym.spaces.Box(-1000, 1000, shape=(3,), dtype=float),
-                "vision": gym.spaces.Box(0, 255, shape=(10, 10, 1), dtype=float),
+                "vision": gym.spaces.Box(0, 255, shape=(1, 10, 1), dtype=float),
             }
         )
 
@@ -86,7 +87,7 @@ class BasicGymController(ai4u.agents.BasicController):
             info = info[0]
         if ("vision" in info) and ("array" in info):
             vision = info["vision"]
-            vision = np.reshape(vision, (10, 10, 1))
+            vision = np.reshape(vision, (1, 10, 1))
             array = info['array']
             return {'array': np.array([array]), 'vision': np.array([vision])}, info['reward'], info['done'], info
         else:
@@ -102,7 +103,7 @@ class BasicGymController(ai4u.agents.BasicController):
         implemented in the AI4UTesting code.
         """
         vision = info['vision']
-        vision = np.reshape(vision, (10, 10, 1))
+        vision = np.reshape(vision, (1, 10, 1))
         array = info['array']
         return {'array': np.array([array]), 'vision': np.array([vision])}
 
