@@ -13,6 +13,12 @@ namespace ai4u {
         public float jumpPower = 1;
         public float jumpForwardPower = 1;
 
+        public MoveActuator()
+        {
+            shape = new int[1]{4};
+            isContinuous = true;
+        }
+
         private bool onGround = false;
 
         public bool OnGround
@@ -28,7 +34,6 @@ namespace ai4u {
             if (agent != null && !agent.Done)
             {
                 float[] action = agent.GetActionArgAsFloatArray();
-
                 move = action[0];
                 turn = action[1];
                 jump = action[2];
@@ -38,7 +43,7 @@ namespace ai4u {
                 Transform reference = agent.gameObject.transform;
                 if (rBody != null)
                 {
-                    if (Mathf.Abs(rBody.velocity.y) > 0.0001)
+                    if (Mathf.Abs(rBody.velocity.y) > 0.001)
                     {
                         onGround = false;
                     }
@@ -50,8 +55,8 @@ namespace ai4u {
                     {
                         Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
                         rBody.MoveRotation(rBody.rotation * deltaRotation);
-                        rBody.AddForce(jump * jumpPower * reference.up + move * 
-                                        speed * reference.forward + 
+                        rBody.AddForce(jump * jumpPower * reference.up +
+                                        move * speed * reference.forward + 
                                         (
                                             jumpPower * jumpForward * reference.up + 
                                             jumpForward * jumpForwardPower * 

@@ -32,8 +32,8 @@ class BasicGymController(BasicController):
         #                                shape=(10, 10, 1), dtype=np.uint8)
         self.observation_space = gym.spaces.Dict(
             {
-                "array": gym.spaces.Box(-1000, 1000, shape=(3,), dtype=float),
-                "vision": gym.spaces.Box(0, 255, shape=(1, 10, 1), dtype=float),
+                "array": gym.spaces.Box(-1, 1, shape=(7,), dtype=float),
+                "vision": gym.spaces.Box(0, 255, shape=(10, 10, 1), dtype=np.float32),
             }
         )
 
@@ -51,8 +51,7 @@ class BasicGymController(BasicController):
         new episode with request_restart command to agent.
         """
         print("End Of Episode")
-        self.agent.request_restart()
-    
+        
     def seed(self, s):
         """
         This method prepare the environment with
@@ -87,7 +86,7 @@ class BasicGymController(BasicController):
             info = info[0]
         if ("vision" in info) and ("array" in info):
             vision = info["vision"]
-            vision = np.reshape(vision, (1, 10, 1))
+            vision = np.reshape(vision, (10, 10, 1)) * 1/255.0
             array = info['array']
             return {'array': np.array([array]), 'vision': np.array([vision])}, info['reward'], info['done'], info
         else:
@@ -103,7 +102,7 @@ class BasicGymController(BasicController):
         implemented in the AI4UTesting code.
         """
         vision = info['vision']
-        vision = np.reshape(vision, (1, 10, 1))
+        vision = np.reshape(vision, (10, 10, 1)) * 1/255.0
         array = info['array']
         return {'array': np.array([array]), 'vision': np.array([vision])}
 
@@ -119,7 +118,7 @@ class BasicGymController(BasicController):
         """
         self.actionName = "move"
         if type(action) != str:
-            self.actionArgs = np.array(action).squeeze() * 20
+            self.actionArgs = np.array(action).squeeze()
         elif action == 'stop':
             self.actionName = "__stop__"
             self.actionArgs = [0]

@@ -1,3 +1,4 @@
+
 import numpy as np
 from .utils import step, stepfv
 import random
@@ -9,9 +10,9 @@ import sys
 class BasicController:    
     def __init__(self):
         self.initialState = None
-        self.actionName = "move"
+        self.actionName = "__waitnewaction__"
         self.actionArgs = [0, 0, 0, 0]
-        self.defaultAction = "move"
+        self.defaultAction = "__waitnewaction__"
         self.defaultActionArgs = [0, 0, 0, 0]
         self.lastinfo = None
         self.waitfornextstate = 0.001
@@ -21,16 +22,20 @@ class BasicController:
         self.id = 0
         self.max_steps = 0
         self.newaction = False
+        self.nextstate = None
 
     def reset_behavior(self, info):
         self.actionArgs = [0, 0, 0, 0]
         return info
 
+    def close(self):
+        pass #release resources here
+
     def request_reset(self):
         #print("Begin Reseting....")
-        self.agent.request_newepisode()
-        self.newaction = True
         while self.initialState is None:
+            self.agent.request_newepisode()
+            self.newaction = True
             time.sleep(self.waitforinitialstate)
         self.done = False
         info = self.initialState
@@ -78,19 +83,28 @@ class BasicController:
         Never override this method. If you want change step behavior,
         implements step_behavior method.
         """
-        self.nextstate = None
         self.step_behavior(action)
         self.newaction = True
-        while (not self.done) and (self.nextstate is None) and (not self.agent.paused):
+        self.nextstate = None
+        while ( (not self.done) and 
+                (self.nextstate is None) and 
+                (not self.agent.paused)  ):
             time.sleep(self.waitfornextstate)
+
         if self.agent.paused:
             if self.actionName == '__resume__':
                 self.resume()
                 return {"paused": False}, 0, False, {'paused': False}
             return {'paused': True}, 0, False, {'paused': True}
+        
+
         state = self.nextstate
+
         if not state:
             state = self.agent.lastinfo
+        else:
+            self.nextstate = None
+
         if gymformat:
             return state, state['reward'], state['done'], {} 
         else:
@@ -100,25 +114,26 @@ class BasicController:
         """
         Return a new action based in new info 'info'.
         """
-        self.lastinfo = info.copy()
-        if (self.actionName == '__pause__') and not self.agent.paused:
-            self.actionName = self.defaultAction
-            return self.agent._pause() #environment is in action mode
-        elif (self.actionName == '__resume__') and self.agent.paused:
-            self.actionName = self.defaultAction
-            return self.agent._resume() #environment is in envcontrolmode 
-        elif (self.actionName == '__stop__'):
-            self.actionName = self.defaultAction
-            return self.agent._stop()
-        elif (self.actionName == "__restart__"):
-            self.actionName = self.defaultAction
-            return self.agent._restart()
-        self.nextstate = info.copy()
-        action = stepfv(self.actionName,  self.actionArgs)
         if self.newaction:
-            self.actionArgs = self.defaultActionArgs.copy()
-            self.newaction = False
-            return action
+            self.lastinfo = info.copy()
+            if (self.actionName == '__pause__') and not self.agent.paused:
+                self.actionName = self.defaultAction
+                return self.agent._pause() #environment is in action mode
+            elif (self.actionName == '__resume__') and self.agent.paused:
+                self.actionName = self.defaultAction
+                return self.agent._resume() #environment is in envcontrolmode 
+            elif (self.actionName == '__stop__'):
+                self.actionName = self.defaultAction
+                return self.agent._stop()
+            elif (self.actionName == "__restart__"):
+                self.actionName = self.defaultAction
+                return self.agent._restart()
+            else:
+                action = stepfv(self.actionName,  self.actionArgs)
+                self.actionArgs = self.defaultActionArgs.copy()
+                self.newaction = False
+                self.agent.hasNextState = True
+                return action
         else:
             return step("__waitnewaction__")
 
@@ -142,6 +157,8 @@ class BasicAgent:
         self.lastinfo = None
         self.stopped = False
         self.paused = False
+        self.hasNextState = False
+        self.waitingCommand = True
 
     def request_stop(self):
         self.newStopCommand = True
@@ -155,7 +172,7 @@ class BasicAgent:
     
     def request_restart(self):
         self.newRestartCommand = True
-    
+
     def request_resume(self):
         if self.paused and not self.stopped:
             self.newResumeCommand = True
@@ -166,6 +183,7 @@ class BasicAgent:
         """
         self.stopped = True
         self.paused = False
+        self.hasNextState = False
         return step("__stop__")
 
     def _restart(self):
@@ -174,6 +192,8 @@ class BasicAgent:
         """
         self.stopped = False
         self.paused = False
+        self.newInfo = True
+        self.hasNextState = False
         return step("__restart__")
     
     def _pause(self):
@@ -195,8 +215,11 @@ class BasicAgent:
         return self.__get_controller().getaction(info)
 
     def act(self, info):
+        self.waitingCommand = False
+        if self.hasNextState:
+            self.__get_controller().nextstate = info.copy()
+            self.hasNextState = False
         if self.newInfo:
-            self.lastinfo = info
             ctrl = self.__get_controller()
             ctrl.initialState = info
             ctrl.handleNewEpisode(info)
@@ -209,6 +232,7 @@ class BasicAgent:
         
         if self.newPauseCommand:
             self.newPauseCommand = False
+            self.lastinfo = info
             return self._pause()
 
         if  self.newStopCommand:
@@ -222,9 +246,8 @@ class BasicAgent:
             return self._restart()
 
         if info['done']:
-            self.__get_controller()._endOfEpisode(info)
-            self.newInfo = True
             self.lastinfo = info
+            self.__get_controller()._endOfEpisode(info)
             return self._stop()
         self.steps = self.steps + 1
         return self._step(info)
@@ -239,14 +262,19 @@ class BasicAgent:
             self.__get_controller().handleConfiguration(self.id, self.max_step)
             return ("@".join(control))
         if 'wait_command' in a:
+            print("waiting command from unity...")
+            self.waitingCommand = True
             if self.createANewEpisode:
                 self.createANewEpisode = False
                 self.newInfo = True
+                self.waitingCommand = False
                 return self._restart()
             if self.newResumeCommand:
+                self.waitingCommand = False
                 return self._resume()
             elif self.newRestartCommand:
                 self.newRestartCommand = False
+                self.waitingCommand = False
                 self.newInfo = True
                 self.paused = False
                 return self._restart()

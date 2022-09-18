@@ -32,9 +32,14 @@ namespace ai4u {
 
         public Camera mainCamera;
 
+        public CharacterActuator()
+        {
+            shape = new int[1]{6};
+            isContinuous = true;
+        }
+
         public override void OnSetup(Agent agent)
         {
-            
             if (agent == null) {
                 Debug.LogWarning("You don't set any agent in CharacterActuator.");
             }

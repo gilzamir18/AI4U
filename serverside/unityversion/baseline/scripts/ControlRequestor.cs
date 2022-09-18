@@ -41,7 +41,7 @@ namespace ai4u
         private int frameCounter = -1;
         private Agent agent;
         private bool paused = false;
-        private bool stopped = false;
+        private bool stopped = true;
         private bool applyingAction = false;
 
         public void SetAgent(Agent agent)
@@ -53,7 +53,7 @@ namespace ai4u
         void Awake()
         {
             paused = false;
-            stopped = false;
+            stopped = true;
             frameCounter = -1;
             sockToSend = TrySocket();
             applyingAction = false;
@@ -179,40 +179,33 @@ namespace ai4u
                     Debug.LogWarning("ControlRequest requires an Agent! Use the method 'SetAgent' of the ControlRequest" 
                                       + " component to set an agent!");
                 }
-                if (frameCounter < 0)
-                {
-                    agent.Reset();
-                }
                 if (!applyingAction)
                 {
-                    bool palive = agent.Alive();
-
                     var cmd = RequestControl();
 
-                    if (palive  && !agent.Alive())
+                    if (!agent.Alive())
                     {
                         applyingAction = false;
                         agent.EndOfEpisode();
-                    }
-
-                    if (CheckCmd(cmd, "__waitnewaction__"))
-                    {
-                        //TODO something about this..
+                        stopped = true;
+                        frameCounter = 0;
+                        agent.NSteps = 0;
                     }
                     else if (CheckCmd(cmd, "__stop__"))
                     {
                         stopped = true;
                         applyingAction = false;
-                        frameCounter = -1;
+                        frameCounter = 0;
                         agent.NSteps = 0;
                         agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__restart__"))
                     {
-                        frameCounter = -1;
+                        frameCounter = 0;
                         agent.NSteps = 0;
                         applyingAction = false;
                         paused = false;
+                        stopped = false;
                         agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__pause__"))
@@ -220,7 +213,7 @@ namespace ai4u
                         applyingAction = false;
                         paused = true;
                     }
-                    else
+                    else if (!CheckCmd(cmd, "__waitnewaction__"))
                     {
                         applyingAction = true;
                         frameCounter = 1;
@@ -230,17 +223,20 @@ namespace ai4u
                 }
                 else
                 {
-                    if (repeatAction)
-                    {
-                        agent.ApplyAction();
-                    }
-                    frameCounter ++;
                     if (frameCounter >= skipFrame)
                     {
                         ((BasicAgent)agent).UpdateReward();
                         frameCounter = 0;
                         applyingAction = false;
                         agent.NSteps = agent.NSteps + 1;
+                    }
+                    else
+                    {
+                        if (repeatAction)
+                        {
+                            agent.ApplyAction();
+                        }
+                        frameCounter ++;
                     }
                 }
             } else
@@ -262,8 +258,9 @@ namespace ai4u
                     agent.NSteps = 0;
                     paused = false;
                     stopped = false;
+                    applyingAction = false;
                     agent.Reset();
-                } else if (CheckCmd(cmds, "__resume__"))
+                } else if (paused && CheckCmd(cmds, "__resume__"))
                 {
                     paused = false;
                 }

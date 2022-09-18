@@ -8,6 +8,11 @@ namespace ai4u
     {
         public GridBuilder grid;
 
+        public GridActuator()
+        {
+            shape = new int[]{5};
+            isContinuous = false;
+        }
 
         public override void OnSetup(Agent agent)
         {

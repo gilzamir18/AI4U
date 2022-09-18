@@ -1,9 +1,4 @@
-from ai4u.agents import BasicAgent
-from ai4u.utils import stepfv
-from threading import Thread
-from ai4u.ai4u2unity import create_server
 import ai4u
-from controller import SimpleController
 from ai4u.controllers import BasicGymController
 import AI4UEnv
 import gym
@@ -15,7 +10,7 @@ env = gym.make("AI4UEnv-v0")
 
 model = SAC(MultiInputPolicy, env, verbose=1)
 print("Training....")
-model.learn(total_timesteps=10000, log_interval=4)
+model.learn(total_timesteps=12000, log_interval=4)
 model.save("sac_ai4u")
 print("Trained...")
 del model # remove to demonstrate saving and loading

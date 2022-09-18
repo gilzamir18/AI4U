@@ -8,7 +8,7 @@ namespace ai4u
     {
         public GameObject target;
         public float successReward = 0.01f;
-        public float stepReward = 0.001f;
+        public float stepReward = -0.001f;
         private BasicAgent agent;
         private float minDistance;
         
@@ -16,7 +16,7 @@ namespace ai4u
         {
             this.agent = (BasicAgent)agent;
             this.agent.AddResetListener(this);
-            minDistance = System.Single.PositiveInfinity;
+            minDistance = (this.agent.gameObject.transform.position - target.transform.position).magnitude;
         }
 
         // Update is called once per frame
@@ -26,19 +26,18 @@ namespace ai4u
             float dist = d.magnitude;
             if (dist < minDistance)
             {
-                minDistance = dist;
-                //Debug.Log("SUCE: " + successReward);
                 this.agent.AddReward(successReward, this);
+                minDistance = dist;
             } else
             {
-                this.agent.AddReward(-stepReward, this);
+                this.agent.AddReward(stepReward, this);
             }
         }
 
         public override void OnReset(Agent agent)
         { 
             this.agent = (BasicAgent) agent;
-            minDistance = System.Single.PositiveInfinity;
+            minDistance = (this.agent.gameObject.transform.position - target.transform.position).magnitude;
         }
     }
 }

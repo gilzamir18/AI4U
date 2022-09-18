@@ -39,7 +39,7 @@ namespace ai4u {
             //Debug.Log("f = " + f.x  + ", " + f.y + ", " + f.z);
             Vector3 d = target.transform.position - reference.transform.position;
             //Debug.Log("d = " + d.x + ", " + d.y + ", " + d.z);
-            float c = Vector3.Dot(f, d);
+            float c = Vector3.Dot(f, d.normalized);
             //Debug.Log("c == " + c);
             history.Push(c);
             history.Push(d.magnitude/maxDistance);

@@ -30,8 +30,8 @@ class DonutGymController(agents.BasicController):
         #                                shape=(10, 10, 1), dtype=np.uint8)
         self.observation_space = gym.spaces.Dict(
             {
-                "array": gym.spaces.Box(-10, 10, shape=(17,), dtype=float),
-                "vision": gym.spaces.Box(0, 255, shape=(5, 5, 4), dtype=float),
+                "array": gym.spaces.Box(-10, 10, shape=(37,), dtype=float),
+                "vision": gym.spaces.Box(0, 1, shape=(5, 5, 4), dtype=float),
             }
         )
 
@@ -85,7 +85,7 @@ class DonutGymController(agents.BasicController):
             info = info[0]
         if ("vision" in info) and ("array" in info):
             vision = info["vision"]
-            vision = np.reshape(vision, (5, 5, 4))
+            vision = np.reshape(vision, (5, 5, 4)) * 1/255.0
             array = info['array']
             steps = info['steps']
             array = np.append(array, steps)
@@ -103,7 +103,7 @@ class DonutGymController(agents.BasicController):
         implemented in the AI4UTesting code.
         """
         vision = info['vision']
-        vision = np.reshape(vision, (5, 5, 4))
+        vision = np.reshape(vision, (5, 5, 4)) * 1/255.0
         array = info['array']
         steps = info['steps']
         array = np.append(array, steps)
@@ -121,7 +121,7 @@ class DonutGymController(agents.BasicController):
         """
         self.actionName = "move"
         if type(action) != str:
-            self.actionArgs = np.array(action).squeeze() * 20
+            self.actionArgs = np.array(action).squeeze()
         elif action == 'stop':
             self.actionName = "__stop__"
             self.actionArgs = [0]

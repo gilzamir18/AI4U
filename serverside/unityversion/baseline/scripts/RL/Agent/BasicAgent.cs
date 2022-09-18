@@ -16,10 +16,12 @@ namespace ai4u
     public class BasicAgent : Agent
     {
         public delegate void AgentEpisodeHandler(BasicAgent agent);
+        public event AgentEpisodeHandler beforeTheResetEvent;
         public event AgentEpisodeHandler endOfEpisodeEvent;
         public event AgentEpisodeHandler beginOfEpisodeEvent;
         public event AgentEpisodeHandler endOfStepEvent;
         public event AgentEpisodeHandler beginOfStepEvent;
+        
 
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
@@ -57,15 +59,18 @@ namespace ai4u
 
             set
             {
-                if (!done && value)
-                {
-                    if (endOfEpisodeEvent != null)
-                    {
-                        endOfEpisodeEvent(this);
-                    }
-                }
                 done = value;
             }
+        }
+
+        public override void EndOfEpisode()
+        {
+            if (endOfEpisodeEvent != null)
+            {
+                endOfEpisodeEvent(this);
+            }
+            rBody.velocity = Vector3.zero;
+            rBody.angularVelocity = Vector3.zero;
         }
 
         public bool TryGetSensor(string key, out Sensor s)
@@ -277,6 +282,10 @@ namespace ai4u
 
         public override void Reset() 
         {
+            if (beforeTheResetEvent != null)
+            {
+                beforeTheResetEvent(this);
+            }
             ResetPlayer();
             if (beginOfEpisodeEvent != null)
             {

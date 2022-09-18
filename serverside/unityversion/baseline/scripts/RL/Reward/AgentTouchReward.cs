@@ -31,7 +31,7 @@ namespace ai4u
             }
         }
 
-        void OnTriggerEnder(Collider collider)
+        void OnTriggerEnter(Collider collider)
         {
             if (rewardableTags.Contains(collider.gameObject.tag))
             {
