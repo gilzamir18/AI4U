@@ -33,9 +33,9 @@ class BasicController:
 
     def request_reset(self):
         #print("Begin Reseting....")
+        self.initialState = None
+        self.agent.request_newepisode()
         while self.initialState is None:
-            self.agent.request_newepisode()
-            self.newaction = True
             time.sleep(self.waitforinitialstate)
         self.done = False
         info = self.initialState
