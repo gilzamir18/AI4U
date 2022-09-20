@@ -9,6 +9,9 @@ namespace  ai4u
     {
         public string actuatorName = "move";
         public float speed = 10.0f;
+
+        private float reward_sum = 0;
+
         override public string GetAction()
         {
             float[] actionValue = new float[4];
@@ -67,9 +70,12 @@ namespace  ai4u
                 if (GetStateName(i) == "reward" || GetStateName(i) == "score")
                 {
                     float r = GetStateAsFloat(i);
-                    if (r != 0) {
-                        Debug.Log("Reward/Score = " + r);
-                    }
+                    reward_sum += r;
+                }
+                else if (GetStateName(i) == "done" && GetStateAsFloat() > 0)
+                {
+                    Debug.Log("Reward Episode: " + reward_sum);
+                    reward_sum = 0;
                 }
             }
         }

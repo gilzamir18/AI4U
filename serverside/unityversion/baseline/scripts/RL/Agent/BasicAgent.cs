@@ -25,7 +25,7 @@ namespace ai4u
 
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
-        public GameObject[] randomPositions;
+        public Transform respawnMarker;
         ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
         ///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
@@ -327,12 +327,25 @@ namespace ai4u
                 rBody.velocity = Vector3.zero;
                 rBody.angularVelocity = Vector3.zero;
             }
-            if (randomPositions.Length > 0) {
-                int idx = (int)Random.Range(0, randomPositions.Length-1 + 0.5f);
-                transform.localPosition = randomPositions[idx].transform.localPosition;
+
+            if (respawnMarker != null)
+            {
+                if (respawnMarker.childCount > 0)
+                {
+                    int idx = (int)Random.Range(0, respawnMarker.childCount - 1 + 0.5f );
+                    Transform c = respawnMarker.GetChild(idx);
+                    transform.localPosition = c.localPosition;
+                    transform.localRotation = c.localRotation;                    
+                }
+                else
+                {
+                    transform.localPosition =  respawnMarker.localPosition;
+                    transform.localRotation = respawnMarker.localRotation;
+                }
             } else {
                 transform.localPosition = initialLocalPosition;
             }
+                    
             UpdateState();
             NotifyReset();
         }

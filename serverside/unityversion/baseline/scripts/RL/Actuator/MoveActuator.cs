@@ -8,7 +8,7 @@ namespace ai4u {
     {
         //forces applied on the x, y and z axes.    
         private float move, turn, jump, jumpForward;
-        public float speed = 1;
+        public float moveAmount = 1;
         public float turnAmount = 1;
         public float jumpPower = 1;
         public float jumpForwardPower = 1;
@@ -53,14 +53,23 @@ namespace ai4u {
                     }
                     if (onGround)
                     {
+                        if (Mathf.Abs(turn) < 0.01f)
+                        {
+                            turn = 0;
+                        }
+
                         Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
                         rBody.MoveRotation(rBody.rotation * deltaRotation);
-                        rBody.AddForce(jump * jumpPower * reference.up +
-                                        move * speed * reference.forward + 
+                        
+                        rBody.AddForce(
+                                        (jump * jumpPower * reference.up +
+                                        move * moveAmount * reference.forward + 
                                         (
                                             jumpPower * jumpForward * reference.up + 
                                             jumpForward * jumpForwardPower * 
-                                            reference.forward)   
+                                            reference.forward )   
+                                        )
+
                                       );
                     }
                 }
