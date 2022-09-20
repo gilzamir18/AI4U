@@ -1,4 +1,7 @@
-# AI4U for Godot
+# AI4U Connect for Godot (It don't work yet)
+
+We are devoloping a new version of the AI4U Connect to Godot. Current implementation don't work with the current AI4U Connect implementation.
+
 This is the Godot version of the AI4U tool. The Godot version of the AI4U get advantage of the Godot architecture and facilitate agent specification by means of an agent abstraction. In Godot, AI4U provides a alternative approach to modeling Non-Player Characters (NPC). Although, the developer can apply this tool in others situations as the environment modeling as an artificial intelligence test bed. 
 
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
