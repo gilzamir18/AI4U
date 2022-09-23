@@ -11,7 +11,7 @@ env = gym.make("AI4UEnv-v0", controller_class=DonutGymController)
 
 model = SAC(MultiInputPolicy, env, verbose=1)
 print("Training....")
-model.learn(total_timesteps=100000, log_interval=4)
+model.learn(total_timesteps=500000, log_interval=10)
 model.save("sac_ai4u")
 print("Trained...")
 del model # remove to demonstrate saving and loading

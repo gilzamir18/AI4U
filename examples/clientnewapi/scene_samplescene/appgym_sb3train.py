@@ -5,12 +5,13 @@ import gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
+from controller import DonutGymController
 
-env = gym.make("AI4UEnv-v0")
+env = gym.make("AI4UEnv-v0", controller_class=DonutGymController)
 
 model = SAC(MultiInputPolicy, env, verbose=1)
 print("Training....")
-model.learn(total_timesteps=12000, log_interval=4)
+model.learn(total_timesteps=100000, log_interval=4)
 model.save("sac_ai4u")
 print("Trained...")
 del model # remove to demonstrate saving and loading
