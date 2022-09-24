@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 namespace ai4u
@@ -209,14 +209,50 @@ namespace ai4u
             return bool.Parse(this.brain.GetReceivedArgs()[i]);
         }
 
-        public float[] GetActionArgAsFloatArray(int i = 0)
+        public float[] GetActionArgAsFloatArray()
         {
-            return System.Array.ConvertAll(this.brain.GetReceivedArgs()[i].Split(' '), ParseFloat);
+            return System.Array.ConvertAll(this.brain.GetReceivedArgs(), ParseFloat);
         }
 
         public int GetActionArgAsInt(int i = 0)
         {
             return int.Parse(this.brain.GetReceivedArgs()[i]);
+        }
+
+        public string GetFieldArgAsString(string cmdname, int argidx=0)
+        {
+            string[] args = brain.GetField(cmdname);
+            return args[argidx];
+        }
+
+        public float GetFieldArgAsFloat(string cmdname, int i = 0)
+        {
+            string[] args = brain.GetField(cmdname);
+            return float.Parse(args[i], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+        }
+
+        public bool GetFieldArgAsBool(string cmdname, int i = 0)
+        {
+            string[] args = brain.GetField(cmdname);
+            return bool.Parse( args[i] );
+        }
+
+        public float[] GetFieldArgAsFloatArray(string cmdname)
+        {
+            string[] args = brain.GetField(cmdname);
+            return System.Array.ConvertAll(args, ParseFloat);
+        }
+
+        public int[] GetFieldArgAsIntArray(string cmdname)
+        {
+            string[] args = brain.GetField(cmdname);
+            return System.Array.ConvertAll<string,  int>(args,  int.Parse);
+        }
+
+        public int GetFieldArgAsInt(string cmdname, int i = 0)
+        {
+            string[] args = brain.GetField(cmdname);
+            return int.Parse(args[i]);
         }
 
         public string GetActionName()
@@ -265,17 +301,38 @@ namespace ai4u
         public static byte FLOAT_ARRAY = 5;
         protected string receivedcmd; 
         protected string[] receivedargs;
-
+        
+        private Dictionary<string, string[]> commandFields;
         public Agent agent = null;
+
+
+        public void SetCommandFields(Dictionary<string, string[]>  cmdField)
+        {
+            this.commandFields = cmdField;
+        } 
+
+        public string[] GetField(string name)
+        {
+            return this.commandFields[name];
+        }
 
         public void SetReceivedCommandName(string cmdname)
         {
-            this.receivedcmd = cmdname;
+            receivedcmd = cmdname;
+        }
+
+        public bool containsCommandField(string cmd)
+        {
+            if (commandFields != null)
+            {
+                return commandFields.ContainsKey(cmd);
+            }
+            return false;
         }
 
         public void SetReceivedCommandArgs(string[] args)
         {
-            this.receivedargs = args;
+            receivedargs = args;    
         }
 
         public string GetReceivedCommand()
@@ -283,10 +340,16 @@ namespace ai4u
             return receivedcmd;
         }
 
-
-        public string[] GetReceivedArgs()
+        public string[] GetReceivedArgs(string cmd=null)
         {
-            return receivedargs;
+            if (cmd == null)
+            {
+                return receivedargs;
+            }
+            else
+            {
+                return commandFields[cmd];
+            }
         }
     }
 

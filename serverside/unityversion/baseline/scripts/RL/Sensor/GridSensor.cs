@@ -33,7 +33,16 @@ namespace ai4u
         public override void OnReset(Agent agent)
         {
             history = new HistoryStack<float>(grid.W * grid.H * stackedObservations);
-            grid.ResetGrid();
+            if (agent.Brain.containsCommandField("goalDist"))
+            {
+                int d = agent.GetFieldArgAsInt("goalDist");
+                grid.ResetGrid(d);
+            }
+            else
+            {
+                grid.ResetGrid();
+            }
+
         }
     }
 }

@@ -91,12 +91,13 @@ namespace ai4u
             {
                 cmdstr = SendMessageFrom(request.Command, request.Type, request.Value);
             }
-
+            
             if (cmdstr != null)
             {
                 Command[] cmds = UpdateActionData(cmdstr);
                 return cmds;
             }
+            
             return null;
         }
 
@@ -117,14 +118,18 @@ namespace ai4u
 
             if (cmdstr != null)
             {
+                Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
                 Command[] cmds = UpdateActionData(cmdstr);
                 foreach(Command cmd in cmds)
                 {
                     agent.Brain.SetReceivedCommandName(cmd.name);
                     agent.Brain.SetReceivedCommandArgs(cmd.args);
+                    fields[cmd.name] = cmd.args; 
                 }
+                agent.Brain.SetCommandFields(fields);
                 return cmds;
             }
+
             return null;
         }
 
@@ -153,6 +158,7 @@ namespace ai4u
                 }
 
                 res[c] = new Command(cmdname, args);
+                c++;
             }
             return res;
         }
@@ -256,6 +262,12 @@ namespace ai4u
                 {
                     frameCounter = -1;
                     agent.NSteps = 0;
+                    Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
+                    for (int i = 0; i < cmds.Length; i++)
+                    {
+                        fields[cmds[i].name] = cmds[i].args;
+                    }
+                    agent.Brain.SetCommandFields(fields);
                     paused = false;
                     stopped = false;
                     applyingAction = false;

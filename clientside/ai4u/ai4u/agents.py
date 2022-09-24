@@ -1,6 +1,6 @@
 
 import numpy as np
-from .utils import step, stepfv
+from .utils import step, stepfv, steps
 import random
 import time
 from threading import Thread
@@ -31,10 +31,10 @@ class BasicController:
     def close(self):
         pass #release resources here
 
-    def request_reset(self):
+    def request_reset(self, args=None):
         #print("Begin Reseting....")
         self.initialState = None
-        self.agent.request_newepisode()
+        self.agent.request_newepisode(args)
         while self.initialState is None:
             time.sleep(self.waitforinitialstate)
         self.done = False
@@ -159,6 +159,7 @@ class BasicAgent:
         self.paused = False
         self.hasNextState = False
         self.waitingCommand = True
+        self.resetargs = None
 
     def request_stop(self):
         self.newStopCommand = True
@@ -167,10 +168,12 @@ class BasicAgent:
         if not self.stopped:
             self.newPauseCommand = True
 
-    def request_newepisode(self):
+    def request_newepisode(self, cmds=None):
+        self.resetargs = cmds
         self.createANewEpisode = True
     
-    def request_restart(self):
+    def request_restart(self, cmds=None):
+        self.resetargs = cmds
         self.newRestartCommand = True
 
     def request_resume(self):
@@ -194,8 +197,12 @@ class BasicAgent:
         self.paused = False
         self.newInfo = True
         self.hasNextState = False
-        return step("__restart__")
-    
+        if self.resetargs is None:
+            return step("__restart__")
+        else:
+            args = self.resetargs
+            self.resetargs = None
+            return steps("__restart__", None, args)
     def _pause(self):
         """
         Pause agent simulation in Unity.
@@ -262,7 +269,7 @@ class BasicAgent:
             self.__get_controller().handleConfiguration(self.id, self.max_step)
             return ("@".join(control))
         if 'wait_command' in a:
-            print("waiting command from unity...")
+            #print("waiting command from unity...")
             self.waitingCommand = True
             if self.createANewEpisode:
                 self.createANewEpisode = False

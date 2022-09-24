@@ -165,24 +165,33 @@ def eval_from(config, parameter, default_value):
     else:
         return default_value
 
-def ai4ucmd_parser(cmdname, args=[]):
+def ai4ucmd_parser(cmdname, args=None):
+    if args is None:
+        args = []
     nsize = len(args)
-    cmd = ""
+    cmd = []
     for a in args:
-        cmd += str(a) + ";"
-    command = "%s;%d;%s"%(cmdname, nsize, cmd)
+        cmd.append(str(a))
+    command = "%s;%d;%s"%(cmdname, nsize, ";".join(cmd))
     return command
 
 def step(action, value=None):
     if value is not None:
-        return format_ai4ucmd(action, [value])
+        return ai4ucmd_parser(action, [value])
     else:
         return ai4ucmd_parser(action)
 
+def steps(action, value, actions=None):
+    cmds = [ step(action, value) ]
+    assert actions is None or type(actions) is list, "Error: invalid action list: {a}".format(a=actions)
+    if actions is not None:
+        for i in range(len(actions)):
+            if (type(actions[i]) is tuple and len(actions[i]) == 2):
+                cmds.append( step(actions[i][0], actions[i][1]) )
+            else:
+                print("Error: the expected field of action is tuple, but {x} was the received value.".format(x=action[i]) )
+    #print("@".join(cmds))
+    return "@".join(cmds)
+
 def stepfv(action, values):
-    strvalues = None
-    if not isinstance(values, list):
-        values = list(values)
-    strvalues = str(values)
-    strvalues = strvalues.replace(' ', '').replace(',', ' ').replace('[','').replace(']', '')
-    return ai4ucmd_parser(action, [strvalues])
+    return ai4ucmd_parser(action, values)
