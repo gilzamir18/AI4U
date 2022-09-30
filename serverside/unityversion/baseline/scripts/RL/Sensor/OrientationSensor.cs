@@ -42,7 +42,14 @@ namespace ai4u {
             float c = Vector3.Dot(f, d.normalized);
             //Debug.Log("c == " + c);
             history.Push(c);
-            history.Push(d.magnitude/maxDistance);
+            if (normalized)
+            {
+                history.Push(d.magnitude/maxDistance);
+            } 
+            else
+            {
+                history.Push(d.magnitude);
+            }
             return history.Values;
         }
     }

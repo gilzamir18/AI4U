@@ -21,7 +21,10 @@ namespace ai4u
         public event AgentEpisodeHandler beginOfEpisodeEvent;
         public event AgentEpisodeHandler endOfStepEvent;
         public event AgentEpisodeHandler beginOfStepEvent;
-        
+        public event AgentEpisodeHandler beginOfUpdateStateEvent;
+        public event AgentEpisodeHandler endOfUpdateStateEvent;
+        public event AgentEpisodeHandler beginOfApplyActionEvent;
+        public event AgentEpisodeHandler endOfApplyActionEvent;  
 
         /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
         /// All positions are equally likely.</summary>
@@ -237,8 +240,31 @@ namespace ai4u
             reward += v;
         }
 
+        public void AddReward(float v, bool causeEpisodeToEnd){
+            if (doneAtNegativeReward && v < 0) {
+                Done = true;
+            }
+
+            if (doneAtPositiveReward && v > 0) {
+                Done = true;
+            }
+
+            if (causeEpisodeToEnd)
+            {
+                Done = true;
+            }
+
+            reward += v;
+        }
+
         public override void  ApplyAction()
         {
+
+            if (beginOfApplyActionEvent != null)
+            {
+                beginOfApplyActionEvent(this);
+            }
+
             if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
                 Done = true;
             }
@@ -251,6 +277,13 @@ namespace ai4u
                     {
                         actuatorList[i].Act();
                     }
+                }
+            }
+            if (!Done)
+            {
+                if (endOfApplyActionEvent != null)
+                {
+                    endOfApplyActionEvent(this);
                 }
             }
         }
@@ -374,6 +407,12 @@ namespace ai4u
 
         public override void UpdateState()
         {
+
+            if (beginOfUpdateStateEvent != null)
+            {
+                beginOfUpdateStateEvent(this);
+            }
+
             int n = sensorList.Count;
             for (int i = 0; i < n; i++) {
                 Sensor s = sensorList[i];
@@ -418,6 +457,12 @@ namespace ai4u
                     default:
                         break;
                 }
+            }
+
+
+            if (endOfUpdateStateEvent != null)
+            {
+                endOfUpdateStateEvent(this);
             }
         }
     }

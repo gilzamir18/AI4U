@@ -91,19 +91,21 @@ namespace ai4u
 
         public float[] GetActionArgAsFloatArray(string arg)
         {
-            return System.Array.ConvertAll(arg.Split(' '), ParseFloat);
+            return System.Array.ConvertAll(arg.Split(';'), ParseFloat);
         }
 
         public static string ParseAction(string actionName, float[] args)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(actionName);
-            sb.Append(";1;");
+            sb.Append(";");
+            sb.Append("" + args.Length);
+            sb.Append(";");
             for (int i = 0; i < args.Length; i++)
             {
                 if (i > 0)
                 {
-                    sb.Append(" ");
+                    sb.Append(";");
                 }
                 sb.Append(args[i]);
             }
