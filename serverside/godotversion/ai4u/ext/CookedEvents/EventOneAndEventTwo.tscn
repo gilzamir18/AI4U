@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=2]
-
-[ext_resource path="res://ai4u/ext/RL/src/AndRewardFunc.cs" type="Script" id=1]
-
-[node name="AND" type="Spatial"]
-script = ExtResource( 1 )
-isJustAnEvent = true
-alfa = 0.0
-successReward = 0.0

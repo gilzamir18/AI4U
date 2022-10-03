@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=2]
-
-[ext_resource path="res://ai4u/ext/RL/src/KinematicBodyTouchRewardFunc.cs" type="Script" id=1]
-
-[node name="KBTouchEvent" type="Spatial"]
-script = ExtResource( 1 )
-propagateNegativeReward = true
-isJustAnEvent = true
-reward = 1.0
