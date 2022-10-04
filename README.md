@@ -1,6 +1,3 @@
-![Running example ballroller](doc/images/ai4u1.PNG)
-
-
 # What is AI4U Connect?
 AI4U Connect is the backbone infrastructure for various flavors of AI4U. AI4U is separated into several subprojects. The AI4USB3 project, for example, is a full integration with the stable-baselines3 framework. AI4U Connect is the foundation on which many other projects are built.
 
