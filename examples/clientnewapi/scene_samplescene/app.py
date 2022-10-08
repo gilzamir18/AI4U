@@ -30,11 +30,11 @@ while True:
         print(state)
     else:
         action = map[r.upper()]
-        state = controller.request_step(action)
+        if action == 8:
+            state = controller.request_reset()
+        elif action == 5:
+            break
+        else:
+            state = controller.request_step(action)
     r = input("Action ?")
-    action = map[r.upper()]
-    if action == 8:
-        state = controller.request_reset()
-    elif action == 5:
-        break
 controller.close()
