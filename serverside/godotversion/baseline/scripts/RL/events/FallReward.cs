@@ -37,12 +37,6 @@ namespace ai4u
 		
 		public override void OnUpdate()
 		{
-			agent.AddReward(acmReward, this);
-			acmReward = 0;
-		}
-		
-		public override void _PhysicsProcess(float delta)
-		{
 			if ( !agent.Done )
 			{
 				Spatial sp = agent.GetAvatarBody() as Spatial;
@@ -65,6 +59,11 @@ namespace ai4u
 					acmReward += failReward;
 				}					
 			}
+
+
+			agent.AddReward(acmReward, this);
+			acmReward = 0;
 		}
+
 	}
 }

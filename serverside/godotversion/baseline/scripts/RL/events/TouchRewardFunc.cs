@@ -17,15 +17,17 @@ namespace ai4u
 		
 		public override void OnSetup(Agent agent)
 		{
+			agent.AddResetListener(this);
 			this.agent = (BasicAgent) agent;
 			target = GetNode(targetPath);
 			RigidBody body = this.agent.GetAvatarBody() as RigidBody;
-			body.Connect("body_entered", this, nameof(body_entered));
+			body.Connect("body_shape_entered", this, nameof(body_shape_entered));
 		}
 		
-		public void body_entered(Node node)
+		public void body_shape_entered(RID body_rid, Node body, int body_shape_index, int local_shape_index )
 		{
-			if (node == target)
+			GD.Print("COL " + body.Name);
+			if (body == target)
 			{
 				acmReward += this.reward;
 			}
