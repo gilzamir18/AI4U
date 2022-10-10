@@ -62,22 +62,9 @@ namespace ai4u {
 						{
 							turn = 0;
 						}
-						//state.transform.basis = state.transform.basis.rotated(Vector3.UP,the_rotation)
 						var velocity = new Vector3(0, 0, 0);
 						velocity.z += move + jumpForward;
-						
-
-						/*if (turn != 0)
-						{
-							PhysicsServer.BodySetState(
-								rBody.GetRid(),
-								PhysicsServer.BodyState.Transform,
-								rBody.GlobalTransform.Rotated(rBody.GlobalTransform.basis.y, turn)
-							);
-						}*/
-						
-						//velocity.x += turn;
-						
+												
 						
 						var r = rBody.Transform.basis.y * turn;
 						
@@ -87,11 +74,9 @@ namespace ai4u {
 							r
 						);	
 						
-						velocity.y += jump;
+						velocity.y += jump * jumpPower + jumpForward * jumpForwardPower;
 						velocity = velocity.Rotated(Vector3.Up, rBody.Rotation.y);
 						rBody.ApplyCentralImpulse(velocity);
-						//rBody.AddTorque(new Vector3() * 1000);
-						//rBody.ApplyTorqueImpulse( rBody.GlobalTransform.basis.y * 10000);
 					}
 				}
 				move = 0;

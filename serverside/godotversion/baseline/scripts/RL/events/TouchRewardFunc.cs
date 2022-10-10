@@ -26,7 +26,6 @@ namespace ai4u
 		
 		public void body_shape_entered(RID body_rid, Node body, int body_shape_index, int local_shape_index )
 		{
-			GD.Print("COL " + body.Name);
 			if (body == target)
 			{
 				acmReward += this.reward;

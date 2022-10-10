@@ -8,6 +8,7 @@ namespace ai4u {
 	[System.Serializable]
 	public class RewardFunc : Node, IAgentResetListener
 	{
+		[Export]
 		public bool causeEpisodeToEnd = false;
 		
 		public virtual void OnSetup(Agent agent)

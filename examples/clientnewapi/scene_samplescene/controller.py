@@ -25,9 +25,9 @@ class SimpleController(ai4u.agents.BasicController):
         elif action == 2:
             self.actionArgs = [0, 0.1, 0, 0, 0]
         elif action == 3:
-            self.actionArgs = [10, 0, 0, 0, 0]
+            self.actionArgs = [1, 0, 0, 0, 0]
         elif action == 4:
-            self.actionArgs = [-10, 0, 0, 0, 0]
+            self.actionArgs = [-1, 0, 0, 0, 0]
         elif action == 5:
             self.actionName = "__stop__"
             self.actionArgs = [0]

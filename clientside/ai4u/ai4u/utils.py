@@ -195,3 +195,21 @@ def steps(action, value, actions=None):
 
 def stepfv(action, values):
     return ai4ucmd_parser(action, values)
+
+def import_getch():
+    try:
+        from msvcrt import getch
+        return getch
+    except ImportError:
+        def getch_unix():
+            import sys, tty, termios
+            old_settings = termios.tcgetattr(0)
+            new_settings = old_settings[:]
+            new_settings[3] &= ~termios.ICANON
+            try:
+                termios.tcsetattr(0, termios.TCSANOW, new_settings)
+                ch = sys.stdin.read(1)
+            finally:
+                termios.tcsetattr(0, termios.TCSANOW, old_settings)
+            return ch
+        return getch_unix

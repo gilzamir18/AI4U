@@ -1,13 +1,13 @@
 import ai4u
 from controller import SimpleController
 from ai4u.appserver import startasdaemon
-
+from ai4u import utils
 
 ids = ["0"]
 controllers_classes =  [SimpleController]
 controller = startasdaemon(ids, controllers_classes)[0]
 
-map = {'A': 1, 'D': 2, 'W': 3, 'S': 4, 'T': 5, 'P': 6, 'R': 7, 'U': 0, 'E': 8}
+actions = {'A': 1, 'D': 2, 'W': 3, 'S': 4, 'T': 5, 'P': 6, 'R': 7, 'U': 0, 'E': 8}
 state = controller.request_reset()
 
 
@@ -24,17 +24,24 @@ L: Print State
 T: exit
 E: Restart
 ''')
-r = input("Action? ")
+
+getch = utils.import_getch()
+
 while True:
+    r = ''.join( map(chr, getch()) )
     if r.upper() == "L":
         print(state)
     else:
-        action = map[r.upper()]
+        if r.upper() not in actions:
+            print("Comando inválido: ", r)
+            continue
+        action = actions[r.upper()]
         if action == 8:
             state = controller.request_reset()
         elif action == 5:
             break
         else:
-            state = controller.request_step(action)
-    r = input("Action ?")
+            state, reward, done, info = controller.request_step(action)
+            print(reward)
+
 controller.close()

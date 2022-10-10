@@ -91,6 +91,7 @@ namespace ai4u
 
 		public override void OnSetup(Agent agent) 
 		{
+			mapping = new Dictionary<string, int>();
 			agent.AddResetListener(this);
 			this.agent = (BasicAgent) agent;
 			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody).GetWorld().DirectSpaceState;
@@ -114,7 +115,7 @@ namespace ai4u
 			Vector3 up = aim.y.Normalized();
 			Vector3 right = aim.x.Normalized();
 			UpdateRaysMatrix(eye.GlobalTransform.origin, forward, up, right, fieldOfView);
-			UpdateViewMatrix();
+			UpdateViewMatrix(visionMaxDistance);
 			return history.Values;
 		}
 
@@ -148,10 +149,10 @@ namespace ai4u
 				for (int j = 0; j < shape[1]; j++)
 				{				
 					var myray = raysMatrix[i,j];
-					var result = this.spaceState.IntersectRay(myray.Origin, myray.Origin + myray.Direction*maxDistance);//new Godot.Collections.Array { agent.GetBody() }
+					var result = this.spaceState.IntersectRay(myray.Origin, myray.Origin + myray.Direction*maxDistance, null, 2147483647, true, true);//new Godot.Collections.Array { agent.GetBody() }
 					if (debugEnabled)
 					{
-						GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
+						GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * maxDistance, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
 						debug_line += 1;
 					}
 					float t = -1;
@@ -163,7 +164,7 @@ namespace ai4u
 
 						var groups = gobj.GetGroups();
 						bool isTagged = false;
-						if (t <= visionMaxDistance)
+						if (t <= maxDistance)
 						{
 							foreach(string g in groups)
 							{

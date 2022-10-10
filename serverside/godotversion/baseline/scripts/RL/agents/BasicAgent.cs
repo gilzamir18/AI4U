@@ -216,7 +216,7 @@ namespace ai4u
 
 			if (from != null)
 			{
-				if (from.causeEpisodeToEnd)
+				if (from.causeEpisodeToEnd && v != 0)
 				{
 					Done = true;
 				}
