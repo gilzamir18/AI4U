@@ -72,7 +72,7 @@ namespace  ai4u
                     float r = GetStateAsFloat(i);
                     reward_sum += r;
                 }
-                else if (GetStateName(i) == "done" && GetStateAsFloat() > 0)
+                if (GetStateName(i) == "done" && GetStateAsFloat() > 0)
                 {
                     Debug.Log("Reward Episode: " + reward_sum);
                     reward_sum = 0;

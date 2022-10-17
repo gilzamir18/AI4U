@@ -9,7 +9,7 @@ using System.Text;
 namespace ai4u
 {
 
-    public struct Command  
+    public class Command  
     {
         public string name;
         public string[] args;
@@ -171,7 +171,8 @@ namespace ai4u
             }
             return false;
         }
-
+        
+        private Command[] lastCmd = null;
         void FixedUpdate()
         {
             if (!agent.SetupIsDone)
@@ -188,9 +189,10 @@ namespace ai4u
                 if (!applyingAction)
                 {
                     var cmd = RequestControl();
-
+                    lastCmd = null;
                     if (!agent.Alive())
                     {
+                        lastCmd = RequestControl();
                         applyingAction = false;
                         agent.EndOfEpisode();
                         stopped = true;
@@ -247,12 +249,22 @@ namespace ai4u
                 }
             } else
             {
-                RequestCommand request = new RequestCommand(3);
-                request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-                request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
-                request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
-            
-                var cmds = RequestEnvControl(request);
+                Command[] cmds = null;
+                if (lastCmd != null)
+                {
+                    cmds = lastCmd;
+                    lastCmd = null;
+                }
+                else
+                {
+                    RequestCommand request = new RequestCommand(3);
+                    request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
+                    request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
+                    request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
+                
+                    cmds = RequestEnvControl(request);
+                }
+
                 if (cmds == null)
                 {
                     throw new System.Exception("ai4u2unity connection error!");

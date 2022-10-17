@@ -26,15 +26,16 @@ namespace ai4u {
         }
         
         public override float[] GetFloatArrayValue()
-        {
+        {             
             if (agent.GetActionName()==actionName)
             {
+                previewsAction = agent.GetActionArgAsFloatArray();
                 for (int i = 0; i < actionSize; i++)
                 {
                     history.Push(previewsAction[i]);
                 }
-                previewsAction = agent.GetActionArgAsFloatArray();
             }
+
             return history.Values;
         }
     }

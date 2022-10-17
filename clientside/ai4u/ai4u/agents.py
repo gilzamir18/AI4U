@@ -88,8 +88,11 @@ class BasicController:
         self.nextstate = None
         while ( (not self.done) and 
                 (self.nextstate is None) and 
-                (not self.agent.paused)  ):
+                (not self.agent.paused) and (not self.agent.waitingCommand) ):
             time.sleep(self.waitfornextstate)
+
+        if self.agent.waitingCommand:
+            return {"envmode": True}, 0, True, {"envmode": True}
 
         if self.agent.paused:
             if self.actionName == '__resume__':
@@ -97,7 +100,6 @@ class BasicController:
                 return {"paused": False}, 0, False, {'paused': False}
             return {'paused': True}, 0, False, {'paused': True}
         
-
         state = self.nextstate
 
         if not state:
@@ -269,7 +271,7 @@ class BasicAgent:
             self.__get_controller().handleConfiguration(self.id, self.max_step)
             return ("@".join(control))
         if 'wait_command' in a:
-            #print("waiting command from unity...")
+            print("waiting command from unity...")
             self.waitingCommand = True
             if self.createANewEpisode:
                 self.createANewEpisode = False
