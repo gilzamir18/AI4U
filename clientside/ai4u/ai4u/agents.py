@@ -90,16 +90,26 @@ class BasicController:
                 (self.nextstate is None) and 
                 (not self.agent.paused) and (not self.agent.waitingCommand) ):
             time.sleep(self.waitfornextstate)
-
+        
         if self.agent.waitingCommand:
-            return {"envmode": True}, 0, True, {"envmode": True}
+            self.lastinfo['envmode'] = True
+            self.lastinfo['done'] = True
+            if gymformat:
+                return self.lastinfo, self.lastinfo['reward'], True, {}
+            else:
+                return self.lastinfo
 
         if self.agent.paused:
             if self.actionName == '__resume__':
                 self.resume()
-                return {"paused": False}, 0, False, {'paused': False}
-            return {'paused': True}, 0, False, {'paused': True}
-        
+                self.lastinfo['paused'] = False
+            else:
+                self.lastinfo['paused'] = True
+            if gymformat:
+                return self.lastinfo, self.lastinfo['reward'], True, {}
+            else:
+                return self.lastinfo
+
         state = self.nextstate
 
         if not state:
