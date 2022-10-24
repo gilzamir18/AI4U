@@ -281,7 +281,7 @@ class BasicAgent:
             self.__get_controller().handleConfiguration(self.id, self.max_step)
             return ("@".join(control))
         if 'wait_command' in a:
-            print("waiting command from unity...")
+            #print("waiting command from unity...")
             self.waitingCommand = True
             if self.createANewEpisode:
                 self.createANewEpisode = False

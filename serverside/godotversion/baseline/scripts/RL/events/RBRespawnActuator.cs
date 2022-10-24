@@ -20,10 +20,10 @@ namespace ai4u
 				nodeRef = GetNode(respawnOptionsPath);
 				children = nodeRef.GetChildren();
 				rBody = ( (BasicAgent) agent).GetAvatarBody() as RigidBody;
-				agent.AddResetListener(this);
+				((BasicAgent)agent).beforeTheResetEvent += HandleReset;
 			}
 			
-			public override void OnReset(Agent agent)
+			public void HandleReset(BasicAgent agent)
 			{
 				int idx = (int)GD.RandRange(0, children.Count);
 				

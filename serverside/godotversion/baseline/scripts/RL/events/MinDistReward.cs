@@ -29,7 +29,8 @@ namespace ai4u
 			rBody = (RigidBody) this.agent.GetAvatarBody();
 			
 			this.agent.AddResetListener(this);
-			minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
+			//minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
+			minDistance = System.Single.PositiveInfinity;
 		}
 
 		// Update is called once per frame
@@ -39,6 +40,7 @@ namespace ai4u
 			float dist = d.Length();
 			if (dist < minDistance)
 			{
+				if (minDistance != System.Single.PositiveInfinity)
 				this.agent.AddReward(successReward, this);
 				minDistance = dist;
 			} else
@@ -50,7 +52,8 @@ namespace ai4u
 		public override void OnReset(Agent agent)
 		{ 
 			this.agent = (BasicAgent) agent;
-			minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
+			//minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
+			minDistance = System.Single.PositiveInfinity;
 		}
 	}
 }

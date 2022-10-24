@@ -23,10 +23,6 @@ namespace ai4u
 					if (s != null && s.IsActive)
 					{
 						sensors.Add(s);
-						if (s.Resetable)
-						{
-							agent.AddResetListener(this);
-						}
 						s.OnSetup(agent);
 						if (s.type == SensorType.sfloatarray)
 						{
@@ -50,7 +46,10 @@ namespace ai4u
 			int n = sensors.Count;
 			for (int i = 0; i < n; i++)
 			{
-				sensors[i].OnReset(agent);
+				if (sensors[i].Resetable)
+				{
+					sensors[i].OnReset(agent);
+				}
 			}
 			GetFloatArrayValue();
 		}

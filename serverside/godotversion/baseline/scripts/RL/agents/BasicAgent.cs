@@ -63,7 +63,9 @@ namespace ai4u
 			{
 				if (node is RewardFunc)
 				{
-					rewards.Add((RewardFunc)node);
+					RewardFunc rf = (RewardFunc)node;
+					rf.OnSetup(this);
+					rewards.Add(rf);
 				}
 				else if (node is Sensor)
 				{
@@ -102,26 +104,6 @@ namespace ai4u
 
 			numberOfSensors += 4;
 
-			foreach (Sensor sensor in sensorList)
-			{
-				if (sensor.Resetable)
-				{
-					AddResetListener(sensor);
-				}
-				sensor.OnSetup(this);
-				sensorsMap[sensor.PerceptionKey] = idSensor;
-			}
-
-			foreach(Actuator a in actuatorList)
-			{
-				a.OnSetup(this);
-			}
-
-			foreach(RewardFunc rf in rewards)
-			{
-				rf.OnSetup(this);
-			}
-
 			desc = new string[numberOfSensors];
 			types = new byte[numberOfSensors];
 			values = new string[numberOfSensors];
@@ -137,6 +119,21 @@ namespace ai4u
 				throw new System.Exception("ai4u2unity connection error!");
 			}
 			setupIsDone = true;
+			
+			foreach (Sensor sensor in sensorList)
+			{
+				if (sensor.Resetable)
+				{
+					AddResetListener(sensor);
+				}
+				sensor.OnSetup(this);
+				sensorsMap[sensor.PerceptionKey] = idSensor;
+			}
+
+			foreach(Actuator a in actuatorList)
+			{
+				a.OnSetup(this);
+			}
 		}
 		
 		public void ResetReward()
@@ -242,35 +239,34 @@ namespace ai4u
 			reward += v;
 		}
 
-	public override void  ApplyAction()
-	{
-		if (beginOfApplyActionEvent != null)
+		public override void  ApplyAction()
 		{
-			beginOfApplyActionEvent(this);
-		}
-
-		if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
-			Done = true;
-		}
-		int n = actuatorList.Count;
-		for (int i = 0; i < n; i++)
-		{
+			if (beginOfApplyActionEvent != null)
+			{
+				beginOfApplyActionEvent(this);
+			}
+			if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
+				Done = true;
+			}
+			int n = actuatorList.Count;
+			for (int i = 0; i < n; i++)
+			{
+				if (!Done)
+				{
+					if (GetActionName() == actuatorList[i].actionName)
+					{
+						actuatorList[i].Act();
+					}
+				}
+			}
 			if (!Done)
 			{
-				if (GetActionName() == actuatorList[i].actionName)
+				if (endOfApplyActionEvent != null)
 				{
-					actuatorList[i].Act();
+					endOfApplyActionEvent(this);
 				}
 			}
 		}
-		if (!Done)
-		{
-			if (endOfApplyActionEvent != null)
-			{
-				endOfApplyActionEvent(this);
-			}
-		}
-	}
 
 		public override void Reset() 
 		{

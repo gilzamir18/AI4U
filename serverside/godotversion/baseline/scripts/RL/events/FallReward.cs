@@ -21,7 +21,11 @@ namespace ai4u
 		[Export]
 		private int axis = 1;
 		
+		[Export]
+		private int maxRewards = 1;
+		
 		private float acmReward = 0.0f;
+		private int rewards = 0;
 		private BasicAgent agent;
 		
 		public override void OnSetup(Agent agent)
@@ -33,11 +37,13 @@ namespace ai4u
 		public override void OnReset(Agent agent)
 		{
 			acmReward = 0.0f;
+			rewards = 0;
 		}
 		
 		public override void OnUpdate()
 		{
-			if ( !agent.Done )
+			
+			if (rewards < maxRewards)
 			{
 				Spatial sp = agent.GetAvatarBody() as Spatial;
 				Vector3 pos;
@@ -58,10 +64,12 @@ namespace ai4u
 				{
 					acmReward += failReward;
 				}					
+				agent.AddReward(acmReward, this);
+				if (acmReward != 0)
+				{
+					rewards ++;
+				}
 			}
-
-
-			agent.AddReward(acmReward, this);
 			acmReward = 0;
 		}
 

@@ -17,13 +17,26 @@ namespace ai4u {
 		[Export]
 		public float jumpForwardPower = 1;
 
+		[Export]
+		public float minActivityThreshold = 0.001f;
+
 		private BasicAgent agent;
+		
+		private RigidBody rBody;
 
 		public RBMoveActuator()
 		{
 			shape = new int[1]{4};
 			isContinuous = true;
 		}
+
+		public override void OnSetup(Agent agent)
+		{
+			this.agent = (BasicAgent) agent;
+			agent.AddResetListener(this);
+			rBody = this.agent.GetAvatarBody() as RigidBody;
+		}
+
 
 		private bool onGround = false;
 
@@ -45,7 +58,6 @@ namespace ai4u {
 				jump = action[2];
 				jumpForward = action[3];
 
-				RigidBody rBody = agent.GetAvatarBody() as RigidBody;
 				if (rBody != null)
 				{
 					if (Mathf.Abs(rBody.LinearVelocity.y) > 0.001)
@@ -57,14 +69,24 @@ namespace ai4u {
 						onGround = true;
 					}
 					if (onGround)
-					{
-						if (Mathf.Abs(turn) < 0.01f)
+					{	
+						if (Mathf.Abs(turn) < minActivityThreshold)
 						{
 							turn = 0;
 						}
+						
+						if (Mathf.Abs(jump) < minActivityThreshold)
+						{
+							jump = 0;
+						}
+						
+						if (Mathf.Abs(jumpForward) < minActivityThreshold)
+						{
+							jumpForward = 0;
+						}
+						
 						var velocity = new Vector3(0, 0, 0);
-						velocity.z += move + jumpForward;
-												
+						velocity.z += move * moveAmount + jumpForward * jumpForwardPower;
 						
 						var r = rBody.Transform.basis.y * turn;
 						
@@ -72,11 +94,11 @@ namespace ai4u {
 							rBody.GetRid(),
 							PhysicsServer.BodyState.AngularVelocity,
 							r
-						);	
+						);
 						
-						velocity.y += jump * jumpPower + jumpForward * jumpForwardPower;
+						velocity.y += jump * jumpPower + jumpForward * jumpPower;
 						velocity = velocity.Rotated(Vector3.Up, rBody.Rotation.y);
-						rBody.ApplyCentralImpulse(velocity);
+						rBody.AddCentralForce(velocity);
 					}
 				}
 				move = 0;
@@ -84,13 +106,6 @@ namespace ai4u {
 				jump = 0;
 				jumpForward = 0;
 			}
-		}
-
-		public override void OnSetup(Agent agent)
-		{
-			this.agent = (BasicAgent) agent;
-			agent.AddResetListener(this);
-			
 		}
 
 		public override void OnReset(Agent agent)

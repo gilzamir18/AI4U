@@ -42,6 +42,7 @@ while True:
             break
         else:
             state, reward, done, info = controller.request_step(action)
+            print(state['array'])
             print(reward)
 
 controller.close()

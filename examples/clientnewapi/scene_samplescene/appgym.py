@@ -5,7 +5,7 @@ import numpy as np
 env = gym.make("AI4UEnv-v0")
 state = env.reset()
 done = False 
-amap = {'A': [0, -0.2, 0, 0], 'D': [0, 0.2, 0, 0], 'W': [10, 0, 0, 0], 'S': [-10, 0, 0, 0], 'U': [0, 0, 1, 0], 'F':[0, 0, 0, 1]}
+amap = {'A': [0, -0.2, 0, 0], 'D': [0, 0.2, 0, 0], 'W': [1, 0, 0, 0], 'S': [-1, 0, 0, 0], 'U': [0, 0, 1, 0], 'F':[0, 0, 0, 1]}
 
 print('''
 AI4UConnect Demo.

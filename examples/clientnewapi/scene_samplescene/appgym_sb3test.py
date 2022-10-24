@@ -8,9 +8,23 @@ from stable_baselines3.sac import MultiInputPolicy
 
 env = gym.make("AI4UEnv-v0")
 
-model = SAC.load("sac_ai4u")
+print('''
+AI4U Client Controller
+=======================
+This example controll a movable character in game (unity or godot).
+''')
 
-print("Testing...")
+opt = input("Godot (G) or Unity (U)? ")
+options = ['G', 'U']
+while opt.upper() not in options:
+  print("Select one option from: ", options)
+  opt = input("Godot (G) or Unity (U)? ")
+
+if opt.upper() == 'G':
+  model = SAC.load("sac_ai4u_godot")
+else:
+  model = SAC.load("sac_ai4u_unity")
+
 obs = env.reset()
 reward_sum = 0
 while True:
