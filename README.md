@@ -1,8 +1,9 @@
-# What is AI4U Connect?
+# What is AI4U?
 AI4U Connect is the backbone infrastructure for various flavors of AI4U. AI4U is separated into several subprojects. AI4U is the foundation on which many other projects are built connecting powerfull game engines (Unity and Godot) and artificial intelligence abstractions. AI4U role is to connect third-party applications to Unity/Godot through the Python language and providing an agent abstraction.
 
 # Documentation
-(Development Guide)[doc/]
+
+[Developement Guide](doc/)
 
 # Warning
 Currently, AI4U is under intense development. The API is not yet stable. We hope to soon stabilize the API.
