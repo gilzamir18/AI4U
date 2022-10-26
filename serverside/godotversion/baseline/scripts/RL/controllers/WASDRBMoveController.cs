@@ -10,7 +10,11 @@ namespace  ai4u
 		[Export]
 		public string actuatorName = "move";
 		[Export]
-		public float speed = 10.0f;
+		public float speed = 0.5f;
+		[Export]
+		public float turnAmount = 1.0f;
+		[Export]
+		public float jumpPower = 1.0f;
 
 		private float reward_sum = 0;
 
@@ -31,22 +35,22 @@ namespace  ai4u
 
 			if (Input.IsKeyPressed((int)KeyList.U))
 			{
-				actionValue[2] = speed;
+				actionValue[2] = jumpPower;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.J))
 			{
-				actionValue[3] = speed;
+				actionValue[3] = jumpPower;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.A))
 			{
-				actionValue[1] = -speed;
+				actionValue[1] = -turnAmount;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.D))
 			{
-				actionValue[1] = speed;
+				actionValue[1] = turnAmount;
 			}
 
 			if (Input.IsKeyPressed((int)KeyList.R))

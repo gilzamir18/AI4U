@@ -66,6 +66,11 @@ namespace ai4u
 		
 		[Export]
 		public int vSize = 10;
+		
+		[Export]
+		public float horizontalShift = 0;
+		[Export]
+		public float verticalShift = 0;
 	
 		[Export]
 		public NodePath eyePath;
@@ -77,35 +82,32 @@ namespace ai4u
 		[Export]
 		public float fieldOfView = 90.0f;
 
-
-
 		private Dictionary<string, int> mapping;
 		private Ray[,] raysMatrix = null;
 		private HistoryStack<float> history;
 		private PhysicsDirectSpaceState spaceState;
-		private int[,] viewMatrix = null;
-		private float[,] depthMatrix = null;
 		
 		[Export]
 		public bool debugEnabled = false;
 
 		public override void OnSetup(Agent agent) 
 		{
-			mapping = new Dictionary<string, int>();
-			agent.AddResetListener(this);
-			this.agent = (BasicAgent) agent;
-			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody).GetWorld().DirectSpaceState;
 			type = SensorType.sfloatarray;
 			shape = new int[2]{hSize,  vSize};
 			history = new HistoryStack<float>(stackedObservations * shape[0] * shape[1]);
+			agent.AddResetListener(this);
+			
+			mapping = new Dictionary<string, int>();
+
+			this.agent = (BasicAgent) agent;
+			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody).GetWorld().DirectSpaceState;
+
 			if (this.eyePath != null && this.eyePath != "") {
 				this.eye = GetNode(this.eyePath) as Spatial;
 			} else {
 				this.eye = this.agent.GetAvatarBody() as Spatial;
 			}
 			raysMatrix = new Ray[shape[0], shape[1]];
-			viewMatrix = new int[shape[0], shape[1]];
-			depthMatrix = new float[shape[0], shape[1]];
 		}
 
 		public override float[] GetFloatArrayValue()
@@ -115,12 +117,7 @@ namespace ai4u
 			Vector3 up = aim.y.Normalized();
 			Vector3 right = aim.x.Normalized();
 			UpdateRaysMatrix(eye.GlobalTransform.origin, forward, up, right, fieldOfView);
-			UpdateViewMatrix(visionMaxDistance);
 			return history.Values;
-		}
-
-		public int[,] GetViewMatrix() {
-			return this.viewMatrix;
 		}
 
 		private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 45.0f)
@@ -128,72 +125,78 @@ namespace ai4u
 			float vangle = 2 * fieldOfView / shape[0];
 			float hangle = 2 * fieldOfView / shape[1];
 
+			
 			float iangle = -fieldOfView;
-
+			
+			var debugline = 0;
 			for (int i = 0; i < shape[0]; i++)
 			{
-				var fwd = ( (new Quat(right, Mathf.Deg2Rad(iangle + vangle * i) )).Normalized().Xform(forward) );
+				var k1 = 1;
+				if (shape[0] <= 1)
+				{
+					k1 = 0;
+				}
+				var fwd = forward.Rotated(up, Mathf.Deg2Rad( (iangle * k1 + horizontalShift)  + vangle * i) ).Normalized();
 				for (int j = 0; j < shape[1]; j++)
 				{
-					var direction = ( (new Quat(up, Mathf.Deg2Rad(iangle + hangle * j)  )).Normalized().Xform(fwd) );
+					var k2 = 1;
+					if (shape[1] <= 1)
+					{
+						k2 = 0;
+					}
+					var direction = fwd.Rotated(right, Mathf.Deg2Rad( (iangle * k2 + verticalShift) + hangle * j)).Normalized();
 					raysMatrix[i, j] =  new Ray(position, direction);
+					UpdateView(i, j, debugline);
+					debugline ++;
 				}
 			}
 		}
 		
-		public void UpdateViewMatrix(float maxDistance = 500.0f)
+		public void UpdateView(int i, int j, int debug_line = 0)
 		{
-			var debug_line = 0;
-			for (int i = 0; i < shape[0]; i++)
+			var myray = raysMatrix[i,j];
+			var result = this.spaceState.IntersectRay(myray.Origin, myray.Origin + myray.Direction*visionMaxDistance, null, 2147483647, true, true);//new Godot.Collections.Array { agent.GetBody() }
+			bool isTagged = false;
+			float t = -1;
+			if (result.Count > 0)
 			{
-				for (int j = 0; j < shape[1]; j++)
-				{				
-					var myray = raysMatrix[i,j];
-					var result = this.spaceState.IntersectRay(myray.Origin, myray.Origin + myray.Direction*maxDistance, null, 2147483647, true, true);//new Godot.Collections.Array { agent.GetBody() }
-					if (debugEnabled)
-					{
-						GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * maxDistance, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
-						debug_line += 1;
-					}
-					float t = -1;
-					if (result.Count > 0)
-					{
-						t = myray.GetDist((Vector3)result["position"]);					
-						
-						Spatial gobj = result["collider"] as Spatial;
+				t = myray.GetDist((Vector3)result["position"]);					
+				
+				Spatial gobj = result["collider"] as Spatial;
 
-						var groups = gobj.GetGroups();
-						bool isTagged = false;
-						if (t <= maxDistance)
-						{
-							foreach(string g in groups)
-							{
-								if (mapping.ContainsKey(g))
-								{
-									int code = mapping[g];
-									viewMatrix[i, j] = code;
-									history.Push(code);
-									depthMatrix[i, j] = t;
-									isTagged = true;
-									break;
-								}
-							}
-						}
-						if (!isTagged)
-						{
-							viewMatrix[i, j] = noObjectCode;
-							history.Push(noObjectCode);
-							depthMatrix[i, j] = -1.0f;
-						}				
-					}
-					else
+				var groups = gobj.GetGroups();
+
+				if (t <= visionMaxDistance)
+				{
+					foreach(string g in groups)
 					{
-						viewMatrix[i, j] = noObjectCode;
-						history.Push(noObjectCode);
-						depthMatrix[i, j] = -1.0f;
-					}					
+						if (mapping.ContainsKey(g))
+						{
+							int code = mapping[g];
+							history.Push(code);
+							isTagged = true;
+							break;
+						}
+					}
 				}
+				if (!isTagged)
+				{
+					history.Push(noObjectCode);
+				}				
 			}
+			else
+			{
+				history.Push(noObjectCode);
+			}
+			if (debugEnabled)
+			{
+				if (isTagged) {
+					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * visionMaxDistance, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
+				} else 
+				{
+					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * visionMaxDistance, new Color(1, 1, 1, 1), new Color(0, 1, 0, 1), 1, 10);					
+				}
+			}			
 		}
 		
 		public override void OnReset(Agent agent) {
@@ -206,8 +209,6 @@ namespace ai4u
 				mapping[name] = code;
 			}
 			raysMatrix = new Ray[shape[0], shape[1]];
-			viewMatrix = new int[shape[0], shape[1]];
-			depthMatrix = new float[shape[0], shape[1]];
 		} 
 	}
 }
