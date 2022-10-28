@@ -12,4 +12,6 @@ After installing AI4UPE, enter the [example](/examples/ai4upe/scene_samplescene)
 
 Then run the SampleScene scene in Godot and run the game. This script will execute an already trained neural network that will control the capsule with arrow that represents the agent. The agent's objective is to reach the red cube without falling off the platform (green plane in figure bellow).
 
+[See here for full documentation on AI4UPE](./doc/) 
+
 ![IMAGEM](/ai4upe/doc/img/ai4uge_samplescene.png)

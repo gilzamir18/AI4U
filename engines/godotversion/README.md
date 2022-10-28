@@ -4,4 +4,4 @@ This is the Godot version of the AI4U tool (AI4U Godot Edition - AI4UGE). The Go
 
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
-[Documentation](../../doc/)
+[Documentation](/doc/)
