@@ -15,4 +15,19 @@ Portanto, AI4U possui uma arquitetura resumida na Figura 1.
 
 *Figure 1. Arquitetura da AI4U mostrando os seus quatro componentes principais: a função ai4u.appserver.startdaemon (resumidamente, startdaemon), um objeto que herda de BasicController que é inicializado pela função stardaemon, um objeto do tipo ControlRequestor associado a um item de jogo (agente) controlado pelo objeto do tipo BasicAgent*.
 
-BasicController é a classe ai4u.controllers.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o agente criado no motor de jogos.
+BasicController é a classe ai4u.agents.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o agente criado no motor de jogos.
+
+# Exemplo
+Neste diretório [examples/ai4upe](/examples/ai4upe), há exemplos de controladores para três cenas. A cena *scene_samplescene* está implementada tanto em Godot quanto an Unity. O seguinde código (reference ao arquivo app.py) pode controlar por meio de comandos manuais o agente representado pelo corpo de capsula com seta mostrado na Figura 2 (o lado esquerdo tem o agente em Godot e o lado direito, em Unity).
+
+Primeiramente importamos os módulos que contém os componentes de que precisamos.
+
+```
+import ai4u
+from controller import SimpleController
+from ai4u.appserver import startasdaemon
+from ai4u import utils
+```
+
+O componente *SimpleController* herda de ai4u.agents.*BasicController* e implementa uma forma específica de comunicação com os agentes das cenas do projeto [AI4UTesting](/examples/unity/) e do projeto [AI4UGTesting](/examples/dodot/).
+
