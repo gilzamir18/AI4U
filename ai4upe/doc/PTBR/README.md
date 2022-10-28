@@ -10,8 +10,7 @@ Neste guia, mostramos a arquitetura do componente da AI4U chamado de AI4U Python
 AI4UPE permite controlar um agente na Unity e na Godot de uma maneira similar. Você não precisa ter dois scripts diferentes, pois o protocolo de comunicação entre o código Python e o motor de jogos é o mesmo, tanto faz ser Unity quanto Godot. Para isso, é importante entender que todo agente no ambiente tem um identificador (ID). E cada agente no ambiente tem um controlador que implementa o protocolo da AI4UPE. Em Python, para controlar o agente, deve-se criar um objeto controlador que é inicializado pelo método *startdaemon* do pacote *ai4u.appserver*. O controlador interpreta o estado do ambiente percebido pelo agente criado dentro do motor de jogos e envia as ações no formato que este agente compreenda. Observe que é papel do programador ajustar o nome, tipo e formato das percepções (dados enviados pelos sensores) e das ações (dados enviados aos atuadores) do agente.
 
 Portanto, AI4U possui uma arquitetura resumida na Figura 1.
-
-<center>
 ![Arquitetura da AI4U](../img/ai4ucomps.png)
 *Figure 1. Arquitetura da AI4U mostrando os seus quatro componentes principais: a função ai4u.appserver.startdaemon (resumidamente, startdaemon), um objeto que herda de BasicController que é inicializado pela função stardaemon, um objeto do tipo ControlRequestor associado a um item de jogo (agente) controlado pelo objeto do tipo BasicAgent.
-</center>
+
+BasicController é a classe ai4u.controllers.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o agente criado no motor de jogos.
