@@ -18,7 +18,11 @@ Portanto, AI4U possui uma arquitetura resumida na Figura 1.
 BasicController é a classe ai4u.agents.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o agente criado no motor de jogos.
 
 # Exemplo
-Neste diretório [examples/ai4upe](/examples/ai4upe), há exemplos de controladores para três cenas. A cena *scene_samplescene* está implementada tanto em Godot quanto an Unity. O seguinde código (reference ao arquivo app.py) pode controlar por meio de comandos manuais o agente representado pelo corpo de capsula com seta mostrado na Figura 2 (o lado esquerdo tem o agente em Godot e o lado direito, em Unity).
+Neste diretório [examples/ai4upe](/examples/ai4upe), há exemplos de controladores para três cenas. A cena *scene_samplescene* está implementada tanto em Godot quanto an Unity. O código (reference ao arquivo app.py) pode controlar por meio de comandos manuais o agente representado pelo corpo de capsula com seta mostrado na Figura 2 (o lado esquerdo tem o agente em Godot e o lado direito, em Unity).
+
+
+![Agent](/ai4upe/doc/img/agentgu.png)
+
 
 Primeiramente importamos os módulos que contém os componentes de que precisamos.
 
@@ -29,5 +33,7 @@ from ai4u.appserver import startasdaemon
 from ai4u import utils
 ```
 
-O componente *SimpleController* herda de ai4u.agents.*BasicController* e implementa uma forma específica de comunicação com os agentes das cenas do projeto [AI4UTesting](/examples/Unity/) e do projeto [AI4UGTesting](/examples/Godot/).
+O componente *SimpleController* herda de ai4u.agents.*BasicController* e implementa uma forma específica de comunicação com os agentes das cenas do projeto [AI4UTesting](/examples/Unity/) e do projeto [AI4GTesting](/examples/Godot/). O componente *utils*, dentre outras funcionalidades, provê a função import_getch, que pode ser usada no lugar da entrada padrão em Python.
+
+Depois de importar as bibliotecas a 
 
