@@ -29,5 +29,5 @@ from ai4u.appserver import startasdaemon
 from ai4u import utils
 ```
 
-O componente *SimpleController* herda de ai4u.agents.*BasicController* e implementa uma forma específica de comunicação com os agentes das cenas do projeto [AI4UTesting](/examples/unity/) e do projeto [AI4UGTesting](/examples/dodot/).
+O componente *SimpleController* herda de ai4u.agents.*BasicController* e implementa uma forma específica de comunicação com os agentes das cenas do projeto [AI4UTesting](/examples/Unity/) e do projeto [AI4UGTesting](/examples/Godot/).
 
