@@ -1,6 +1,6 @@
 # AI4U Python Edition
 
-AI4U Python Edition (AI4UPE) is a protocol and an Application Programming Interface (API) that allow control Unity and Godot itens designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. See the developer guide to understand how to turn a game item into an agent: [DevGuide](doc/).
+AI4U Python Edition (AI4UPE) is a protocol and an Application Programming Interface (API) that allow control Unity and Godot itens designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. See the developer guide to understand how to turn a game item into an agent: [DevGuide](/doc/).
 
 To control your agent through the Python language, you need to install AI4UPE. To do this, enter the directory [clientside](/clientside/ai4u) and run the command:
 
