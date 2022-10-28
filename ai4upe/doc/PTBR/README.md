@@ -11,4 +11,4 @@ AI4UPE permite controlar um agente na Unity e na Godot de uma maneira similar. V
 
 Portanto, AI4U possui uma arquitetura resumida na Figura 1.
 
-![Arquitetura da AI4U](/ai4pe/doc/img/ai4ucomps.png)
+![Arquitetura da AI4U](../img/ai4ucomps.png)
