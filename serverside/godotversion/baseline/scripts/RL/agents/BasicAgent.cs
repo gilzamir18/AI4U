@@ -290,6 +290,14 @@ namespace ai4u
 			return !Done;
 		}
 
+		public override void EndOfEpisode()
+		{
+			if (endOfEpisodeEvent != null)
+			{
+				endOfEpisodeEvent(this);
+			}
+		}
+
 		public override void UpdateState()
 		{
 			if (beginOfUpdateStateEvent != null)

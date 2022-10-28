@@ -14,16 +14,14 @@ AI4U Client Controller
 This example controll a movable character in game (unity or godot).
 ''')
 
-opt = input("Godot (G) or Unity (U)? ")
-options = ['G', 'U']
-while opt.upper() not in options:
-  print("Select one option from: ", options)
-  opt = input("Godot (G) or Unity (U)? ")
+opt = input("Godot (G), Unity (U) or Current (Any)? ")
 
 if opt.upper() == 'G':
   model = SAC.load("sac_ai4u_godot")
-else:
+elif opt.upper() == 'U':
   model = SAC.load("sac_ai4u_unity")
+else:
+  model = SAC.load("sac_ai4u")
 
 obs = env.reset()
 reward_sum = 0

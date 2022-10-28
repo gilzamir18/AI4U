@@ -189,17 +189,7 @@ namespace ai4u
                 if (!applyingAction)
                 {
                     var cmd = RequestControl();
-                    lastCmd = null;
-                    if (!agent.Alive())
-                    {
-                        lastCmd = RequestControl();
-                        applyingAction = false;
-                        agent.EndOfEpisode();
-                        stopped = true;
-                        frameCounter = 0;
-                        agent.NSteps = 0;
-                    }
-                    else if (CheckCmd(cmd, "__stop__"))
+                    if (CheckCmd(cmd, "__stop__"))
                     {
                         stopped = true;
                         applyingAction = false;
@@ -227,6 +217,16 @@ namespace ai4u
                         frameCounter = 1;
                         ((BasicAgent)agent).ResetReward();
                         agent.ApplyAction();
+                        if (!agent.Alive())
+                        {
+                            applyingAction = false;
+                            ((BasicAgent)agent).UpdateReward();
+                            agent.EndOfEpisode();
+                            lastCmd = RequestControl();
+                            stopped = true;
+                            frameCounter = 0;
+                            agent.NSteps = 0;
+                        }
                     }
                 }
                 else
@@ -243,6 +243,16 @@ namespace ai4u
                         if (repeatAction)
                         {
                             agent.ApplyAction();
+                            if (!agent.Alive())
+                            {
+                                applyingAction = false;
+                                ((BasicAgent)agent).UpdateReward();
+                                agent.EndOfEpisode();
+                                lastCmd = RequestControl();
+                                stopped = true;
+                                frameCounter = 0;
+                                agent.NSteps = 0;
+                            }
                         }
                         frameCounter ++;
                     }
