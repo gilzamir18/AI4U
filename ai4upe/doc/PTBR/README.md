@@ -22,7 +22,7 @@ Neste diretório [examples/ai4upe](/examples/ai4upe), há exemplos de controlado
 
 ![Agent](/ai4upe/doc/img/agentgu.png)
 
-Primeiramente importamos os módulos que contém os componentes de que precisamos.
+Vamos implementar um controlador manual (o próprio usuário envia comandos por meio da entrada padrão) para esta cena. Primeiramente importamos os módulos que contém os componentes de que precisamos.
 
 ```
 import ai4u
@@ -43,9 +43,46 @@ ids = ["0"]
 # Observe que informamos a classe e não o objeto.
 controllers_classes =  [SimpleController]
 
-#O método startasdaemon criar uma instância do controlador e o iniciliza em uma thread separada. 
+#O método startasdaemon criar uma instância do controlador e o inicializa em uma thread separada. 
 
 controller = startasdaemon(ids, controllers_classes)[0]
 ```
 
 O método *startasdaemon* recebe a lista de identificadores de agente e uma lista de controladores correspondentes e então instancia o controlador em uma *thread* do tipo *daemon* e retorna a lista de objetos controladores instanciados. Na última linha de código, obtemos na mesma linha o único controlador retornado. Com este objeto, podemos enviar comandos para o agente modelado no motor de jogos e que roda em uma instância do jogo que criamos:
+
+```
+# Reinicializa o ambiente em um novo episódio.
+state = controller.request_reset()
+```
+
+Neste exemplo, o comando *request_reset* de controller solicita a reinicialização do ambiente do agente, gerando um novo episódio. O tempo de vida do agente é dividida em episódios. O episódio somente inicializa depois que o comando *request_reset* for executado.
+
+Também podemos enviar ações para o agente. O conjunto de ações que podemos enviar depende da forma como o agente foi modelado, ou seja, dos sensores e atuadores que o pesquisador adicionou ao agente. Por isso, a classe SimpleController teve que ser codificada especificamente para a cena *SampleScene*. Nesta cena, o agente em um corpo de capsula, como mostrado na Figura 2 e mode se movimentar em uma plataforma plana. O agente tem que alcançar o cubo evitando sair da plataforma. Se o agente sair da plataforma, ele cai e morre. Este agente suporta uma ação nomeada como "move" que recebe quatro números reais em um vetor *[fb, lr, j, jf]*, cujos valores representam:
+
+* *fb* um valor no intervalo real [-1, 1], se o valor for positivo executa um movimento para frente com velocidade proporcional ao módulo de *fb*; se for negativo, faz um movimento para trás proporcional a *fb*.
+* *lr* quantidade de graus que o agente pode girar (se for positivo, gira para à esquerda do agente, se for positivo, gira para a direita do agente).
+* *j* intensidade do salto para cima (se for menor ou igual a zero, o agente não pula).
+* *jf* intensidade do salto para frente (se for menor ou igual a zero o agente não salta).
+
+Para enviar um comando desse tipo, basta executar o método *request_step* do *controller*
+
+```
+state, reward, done, info = controller.request_step(action)
+```
+
+onde *action* é um vetor de quadro números reais como acabamos de descrever; O método *request_step* retorna por padrão uma tupla com quatro elementos:
+
+* state: o estado atual observado pelo agente;
+* reward: a soma de recompensas recebidas durante o ciclo de decisão do agente;
+* done: se o episódio terminou depois da última ação; e
+* info: informações extras enviadas pelo próprio ambiente, geralmente o mesmo que *state*.
+
+
+O arquivo [app.py](/examples/ai4upe/scene_samplescene/app.py) vai além e adiciona código para interação com o usuário. Para executar este exemplo, primeiramente execute o script usando a linguagem Python:
+
+    python app.py
+
+Depois, execute a cena no seu motor de jogos preferido (Godot ou Unity). Observe que você executar a cena apenas depois de executar o *script* que usa a AI4UPE, caso contrário, a cena será fechada por falta de comunicação com a AI4UPE.
+
+# Criando seu próprio controlador
+Em breve!
