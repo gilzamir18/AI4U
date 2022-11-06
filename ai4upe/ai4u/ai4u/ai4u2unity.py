@@ -1,36 +1,7 @@
 import sys
 from multiprocessing import Process
 import socketserver
-from .workers import TestWorker, AI4UWorker
-import argparse
-import importlib
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--host',
-                    default='127.0.0.1',
-                    dest='host',
-                    help='Host IP address.'
-                    )
-parser.add_argument('--port',
-                    default='8080',
-                    help='port address'
-                    )
-
-parser.add_argument('--worker',
-                    default='',
-                    help='user worker.'
-                    )
-
-parser.add_argument('--agent',
-                    default='ai4u.agents.BasicAgent',
-                    help='user worker.'
-                    )
-                
-parser.add_argument('--agent_id',
-                    default='0',
-                    help='user worker.'
-                    )
-                
+from .workers import AI4UWorker
 
 class AI4UUDPHandler(socketserver.DatagramRequestHandler):
     worker = AI4UWorker()

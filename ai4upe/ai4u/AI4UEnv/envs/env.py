@@ -13,7 +13,7 @@ class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
 
-  def __init__(self, controller_class=BasicGymController, ids=None):
+  def __init__(self, controller_class=BasicGymController, ids=None, server_IP="127.0.0.1", server_port=8080, sleep=0.1):
     super(GenericEnvironment, self).__init__()
     # Define action and observation space
     # They must be gym.spaces objects
@@ -21,7 +21,7 @@ class GenericEnvironment(gym.Env):
     if ids is None:
       ids = ["0"]
     controllers_classes =  [controller_class]
-    controller = startasdaemon(ids, controllers_classes)[0]
+    controller = startasdaemon(ids, controllers_classes, server_IP, server_port, sleep)[0]
     self.controller = controller
     self.action_space = self.controller.action_space
     self.observation_space = self.controller.observation_space
