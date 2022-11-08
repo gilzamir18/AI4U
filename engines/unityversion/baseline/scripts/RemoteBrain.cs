@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Text;
+using System.Net.Sockets;
+using System.Net;
+using UnityEditor;
 
 namespace ai4u
 {
@@ -21,17 +24,24 @@ namespace ai4u
         private float timeScale = 1.0f; //unity controll of the physical time.
         private bool runFirstTime = false;
 
+
+        ///<summary>The IP of the ai4u2unity training server.</summary>
+        public string host = "127.0.0.1";
+        
+        ///<summary>The server port of the ai4u2unity training server.</summary>
+        public int port = 8080;
+
+        public int receiveTimeout = 10;
+
+        private IPAddress serverAddr; //controller address
+        private EndPoint endPoint; //controller endpoint
+        private Socket sockToSend; //Socket to send async message.
+
         private ControlRequestor controlRequestor;
 
         void Awake(){
-            controlRequestor = GetComponent<ControlRequestor>(); 
-            if (controlRequestor == null)
-            {
-
-                Debug.LogWarning("No ControlRequestor component added in RemoteBrain component.");
-            }
-
             //one time configuration
+            sockToSend = TrySocket();
             if (!managed && runFirstTime){
                 runFirstTime =false;
                 string[] args = System.Environment.GetCommandLineArgs ();
@@ -39,7 +49,7 @@ namespace ai4u
                 while (i < args.Length){
                     switch (args[i]) {
                         case "--ai4u_port":
-                            if (controlRequestor != null) controlRequestor.port = int.Parse(args[i+1]);
+                            port = int.Parse(args[i+1]);
                             i += 2;
                             break;
                         case "--ai4u_timescale":
@@ -48,7 +58,7 @@ namespace ai4u
                             i += 2;
                             break;
                         case "--ai4u_host":
-                            if (controlRequestor != null) controlRequestor.host = args[i+1];
+                            host = args[i+1];
                             i += 2;
                             break;
                         case "--ai4u_targetframerate":
@@ -70,6 +80,12 @@ namespace ai4u
             }
             agent.SetBrain(this);
             agent.Setup();
+            controlRequestor = agent.ControlRequestor; 
+            if (controlRequestor == null)
+            {
+
+                Debug.LogWarning("No ControlRequestor component added in RemoteBrain component.");
+            }
         }
 
         public ControlRequestor ControlRequestor
@@ -80,5 +96,48 @@ namespace ai4u
             }
         }
 
+
+
+        public Socket TrySocket()
+        {
+            if (sockToSend == null)
+            {
+                    serverAddr = IPAddress.Parse(host);
+                    endPoint = new IPEndPoint(serverAddr, port);
+                    sockToSend = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            }
+            return sockToSend;
+        }
+
+        void OnDisable()
+        {
+            if (sockToSend != null)
+            {
+                //Debug.Log("Socket is closed...");
+                sockToSend.Close();
+            }
+        }
+
+
+        public bool sendData(byte[] data, out int total, byte[] received)
+        {
+            TrySocket().ReceiveTimeout = receiveTimeout;
+            sockToSend.SendTo(data, endPoint);
+            total = 0;
+            try 
+            { 
+                total = sockToSend.Receive(received);
+                return true;
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogWarning("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
+                #if UNITY_EDITOR
+                    EditorApplication.isPlaying = false;
+                #endif
+                Application.Quit();
+                return false;
+            }
+        }
     }
 }

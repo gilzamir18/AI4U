@@ -21,7 +21,7 @@ namespace ai4u
 
         protected Brain brain;
         public string ID = "0";
-
+        public ControlRequestor controlRequestor;
         public int numberOfFields = 0;
         
         protected int nSteps;
@@ -77,6 +77,14 @@ namespace ai4u
             get
             {
                 return brain;
+            }
+        }
+        
+        public ControlRequestor ControlRequestor
+        {
+            get
+            {
+                return controlRequestor;
             }
         }
 
@@ -304,6 +312,8 @@ namespace ai4u
         
         private Dictionary<string, string[]> commandFields;
         public Agent agent = null;
+        public int skipFrame = 0;
+        public bool repeatAction = false;
 
 
         public void SetCommandFields(Dictionary<string, string[]>  cmdField)

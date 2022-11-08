@@ -1,9 +1,6 @@
 using System.Collections;
-using System.Net.Sockets;
-using System.Net;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Text;
 
 namespace ai4u
@@ -20,67 +17,46 @@ namespace ai4u
         }
     }
 
+
+    public class AgentControlInfo
+    {
+        public bool paused = false;
+        public bool stopped = true;
+        public bool applyingAction = false;
+        public int frameCounter = -1;
+        public Command[] lastCmd;
+    }
+
     public class ControlRequestor : MonoBehaviour
     {
-        ///<summary>The IP of the ai4u2unity training server.</summary>
-        public string host = "127.0.0.1";
-        
-        ///<summary>The server port of the ai4u2unity training server.</summary>
-        public int port = 8080;
-
-        public int receiveTimeout = 10;
-
-        public int skipFrame = 0;
-        public bool repeatAction = false;
         public float defaultTimeScale = 1.0f; 
 
+        private Dictionary<string, AgentControlInfo> controlInfo;
+        private SortedList<string, Agent> agents;
 
-        private IPAddress serverAddr; //controller address
-        private EndPoint endPoint; //controller endpoint
-        private Socket sockToSend; //Socket to send async message.
-        private int frameCounter = -1;
-        private Agent agent;
-        private bool paused = false;
-        private bool stopped = true;
-        private bool applyingAction = false;
+        private bool initialized = false;
 
         public void SetAgent(Agent agent)
         {
-            this.agent = agent;
+            if (! initialized)
+            {
+                Initialize();
+                initialized = true;
+            }
+            string pkey = agent.ID;
+            this.agents.Add(pkey, agent);
+            this.controlInfo.Add(pkey, new AgentControlInfo());
         }
 
         // Start is called before the first frame update
-        void Awake()
+        void Initialize()
         {
-            paused = false;
-            stopped = true;
-            frameCounter = -1;
-            sockToSend = TrySocket();
-            applyingAction = false;
+            this.controlInfo = new Dictionary<string, AgentControlInfo>();
+            this.agents = new SortedList<string, Agent>();
             Time.timeScale = defaultTimeScale;
         }
 
-        public Socket TrySocket()
-        {
-            if (sockToSend == null)
-            {
-                    serverAddr = IPAddress.Parse(host);
-                    endPoint = new IPEndPoint(serverAddr, port);
-                    sockToSend = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            }
-            return sockToSend;
-        }
-
-        void OnDisable()
-        {
-            if (sockToSend != null)
-            {
-                //Debug.Log("Socket is closed...");
-                sockToSend.Close();
-            }
-        }
-
-        public Command[] RequestEnvControl(RequestCommand request)
+        public Command[] RequestEnvControl(Agent agent, RequestCommand request)
         {
             string cmdstr = null;
             if (agent.Brain is LocalBrain)
@@ -89,7 +65,7 @@ namespace ai4u
             }
             else
             {
-                cmdstr = SendMessageFrom(request.Command, request.Type, request.Value);
+                cmdstr = SendMessageFrom((RemoteBrain)agent.Brain, request.Command, request.Type, request.Value);
             }
             
             if (cmdstr != null)
@@ -102,7 +78,7 @@ namespace ai4u
         }
 
 
-        public Command[] RequestControl()
+        public Command[] RequestControl(Agent agent)
         {
             agent.UpdateState();
             string cmdstr = null;
@@ -113,7 +89,7 @@ namespace ai4u
             else
             {
 
-                cmdstr = SendMessageFrom(agent.MessageID, agent.MessageType, agent.MessageValue);
+                cmdstr = SendMessageFrom((RemoteBrain)agent.Brain, agent.MessageID, agent.MessageType, agent.MessageValue);
             }
 
             if (cmdstr != null)
@@ -172,98 +148,113 @@ namespace ai4u
             return false;
         }
         
-        private Command[] lastCmd = null;
+
         void FixedUpdate()
         {
+            foreach(var entry in agents)
+            {
+                AgentUpdate(entry.Value);
+            }
+        }
+
+        private void AgentUpdate(Agent agent)
+        {
+
             if (!agent.SetupIsDone)
             {
                 return;
             }
-            if (agent != null && !stopped && !paused)
+            AgentControlInfo ctrl = null;
+            
+            if (agent != null)
+            {
+                ctrl = controlInfo[agent.ID];
+            }
+
+            if (agent != null && !ctrl.stopped && !ctrl.paused)
             {
                 if (agent == null)
                 {
                     Debug.LogWarning("ControlRequest requires an Agent! Use the method 'SetAgent' of the ControlRequest" 
                                       + " component to set an agent!");
                 }
-                if (!applyingAction)
+                if (!ctrl.applyingAction)
                 {
-                    var cmd = RequestControl();
+                    var cmd = RequestControl(agent);
+                    
                     if (CheckCmd(cmd, "__stop__"))
                     {
-                        stopped = true;
-                        applyingAction = false;
-                        frameCounter = 0;
+                        ctrl.stopped = true;
+                        ctrl.applyingAction = false;
+                        ctrl.frameCounter = 0;
                         agent.NSteps = 0;
                         agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__restart__"))
                     {
-                        frameCounter = 0;
+                        ctrl.frameCounter = 0;
                         agent.NSteps = 0;
-                        applyingAction = false;
-                        paused = false;
-                        stopped = false;
+                        ctrl.applyingAction = false;
+                        ctrl.paused = false;
+                        ctrl.stopped = false;
                         agent.Reset();
                     }
                     else if (CheckCmd(cmd, "__pause__"))
                     {
-                        applyingAction = false;
-                        paused = true;
+                        ctrl.applyingAction = false;
+                        ctrl.paused = true;
                     }
                     else if (!CheckCmd(cmd, "__waitnewaction__"))
                     {
-                        applyingAction = true;
-                        frameCounter = 1;
+                        ctrl.applyingAction = true;
+                        ctrl.frameCounter = 1;
                         ((BasicAgent)agent).ResetReward();
                         agent.ApplyAction();
                         if (!agent.Alive())
                         {
-                            applyingAction = false;
+                            ctrl.applyingAction = false;
                             ((BasicAgent)agent).UpdateReward();
-                            agent.EndOfEpisode();
-                            lastCmd = RequestControl();
-                            stopped = true;
-                            frameCounter = 0;
+                            ctrl.lastCmd = RequestControl(agent);
+                            ctrl.stopped = true;
+                            ctrl.frameCounter = 0;
                             agent.NSteps = 0;
                         }
                     }
                 }
                 else
                 {
-                    if (frameCounter >= skipFrame)
+                    if (ctrl.frameCounter >= agent.Brain.skipFrame)
                     {
                         ((BasicAgent)agent).UpdateReward();
-                        frameCounter = 0;
-                        applyingAction = false;
+                        ctrl.frameCounter = 0;
+                        ctrl.applyingAction = false;
                         agent.NSteps = agent.NSteps + 1;
                     }
                     else
                     {
-                        if (repeatAction)
+                        if (agent.Brain.repeatAction)
                         {
                             agent.ApplyAction();
                             if (!agent.Alive())
                             {
-                                applyingAction = false;
+                                ctrl.applyingAction = false;
                                 ((BasicAgent)agent).UpdateReward();
-                                agent.EndOfEpisode();
-                                lastCmd = RequestControl();
-                                stopped = true;
-                                frameCounter = 0;
+                                ctrl.lastCmd = RequestControl(agent);
+                                ctrl.stopped = true;
+                                ctrl.frameCounter = 0;
                                 agent.NSteps = 0;
                             }
                         }
-                        frameCounter ++;
+                        ctrl.frameCounter ++;
                     }
                 }
             } else
             {
                 Command[] cmds = null;
-                if (lastCmd != null)
+                if (ctrl.lastCmd != null)
                 {
-                    cmds = lastCmd;
-                    lastCmd = null;
+                    cmds = ctrl.lastCmd;
+                    ctrl.lastCmd = null;
                 }
                 else
                 {
@@ -272,7 +263,7 @@ namespace ai4u
                     request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
                     request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
                 
-                    cmds = RequestEnvControl(request);
+                    cmds = RequestEnvControl(agent, request);
                 }
 
                 if (cmds == null)
@@ -282,7 +273,7 @@ namespace ai4u
 
                 if (CheckCmd(cmds, "__restart__"))
                 {
-                    frameCounter = -1;
+                    ctrl.frameCounter = -1;
                     agent.NSteps = 0;
                     Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
                     for (int i = 0; i < cmds.Length; i++)
@@ -290,13 +281,13 @@ namespace ai4u
                         fields[cmds[i].name] = cmds[i].args;
                     }
                     agent.Brain.SetCommandFields(fields);
-                    paused = false;
-                    stopped = false;
-                    applyingAction = false;
+                    ctrl.paused = false;
+                    ctrl.stopped = false;
+                    ctrl.applyingAction = false;
                     agent.Reset();
-                } else if (paused && CheckCmd(cmds, "__resume__"))
+                } else if (ctrl.paused && CheckCmd(cmds, "__resume__"))
                 {
-                    paused = false;
+                    ctrl.paused = false;
                 }
             }
         }
@@ -312,7 +303,7 @@ namespace ai4u
         /// 4 = byte array
         /// e value is the value of the information sent.
         /// </summary>
-        public string SendMessageFrom(string[] desc, byte[] tipo, string[] valor)
+        public string SendMessageFrom(RemoteBrain rbrain, string[] desc, byte[] tipo, string[] valor)
         {
             StringBuilder sb = new StringBuilder();
             int numberoffields = desc.Length;
@@ -333,32 +324,11 @@ namespace ai4u
             byte[] b = Encoding.UTF8.GetBytes(sb.ToString());
             byte[] received = new byte[1000];
             int total = 0;
-            if (this.sendData(b, out total, received))
+            if (rbrain.sendData(b, out total, received))
             {
                 return Encoding.UTF8.GetString(received);
             }
             return null;
-        }
-
-        public bool sendData(byte[] data, out int total, byte[] received)
-        {
-            TrySocket().ReceiveTimeout = receiveTimeout;
-            sockToSend.SendTo(data, endPoint);
-            total = 0;
-            try 
-            { 
-                total = sockToSend.Receive(received);
-                return true;
-            }
-            catch(System.Exception e)
-            {
-                Debug.LogWarning("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
-                #if UNITY_EDITOR
-                    EditorApplication.isPlaying = false;
-                #endif
-                Application.Quit();
-                return false;
-            }
         }
     }
 }

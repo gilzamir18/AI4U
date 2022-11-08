@@ -8,7 +8,6 @@ namespace ai4u
     
     /// <summary>DPRLAgent - Dimentional Physical Reinforcement Learning Agent
     /// This class models an agent with physical rigidbody control in a tridimentional world. </summary> 
-    [RequireComponent(typeof(ControlRequestor))]
     [RequireComponent(typeof(DoneSensor))]
     [RequireComponent(typeof(RewardSensor))]
     [RequireComponent(typeof(StepSensor))]
@@ -45,7 +44,6 @@ namespace ai4u
         private Vector3 initialLocalPosition;
         private bool done;
         protected float reward;
-        private ControlRequestor controlRequestor;
         private Dictionary<string, bool> firstTouch;
         private Dictionary<string, Sensor> sensorsMap;
         private List<Actuator> actuatorList;
@@ -62,7 +60,12 @@ namespace ai4u
 
             set
             {
+                bool pd = done;
                 done = value;
+                if (!pd && done)
+                {
+                    EndOfEpisode();
+                }
             }
         }
 
@@ -87,8 +90,11 @@ namespace ai4u
 
         public override void Setup()
         {
+            if (controlRequestor == null)
+            {
+                throw new System.Exception("ControlRequestor is mandatory to BasicAgent! Set a ControlRequestor component for this agent.");
+            }
             setupIsDone = false;
-            controlRequestor = GetComponent<ControlRequestor>();
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
             actuatorList = new List<Actuator>();
@@ -199,7 +205,7 @@ namespace ai4u
             request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
             request.SetMessage(2, "id", ai4u.Brain.STR, ID);
 
-            var cmds = controlRequestor.RequestEnvControl(request);
+            var cmds = controlRequestor.RequestEnvControl(this, request);
             if (cmds == null)
             {
                 throw new System.Exception("ai4u2unity connection error!");
