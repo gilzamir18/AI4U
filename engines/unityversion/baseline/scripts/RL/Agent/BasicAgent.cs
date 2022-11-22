@@ -25,9 +25,6 @@ namespace ai4u
         public event AgentEpisodeHandler beginOfApplyActionEvent;
         public event AgentEpisodeHandler endOfApplyActionEvent;  
 
-        /// <summary> Ramdom positions contains all positions where the agent can be placed in the environment. 
-        /// All positions are equally likely.</summary>
-        public Transform respawnMarker;
         ///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>
         public bool doneAtNegativeReward = true;
         ///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
@@ -40,8 +37,6 @@ namespace ai4u
         public List<RewardFunc> rewards;
 
         //Agent's ridid body
-        private Rigidbody rBody;
-        private Vector3 initialLocalPosition;
         private bool done;
         protected float reward;
         private Dictionary<string, bool> firstTouch;
@@ -75,8 +70,6 @@ namespace ai4u
             {
                 endOfEpisodeEvent(this);
             }
-            rBody.velocity = Vector3.zero;
-            rBody.angularVelocity = Vector3.zero;
         }
 
         public bool TryGetSensor(string key, out Sensor s)
@@ -189,9 +182,6 @@ namespace ai4u
             if (actuatorList.Count == 0) {
                 Debug.LogWarning("Agent without actuators. Add at least one actuator for this agent to be able to change the world! GameObject: " + gameObject.name);
             }
-
-            rBody = GetComponent<Rigidbody>();
-            initialLocalPosition = transform.position;
 
             int totalNumberOfSensors = sensorList.Count;
 
@@ -355,35 +345,8 @@ namespace ai4u
             nSteps = 0;
             reward = 0;
             Done = false;
-    
             firstTouch = new Dictionary<string, bool>(); 
             
-            transform.rotation = Quaternion.identity;
-            if (initialLocalPosition == null) {
-                initialLocalPosition = transform.localPosition;
-            }
-            if (rBody != null) {
-                rBody.velocity = Vector3.zero;
-                rBody.angularVelocity = Vector3.zero;
-            }
-
-            if (respawnMarker != null)
-            {
-                if (respawnMarker.childCount > 0)
-                {
-                    int idx = (int)Random.Range(0, respawnMarker.childCount - 1 + 0.5f );
-                    Transform c = respawnMarker.GetChild(idx);
-                    transform.localPosition = c.localPosition;
-                    transform.localRotation = c.localRotation;                    
-                }
-                else
-                {
-                    transform.localPosition =  respawnMarker.localPosition;
-                    transform.localRotation = respawnMarker.localRotation;
-                }
-            } else {
-                transform.localPosition = initialLocalPosition;
-            }
                     
             UpdateState();
             NotifyReset();
