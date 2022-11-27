@@ -4,6 +4,14 @@ using System.Collections.Generic;
 namespace ai4u
 {
 
+    public class AgentControlInfo
+    {
+        public bool paused = false;
+        public bool stopped = true;
+        public bool applyingAction = false;
+        public int frameCounter = -1;
+        public Command[] lastCmd;
+    }
 
     ///<summary>
     ///An agent is an object that supports the cycle of updating the state 
@@ -29,6 +37,20 @@ namespace ai4u
         protected byte[] types;
         protected string[] values;
         protected bool setupIsDone = false;
+        private AgentControlInfo controlInfo;
+
+        public AgentControlInfo ControlInfo 
+        {
+            set 
+            {
+                controlInfo = value;
+            }
+
+            get 
+            {
+                return controlInfo;
+            }
+        }
 
         public byte[] MessageType
         {

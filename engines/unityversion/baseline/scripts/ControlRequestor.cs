@@ -17,21 +17,10 @@ namespace ai4u
         }
     }
 
-
-    public class AgentControlInfo
-    {
-        public bool paused = false;
-        public bool stopped = true;
-        public bool applyingAction = false;
-        public int frameCounter = -1;
-        public Command[] lastCmd;
-    }
-
     public class ControlRequestor : MonoBehaviour
     {
         public float defaultTimeScale = 1.0f; 
 
-        private Dictionary<string, AgentControlInfo> controlInfo;
         private SortedList<string, Agent> agents;
 
         private bool initialized = false;
@@ -45,13 +34,12 @@ namespace ai4u
             }
             string pkey = agent.ID;
             this.agents.Add(pkey, agent);
-            this.controlInfo.Add(pkey, new AgentControlInfo());
+            agent.ControlInfo = new AgentControlInfo();
         }
 
         // Start is called before the first frame update
         void Initialize()
         {
-            this.controlInfo = new Dictionary<string, AgentControlInfo>();
             this.agents = new SortedList<string, Agent>();
             Time.timeScale = defaultTimeScale;
         }
@@ -159,20 +147,15 @@ namespace ai4u
 
         private void AgentUpdate(Agent agent)
         {
-
             if (!agent.SetupIsDone)
             {
                 return;
             }
-            AgentControlInfo ctrl = null;
-            
-            if (agent != null)
-            {
-                ctrl = controlInfo[agent.ID];
-            }
+            AgentControlInfo ctrl = agent.ControlInfo;
 
             if (agent != null && !ctrl.stopped && !ctrl.paused)
             {
+
                 if (agent == null)
                 {
                     Debug.LogWarning("ControlRequest requires an Agent! Use the method 'SetAgent' of the ControlRequest" 
@@ -235,6 +218,17 @@ namespace ai4u
                         if (agent.Brain.repeatAction)
                         {
                             agent.ApplyAction();
+                            if (!agent.Alive())
+                            {
+                                ctrl.applyingAction = false;
+                                ((BasicAgent)agent).UpdateReward();
+                                ctrl.lastCmd = RequestControl(agent);
+                                ctrl.stopped = true;
+                                ctrl.frameCounter = 0;
+                                agent.NSteps = 0;
+                            }
+                        } else 
+                        {
                             if (!agent.Alive())
                             {
                                 ctrl.applyingAction = false;
