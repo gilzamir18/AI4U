@@ -218,28 +218,21 @@ namespace ai4u
                         if (agent.Brain.repeatAction)
                         {
                             agent.ApplyAction();
-                            if (!agent.Alive())
-                            {
-                                ctrl.applyingAction = false;
-                                ((BasicAgent)agent).UpdateReward();
-                                ctrl.lastCmd = RequestControl(agent);
-                                ctrl.stopped = true;
-                                ctrl.frameCounter = 0;
-                                agent.NSteps = 0;
-                            }
-                        } else 
+                        } 
+                        
+                        if (!agent.Alive())
                         {
-                            if (!agent.Alive())
-                            {
-                                ctrl.applyingAction = false;
-                                ((BasicAgent)agent).UpdateReward();
-                                ctrl.lastCmd = RequestControl(agent);
-                                ctrl.stopped = true;
-                                ctrl.frameCounter = 0;
-                                agent.NSteps = 0;
-                            }
+                            ctrl.applyingAction = false;
+                            ((BasicAgent)agent).UpdateReward();
+                            ctrl.lastCmd = RequestControl(agent);
+                            ctrl.stopped = true;
+                            ctrl.frameCounter = 0;
+                            agent.NSteps = 0;
                         }
-                        ctrl.frameCounter ++;
+                        else
+                        {                        
+                            ctrl.frameCounter ++;
+                        }
                     }
                 }
             } else
