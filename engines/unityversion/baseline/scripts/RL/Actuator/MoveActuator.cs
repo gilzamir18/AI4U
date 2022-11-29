@@ -58,9 +58,12 @@ namespace ai4u {
                             turn = 0;
                         }
 
-                        Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
-                        rBody.MoveRotation(rBody.rotation * deltaRotation);
+                        //Quaternion deltaRotation = Quaternion.Euler(reference.up * turn * turnAmount);
+                        //rBody.MoveRotation(rBody.rotation * deltaRotation);
                         
+                        rBody.angularVelocity = Vector3.zero;
+                        rBody.AddTorque(reference.up * turn * turnAmount);
+
                         rBody.AddForce(
                                         (jump * jumpPower * reference.up +
                                         move * moveAmount * reference.forward + 
