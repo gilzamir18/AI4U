@@ -1,31 +1,31 @@
-# What is AI4U?
-AI4U is a backbone infrastructure for various flavors of AI4U. AI4U is separated into several subprojects. AI4U is the foundation on which many other projects are built on powerfull game engines (Unity and Godot). AI4U role is to connect third-party applications to Unity/Godot through the Python language and providing an agent abstraction.
+# AI4U
 
-# Documentation
+AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity and Godot game objects designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. See the developer guide to understand how to turn a game item into an agent: [DevGuide](/doc/).
 
-[Developement Guide](doc/)
-
-# Support
-
-* Current AI4U version was tested on Windows (10 and 11) operation system.  
-* AI4U Godot Edition was tested on Godot binary Godot_v3.5.1-stable_mono_win64.zip downloaded from  [Godot Engine Website](http://www.godotengine.org).
-* AI4U Unity Edition was tested on Unity 2021.3.11f1.
-
-# Install
-
-Run the following command to install Godot/Unity external control support via Python language::
+To control your agent through the Python language, you need to install AI4U. To do this, enter the directory [ai4upe](/ai4u) and run the command:
 
     pip install -e .
 
-To learn how to build an agent and environment in Godot/Unity and how to train the agent, see the documentation at [AI4U/doc](/doc/).
+After installing AI4U, enter the [example](/examples/ai4upe/scene_samplescene) directory and run the command:
 
-# Maintainers
-AI4U is currently maintained by Gilzamir Gomes (gilzamir@outlook.com), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).
+    python appgym_sbtest.py
 
-## Important Note: We do not do technical support, nor consulting and don't answer personal questions per email.
+Then run the SampleScene scene in Unity/Godot and run the game. This script will execute an already trained neural network that will control the capsule with arrow that represents the agent. The agent's objective is to reach the red cube without falling off the platform (green plane in figure bellow).
 
-# How To Contribute
-To any interested in making the AI4U better, there is still some documentation that needs to be done. If you want to contribute, please read CONTRIBUTING.md guide first.
+[See here for full documentation on AI4U](./doc/) 
 
-# Acknowledgments
-AI4U was created in the CRab (Computer Graphics, Virtual Reality and Animations) Labs at UFC (Universidade Federal do Ceará).
+![IMAGEM](/doc/img/ai4uge_samplescene.png)
+
+# Game Engine Support
+
+AI4U support Unity or Godot scenes designed using the Framework AI4U Agent Abstraction (AI4UAA). 
+
+
+AI4U supports scenes designed in Godot and Unity game engines. The AI4UAA Framework provides a set of abstractions for creating agents. The main abstractions are sensors and actuators. An agent uses sensors to obtain information about the environment and about itself and send this information to a decision-making model (a neural network, for example). Actuators represent actions that change the environment and the agent itself. For example, a set of sensors can capture the agent's position and orientation; another set of sensors can capture a target's position. All information is concatenated and sent to an agent controller, which can use a neural network to decide on an action to perform. The action the controller can perform depends on the type of actuator the agent has. For example, a motion actuator can receive a forward motion force and a torque as parameters and then apply these forces to the center of mass of the physical object that represents the agent.
+
+There is an AI4UAA implementation for Unity and one for Godot. Each implementation has its own specifics and limitations. Therefore, AI4U is just the component that connects a Python controller to one of the versions of AI4UAA, either for Unity or for Godot.
+
+
+[AI4U Unity Edition (AI4UAA for Unity)](https://github.com/gilcoder/AI4UUE)
+
+[AI4U Godot Edition (AI4UAA for Godot](https://github.com/gilcoder/AI4UGE)
