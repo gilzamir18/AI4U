@@ -6,7 +6,7 @@ To control your agent through the Python language, you need to install AI4U. To 
 
     pip install -e .
 
-After installing AI4U, enter the [example](/examples/ai4upe/scene_samplescene) directory and run the command:
+After installing AI4U, enter the [example](/examples/scene_samplescene) directory and run the command:
 
     python appgym_sbtest.py
 
