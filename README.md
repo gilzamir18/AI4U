@@ -28,4 +28,4 @@ There is an AI4UAA implementation for Unity and one for Godot. Each implementati
 
 [AI4U Unity Edition (AI4UAA for Unity)](https://github.com/gilcoder/AI4UUE)
 
-[AI4U Godot Edition (AI4UAA for Godot](https://github.com/gilcoder/AI4UGE)
+[AI4U Godot Edition (AI4UAA for Godot)](https://github.com/gilcoder/AI4UGE)
