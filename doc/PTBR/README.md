@@ -101,3 +101,5 @@ Para criar um controlador para uma nova cena, é preciso mapear as percepções 
 Quando as função *step_behavior* é executada, isso significa que o agente já definiu uma ação e passou essa ação com um formato específico dado no parâmetro *action* da função. Por exemplo, *action* pode ser um vetor *(d, b, l, r)*, onde *d* indica a quantidade de giro da direção em graus, *b* é a intensidade do freio, l é um valor binário que indica o *status* do pisca da esquerda (1 indica se o pisca da esquerda está acesso e 0 se está apagado) e *r* também é um valor binário  que indica o *status* do pisca da direita. Digamos que essa ação deve ser associada a um atuador de um agente de carro no jogo nomeado de **move**. Dessa forma, o atributo *actionName* deve ser modificado para "move" e o atributo *actionArgs* deve ser modificado para conter uma lista *[d, b, l, r]*, conforme mostra a seguinte figura:
 
 ![request_step.png](/doc/img/request_step.png)
+
+O [controlador da cena Donut](/examples/scene_donut/) (disponível tanto nas amostras do AI4UAAF da Unity quando no da Godot) é um caso mais complexo de controlador.
