@@ -1,8 +1,14 @@
 # AI4U
 
-AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity and Godot game objects designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. See the developer guide to understand how to turn a game item into an agent: [DevGuide](/doc/).
+AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity and Godot game objects designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. 
 
-To control your agent through the Python language, you need to install AI4U. To do this, enter the directory [ai4upe](/ai4u) and run the command:
+The environment and agent creation pipeline is:
+
+* First create a project in the game engine (Unity or Godot).
+* Install AI4U in the created project and start modeling the agent's. environment using the abstractions of the AI4U Agent Abstraction Framework.
+* Connect the environment and the agent with python scripts to, for example, train the neural networks that control the agent.
+
+To control your agent through the Python language, you need to install AI4U. To do this, enter the directory [ai4u](/ai4u) and run the command:
 
     pip install -e .
 
