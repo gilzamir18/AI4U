@@ -116,3 +116,7 @@ When the *step_behavior* function is executed, it means that the agent has alrea
 
 The [Donut scene controller](/examples/scene_donut/controller.py) (available in both Unity and Godot AI4UAAF samples) is a more complex case of controller. Instead of creating a controller from scratch, use this example to get started.
 
+# Limitations
+
+AI4U does not yet natively support communication between many agents. But multiple agents running simultaneously are supported. More documentation on this aspect will be made available soon.
+

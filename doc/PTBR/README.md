@@ -64,7 +64,7 @@ Também podemos enviar ações para o agente. O conjunto de ações que podemos 
 * *j* intensidade do salto para cima (se for menor ou igual a zero, o agente não pula).
 * *jf* intensidade do salto para frente (se for menor ou igual a zero o agente não salta).
 
-Para enviar um comando desse tipo, basta executar o método *request_step* do *controller*
+Para enviar um comando desse tipo, basta executar o método *request_step* do *controller*:
 
 ```
 state, reward, done, info = controller.request_step(action)
@@ -103,3 +103,7 @@ Quando as função *step_behavior* é executada, isso significa que o agente já
 ![request_step.png](/doc/img/request_step.png)
 
 O [controlador da cena Donut](/examples/scene_donut/controller.py) (disponível tanto nas amostras do AI4UAAF da Unity quando no da Godot) é um caso mais complexo de controlador. Em vez de criar um controlador do zero, utilize este exemplo para começar.
+
+# Limitações
+
+AI4U ainda não suporta nativamente comunicação entre muitos agentes. Mas há suporte para múltiplos agentes executando simultâneamente. Em breve, mais documentação sobre este aspecto será disponibilizada.
