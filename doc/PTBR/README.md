@@ -96,3 +96,8 @@ Um controlador herda é uma classe que implementa as funções de ai4u.agents.Ba
 Para criar um controlador para uma nova cena, é preciso mapear as percepções que a cena envia ao controlador e as ações que o controlador tem que enviar para o agente executar no ambiente da cena. Para isso, a classe base *ai4u.agents.BasicController* provê atributos pré-definidos que permitem especificar nome da ação a ser executada, argumentos da ação, domínio da ação e domínio das observações (estados).Logo no construtor do controlador, pode-se especificar os valores dos atributos *action_space* e *observation_space*, que devem ser um objeto de *gym.spaces*, como no seguinte exemplo:
 
 ![Controller Spaces](/doc/img/controller_spaces.png)
+
+
+Quando as função *step_behavior* é executada, isso significa que o agente já definiu uma ação e passou essa ação com um formato específico dado no parâmetro *action* da função. Por exemplo, *action* pode ser um vetor *(d, b, l, r)*, onde *d* indica a quantidade de giro da direção em graus, *b* é a intensidade do freio, l é um valor binário que indica o *status* do pisca da esquerda (1 indica se o pisca da esquerda está acesso e 0 se está apagado) e *r* também é um valor binário  que indica o *status* do pisca da direita. Digamos que essa ação deve ser associada a um atuador de um agente de carro no jogo nomeado de **move**. Dessa forma, o atributo *actionName* deve ser modificado para "move" e o atributo *actionArgs* deve ser modificado para conter uma lista *[d, b, l, r]*, conforme mostra a seguinte figura:
+
+![request_step.png](/doc/img/request_step.png)

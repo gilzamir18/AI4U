@@ -18,6 +18,13 @@ class SimpleController(ai4u.agents.BasicController):
 
     def step_behavior(self, action):
         self.actionName = "move"
+        d = action[0]
+        b = action[1]
+        l = action[2]
+        r = action[3]
+        
+        self.actionArgs = [d, b, l, r]
+                
         if action == 0:
             self.actionArgs = [0, 0, 1, 0, 0]
         elif action == 1:
