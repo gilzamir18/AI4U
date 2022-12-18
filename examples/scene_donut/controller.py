@@ -26,8 +26,6 @@ class DonutGymController(agents.BasicController):
                                high=np.array([1, 1, 1, 1]),
                                dtype=np.float32)
 
-        #self.observation_space = gym.spaces.Box(low=0, high=255,
-        #                                shape=(10, 10, 1), dtype=np.uint8)
         self.observation_space = gym.spaces.Dict(
             {
                 "array": gym.spaces.Box(-10, 10, shape=(37,), dtype=float),
