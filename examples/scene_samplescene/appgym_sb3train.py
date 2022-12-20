@@ -8,9 +8,9 @@ from stable_baselines3.sac import MultiInputPolicy
 
 env = gym.make("AI4UEnv-v0")
 
-model = SAC(MultiInputPolicy, env, verbose=1)
+model = SAC(MultiInputPolicy, env, verbose=1, tensorboard_log="SAC")
 print("Training....")
-model.learn(total_timesteps=20000, log_interval=4)
+model.learn(total_timesteps=20000, log_interval=4,  tb_log_name='SAC')
 model.save("sac_ai4u")
 print("Trained...")
 del model # remove to demonstrate saving and loading

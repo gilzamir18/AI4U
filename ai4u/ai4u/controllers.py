@@ -6,6 +6,11 @@ import gym
 import numpy as np
 import sys
 
+
+IMG_H = 10
+IMG_W = 10
+IMG_C = 1
+
 class BasicGymController(BasicController):
     """
     This basic controller only works with Unity or Godot AI4UTesting
@@ -32,8 +37,8 @@ class BasicGymController(BasicController):
         #                                shape=(10, 10, 1), dtype=np.uint8)
         self.observation_space = gym.spaces.Dict(
             {
-                "array": gym.spaces.Box(-1, 1, shape=(7,), dtype=float),
-                "vision": gym.spaces.Box(0, 255, shape=(10, 10, 1), dtype=np.float32),
+                "array": gym.spaces.Box(-1, 1, shape=(7,), dtype=np.float32),
+                "vision": gym.spaces.Box(0, 1, shape=(IMG_C * IMG_W * IMG_H, ), dtype=np.float32),
             }
         )
 
@@ -86,9 +91,9 @@ class BasicGymController(BasicController):
             info = info[0]
         if ("vision" in info) and ("array" in info):
             vision = info["vision"]
-            vision = np.reshape(vision, (10, 10, 1)) * 1/255.0
+            vision = np.reshape(vision, (IMG_C * IMG_W * IMG_H, )) * 1/256
             array = info['array']
-            return {'array': np.array([array]), 'vision': np.array([vision])}, info['reward'], info['done'], info
+            return {'array': np.array([array], dtype=np.float32), 'vision': np.array([vision], dtype=np.float32)}, info['reward'], info['done'], info
         else:
             return info
 
@@ -102,9 +107,9 @@ class BasicGymController(BasicController):
         implemented in the AI4UTesting code.
         """
         vision = info['vision']
-        vision = np.reshape(vision, (10, 10, 1)) * 1/255.0
+        vision = np.reshape(vision, (IMG_C *  IMG_W * IMG_H, )) * 1/256
         array = info['array']
-        return {'array': np.array([array]), 'vision': np.array([vision])}
+        return {'array': np.array([array], dtype=np.float32), 'vision': np.array([vision], dtype=np.float32)}
 
     def step_behavior(self, action):
         """

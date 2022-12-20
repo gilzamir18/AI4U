@@ -22,6 +22,12 @@ Then run the SampleScene scene in Unity/Godot and run the game. This script will
 
 ![IMAGEM](/doc/img/ai4uge_samplescene.png)
 
+
+In the next image, we show the tensorboard training logs generated when training the SampleScene scene agent. To do this, we use the stable-baselines3 project.
+
+![IMAGE](/doc/img/training_of_godot_sample_scene.png)
+
+
 # Game Engine Support
 
 AI4U support Unity or Godot scenes designed using the Framework AI4U Agent Abstraction (AI4UAA). 
