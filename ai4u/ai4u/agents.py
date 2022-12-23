@@ -66,9 +66,10 @@ class BasicController:
     def resume(self):
         self.agent.request_resume()
 
-    def handleConfiguration(self, id, max_step):
+    def handleConfiguration(self, id, max_step, metadatamodel):
         self.id = id
         self.max_steps = max_step
+        self.metadatamodel = metadatamodel
 
     def step_behavior(self, action):
         """
@@ -276,10 +277,11 @@ class BasicAgent:
         if 'config' in a:
             self.max_steps = a['max_steps']
             self.id = a['id']
+            self.modelmetadata = a['modelmetadata']
             control = []
             control.append(stepfv('max_steps', [self.max_steps]))
             control.append(stepfv('id', [self.id]))
-            self.__get_controller().handleConfiguration(self.id, self.max_step)
+            self.__get_controller().handleConfiguration(self.id, self.max_step, self.modelmetadata)
             return ("@".join(control))
         if 'wait_command' in a:
             #print("waiting command from unity...")

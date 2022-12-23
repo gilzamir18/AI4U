@@ -13,8 +13,9 @@ class SimpleController(ai4u.agents.BasicController):
     def handleEndOfEpisode(self, info):
         print("End of Episode...")
     
-    def configure(self, id, max_step):
+    def handleConfiguration(self, id, max_step, metadatamodel):
         print("Agent configuration: id=", id, " maxstep=", max_step)
+        print(metadatamodel)
 
     def step_behavior(self, action):
         self.actionName = "move"

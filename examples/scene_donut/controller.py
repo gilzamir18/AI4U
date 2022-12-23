@@ -70,8 +70,9 @@ class DonutGymController(agents.BasicController):
         """
         sys.exit(0)
 
-    def handleConfiguration(self, id, max_step):
+    def handleConfiguration(self, id, max_step, metadatamodel):
         print("Agent configuration: id=", id, " maxstep=", max_step)
+        print(metadatamodel)
 
     def get_state(self, info):
         """
