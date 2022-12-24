@@ -1,4 +1,4 @@
-import ai4u
+from ai4u.onnxutils import sac_export_to
 from ai4u.controllers import BasicGymController
 import AI4UEnv
 import gym
@@ -23,7 +23,11 @@ elif opt.upper() == 'U':
 else:
   model = SAC.load("sac_ai4u")
 
+sac_export_to("sac_ai4u", metadatamodel=env.controller.metadataobj)
+
+
 obs = env.reset()
+
 reward_sum = 0
 while True:
     action, _states = model.predict(obs, deterministic=True)

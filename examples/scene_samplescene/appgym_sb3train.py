@@ -14,8 +14,5 @@ model.learn(total_timesteps=20000, log_interval=4,  tb_log_name='SAC')
 model.save("sac_ai4u")
 print("Trained...")
 del model # remove to demonstrate saving and loading
-
-model = SAC.load("sac_ai4u")
-
 print("Train finished!!!")
 

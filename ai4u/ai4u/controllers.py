@@ -5,11 +5,10 @@ import ai4u
 import gym
 import numpy as np
 import sys
+import json
+from .types import SENSOR_SFLOATARRAY, SENSOR_SINTARRAY, SENSOR_SINT, SENSOR_SBOOL, SENSOR_SFLOAT
 
-
-IMG_H = 10
-IMG_W = 10
-IMG_C = 1
+codetypes = {0: np.float32, 1: None, 2: np.uint8, 3: np.uint8, 4: None, 5: np.float32, 6: np.uint8}
 
 class BasicGymController(BasicController):
     """
@@ -29,18 +28,8 @@ class BasicGymController(BasicController):
         """
         super().__init__()
         self._seed = 0
-        self.action_space = gym.spaces.Box(low=np.array([0,-1, 0, 0]),
-                               high=np.array([1, 1, 1, 1]),
-                               dtype=np.float32)
-
-        #self.observation_space = gym.spaces.Box(low=0, high=255,
-        #                                shape=(10, 10, 1), dtype=np.uint8)
-        self.observation_space = gym.spaces.Dict(
-            {
-                "array": gym.spaces.Box(-1, 1, shape=(7,), dtype=np.float32),
-                "vision": gym.spaces.Box(0, 1, shape=(IMG_C * IMG_W * IMG_H, ), dtype=np.float32),
-            }
-        )
+        self.action_space = None
+        self.observation_space = None
 
     def handleNewEpisode(self, info):
         """
@@ -78,50 +67,40 @@ class BasicGymController(BasicController):
         """
         sys.exit(0)
 
-    def handleConfiguration(self, id, max_step, metadatamodel):
-        print("Agent configuration: id=", id, " maxstep=", max_step)
-        print("Metadata Model " + metadatamodel)
-
-    def get_state(self, info):
-        """
-        This method transform AI4U data structure to a
-        shape supported by OpenGym based environments.
-        """
-        #print(info)
-        if  type(info) is tuple:
-            info = info[0]
-        if ("vision" in info) and ("array" in info):
-            vision = info["vision"]
-            vision = np.reshape(vision, (IMG_C * IMG_W * IMG_H, )) * 1/256
-            array = info['array']
-            return {'array': np.array([array], dtype=np.float32), 'vision': np.array([vision], dtype=np.float32)}, info['reward'], info['done'], info
+    def convertoboxspace(self, modelinput):
+        shape = modelinput["shape"]
+        data_dim = len(shape) - 1
+        if data_dim == 1:
+            size = shape[-1]
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, ), dtype=codetypes[modelinput["type"]]), False
+        if data_dim == 2:
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shape, dtype=codetypes[modelinput["type"]]), True
         else:
-            return info
+            raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check your environment configuration. Perception Key: ", modelinput['name'])
 
-    def reset_behavior(self, info):
-        """
-        Here you implement whatever is necessary to configure 
-        an episode's initial settings and return the first 
-        observation that an agent will use to start performing
-        actions. In this example, we only extract the initial 
-        state from the information sent by the game environment
-        implemented in the AI4UTesting code.
-        """
-        vision = info['vision']
-        vision = np.reshape(vision, (IMG_C *  IMG_W * IMG_H, )) * 1/256
-        array = info['array']
-        return {'array': np.array([array], dtype=np.float32), 'vision': np.array([vision], dtype=np.float32)}
 
-    def step_behavior(self, action):
-        """
-        In this method, by changing the values of the 
-        actionName and actionArgs attributes,
-        you define the action to be performed based on
-        the action (action argument) returned by the agent.
-        Therefore, this method is called when an agent makes
-        a decision, producing the action represented by the
-        variable "action".
-        """
+    def loadarrayfrominput(self, modelinput, info):
+        return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
+    
+    def loadimagefrominput(self, modelinput, info):
+        vision = np.reshape(info[ modelinput['name'] ], modelinput['shape'])
+        return  np.array([vision], dtype=codetypes[modelinput['type']] )
+
+    def dict_input_extractor(self, modelinputs, info):
+        inputs = {}
+        for i in modelinputs:
+            shape = i['shape']
+            data_dim = len(shape) - 1
+            if data_dim == 1:
+                inputs[i['name']] = self.loadarrayfrominput(i, info)
+            elif data_dim == 2:
+                inputs[i['name']] = self.loadimagefrominput(i, info)
+            else:
+                raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check agetn's environment configuration by Perception Key: ", i['name'], ".")
+        return inputs
+
+
+    def floatarrayoutput(self, action, outputmodel):
         self.actionName = "move"
         if type(action) != str:
             self.actionArgs = np.array(action).squeeze()
@@ -134,4 +113,78 @@ class BasicGymController(BasicController):
         elif action == 'resume':
             self.actionName = "__resume__"
             self.actionArgs = [0]
+
+    def onehotoutput(self, action, outputmodel):
+        self.floatarrayoutput(self, action, outputmodel)
+
+    def handleConfiguration(self, id, max_step, metadatamodel):
+        print("Agent configuration: id=", id, " maxstep=", max_step)
+        print("Metadata Model " + metadatamodel)
+        self.metadataobj = json.loads(metadatamodel)
+        self.inputs = self.metadataobj['inputs']
+        self.outputs = self.metadataobj['outputs']
+        if len(self.inputs) == 1: #single box input
+            self.observation_space, isImage = self.convertoboxspace(self.inputs[0])
+            if isImage:
+                self.input_extractor = self.loadimagefrominput
+            else:
+                self.input_extractor = self.loadarrayfrominput
+        elif len(self.inputs) > 1: #dictionary input
+            dict_space = gym.spaces.Dict()
+            for i in self.inputs:
+                dict_space[i['name']], isImage = self.convertoboxspace(i)
+            self.observation_space = dict_space
+            self.input_extractor = self.dict_input_extractor
+        
+        if len(self.outputs) == 1:
+            out = self.outputs[0]
+            if out['isContinuous']:
+                self.action_space = gym.spaces.Box(low=np.array(out['rangeMin']), high=np.array(out['rangeMax']), dtype=np.float32)
+                self.output_controller = self.floatarrayoutput
+            else:
+                self.action_space = gym.spaces.Discrete(out['shape'][-1])
+                self.output_controller = self.onehotoutput
+        else:
+            raise Exception("Controller configuration: multiple model outputs is not supported.")
+
+
+    def extractstatefrominputs(self, modelinputs, info):
+        if (len(self.inputs) == 1):
+            return self.input_extractor(self.inputs[0], info)
+        else:
+            return self.input_extractor(self.inputs, info)
+
+    def get_state(self, info):
+        """
+        This method transform AI4U data structure to a
+        shape supported by OpenGym based environments.
+        """
+        #print(info)
+        if  type(info) is tuple:
+            info = info[0]
     
+        return self.extractstatefrominputs(self.inputs, info), info["reward"], info['done'], info
+
+    def reset_behavior(self, info):
+        """
+        Here you implement whatever is necessary to configure 
+        an episode's initial settings and return the first 
+        observation that an agent will use to start performing
+        actions. In this example, we only extract the initial 
+        state from the information sent by the game environment
+        implemented in the AI4UTesting code.
+        """
+        return self.extractstatefrominputs(self.inputs, info)
+
+    def step_behavior(self, action):
+        """
+        In this method, by changing the values of the 
+        actionName and actionArgs attributes,
+        you define the action to be performed based on
+        the action (action argument) returned by the agent.
+        Therefore, this method is called when an agent makes
+        a decision, producing the action represented by the
+        variable "action".
+        """
+        for o in self.outputs:
+            self.output_controller(action, o)
