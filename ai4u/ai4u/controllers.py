@@ -6,9 +6,10 @@ import gym
 import numpy as np
 import sys
 import json
-from .types import SENSOR_SFLOATARRAY, SENSOR_SINTARRAY, SENSOR_SINT, SENSOR_SBOOL, SENSOR_SFLOAT
+from .types import *
+from PIL import Image
 
-codetypes = {0: np.float32, 1: None, 2: np.uint8, 3: np.uint8, 4: None, 5: np.float32, 6: np.uint8}
+codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8}
 
 class BasicGymController(BasicController):
     """
@@ -83,8 +84,18 @@ class BasicGymController(BasicController):
         return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
     
     def loadimagefrominput(self, modelinput, info):
-        vision = np.reshape(info[ modelinput['name'] ], modelinput['shape'])
-        return  np.array([vision], dtype=codetypes[modelinput['type']] )
+        if modelinput['type'] == SENSOR_SSTRING:
+            img_stream = info[modelinput['name']]
+            bstr = bytes(img_stream, 'ascii')
+            data = np.fromstring(bstr, dtype=np.uint8)
+            vision = np.reshape(data, modelinput['shape'])
+            #for i in range(vision.shape[0]):
+            #    im = Image.fromarray(vision[i])
+            #    im.save("/Users/gilza/tmp/frame_%d_%d.jpeg"%(info['steps'], i))
+            return  np.array([vision], dtype=np.uint8)
+        else:
+            vision = np.reshape(info[ modelinput['name'] ], modelinput['shape'])
+            return  np.array([vision], dtype=codetypes[modelinput['type']] )
 
     def dict_input_extractor(self, modelinputs, info):
         inputs = {}
@@ -101,9 +112,9 @@ class BasicGymController(BasicController):
 
 
     def floatarrayoutput(self, action, outputmodel):
-        self.actionName = "move"
+        self.actionName = outputmodel["name"]
         if type(action) != str:
-            self.actionArgs = np.array(action).squeeze()
+            self.actionArgs = np.array([action.squeeze()])
         elif action == 'stop':
             self.actionName = "__stop__"
             self.actionArgs = [0]
@@ -115,7 +126,7 @@ class BasicGymController(BasicController):
             self.actionArgs = [0]
 
     def onehotoutput(self, action, outputmodel):
-        self.floatarrayoutput(self, action, outputmodel)
+        self.floatarrayoutput(action, outputmodel)
 
     def handleConfiguration(self, id, max_step, metadatamodel):
         print("Agent configuration: id=", id, " maxstep=", max_step)

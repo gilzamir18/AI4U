@@ -13,11 +13,12 @@ class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
 
-  def __init__(self, controller_class=BasicGymController, rid=None, server_IP="127.0.0.1", server_port=8080, sleep=0.1):
+  def __init__(self, controller_class=BasicGymController, rid=None, server_IP="127.0.0.1", server_port=8080, sleep=0.1, buffer_size=8192):
     super(GenericEnvironment, self).__init__()
     # Define action and observation space
     # They must be gym.spaces objects
     # Example when using discrete actions:
+
     if rid is None:
       rid = ["0"]
     elif type(rid) is str:
@@ -28,10 +29,9 @@ class GenericEnvironment(gym.Env):
       raise TypeError("Unsupported type of ids parameter: ", type(rid))
 
     controllers_classes =  [controller_class]
-    controller = startasdaemon(rid, controllers_classes, server_IP, server_port, sleep)[0]
+    controller = startasdaemon(rid, controllers_classes, server_IP, server_port, buffer_size, sleep)[0]
     self.controller = controller
     self.reset()
-  
     if self.controller.action_space is not None:
       self.action_space = self.controller.action_space
     else:

@@ -16,12 +16,13 @@ class AI4UUDPHandler(socketserver.DatagramRequestHandler):
             print("WARNING: returning empty message!")
             self.wfile.write("".encode(encoding="utf-8"))
 
-def create_server(agents, ids, server_IP="127.0.0.1", server_port=8080):
+def create_server(agents, ids, server_IP="127.0.0.1", server_port=8080, buffer_size=8192):
     for i in range(len(agents)):
         if not AI4UWorker.register_agent(agents[i], ids[i]):
             sys.exit(-1)
     serverAddress   = (server_IP, server_port)
     serverUDP = socketserver.UDPServer(serverAddress, AI4UUDPHandler)
+    serverUDP.max_packet_size = buffer_size
     serverUDP.serve_forever()
 
 if __name__ == "__main__":
