@@ -7,7 +7,8 @@ import numpy as np
 import sys
 import json
 from .types import *
-from PIL import Image
+import base64
+#from PIL import Image
 
 codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8}
 
@@ -86,8 +87,8 @@ class BasicGymController(BasicController):
     def loadimagefrominput(self, modelinput, info):
         if modelinput['type'] == SENSOR_SSTRING:
             img_stream = info[modelinput['name']]
-            bstr = bytes(img_stream, 'ascii')
-            data = np.fromstring(bstr, dtype=np.uint8)
+            imgdata = base64.b64decode(img_stream)
+            data = np.frombuffer(imgdata, dtype=np.uint8)
             vision = np.reshape(data, modelinput['shape'])
             #for i in range(vision.shape[0]):
             #    im = Image.fromarray(vision[i])
