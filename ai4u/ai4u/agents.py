@@ -34,8 +34,8 @@ class BasicController:
     def request_reset(self, args=None):
         #print("Begin Reseting....")
         self.initialState = None
-        self.agent.request_newepisode(args)
         while self.initialState is None:
+            self.agent.request_newepisode(args)
             time.sleep(self.waitforinitialstate)
         self.done = False
         info = self.initialState
@@ -240,11 +240,13 @@ class BasicAgent:
         if self.hasNextState:
             self.__get_controller().nextstate = info.copy()
             self.hasNextState = False
+
         if self.newInfo:
+            self.newInfo = False
             ctrl = self.__get_controller()
             ctrl.initialState = info
             ctrl.handleNewEpisode(info)
-            self.newInfo = False
+
 
         if self.createANewEpisode:
             self.createANewEpisode = False
@@ -262,8 +264,8 @@ class BasicAgent:
 
         if self.newRestartCommand:
             self.newInfo = True
-            self.newRestartCommand = False
             self.paused = False
+            self.newRestartCommand = False
             return self._restart()
 
         if info['done']:
