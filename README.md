@@ -28,6 +28,18 @@ In the next image, we show the tensorboard training logs generated when training
 ![IMAGE](/doc/img/training_of_godot_sample_scene.png)
 
 
+A full example of game Pong using AI4UEE:
+
+![](https://public.by.files.1drv.com/y4mE4z_1xivtrP8mdLnopcJSoad1Vs70jnclJtfQrK5GTBCXjnVVfavVBvTgizC0ytDV4acsbPokboN_tnW8iIppCDHZs1OP1ZJ0_NRh5f2T5DTDSrXSIauYIhPOalXStNutHBQ3StqPYfHcseiwq6kqFQasiuaDN_ozHHnkRkIPDOo3Wn2JTat0XamQo0JxU7jlxYSiUzP4TECDSZDGXWh2KHbKBYOtlXXLhjKQNE5ziw)
+
+
+The training logs show that:
+
+![Gráfico](https://by3301files.storage.live.com/y4mBFID5H01I_Z5o5VdQ_dAYnAP-eh_MsDKZpWCywqhqx-BMvzHbtD23roz99QqsdmE5BncH0c59wy6OEkVyE7TsblGg-In_CY29MQ81MRzXmrIOwO2Q2XhSy9kcHFSLGneVhOlDB7KYvCsKF0nXYTkWbmihxz_1IeKyBR7qlk_lAFA6dFtbISekGqKNlmFkC110-E6CXpkIqsMYRLzoJKbRjjnpPcziXRnpTU6WkJu7c0?encodeFailures=1&width=384&height=311). 
+
+Pong project is [here](https://github.com/gilzamir18/PhongDemo).
+
+
 # Game Engine Support
 
 AI4U support Unity or Godot scenes designed using the Framework AI4U Agent Abstraction (AI4UAA). 
