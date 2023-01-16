@@ -28,7 +28,7 @@ In the next image, we show the tensorboard training logs generated when training
 ![IMAGE](/doc/img/training_of_godot_sample_scene.png)
 
 
-A full example of game Pong using AI4UEE:
+A full example of the game Pong using AI4UEE:
 
 ![](https://public.by.files.1drv.com/y4mE4z_1xivtrP8mdLnopcJSoad1Vs70jnclJtfQrK5GTBCXjnVVfavVBvTgizC0ytDV4acsbPokboN_tnW8iIppCDHZs1OP1ZJ0_NRh5f2T5DTDSrXSIauYIhPOalXStNutHBQ3StqPYfHcseiwq6kqFQasiuaDN_ozHHnkRkIPDOo3Wn2JTat0XamQo0JxU7jlxYSiUzP4TECDSZDGXWh2KHbKBYOtlXXLhjKQNE5ziw)
 
