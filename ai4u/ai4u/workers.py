@@ -110,4 +110,4 @@ class AI4UWorker:
             else:
                 print("ERROR: invalid target! Set a valid __target__ field when you send a message from Unity Editor.")
         else:
-            print("ERROR: invalid agent id ", id)
+            print("ERROR: duplicated agent id ", id)

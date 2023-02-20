@@ -12,7 +12,8 @@ from ai4u.appserver import startasdaemon
 class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
-
+  envidx = 0
+  controllers = None
   def __init__(self, controller_class=BasicGymController, rid=None, server_IP="127.0.0.1", server_port=8080, sleep=0.1, buffer_size=8192):
     super(GenericEnvironment, self).__init__()
     # Define action and observation space
@@ -25,12 +26,26 @@ class GenericEnvironment(gym.Env):
       rid = [rid]
     elif type(rid) is int:
       rid = [str(rid)]
+    elif type(rid) is list:
+      pass
     else:
       raise TypeError("Unsupported type of ids parameter: ", type(rid))
 
-    controllers_classes =  [controller_class]
-    controller = startasdaemon(rid, controllers_classes, server_IP, server_port, buffer_size, sleep)[0]
-    self.controller = controller
+    if type(controller_class) is list:
+      controller_classes = controller_class
+    else:
+      controller_classes =  [controller_class] * len(rid)
+    
+    if not GenericEnvironment.controllers:
+      GenericEnvironment.controllers = {}
+      controllers = startasdaemon(rid, controller_classes, server_IP, server_port, buffer_size, sleep)
+      for i in range(len(controllers)):
+        GenericEnvironment.controllers[rid[i]] = controllers[i]
+    
+    self.rid = rid[GenericEnvironment.envidx]
+    self.controller = GenericEnvironment.controllers[self.rid]
+    GenericEnvironment.envidx += 1
+
     self.reset()
     if self.controller.action_space is not None:
       self.action_space = self.controller.action_space
