@@ -43,14 +43,22 @@ class GenericEnvironment(gym.Env):
       self.observation_space = None
   
     self.rid =  rid
+    self.step_callback = None
   
+  def set_stepcallback(self, step_callback):
+    self.step_callback = step_callback
+
   def step(self, action):
-    return self.controller.get_state(self.controller.request_step(action))
+    state = self.controller.get_state(self.controller.request_step(action))
+    if self.step_callback is not None:
+      self.step_callback(action, state)
+    return state
 
   def seed(self, seed=0):
     self.controller.seed(seed)
 
   def reset(self):
+    self.last_action = None
     return self.controller.request_reset()
 
   def render(self, mode='human'):
