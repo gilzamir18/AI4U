@@ -74,7 +74,6 @@ class GenericEnvironment(gym.Env):
     self.controller.seed(seed)
 
   def reset(self):
-    self.last_action = None
     return self.controller.request_reset()
 
   def render(self, mode='human'):
