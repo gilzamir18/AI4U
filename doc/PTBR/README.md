@@ -7,22 +7,22 @@ Neste guia, mostramos a arquitetura do componente da AI4U chamado de AI4U Python
 
 ## Arquitetura 
 
-AI4UPE permite controlar um agente na Unity e na Godot de uma maneira similar. Você não precisa ter dois scripts diferentes, pois o protocolo de comunicação entre o código Python e o motor de jogos é o mesmo, tanto faz ser Unity quanto Godot. Para isso, é importante entender que todo agente no ambiente do motor de jogos tem um identificador (ID) que pode ser enderessado via Python, usando a AI4UPE. Para cada agente no ambiente do motor de jogos, deve-se criar um controlador da AI4UPE que implementa o protocolo de comunicação com o agente. Em Python, este controlador é um objeto que é inicializado pelo método *startasdaemon* do pacote *ai4u.appserver*. O controlador interpreta o estado do ambiente percebido pelo agente criado dentro do motor de jogos e envia as ações no formato que este agente compreenda. Observe que é papel do programador ajustar o nome, tipo e formato das percepções (dados enviados pelos sensores) e das ações (dados enviados aos atuadores) do agente.
+AI4UPE permite controlar um agente na Unity e na Godot de uma maneira similar. Você não precisa ter dois scripts diferentes, pois o protocolo de comunicação entre o código Python e o motor de jogos é o mesmo, tanto faz ser Unity quanto Godot. Para isso, é importante entender que todo agente no ambiente do motor de jogos tem um identificador (ID) que pode ser enderessado via Python, usando a AI4UPE. Para cada agente no ambiente do motor de jogos, deve-se criar um controlador da AI4UPE que implementa o protocolo de comunicação com o agente. Mas também, se nenhum controlador específico for usado, a AI4UPE utiliza o controlador padrão *ai4u.conrollers.BasicGymController*, que tenta inferir da melhor forma possível as configurações do jogo baseado em Unity ou em Godot. Em Python, este controlador é um objeto inicializado pelo método *startasdaemon* do pacote *ai4u.appserver*. O controlador interpreta o estado do ambiente percebido pelo agente criado dentro do motor de jogos e envia as ações no formato que este agente compreende. Observe que é papel do programador ajustar o nome, o tipo e o formato das percepções (dados enviados pelos sensores) e das ações (dados enviados aos atuadores) do agente.
 
 Portanto, AI4U possui uma arquitetura resumida na Figura 1.
 
 ![Arquitetura da AI4U](/doc/img/ai4ucomps.png)
 
-*Figure 1. Arquitetura da AI4U mostrando os seus quatro componentes principais: a função ai4u.appserver.startasdaemon (resumidamente, startasdaemon), um objeto que herda de BasicController e é inicializado pela função stardaemon, um objeto do tipo ControlRequestor associado a um item de jogo (agente). O ControlRequestor estabele o laço de repetição do agente e controla o item do jogo associado ao script do tipo BasicAgent*.
+*Figure 1. Arquitetura da AI4U mostrando os seus quatro componentes principais: a função ai4u.appserver.startasdaemon (resumidamente, startasdaemon), um objeto que herda de BasicController e é inicializado pela função stardaemon, um objeto do tipo ControlRequestor associado a um item de jogo (agente). O ControlRequestor estabelece o laço de repetição do agente e controla o item do jogo associado ao script do tipo BasicAgent*.
 
-BasicController é a classe ai4u.agents.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o agente criado no motor de jogos.
+BasicController é a classe ai4u.agents.BasicController e provê a interface básica para controlar um agente do tipo BasicAgent. BasicController usa o protocolo da AI4UPE para abstrair a comunicação entre o código em Python e o motor de jogos.
 
 # Exemplo
 Neste diretório [examples/ai4upe](/examples/), há exemplos de controladores para três cenas. A cena *scene_samplescene* está implementada tanto em Godot quanto an Unity. O código em **app.py** pode controlar por meio de comandos manuais o agente representado pelo corpo de capsula com seta mostrado na Figura 2 (o lado esquerdo tem o agente em Godot e o lado direito, em Unity).
 
 ![Agent](/doc/img/agentgu.png)
 
-Vamos implementar um controlador manual (o próprio usuário envia comandos por meio da entrada padrão) para esta cena. Primeiramente importamos os módulos que contém os componentes de que precisamos.
+Agora vou implementar um controlador manual (o próprio usuário envia comandos por meio da entrada padrão) para esta cena. Primeiramente importamos os módulos que contém os componentes de que precisamos.
 
 ```
 import ai4u
@@ -102,7 +102,7 @@ Quando as função *step_behavior* é executada, isso significa que o agente já
 
 ![request_step.png](/doc/img/request_step.png)
 
-O [controlador da cena Donut](/examples/scene_donut/controller.py) (disponível tanto nas amostras do AI4UAAF da Unity quando no da Godot) é um caso mais complexo de controlador. Em vez de criar um controlador do zero, utilize este exemplo para começar.
+O [controlador da cena Donut](/examples/scene_donut/controller.py) (disponível tanto nas amostras do AI4UAAF da Unity quanto no da Godot) é um caso mais complexo de controlador. Em vez de criar um controlador do zero, utilize este exemplo para começar.
 
 # Limitações
 
