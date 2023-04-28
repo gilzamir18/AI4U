@@ -115,7 +115,7 @@ class BasicGymController(BasicController):
     def floatarrayoutput(self, action, outputmodel):
         self.actionName = outputmodel["name"]
         if type(action) != str:
-            self.actionArgs = np.array([action.squeeze()])
+            self.actionArgs = np.array(action).squeeze()
         elif action == 'stop':
             self.actionName = "__stop__"
             self.actionArgs = [0]
