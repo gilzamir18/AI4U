@@ -89,6 +89,8 @@ class AI4UWorker:
                 fields[desc] = a
             count += 1
             pos += valuesize
+        if not 'truncated' in fields:
+            fields['truncated'] = False
         return fields
 
     def proccess(self, msg):
