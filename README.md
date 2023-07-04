@@ -42,14 +42,23 @@ Pong project is [here](https://github.com/gilzamir18/PhongDemo).
 
 # Game Engine Support
 
-AI4U support Unity or Godot scenes designed using the Framework AI4U Agent Abstraction (AI4UAA). 
+AI4U supports scenes designed in the Godot and Unity game engines. The AI4UAA Framework provides a set of abstractions for creating agents, with sensors and actuators being the main abstractions. Agents utilize sensors to gather information about the environment and themselves, sending this information to a decision-making model such as a neural network. For instance, a set of sensors can capture the agent's position and orientation, while another set can capture the position of a target. Actuators, on the other hand, represent actions that modify both the environment and the agent itself. All the information is concatenated and sent to an agent controller, which can utilize a neural network to make decisions on actions to perform. The available actions depend on the type of actuator present in the agent. For example, a motion actuator can receive parameters such as forward motion force and torque, which are then applied to the agent's center of mass in the physical object representation.
 
-
-AI4U supports scenes designed in Godot and Unity game engines. The AI4UAA Framework provides a set of abstractions for creating agents. The main abstractions are sensors and actuators. An agent uses sensors to obtain information about the environment and about itself and send this information to a decision-making model (a neural network, for example). Actuators represent actions that change the environment and the agent itself. For example, a set of sensors can capture the agent's position and orientation; another set of sensors can capture a target's position. All information is concatenated and sent to an agent controller, which can use a neural network to decide on an action to perform. The action the controller can perform depends on the type of actuator the agent has. For example, a motion actuator can receive a forward motion force and a torque as parameters and then apply these forces to the center of mass of the physical object that represents the agent.
-
-There is an AI4UAA implementation for Unity and one for Godot. Each implementation has its own specifics and limitations. Therefore, AI4U is just the component that connects a Python controller to one of the versions of AI4UAA, either for Unity or for Godot.
-
+There are separate implementations of AI4UAA for Unity and Godot. Each implementation has its own unique characteristics and limitations. Consequently, AI4U acts as the component that connects a Python controller to one of the versions of AI4UAA, either for Unity or Godot.
 
 [AI4U Unity Edition (AI4UAA for Unity)](https://github.com/gilcoder/AI4UUE)
 
 [AI4U Godot Edition (AI4UAA for Godot)](https://github.com/gilcoder/AI4UGE)
+
+#### <label style='color:#ff0000'>WARNING: Despite having provided an initial implementation as a proof of concept for Godot, we currently do not have enough resources to maintain both versions. The AI4U Unity Edition is the only version that we will continue to officially support, as it is an integral part of our PhD research workflow.</label>
+
+# Prerequisites
+AI4U and AI4UUE have been tested on three different operating systems: Windows 11, Windows 10, and Ubuntu 20.04. In all systems, it is necessary to have a Python environment installed, preferably a version higher than 3.7. Additionally, the current code has been designed to run on Gymnasio and Gym with a version higher than 0.28.1 or above.
+
+If you are using the stable-baselines3 framework for deep reinforcement learning, AI4U only supports the alpha version, which should be installed according to the issue [#1327](https://github.com/DLR-RM/stable-baselines3/pull/1327):
+
+```shell
+pip install "sb3_contrib>=2.0.0a1" --upgrade    
+pip install "stable_baselines3>=2.0.0a1" --upgrade
+```
+
