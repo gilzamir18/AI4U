@@ -1,5 +1,7 @@
 # AI4U
 
+### **Unfortunately, AI4U has been discontinued and is in maintenance mode. For a modern agent-oriented game modeling framework with support for reinforcement learning and natural language processing, see the BeMaker project (https://github.com/gilzamir18/Bemaker).**
+
 AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity and Godot game objects designed with AI4U's agent abstraction. A Unity game object and a Godot node are agents if associated with components of the BasicAgent type. 
 
 The environment and agent creation pipeline is:
