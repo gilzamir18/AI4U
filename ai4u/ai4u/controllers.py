@@ -175,7 +175,7 @@ class BasicGymController(BasicController):
         if  type(info) is tuple:
             info = info[0]
     
-        return self.extractstatefrominputs(self.inputs, info), info["reward"], info['done'], info['truncated'], info
+        return self.extractstatefrominputs(self.inputs, info), info["reward"], info['done'], info
 
     def reset_behavior(self, info):
         """
@@ -186,7 +186,7 @@ class BasicGymController(BasicController):
         state from the information sent by the game environment
         implemented in the AI4UTesting code.
         """
-        return self.extractstatefrominputs(self.inputs, info), info
+        return self.extractstatefrominputs(self.inputs, info)
 
     def step_behavior(self, action):
         """

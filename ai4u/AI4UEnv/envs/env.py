@@ -73,13 +73,10 @@ class GenericEnvironment(gym.Env):
       self.step_callback(action, state, info)
     return state
 
-  def reset(self, seed=None, **options):
-    if not hasattr(self, "seed"):
-      self.seed = None
-    
-    if seed is not None:
-      self.seed = seed
-    
+  def seed(self, seed=0):
+    self.controller.seed(seed)
+
+  def reset(self):
     if self.reset_callback is not None:
       self.reset_callback()
     return self.controller.request_reset()

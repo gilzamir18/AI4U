@@ -79,7 +79,7 @@ class BasicController:
         self.actionName = "move"
         self.actionArgs = [random.choice([0, 500]), 0, random.choice([0, 500])]
         
-    def request_step(self, action, gymformat=True, truncated=False):
+    def request_step(self, action, gymformat=True):
         """
         This method change environment state under action named 'action'.
         Never override this method. If you want change step behavior,
@@ -97,7 +97,7 @@ class BasicController:
             self.lastinfo['envmode'] = True
             self.lastinfo['done'] = True
             if gymformat:
-                return self.lastinfo, self.lastinfo['reward'], True, truncated, {}
+                return self.lastinfo, self.lastinfo['reward'], True, {}
             else:
                 return self.lastinfo
 
@@ -108,7 +108,7 @@ class BasicController:
             else:
                 self.lastinfo['paused'] = True
             if gymformat:
-                return self.lastinfo, self.lastinfo['reward'], True, truncated, {}
+                return self.lastinfo, self.lastinfo['reward'], True, {}
             else:
                 return self.lastinfo
 
@@ -120,7 +120,7 @@ class BasicController:
             self.nextstate = None
 
         if gymformat:
-            return state, state['reward'], state['done'], truncated, {} 
+            return state, state['reward'], state['done'], {} 
         else:
             return state
 
