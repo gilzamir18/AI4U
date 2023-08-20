@@ -177,20 +177,22 @@ def ai4ucmd_parser(cmdname, args=None):
 
 def step(action, value=None):
     if value is not None:
-        return ai4ucmd_parser(action, [value])
+        if type(value) == list or type(value) == np.ndarray:
+            return ai4ucmd_parser(action, value)
+        else:
+            return ai4ucmd_parser(action, [value])
     else:
         return ai4ucmd_parser(action)
 
-def steps(action, value, actions=None):
+def steps(action, value, fields=None):
+    if (fields is None):
+        return step(action, value)
+    
     cmds = [ step(action, value) ]
-    assert actions is None or type(actions) is list, "Error: invalid action list: {a}".format(a=actions)
-    if actions is not None:
-        for i in range(len(actions)):
-            if (type(actions[i]) is tuple and len(actions[i]) == 2):
-                cmds.append( step(actions[i][0], actions[i][1]) )
-            else:
-                print("Error: the expected field of action is tuple, but {x} was the received value.".format(x=action[i]) )
-    #print("@".join(cmds))
+    assert type(fields) is list, "Error: invalid action list: {a}".format(a=fields)
+    for field in fields:
+        assert type(field) == tuple, f"Error: invalid field: {field}"
+        cmds.append( step(field[0], field[1]) )
     return "@".join(cmds)
 
 def stepfv(action, values):

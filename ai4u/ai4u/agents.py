@@ -23,6 +23,7 @@ class BasicController:
         self.max_steps = 0
         self.newaction = False
         self.nextstate = None
+        self.fields = None
 
     def reset_behavior(self, info):
         self.actionArgs = [0, 0, 0, 0]
@@ -143,8 +144,10 @@ class BasicController:
                 self.actionName = self.defaultAction
                 return self.agent._restart()
             else:
-                action = stepfv(self.actionName,  self.actionArgs)
+                action = steps(self.actionName,  self.actionArgs, self.fields)
                 self.actionArgs = self.defaultActionArgs.copy()
+                self.actionName = self.defaultAction
+                self.fields = None
                 self.newaction = False
                 self.agent.hasNextState = True
                 return action
