@@ -1,0 +1,14 @@
+{
+    "name": "ai4u",
+    "rootNamespace": "ai4u",
+    "references": ["com.unity.barracuda"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

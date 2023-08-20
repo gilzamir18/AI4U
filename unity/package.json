@@ -1,0 +1,25 @@
+{
+  "name": "ai4u",
+  "displayName": "AI4U",
+  "version": "0.9.0",
+  "unity": "2021.3",
+  "description": "Use state-of-the-art machine learning to create intelligent character behaviors in any Unity environment (games, robotics, film, etc.).",
+  "dependencies": {"com.unity.nuget.newtonsoft-json": "2.0.0"},
+  "samples": [
+    {
+      "displayName": "AI4UAssets",
+      "description": "Assets used in AI4U examples.",
+      "path": "Samples/AI4UAssets"
+    },
+    {
+      "displayName": "Donut",
+      "description": "AI4U Demo with scenes used in AI4U examples of python scripts.",
+      "path": "Samples/Donut"
+    }
+  ],
+  "author": {
+    "name": "Gilzamir Gomes",
+    "email": "gilzamir@outlook.com",
+    "url": "https://www.github.com/gilcoder/ai4uue"
+  }
+}
