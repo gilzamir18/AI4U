@@ -1,5 +1,7 @@
 # AI4U
 
+** This software is in maintenance mode. It may be discontinued at any time. A more robust alternative can be obtained at [BeMaker](https://github.com/gilzamir18/Bemaker) **
+
 AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity game objects designed with AI4U's agent abstraction framework. A Unity game object is an agent if associated with BasicAgent component. 
 
 The environment and agent creation pipeline is:
@@ -18,16 +20,6 @@ After installing AI4U, enter the [example](/examples/scene_samplescene) director
 
 Then run the SampleScene scene in Unity and play the game. This script will execute an already trained neural network that will control the capsule with arrow that represents the agent. The agent's goal is to reach the red cube without falling off the platform (green plane in figure bellow).
 
-# AI4U Features
-* AI4U is Stable-baselines3 friendly: it has a default configuration to support stable-baseline3 (SB3) features. We keep track of SB3 features and implement an appropriate compatibility layer.
-
-* AI4U supports many HuggingFace features. With this, you can provide characters with natural language capabilities. We provide a default sensor for main NLP models and a set of prompts to create characters with various peculiar personas.
-
-* AI4U supports ONNX models. As such, you can make your apps without python binding after agent training. For this, it is possible to load trained ONNX models in your Unity application.
-
-* AI4U supports 2D and 3D scenarios in Unity. We provide various made components that facilitate the development of agent-oriented games.
-
-* AI4U supports both classic game artificial intelligence (such as the A* algorithm) and new ways of doing pathfinding (such as reinforcement learning).
 
 
 # Prerequisites
