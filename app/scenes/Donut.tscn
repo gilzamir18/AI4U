@@ -1,0 +1,348 @@
+[gd_scene load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="2"]
+[ext_resource type="Script" path="res://assets/scripts/LocalBrain.cs" id="3"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="4"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="5"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/RBRespawnActuator.cs" id="6"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="7"]
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="8"]
+[ext_resource type="Script" path="res://assets/scripts/RemoteBrain.cs" id="9"]
+[ext_resource type="Script" path="res://app_scripts/RadiationSource.cs" id="10"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="11"]
+[ext_resource type="Script" path="res://app_scripts/RespawnTarget.cs" id="12"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="13"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="14"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="15"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/ActionSensor.cs" id="16"]
+[ext_resource type="Material" path="res://radiationOn.tres" id="17"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="18"]
+[ext_resource type="Material" path="res://radiationOff.tres" id="19"]
+[ext_resource type="Script" path="res://app_scripts/RadiationSensor.cs" id="20"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RewardSensor.cs" id="21"]
+
+[sub_resource type="CapsuleShape3D" id=10]
+
+[sub_resource type="CapsuleMesh" id=11]
+
+[sub_resource type="Skin" id=12]
+
+[sub_resource type="BoxMesh" id=7]
+material = ExtResource( 19 )
+
+[sub_resource type="StandardMaterial3D" id=9]
+albedo_color = Color( 1, 0, 0, 1 )
+
+[sub_resource type="BoxShape3D" id=8]
+size = Vector3( 1.01691, 1, 0.907062 )
+
+[sub_resource type="StandardMaterial3D" id=15]
+albedo_color = Color( 0.109804, 0.109804, 0.109804, 1 )
+
+[sub_resource type="BoxShape3D" id=1]
+
+[sub_resource type="PlaneMesh" id=13]
+
+[sub_resource type="StandardMaterial3D" id=14]
+albedo_color = Color( 0.74902, 1, 0.603922, 1 )
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 0.251259, 0.96792, 0, -0.96792, 0.251259, 0, 19.6813, 4.79547 )
+fov = 60.0
+size = 30.0
+
+[node name="AgentRigidBody" type="RigidBody3D" parent="." groups=["PLAYER"]]
+transform = Transform3D( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -6.2992, 1.65137, 6.5518 )
+continuous_cd = true
+max_contacts_reported = 10000
+contact_monitor = true
+sleeping = true
+can_sleep = false
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+angular_damp = 5.0
+
+[node name="eye" type="Node3D" parent="AgentRigidBody"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.359559, 2.25064 )
+
+[node name="Arrow" parent="AgentRigidBody/eye" instance=ExtResource( 8 )]
+transform = Transform3D( 0.5, 0, 0, 0, -8.74228e-09, -0.5, 0, 0.2, -2.18557e-08, 0, 0.106723, -1.27881 )
+
+[node name="Agent" type="Node" parent="AgentRigidBody"]
+script = ExtResource( 1 )
+controlRequestorPath = NodePath("ControlRequestor")
+avatarPath = NodePath("..")
+doneAtNegativeReward = false
+MaxStepsPerEpisode = 400
+
+[node name="ControlRequestor" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 2 )
+defaultTimeScale = 10.0
+
+[node name="LocalBrain" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 3 )
+enabled = false
+agentPath = NodePath("..")
+skipFrame = 8
+repeatAction = true
+controllerPath = NodePath("../WASDRBController")
+
+[node name="RBMoveActuator" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 5 )
+actionName = "move"
+moveAmount = 30.0
+turnAmount = 1.2
+jumpPower = 0.0
+jumpForwardPower = 0.0
+
+[node name="WASDRBController" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 4 )
+
+[node name="RespawnActuator" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 6 )
+actionName = "respwan"
+respawnOptionsPath = NodePath("../../../RespawnOptions")
+
+[node name="Raycasting" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 7 )
+perceptionKey = "vision"
+normalized = false
+groupCode = PackedInt32Array( 50, 100, 200, 25, 75 )
+groupName = PackedStringArray( "FLOOR", "PLAYER", "TARGET", "WALL", "RADIO" )
+eyePath = NodePath("../../eye")
+visionMaxDistance = 15.0
+debugEnabled = true
+
+[node name="RemoteBrain" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 9 )
+agentPath = NodePath("..")
+skipFrame = 8
+repeatAction = true
+
+[node name="TouchCubeReward" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 11 )
+causeEpisodeToEnd = true
+reward = 10.0
+targetPath = NodePath("../../../TargetRigidBody")
+
+[node name="ArraySensor" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 13 )
+perceptionKey = "array"
+stackedObservations = 4
+
+[node name="OrientationSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource( 14 )
+perceptionKey = "orientation"
+target = NodePath("../../../../TargetRigidBody")
+
+[node name="OnGroundStatus" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource( 15 )
+perceptionKey = "onground"
+rBMoveActuator = NodePath("../../RBMoveActuator")
+
+[node name="ActionSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource( 16 )
+perceptionKey = "actions"
+actionName = "move"
+actionSize = 4
+
+[node name="RewardSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource( 21 )
+perceptionKey = "rewards"
+
+[node name="RadiationSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource( 20 )
+perceptionKey = "radiation"
+radiationPath = NodePath("../../../../RadiationBox")
+
+[node name="MinDistReward" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource( 18 )
+target = NodePath("../../../TargetRigidBody")
+stepReward = -0.01
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
+transform = Transform3D( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 10 )
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="AgentRigidBody"]
+transform = Transform3D( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 11 )
+skin = SubResource( 12 )
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="RespawnOptions" type="Node" parent="."]
+
+[node name="Opt3" type="Node3D" parent="RespawnOptions"]
+transform = Transform3D( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -6.17049, 1.646, 6.9529 )
+
+[node name="positions" type="Node3D" parent="."]
+
+[node name="p1" type="Node3D" parent="positions"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.37168, 1, -7.00393 )
+
+[node name="TargetRigidBody" type="RigidBody3D" parent="." groups=["TARGET"]]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.438, 1, -6.735 )
+mode = 3
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+script = ExtResource( 12 )
+positions = NodePath("../positions")
+agentPath = NodePath("../AgentRigidBody/Agent")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TargetRigidBody"]
+mesh = SubResource( 7 )
+material/0 = SubResource( 9 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TargetRigidBody"]
+shape = SubResource( 8 )
+
+[node name="RadiationBox" type="RigidBody3D" parent="." groups=["RADIO"]]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.787, 1, -1.896 )
+mode = 3
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+script = ExtResource( 10 )
+agentPath = NodePath("../AgentRigidBody/Agent")
+radiationOn = ExtResource( 17 )
+radiationOff = ExtResource( 19 )
+meshInstancePath = NodePath("MeshInstance3D")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RadiationBox"]
+mesh = SubResource( 7 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RadiationBox"]
+shape = SubResource( 8 )
+disabled = true
+
+[node name="Wall" type="RigidBody3D" parent="." groups=["WALL"]]
+transform = Transform3D( 0.25363, 0, 0, 0, 1, 0, 0, 0, 9.99463, -7.83255, 0.107406, 0.215727 )
+mode = 1
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall"]
+transform = Transform3D( 4.11059, 0, 0, 0, 1, 0, 0, 0, 1, -4.06459, 0.984388, -0.0219777 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 15 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall"]
+transform = Transform3D( 3.89517, 0, 0, 0, 1.20407, 0, 0, 0, 1.24757, -4.55182, 0.888963, -0.0245764 )
+shape = SubResource( 8 )
+
+[node name="Wall5" type="RigidBody3D" parent="." groups=["WALL"]]
+transform = Transform3D( 0.837854, 0, 0, 0, 1, 0, 0, 0, 1.15954, 0, 1, 0 )
+mode = 1
+continuous_cd = true
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall5"]
+transform = Transform3D( 4.16771, 0, 0, 0, 1, 0, 0, 0, 4.78549, 0.392635, 0, 0 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 15 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall5"]
+transform = Transform3D( 4.23703, 0, 0, 0, 0.999999, 0, 0, 0, 5.218, 0.358444, 0, 0 )
+shape = SubResource( 8 )
+
+[node name="Wall2" type="RigidBody3D" parent="." groups=["WALL"]]
+transform = Transform3D( 0.25363, 0, 0, 0, 1, 0, 0, 0, 9.99463, 9.90013, 0.107406, 0.215727 )
+mode = 1
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall2"]
+transform = Transform3D( 4.11059, 0, 0, 0, 1, 0, 0, 0, 1, -4.06459, 0.984388, -0.0219777 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 15 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall2"]
+transform = Transform3D( 3.89517, 0, 0, 0, 1.20407, 0, 0, 0, 1.24757, -4.55182, 0.888963, -0.0245764 )
+shape = SubResource( 8 )
+
+[node name="Wall3" type="RigidBody3D" parent="." groups=["WALL"]]
+transform = Transform3D( 1.98725, 0, 0, 0, 1, 0, 0, 0, 0.755275, 7.84092, 0.107406, -9.3155 )
+mode = 1
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall3"]
+transform = Transform3D( 4.11059, 0, 0, 0, 1, 0, 0, 0, 1, -4.06459, 0.984388, -0.0219777 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 15 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall3"]
+transform = Transform3D( 3.89517, 0, 0, 0, 1.20407, 0, 0, 0, 1.24757, -3.99573, 0.888963, -0.0245771 )
+shape = SubResource( 8 )
+
+[node name="Wall4" type="RigidBody3D" parent="." groups=["WALL"]]
+transform = Transform3D( 1.98725, 0, 0, 0, 1, 0, 0, 0, 0.755275, 7.84092, 0.107406, 9.27627 )
+mode = 1
+max_contacts_reported = 100
+contact_monitor = true
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall4"]
+transform = Transform3D( 4.11059, 0, 0, 0, 1, 0, 0, 0, 1, -4.06459, 0.984388, -0.0219777 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 15 )
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall4"]
+transform = Transform3D( 3.89517, 0, 0, 0, 1.20407, 0, 0, 0, 1.24757, -3.9791, 0.888963, -0.195384 )
+shape = SubResource( 8 )
+
+[node name="FloorStaticBody" type="StaticBody3D" parent="." groups=["FLOOR"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorStaticBody" groups=["FLOOR"]]
+transform = Transform3D( 9.93919, 0, 0, 0, 0.1, 0, 0, 0, 9.9449, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloorStaticBody" groups=["FLOOR"]]
+transform = Transform3D( 9.93109, 0, 0, 0, 1, 0, 0, 0, 9.99972, 0, 0, 0 )
+mesh = SubResource( 13 )
+material/0 = SubResource( 14 )

@@ -1,0 +1,12 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" uid="uid://cblwohkiwrwbd" path="res://app/v687-penny-28-environment.jpg" id="1"]
+
+[resource]
+albedo_color = Color( 1, 0.466667, 0.466667, 1 )
+albedo_texture = ExtResource( 1 )
+refraction_enabled = true
+refraction_scale = 0.05
+refraction_texture_channel = 0
+uv1_offset = Vector3( 1, 0, 0 )
+uv1_triplanar = true

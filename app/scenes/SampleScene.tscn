@@ -1,0 +1,216 @@
+[gd_scene load_steps=23 format=3 uid="uid://caj7lvk0g1aaq"]
+
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_x0fs8"]
+[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="2_kt4nc"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_eidm6"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="4_rhsg2"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/RBRespawnActuator.cs" id="5_ys2cu"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="6_d36se"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="7_7ag7r"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="8_tb4db"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="9_mri8k"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="10_w3bug"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="11_ibwub"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/ActionSensor.cs" id="12_s5rg1"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="13_5twrk"]
+[ext_resource type="Script" path="res://app/scripts/RespawnTarget.cs" id="14_7i7up"]
+[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="15_gykpu"]
+
+[sub_resource type="CapsuleShape3D" id="10"]
+
+[sub_resource type="CapsuleMesh" id="11"]
+
+[sub_resource type="Skin" id="12"]
+
+[sub_resource type="BoxMesh" id="7"]
+
+[sub_resource type="BoxShape3D" id="8"]
+
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="PlaneMesh" id="13"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.870089, 0.492894, 0, -0.492894, 0.870089, 0, 10.2241, 17.5727)
+fov = 60.0
+size = 30.0
+
+[node name="AgentRigidBody" type="RigidBody3D" parent="." groups=["PLAYER"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65137, 0)
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+continuous_cd = true
+max_contacts_reported = 10000
+contact_monitor = true
+sleeping = true
+can_sleep = false
+angular_damp = 5.0
+
+[node name="eye" type="Node3D" parent="AgentRigidBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.359559, 2.25064)
+
+[node name="Arrow" parent="AgentRigidBody/eye" instance=ExtResource("1_x0fs8")]
+transform = Transform3D(0.5, 0, 0, 0, -8.74228e-09, -0.5, 0, 0.2, -2.18557e-08, 0, -0.251057, -1.27881)
+
+[node name="Agent" type="Node" parent="AgentRigidBody"]
+script = ExtResource("2_kt4nc")
+avatarPath = NodePath("..")
+doneAtNegativeReward = false
+MaxStepsPerEpisode = 3000
+
+[node name="RBMoveActuator" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("3_eidm6")
+moveAmount = 20.0
+turnAmount = 10.0
+jumpPower = 50.0
+jumpForwardPower = 50.0
+actionName = "move"
+
+[node name="WASDRBController" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("4_rhsg2")
+speed = 1.0
+
+[node name="RespawnActuator" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("5_ys2cu")
+respawnOptionsPath = NodePath("../../../RespawnOptions")
+actionName = "respwan"
+isOutput = false
+
+[node name="Raycasting" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("6_d36se")
+groupCode = PackedInt32Array(50, 100, 200)
+groupName = PackedStringArray("FLOOR", "PLAYER", "TARGET")
+eyePath = NodePath("../../eye")
+visionMaxDistance = 15.0
+flattened = true
+perceptionKey = "vision"
+normalized = false
+
+[node name="FallReward" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("7_7ag7r")
+threshold = -0.5
+isLocal = true
+causeEpisodeToEnd = true
+
+[node name="TouchCubeReward" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("8_tb4db")
+reward = 10.0
+targetPath = NodePath("../../../TargetRigidBody")
+causeEpisodeToEnd = true
+
+[node name="ArraySensor" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("9_mri8k")
+perceptionKey = "array"
+isState = true
+
+[node name="OrientationSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource("10_w3bug")
+target = NodePath("../../../../TargetRigidBody")
+perceptionKey = "orientation"
+
+[node name="OnGroundStatus" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource("11_ibwub")
+rBMoveActuator = NodePath("../../RBMoveActuator")
+perceptionKey = "onground"
+
+[node name="ActionSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
+script = ExtResource("12_s5rg1")
+actionName = "move"
+actionSize = 4
+perceptionKey = "actions"
+
+[node name="MinDistReward" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("13_5twrk")
+target = NodePath("../../../TargetRigidBody")
+stepReward = -0.01
+
+[node name="WASDRBMoveController" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("4_rhsg2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("10")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="AgentRigidBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("11")
+skin = SubResource("12")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.528201, 0.849119, 0, -0.849119, 0.528201, 0, 4.23971, 0)
+
+[node name="RespawnOptions" type="Node" parent="."]
+
+[node name="Opt3" type="Node3D" parent="RespawnOptions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.345893, 1.646, 1.14072)
+
+[node name="positions" type="Node3D" parent="."]
+
+[node name="p1" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, -5.5473, 0, -6.65892)
+
+[node name="p2" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, -5.41284, 0, 7.42653)
+
+[node name="p3" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, 5.81354, 0, 7.42653)
+
+[node name="p4" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, 5.14622, 0, -6.35482)
+
+[node name="p5" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, 6.70332, 0, 2.45185)
+
+[node name="p6" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, -5.5473, 0, 2.06984)
+
+[node name="p7" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, -1.98822, 0, 4.79691)
+
+[node name="p8" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, 2.01578, 0, 3.79591)
+
+[node name="p9" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, 5.01876, 0, -3.65594)
+
+[node name="p10" type="Node3D" parent="positions"]
+transform = Transform3D(0.25363, 0, 0, 0, 1, 0, 0, 0, 1, -2.87798, 0, -4.76816)
+
+[node name="TargetRigidBody" type="RigidBody3D" parent="." groups=["TARGET"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.46723, 0.107406, 0)
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+max_contacts_reported = 100
+contact_monitor = true
+script = ExtResource("14_7i7up")
+positions = NodePath("../positions")
+agentPath = NodePath("../AgentRigidBody/Agent")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TargetRigidBody"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4.06459, 0.984388, -0.0219777)
+mesh = SubResource("7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TargetRigidBody"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4.0978, 1.03111, -0.0308448)
+shape = SubResource("8")
+
+[node name="FloorStaticBody" type="StaticBody3D" parent="." groups=["FLOOR"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorStaticBody" groups=["FLOOR"]]
+shape = SubResource("1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloorStaticBody" groups=["FLOOR"]]
+transform = Transform3D(9.93109, 0, 0, 0, 1, 0, 0, 0, 9.99972, 0, 0, 0)
+mesh = SubResource("13")
+
+[node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
+script = ExtResource("15_gykpu")
+stopOnQuit = true
+agentsList = [NodePath("../AgentRigidBody/Agent")]

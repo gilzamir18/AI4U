@@ -1,33 +1,20 @@
-# AI4U
+# AI4U - Artificial Inteligence For Universe
 
-** This software is in maintenance mode. It may be discontinued at any time. A more robust alternative can be obtained at [BeMaker](https://github.com/gilzamir18/Bemaker) **
+AI4U tool AI4U is a agent framework for modeling virtual reality and game environment. This repo we keep the reference implementation for Godot Game Engine.
 
-AI4U  is a protocol and an Application Programming Interface (API) that allow control Unity game objects designed with AI4U's agent abstraction framework. A Unity game object is an agent if associated with BasicAgent component. 
+The Godot version of the AI4U get advantage of the Godot architecture and facilitate agent specification by means of an agent abstraction. In Godot, AI4U provides a alternative approach to modeling Non-Player Characters (NPC). Although, developers can apply this tool in others situations, for example, the modeling environment for artificial intelligence experiments.
 
-The environment and agent creation pipeline is:
+Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
-* First create a project in the Unity.
-* Install AI4U in the created project and start modeling the agent's environment using the abstractions of the AI4U Agent Abstraction Framework.
-* Connect the environment and the agent with python scripts to train the neural networks that control the agent.
+# BeMaker
+AI4U Godot supports gymnasium environment in Python throught [bemaker tool](https://github.com/gilzamir18/bemaker). 
 
-To control your agent through the Python language, you need to install AI4U. To do this, enter the directory [ai4u](/ai4u) and run the command:
+# Requirements
 
-    pip install -e .
+* Godot 4 Mono Version (tested only in Godot 4.1.1 stable, mono version, Windows 11)
+* Python 3.10
+* Gynasium 
 
-After installing AI4U, enter the [example](/examples/scene_samplescene) directory and run the command:
-
-    python appgym_sbtest.py
-
-Then run the SampleScene scene in Unity and play the game. This script will execute an already trained neural network that will control the capsule with arrow that represents the agent. The agent's goal is to reach the red cube without falling off the platform (green plane in figure bellow).
-
-
-
-# Prerequisites
-AI4U and AI4UUE have been tested on three different operating systems: Windows 11, Windows 10, and Ubuntu 20.04. AI4U support Python 3.8, 3.9, and 3.10 versions.
-
-If you are using the stable-baselines3 framework for deep reinforcement learning, AI4U only supports up to version 1.8.0. Also, we only support gym version <= 0.25.2. The commands to install the proper version of these modules are:
-
-``` bash
-pip install gym<=0.25.2
-pip install stable-baselines3<=1.8.0
-```
+# Documentation
+In Production...
+[Documentation](/doc/)

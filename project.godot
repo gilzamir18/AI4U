@@ -1,0 +1,38 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="AI4GTesting"
+run/main_scene="res://app/scenes/SampleScene.tscn"
+config/features=PackedStringArray("4.1", "C#")
+config/icon="res://app/icon.png"
+
+[autoload]
+
+LineDrawer="*res://assets/plugins/LineDrawer.cs"
+
+[dotnet]
+
+project/assembly_name="AI4GTesting"
+
+[mono]
+
+project/assembly_name="AI4GTesting"
+export/aot/enabled=true
+export/aot/full_aot=true
+
+[physics]
+
+common/physics_fps=360
+
+[rendering]
+
+environment/defaults/default_environment="res://app/scenes/default_env.tres"
