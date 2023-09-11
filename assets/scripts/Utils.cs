@@ -112,6 +112,24 @@ namespace ai4u
 			return sb.ToString();
 		}
 
+		public static string ParseAction(string actionName, int[] args)
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.Append(actionName);
+			sb.Append(";");
+			sb.Append("" + args.Length);
+			sb.Append(";");
+			for (int i = 0; i < args.Length; i++)
+			{
+				if (i > 0)
+				{
+					sb.Append(";");
+				}
+				sb.Append(args[i]);
+			}
+			return sb.ToString();
+		}
+
 		public static string ParseAction(string actionName)
 		{
 			return actionName + ";0";

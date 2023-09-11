@@ -1,6 +1,8 @@
 using Godot;
 using System;
 
+namespace ai4u;
+
 public partial class RemoteConfiguration : Node
 {
 	///<summary>If true, the remote brain will be 
