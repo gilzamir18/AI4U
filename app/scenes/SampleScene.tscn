@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="15_gykpu"]
 
 [sub_resource type="CapsuleShape3D" id="10"]
+height = 4.38716
 
 [sub_resource type="CapsuleMesh" id="11"]
 
@@ -71,7 +72,6 @@ actionName = "move"
 
 [node name="WASDRBController" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("4_rhsg2")
-speed = 1.0
 
 [node name="RespawnActuator" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("5_ys2cu")
@@ -129,9 +129,11 @@ stepReward = -0.01
 
 [node name="WASDRBMoveController" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("4_rhsg2")
+speed = 0.6
+turnAmount = 2.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+transform = Transform3D(1.85047, 0, 0, 0, -4.37114e-08, -1.79789, 0, 1, -7.85881e-08, 0, 0.0746579, 0.048594)
 shape = SubResource("10")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="AgentRigidBody"]
@@ -214,3 +216,10 @@ mesh = SubResource("13")
 script = ExtResource("15_gykpu")
 stopOnQuit = true
 agentsList = [NodePath("../AgentRigidBody/Agent")]
+
+[node name="TextEdit" type="TextEdit" parent="."]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 358.0
+offset_bottom = 81.0
+text = "Press R to  start/Restart simulation."
