@@ -23,6 +23,7 @@ public partial class TrainController : Controller
 	
 	override public void OnReset(Agent agent)
 	{
+		trainer.OnReset(agent);
 	}
 
 	public void RequestContinuousAction(string name, float[] args)
@@ -67,7 +68,7 @@ public partial class TrainController : Controller
 
 	override public void NewStateEvent()
 	{
-		trainer.UpdateState();
+		trainer.StateUpdated();
 	}
 
 	private void ResetCmd()

@@ -74,6 +74,11 @@ public abstract class Brain
 		return receivedcmd;
 	}
 
+	public virtual void OnStepReward(int step, float reward)
+	{
+		
+	}
+
 	public string[] GetReceivedArgs(string cmd=null)
 	{
 		if (cmd == null)

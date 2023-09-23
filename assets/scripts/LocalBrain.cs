@@ -27,6 +27,12 @@ namespace ai4u
 			this.Controller.OnReset(agent);
 		}
 
+		public override void OnStepReward(int step, float reward)
+		{
+			this.Controller.LastStep = step;
+			this.Controller.LastReward = reward;
+		}
+
 		public string SendMessage(string[] desc, byte[] tipo, string[] valor)
 		{
 			this.Controller.ReceiveState(desc, tipo, valor);

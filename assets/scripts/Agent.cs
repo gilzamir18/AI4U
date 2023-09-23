@@ -48,6 +48,8 @@ public abstract partial class Agent : Node
 	protected byte[] types;
 	protected string[] values;
 	protected bool setupIsDone = false;
+	
+	public ModelMetadata Metadata {get; set;}
 
 	public byte[] MessageType
 	{

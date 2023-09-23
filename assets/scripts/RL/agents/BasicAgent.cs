@@ -206,6 +206,7 @@ namespace ai4u
 			}
 
 			metadataLoader = new ModelMetadataLoader(this);
+			Metadata = metadataLoader.Metadata;
 			string metadatastr = metadataLoader.toJson();
 
 			RequestCommand request = new RequestCommand(5);
@@ -252,6 +253,7 @@ namespace ai4u
 			{
 				rewards[i].OnUpdate();
 			}
+			brain.OnStepReward(nSteps, Reward);
 			if (endOfStepEvent != null)
 			{
 				endOfStepEvent(this);

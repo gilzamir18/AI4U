@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://caj7lvk0g1aaq"]
+[gd_scene load_steps=31 format=3 uid="uid://caj7lvk0g1aaq"]
 
 [ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="2_kt4nc"]
 [ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_eidm6"]
@@ -12,7 +12,9 @@
 [ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="11_ibwub"]
 [ext_resource type="Script" path="res://assets/scripts/RL/sensors/ActionSensor.cs" id="12_s5rg1"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="13_5twrk"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/TrainController.cs" id="13_g88cc"]
 [ext_resource type="Script" path="res://app/scripts/RespawnTarget.cs" id="14_7i7up"]
+[ext_resource type="Script" path="res://assets/scripts/RL/contrib/DQNTrainer.cs" id="14_u3plo"]
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="15_gykpu"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lihe8"]
@@ -143,8 +145,6 @@ groupName = PackedStringArray("FLOOR", "PLAYER", "TARGET")
 eyePath = NodePath("../../eye")
 visionMaxDistance = 15.0
 flattened = true
-perceptionKey = "vision"
-normalized = false
 
 [node name="FallReward" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("7_7ag7r")
@@ -160,24 +160,19 @@ causeEpisodeToEnd = true
 
 [node name="ArraySensor" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("9_mri8k")
-perceptionKey = "array"
-isState = true
 
 [node name="OrientationSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
 script = ExtResource("10_w3bug")
 target = NodePath("../../../../TargetRigidBody")
-perceptionKey = "orientation"
 
 [node name="OnGroundStatus" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
 script = ExtResource("11_ibwub")
 rBMoveActuator = NodePath("../../RBMoveActuator")
-perceptionKey = "onground"
 
 [node name="ActionSensor" type="Node" parent="AgentRigidBody/Agent/ArraySensor"]
 script = ExtResource("12_s5rg1")
 actionName = "move"
 actionSize = 4
-perceptionKey = "actions"
 
 [node name="MinDistReward" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("13_5twrk")
@@ -186,6 +181,10 @@ stepReward = -0.01
 
 [node name="WASDRBMoveController" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("4_rhsg2")
+
+[node name="TrainerController" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("13_g88cc")
+trainerPath = NodePath("../../Trainer")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
@@ -196,6 +195,9 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 mesh = SubResource("11")
 skin = SubResource("12")
 surface_material_override/0 = SubResource("StandardMaterial3D_k33ek")
+
+[node name="Trainer" type="Node" parent="AgentRigidBody"]
+script = ExtResource("14_u3plo")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.528201, 0.849119, 0, -0.849119, 0.528201, 0, 4.23971, 0)
@@ -273,4 +275,4 @@ surface_material_override/0 = SubResource("StandardMaterial3D_lpv35")
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("15_gykpu")
 stopOnQuit = true
-agentsList = [NodePath("../AgentRigidBody/Agent")]
+agentsList = []
