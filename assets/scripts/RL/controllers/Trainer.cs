@@ -22,6 +22,9 @@ public partial class Trainer : Node
 
 	}
 	
+	///<summary>
+	/// Here you get agent life cicle callback about episode resetting.
+	///</summary>
 	public virtual void OnReset(Agent agent)
 	{
 		

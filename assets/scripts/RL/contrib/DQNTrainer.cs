@@ -5,9 +5,14 @@ using System.Collections.Generic;
 using TorchSharp;
 using static TorchSharp.torch;
 using static TorchSharp.torch.nn;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace ai4u.contrib;
 
+/*
+Reference: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+*/
 public class ReplayMemory<T>
 {
 	private readonly T[] memory;
@@ -119,6 +124,8 @@ public partial class DQNTrainer : Trainer
 	private float tau = 0.005f;
 	[Export]
 	private float lr = 1e-4f;
+	[Export]
+	private int numEpisodes = 1000;
 	
 	private ReplayMemory< Transition<float[], int> > replayBuffer;
 	private QNet policyNet;
@@ -128,6 +135,9 @@ public partial class DQNTrainer : Trainer
 	private int action = -1;
 	private int numberOfFields = 0;
 	private int inputIdx = -1;
+	private RandomNumberGenerator random;
+	private int stepsDone = 0;
+	
 	private float[][] actions = new float[][]{
 			new float[]{1, 0, 0, 0}, //forward
 			new float[]{-1, 0, 0, 0}, //backward
@@ -141,6 +151,8 @@ public partial class DQNTrainer : Trainer
 	/// </summary>
 	public override void OnSetup()
 	{
+		random = new RandomNumberGenerator();
+		random.Randomize();
 		policyNet = new QNet(stateSize, numberOfActions);
 		targetNet = new QNet(stateSize, numberOfActions);
 		optimizer = torch.optim.AdamW(policyNet.parameters(), lr:lr, amsgrad:true);
@@ -150,6 +162,7 @@ public partial class DQNTrainer : Trainer
 	
 	public override void OnReset(Agent agent)
 	{
+		stepsDone = 0;
 		numberOfFields = controller.GetStateSize();
 		for (int i = 0; i < numberOfFields; i++)
 		{
@@ -166,18 +179,9 @@ public partial class DQNTrainer : Trainer
 	public override void StateUpdated()
 	{
 		float[] state = controller.GetStateAsFloatArray(inputIdx);
-		float[] q = ModelAction(state);
-		int argmax = 0;
-		for (int i = 1; i < q.Length; i++)
-		{
-			if (q[argmax] <= q[i])
-			{
-				argmax = i;
-			}
-		}
-		
-		var curAction = argmax;
-		controller.RequestContinuousAction(actionName, actions[argmax]);
+		int curAction = SelectAction(state);
+
+		controller.RequestContinuousAction(actionName, actions[curAction]);
 		
 		if (initialState == null)
 		{
@@ -192,15 +196,119 @@ public partial class DQNTrainer : Trainer
 		}
 	}
 	
-	private float[] ModelAction(float[] state)
+	private float[] SampleAction()
 	{
-		return new float[]{1, 0, 0, 0, 0, 0};
+		float[] a = new float[numberOfActions];
+		for (int i = 0; i < numberOfActions; i++)
+		{
+			a[i] = random.Randfn();
+		}
+		return a;
 	}
 	
-	private void Training()
+	private int SelectAction(float[] state)
 	{
-			
+		var sample = random.RandiRange(0, 99)/100.0f;
+		var eps_threshold = epsEnd + (epsStart - epsEnd) * Mathf.Exp(-1 * stepsDone/epsDecay);
+		stepsDone += 1;
+		if (sample > eps_threshold)
+		{
+			var q = policyNet.call(state);
+			return q.argmax(-1).item<int>();
+		}
+		else
+		{
+			return random.RandiRange(0, numberOfActions-1);
+		}
+	}
+	
+	private async Task OptimizeModel()
+	{
+		if (this.replayBuffer.Length() < this.batchSize)
+		{
+			return;
+		}
 		
+		var transitions = replayBuffer.Sample(this.batchSize);
+		
+		Tensor[] initialStates, actions, nextStatesA, rewards;
+		Unzip(transitions, 
+				out initialStates,
+				out actions,
+				out nextStatesA,
+				out rewards);
+		var device = new Device("cuda");
+
+		// Suponha que 'batch.NextState' seja uma lista de estados
+		List<Tensor> nextStates = new List<Tensor>(nextStatesA);
+		// Inicialize uma lista para armazenar os valores booleanos
+		List<bool> maskValues = new List<bool>();
+		// Preencha a lista com valores booleanos indicando se o estado é nulo ou não
+		foreach (var state in nextStates)
+		{
+			maskValues.Add( (state != null).item<bool>() );
+		}
+		// Converta a lista de bools para um tensor TorchSharp
+		var nonFinalMask = BoolTensor( maskValues.ToArray() );
+	
+		// Inicialize uma lista para armazenar os estados não nulos
+		List<Tensor> nonNullStates = new List<Tensor>();
+
+		// Preencha a lista com estados que não são nulos
+		foreach (var state in nextStates)
+		{
+			if ( (state != null).item<bool>() )
+			{
+				nonNullStates.Add(state);
+			}
+		}
+		// Concatene os estados não nulos em um tensor TorchSharp
+		var nonFinalNextStates = torch.cat(nonNullStates.ToArray());
+				
+		var stateBatch = torch.cat(nextStates);
+		var actionBatch = torch.cat(actions);
+		var rewardBatch = torch.cat(rewards);
+		
+		var stateActionValues = policyNet.forward(stateBatch);
+		
+		stateActionValues = stateActionValues.gather(1, actionBatch);
+		
+		var nextStateValues = torch.zeros(new long[]{batchSize}, device:device);
+		
+		Tensor expectedStateActionValues = null;
+		using (torch.no_grad())
+		{
+			nextStateValues[nonFinalMask] = targetNet.forward(nonFinalNextStates).max(1).values[0];
+			expectedStateActionValues = (nextStateValues * gamma) + rewardBatch;
+		}
+		var criterion = torch.nn.SmoothL1Loss();
+		var loss = criterion.call(stateActionValues, expectedStateActionValues.unsqueeze(1));
+		optimizer.zero_grad();
+		loss.backward();
+		torch.nn.utils.clip_grad_value_(policyNet.parameters(), 100);
+		optimizer.step();
+		await Task.Delay(100);
 	}
 	
+	private void Unzip(List<Transition<float[], int>> transitions, 
+		out Tensor[] initialStates, 
+		out Tensor[] actions,
+		out Tensor[] nextStates,
+		out Tensor[] rewards
+	)
+	{	
+		int n = transitions.Count;
+		initialStates = new Tensor[n];
+		actions = new Tensor[n];
+		nextStates = new Tensor[n];
+		rewards = new Tensor[n];	
+		for (int i = 0; i < n; i++)
+		{
+			var t = transitions[i];
+			initialStates[i] = t.InitialState;
+			actions[i] = t.Action;
+			nextStates[i] = t.NextState;
+			rewards[i] = t.Reward;			
+		}
+	} 
 }
