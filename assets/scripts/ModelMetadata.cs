@@ -8,11 +8,11 @@ namespace ai4u
 	[Serializable]
 	public struct ModelInput
 	{
-		public string name;
-		public int[] shape;
-		public SensorType type;
-		public float rangeMin;
-		public float rangeMax;
+		public string name {get; set;}
+		public int[] shape {get; set;}
+		public SensorType type {get; set;}
+		public float rangeMin {get; set;}
+		public float rangeMax {get; set;}
 
 		public ModelInput(string name, SensorType type, int[] shape, int stackedObservations, float rangeMin, float rangeMax)
 		{
@@ -33,12 +33,12 @@ namespace ai4u
 	[Serializable]
 	public struct ModelOutput
 	{
-		public string name;
-		public bool isContinuous;
-		public int[] shape;
+		public string name {get; set;}
+		public bool isContinuous {get; set;}
+		public int[] shape {get; set;}
 
-		public float[] rangeMin;
-		public float[] rangeMax;
+		public float[] rangeMin {get; set;}
+		public float[] rangeMax {get; set;}
 
 
 		public ModelOutput(string name, int[] shape, bool isContinuous, float[] rangeMin, float[] rangeMax)
@@ -54,8 +54,8 @@ namespace ai4u
 	[Serializable]
 	public partial class ModelMetadata
 	{
-		public ModelInput[] inputs;
-		public ModelOutput[] outputs;
+		public ModelInput[] inputs {get; set;}
+		public ModelOutput[] outputs {get; set;}
 
 		public ModelMetadata(int inputCount, int outputCount)
 		{

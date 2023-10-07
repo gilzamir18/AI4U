@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://caj7lvk0g1aaq"]
+[gd_scene load_steps=25 format=3 uid="uid://caj7lvk0g1aaq"]
 
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_x0fs8"]
 [ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="2_kt4nc"]
@@ -23,7 +23,11 @@ height = 4.38716
 
 [sub_resource type="Skin" id="12"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf34t"]
+albedo_color = Color(0.827451, 0, 0.054902, 1)
+
 [sub_resource type="BoxMesh" id="7"]
+material = SubResource("StandardMaterial3D_lf34t")
 
 [sub_resource type="BoxShape3D" id="8"]
 
@@ -31,6 +35,9 @@ height = 4.38716
 size = Vector3(20, 0.1, 20)
 
 [sub_resource type="PlaneMesh" id="13"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bnksa"]
+albedo_color = Color(0.0313726, 0.313726, 0.301961, 1)
 
 [node name="Node3D" type="Node3D"]
 
@@ -59,6 +66,7 @@ transform = Transform3D(0.5, 0, 0, 0, -8.74228e-09, -0.5, 0, 0.2, -2.18557e-08, 
 [node name="Agent" type="Node" parent="AgentRigidBody"]
 script = ExtResource("2_kt4nc")
 avatarPath = NodePath("..")
+remote = true
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 3000
 
@@ -211,15 +219,22 @@ shape = SubResource("1")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="FloorStaticBody" groups=["FLOOR"]]
 transform = Transform3D(9.93109, 0, 0, 0, 1, 0, 0, 0, 9.99972, 0, 0, 0)
 mesh = SubResource("13")
+surface_material_override/0 = SubResource("StandardMaterial3D_bnksa")
 
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("15_gykpu")
 stopOnQuit = true
 agentsList = [NodePath("../AgentRigidBody/Agent")]
 
-[node name="TextEdit" type="TextEdit" parent="."]
+[node name="NotificationOutput" type="TextEdit" parent="."]
 offset_left = 24.0
 offset_top = 16.0
-offset_right = 358.0
-offset_bottom = 81.0
-text = "Press R to  start/Restart simulation."
+offset_right = 345.0
+offset_bottom = 167.0
+text = "Press R to  start/Restart simulation.
+
+A = TURN  LEFT
+D = TURN RIGHT
+W/S = FORWARD/BACKWARD"
+editable = false
+wrap_mode = 1

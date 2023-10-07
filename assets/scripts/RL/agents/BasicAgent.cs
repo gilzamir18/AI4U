@@ -216,6 +216,7 @@ namespace ai4u
 			request.SetMessage(4, "config", ai4u.Brain.INT, 1);
 
 			var cmds = controlRequestor.RequestEnvControl(this, request);
+			
 			if (cmds == null)
 			{
 				throw new System.Exception("ai4u2unity connection error!");
