@@ -140,20 +140,25 @@ We're almost ready to train our agent. We need to create the object that control
 In theory, this agent can already be trained. But there are still some flaws in its design. The agent sees only one frame of the game at a time. We could add more frames through the *Stacked Observations* property, but the agent's training would take a long time. For the agent's behavior to learn, we need to transform the agent's observation into something more informative without greatly increasing its complexity. For this, we developed a set of sensors suitable for making the agent's perceptions more informative. In reinforcement learning jargon, we say that the agent's observations represent a Markovian state for the task to be learned. For this, we use two sensors (see Figure 18): *OrientationSensor* (configured as shown in Figure 19) and *ActionSensor* (configured as shown in Figure 20). These sensors should be created as children of a FloatArrayCompositeSensor node, configured as shown in Figure 21. A composite type sensor groups multiple sensors, making them look like a single sensor to the training algorithm.
 
 ![figure](img/demo1msensores.png)
+
 *Figure 18. A FloatArrayCompositeSensor type sensor grouping two sensors: OrientationSensor and ActionSensor.*
 
 ![figure](img/demo1oriconfig.png)
+
 *Figure 19. Configuration of OrientationSensor.*
 
 ![figure](img/demo1actionconfig.png)
+
 *Figure 20. Configuration of ActionSensor.*
 
 ![figure](img/demo1arrayconfig.png)
+
 *Figure 21. Configuration of FloatArrayCompositeSensor.*
 
 > A small detail has been forgotten so far in creating this environment. It is necessary to create a reward function that ends the episode if the agent falls off the floor. To do this, create a node of type *FallReward* as a child of the Agent node and configure it as shown in Figure 22.
 
 ![figure](img/demo1fallreward.png)
+
 *Figure 22. Reward generated when the episode ends.*
 
 Now we can train our agent. To do this, create a Python file (let's say, train.py) and copy the following content into it:
@@ -188,6 +193,7 @@ $> python train.py
 Observe the agent's behavior at the start of training, it moves strangely on the plane and not as if it were moving. To correct this, close the game window in Godot. Now, go to the RigidBody3D node of the agent and modify the *Axis Lock* property as shown in *Figure 23*.
 
 ![figure](img/demo1axislock.png)
+
 *Figure 23. Axis Lock configuration of the agent's RigidBody3D.*
 
 > Final Adjustments: In the RigidBody3D of all objects that can collide, enable the *Contact Monitor* property. Also, change the *Max Contacts Reported* property to a value greater than zero (I used 10000). These changes are essential for the proper functioning of the *TouchRewardFunc*. For greater physics calculation accuracy, enable the *Continuos CD* properties of the agent's RigidBody3D. Specifically for the RigidBody3D of the target (Target object), enable the *Freeze* and *Lock Rotation* properties. Specifically for the agent's RigidBody3D, change the *Damp* property, from the *Angular* tab to 5. This property is essential to obtain a smooth rotation of the agent's body.
@@ -200,6 +206,7 @@ After running the training script, you should observe something like shown in Fi
 After approximately 16 thousand steps of updating the agent's neural network, the result is as shown in Figure 25.
 
 ![figure](img/GodotDemo1_2.gif)
+
 *Figure 25. Several steps after start of agent training.*
 
 After training the agent, a file *sac_bemaker.zip* is generated. This file contains the neural network model that knows how to control the agent to perform a task. We can run this model using a Python loop or using the model directly in Godot itself. To use Python, create a test file with the following content:
