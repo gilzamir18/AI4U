@@ -16,8 +16,7 @@ AI4U Godot supports gymnasium environment in Python throught [bemaker tool](http
 * Gynasium 
 
 # Documentation
-In Production...
-[Documentation](/doc/)
+[Documentation](/doc/summary.md)
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir_gomes@uvanet.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).

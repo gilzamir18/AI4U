@@ -1,9 +1,8 @@
-[gd_scene load_steps=25 format=3 uid="uid://caj7lvk0g1aaq"]
+[gd_scene load_steps=24 format=3 uid="uid://caj7lvk0g1aaq"]
 
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_x0fs8"]
 [ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="2_kt4nc"]
 [ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_eidm6"]
-[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="4_rhsg2"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/RBRespawnActuator.cs" id="5_ys2cu"]
 [ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="6_d36se"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="7_7ag7r"]
@@ -16,12 +15,11 @@
 [ext_resource type="Script" path="res://app/scripts/RespawnTarget.cs" id="14_7i7up"]
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="15_gykpu"]
 
-[sub_resource type="CapsuleShape3D" id="10"]
-height = 4.38716
-
 [sub_resource type="CapsuleMesh" id="11"]
 
 [sub_resource type="Skin" id="12"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qpp2e"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf34t"]
 albedo_color = Color(0.827451, 0, 0.054902, 1)
@@ -58,7 +56,7 @@ can_sleep = false
 angular_damp = 5.0
 
 [node name="eye" type="Node3D" parent="AgentRigidBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.359559, 2.25064)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.541765, 0.395634)
 
 [node name="Arrow" parent="AgentRigidBody/eye" instance=ExtResource("1_x0fs8")]
 transform = Transform3D(0.5, 0, 0, 0, -8.74228e-09, -0.5, 0, 0.2, -2.18557e-08, 0, -0.251057, -1.27881)
@@ -73,19 +71,10 @@ MaxStepsPerEpisode = 3000
 [node name="RBMoveActuator" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("3_eidm6")
 moveAmount = 20.0
-turnAmount = 10.0
-jumpPower = 50.0
-jumpForwardPower = 50.0
+turnAmount = 20.0
+jumpPower = 0.0
+jumpForwardPower = 0.0
 actionName = "move"
-
-[node name="WASDRBController" type="Node" parent="AgentRigidBody/Agent"]
-script = ExtResource("4_rhsg2")
-
-[node name="RespawnActuator" type="Node" parent="AgentRigidBody/Agent"]
-script = ExtResource("5_ys2cu")
-respawnOptionsPath = NodePath("../../../RespawnOptions")
-actionName = "respwan"
-isOutput = false
 
 [node name="Raycasting" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("6_d36se")
@@ -99,8 +88,6 @@ normalized = false
 
 [node name="FallReward" type="Node" parent="AgentRigidBody/Agent"]
 script = ExtResource("7_7ag7r")
-threshold = -0.5
-isLocal = true
 causeEpisodeToEnd = true
 
 [node name="TouchCubeReward" type="Node" parent="AgentRigidBody/Agent"]
@@ -135,19 +122,20 @@ script = ExtResource("13_5twrk")
 target = NodePath("../../../TargetRigidBody")
 stepReward = -0.01
 
-[node name="WASDRBMoveController" type="Node" parent="AgentRigidBody/Agent"]
-script = ExtResource("4_rhsg2")
-speed = 0.6
-turnAmount = 2.0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
-transform = Transform3D(1.85047, 0, 0, 0, -4.37114e-08, -1.79789, 0, 1, -7.85881e-08, 0, 0.0746579, 0.048594)
-shape = SubResource("10")
+[node name="RespawnActuator" type="Node" parent="AgentRigidBody/Agent"]
+script = ExtResource("5_ys2cu")
+respawnOptionsPath = NodePath("../../../RespawnOptions")
+actionName = "respawn"
+isOutput = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="AgentRigidBody"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.22201e-08, -0.73711)
 mesh = SubResource("11")
 skin = SubResource("12")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AgentRigidBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00857425, -0.725799)
+shape = SubResource("CapsuleShape3D_qpp2e")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.528201, 0.849119, 0, -0.849119, 0.528201, 0, 4.23971, 0)
@@ -223,6 +211,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_bnksa")
 
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("15_gykpu")
+defaultTimeScale = 10.0
 stopOnQuit = true
 agentsList = [NodePath("../AgentRigidBody/Agent")]
 

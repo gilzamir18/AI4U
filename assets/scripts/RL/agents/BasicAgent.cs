@@ -245,6 +245,14 @@ namespace ai4u
 			return avatarBody;
 		}
 		
+		public Node Body
+		{
+			get
+			{
+				return avatarBody;
+			}
+		}
+		
 		public override void UpdateReward()
 		{
 			int n = rewards.Count;
