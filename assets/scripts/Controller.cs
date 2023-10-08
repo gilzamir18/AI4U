@@ -5,12 +5,15 @@ namespace ai4u
 {
 	public abstract partial class Controller: Node
 	{
-		protected Agent agent;
 		
+		public int LastStep {get; set;}
+		public float LastReward {get; set;}
+		
+		protected Agent agent;		
 		private string[] desc;
 		private byte[] type;
 		private string[] value;
-
+		
 		public Controller(): base()
 		{
 			System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
@@ -35,6 +38,7 @@ namespace ai4u
 		
 		public virtual void NewStateEvent()
 		{
+			
 		}
 		
 		public string GetStateAsString(int i = 0)
