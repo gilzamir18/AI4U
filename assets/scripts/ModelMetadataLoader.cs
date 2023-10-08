@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Godot;
 using ai4u;
 using System.Text;
 
@@ -31,7 +32,6 @@ namespace ai4u
 					outputs.Add(new ModelOutput(a.actionName, a.Shape3D, a.IsContinuous, a.RangeMin, a.RangeMax));
 				}
 			}
-
 			metadata = new ModelMetadata(inputs.Count, outputs.Count);
 			for (int i = 0; i < inputs.Count; i++)
 			{
