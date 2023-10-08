@@ -29,9 +29,11 @@ In Godot, the structure of an agent is a tree of nodes whose root is the object 
 Let's now modify your project to create an agent with a rigid body. I created a project called [Demo1](https://1drv.ms/u/s!AkkX5pv0cl3aieYYTQz_d9S1kVhJAQ?e=rlCgnh). You need to create a scene where our agent will live and interact with objects. For now, let's create a very simple scene. For this, choose the *3D Scene* option, as shown in *Figure 1*. Use the CTRL+S shortcut to save the scene, as shown in *Figure 2*.
 
 ![figure](img/demo1sceneoptions.png)
+
 *Figure 1. The scene creation options are shown in the upper left panel.*
 
 ![figure](img/demo1savescene.png)
+
 *Figure 2. Saving a scene.*
 
 So far, I assume that you have already copied the *assets* directory from the AI4U repository into your project. If so, your project should look like Figure 3.
