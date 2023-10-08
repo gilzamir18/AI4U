@@ -221,6 +221,7 @@ Observe the agent's behavior at the start of training, it moves strangely on the
 After running the training script, you should observe something like shown in Figure 24.
 
 ![figure](img/GodotDemo1.gif)
+
 *Figure 24. Agent training.*
 
 After approximately 16 thousand steps of updating the agent's neural network, the result is as shown in Figure 25.
@@ -269,6 +270,7 @@ Run the scene and see the result.
 In the document [Introduction to ONNX Model](introductiontoonnxmodel.md), I show how to run the model directly in Godot, without needing to use Python.
 
 ![figure](img/GodotDemo1_3.gif)
+
 *Figure 26. Agent after training.*
 
 Note that in the directory where you ran the training script, a directory named SAC was created. This directory creates tensorboard log files for you to check the progress of training in graphs. In the Linux/Window terminal, access the SAC directory and type the command:
@@ -286,5 +288,6 @@ python -m tensorboard.main --port 6007 --logdir .
 Then, open the link suggested by tensorboard in a browser (usually *http://localhost:6006*). The results may be as shown in Figure 27.
 
 ![figure](img/demo1tb.png)
+
 *Figure 27. Final result of training.*
 
