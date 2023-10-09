@@ -63,7 +63,7 @@ namespace ai4u
 				else 
 				{
 					acmReward += failReward;
-				}
+				}					
 				agent.AddReward(acmReward, this);
 				if (acmReward != 0)
 				{

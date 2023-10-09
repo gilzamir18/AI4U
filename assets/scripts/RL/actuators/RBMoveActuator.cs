@@ -90,7 +90,8 @@ namespace ai4u {
 						
 						var velocity = new Vector3(0, 0, 0);
 						velocity.Z += move * moveAmount + jumpForward * jumpForwardPower;
-						var r = rBody.Transform.Basis.Y * turn * turnAmount;
+						
+						var r = rBody.Transform.Basis.Y * turn;
 						
 						PhysicsServer3D.BodySetState(
 							rBody.GetRid(),

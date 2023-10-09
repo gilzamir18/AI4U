@@ -25,17 +25,16 @@ namespace ai4u
 			
 			public void HandleReset(BasicAgent agent)
 			{
-				Transform3D reference = ((Node3D)agent.Body).Transform;
+				Transform3D reference;
 				if (children.Count > 0)
 				{
 					int idx = (int)GD.RandRange(0, children.Count-1);
-					reference = ((Node3D)children[idx]).Transform;
+					reference = ((Node3D)children[idx]).GlobalTransform;
 				}
 				else
 				{
-					reference = ((Node3D) nodeRef).Transform;
+					reference = ((Node3D) nodeRef).GlobalTransform;
 				}
-				
 				/*var mode = rBody.Mode;
 				rBody.Mode = RigidBody3D.ModeEnum.Kinematic;
 				rBody.Position = children[idx].position;

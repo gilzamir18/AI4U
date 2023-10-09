@@ -25,7 +25,9 @@ public partial class NeuralNetController : Controller
 	private bool isSingleInput = true;
 	private Dictionary<string, int> inputName2Idx;
 	private Dictionary<string, float[]> outputs;
+	private ModelOutput modelOutput;
 	private InferenceSession session;
+	
 
 	override public void OnSetup()
 	{
@@ -37,6 +39,10 @@ public partial class NeuralNetController : Controller
 		{
 			var output = metadata.outputs[o];
 			outputs[output.name] = new float[output.shape[0]];
+			if (output.name == mainOutput)
+			{
+				modelOutput = output;
+			}
 		}
 		
 		for (int i = 0; i < bagent.Sensors.Count; i++)
@@ -81,8 +87,19 @@ public partial class NeuralNetController : Controller
 		}
 		if (initialized && !((BasicAgent)agent).Done )
 		{
+			if (mainOutput == null)
+			{
+				throw new System.Exception("No valid main output was specified!");
+			}
 			Inference();
-			return ai4u.Utils.ParseAction(mainOutput, outputs[mainOutput]);
+			float[] action = outputs[mainOutput];
+			for (int i = 0; i < action.Length; i++)
+			{
+				var d = (modelOutput.rangeMax[i]-modelOutput.rangeMin[i]);
+				action[i] = (action[i] + 1)/2;
+				action[i] = modelOutput.rangeMin[i] + action[i] * d;
+			}
+			return ai4u.Utils.ParseAction(mainOutput, action);
 		}
 		else 
 		{
@@ -120,8 +137,8 @@ public partial class NeuralNetController : Controller
 	private void Inference()
 	{
 		var inputs = new List<NamedOnnxValue>();
-		var random = new RandomNumberGenerator();
-		random.Randomize();
+		/*var random = new RandomNumberGenerator();
+		random.Randomize();*/
 		
 		for (int i = 0; i < metadata.inputs.Length; i++)
 		{
@@ -132,13 +149,13 @@ public partial class NeuralNetController : Controller
 			DenseTensor<float> t;
 			if (dataDim  >= 1)
 			{ 
-				//System.Memory<float> mem = new System.Memory<float>(GetInputAsArray(inputName));
-				float[] dt = new float[shape[0] * shape[1]];
+				System.Memory<float> mem = new System.Memory<float>(GetInputAsArray(inputName));
+				/*float[] dt = new float[shape[0] * shape[1]];
 				for (int k = 0; k < shape[0] * shape[1]; k++)
 				{
 					dt[k] = random.Randfn();
 				}
-				System.Memory<float> mem = new System.Memory<float>( dt );
+				System.Memory<float> mem = new System.Memory<float>( dt );*/
 				t = new DenseTensor<float>( mem, shape );
 			}
 			else
@@ -146,7 +163,7 @@ public partial class NeuralNetController : Controller
 				throw new System.Exception($"Controller configuration: unsuported data dimenstion: {shape}. Check agetn's environment configuration by Perception Key {inputName}.");
 			}
 			inputs.Add(NamedOnnxValue.CreateFromTensor<float>(inputName, t));
-		};
+		}
 
 
 		using (var results = session.Run(inputs))
@@ -155,10 +172,13 @@ public partial class NeuralNetController : Controller
 			{
 					var output = r.AsEnumerable<float>().ToArray();
 					outputs[r.Name] = output;
-					/*for (int k = 0; k < output.Length; k++)
+					/*
+					GD.Print("----------------------------------");
+					for (int k = 0; k < output.Length; k++)
 					{
 						GD.Print(output[k]);
-					}*/
+					}
+					GD.Print("----------------------------------");*/
 			}
 		}
 	}
