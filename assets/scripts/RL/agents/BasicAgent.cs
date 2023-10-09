@@ -127,23 +127,7 @@ namespace ai4u
 				}
 			}
 			
-			
-			if (brain != null)
-			{
-				brain.Setup(this);
-			}
-			else
-			{
-				if (remote)
-				{
-					throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
-				}
-				else
-				{
-					throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
-				}
-			}
-
+		
 			DoneSensor doneSensor = new DoneSensor();
 			doneSensor.isInput = false;
 			doneSensor.SetAgent(this);
@@ -215,6 +199,22 @@ namespace ai4u
 			request.SetMessage(2, "id", ai4u.Brain.STR, ID);
 			request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
 			request.SetMessage(4, "config", ai4u.Brain.INT, 1);
+
+			if (brain != null)
+			{
+				brain.Setup(this);
+			}
+			else
+			{
+				if (remote)
+				{
+					throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
+				}
+				else
+				{
+					throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
+				}
+			}
 
 			var cmds = controlRequestor.RequestEnvControl(this, request);
 			

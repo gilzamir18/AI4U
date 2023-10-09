@@ -161,6 +161,7 @@ namespace ai4u
 				}
 				
 				string cmdname = tokens[0].Trim();
+				
 				int nargs = int.Parse(tokens[1].Trim());
 				string[] args = new string[nargs];
 
@@ -315,7 +316,6 @@ namespace ai4u
 				request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
 				request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
 				var cmds = RequestEnvControl(agent, request);
-
 				if (cmds == null)
 				{
 					throw new System.Exception($"AI4U connection error! Agent ID: {agent.ID}.");
