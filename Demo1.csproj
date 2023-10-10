@@ -1,12 +1,11 @@
 <Project Sdk="Godot.NET.Sdk/4.1.1">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Platforms>AnyCPU;x64</Platforms>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="2.0.1" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.16.0" />
-    <PackageReference Include="TorchSharp-cuda-windows" Version="0.100.5" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Godot.SourceGenerators" Version="4.1.2" />

@@ -10,7 +10,7 @@ Para rodar a rede neural treinada diretamente na Godot usando AI4U, há duas eta
 Vamos usar como exemplo o projeto desenvolvido para o tutorial de [Introdução](introduction.md). Este projeto pode ser baixado [aqui](https://1drv.ms/u/s!AkkX5pv0cl3aieYYTQz_d9S1kVhJAQ?e=rlCgnh).
 
 ## Instalando os componentes necessários
-Baixe o projeto do tutorial de introdução, descompacte-o. Faça a importação deste projeto na Godot. Abre o terminal do teu sistema operacional na raiz deste projeto e execute os seguinte comandos:
+Baixe o projeto do tutorial de introdução, descompacte-o. Faça a importação deste projeto na Godot. Abra o terminal do teu sistema operacional na raiz deste projeto e execute os seguinte comandos:
 
 > dotnet add package Microsoft.ML
 
@@ -23,7 +23,7 @@ Entre no diretório *AI4U/doc/trainer_example/scene_simplescene* e execute o com
 
 > python  appgym_sb3test.py
 
-> Veja os comandos para conversão do modelo do pytorch em onnx no arquivo appgym_sb3test.
+> Veja os comandos para conversão do modelo do pytorch em onnx no arquivo *appgym_sb3test*.
 
 Então rode a cena do projeto Demo1 na Godot. Isto vai gerar o arquivo *model.onnx*. Feche a cena e veja se o arquivo foi realmente gerado. Se a execução da cena gerar um erro de *NullReferenceException*, veja se o agente foi adicionado ao *ControlRequestor*. Caso não, adicione o agente como mostrado na *Figura 1*.
 

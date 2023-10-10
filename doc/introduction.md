@@ -245,7 +245,7 @@ Rode a cena e veja o resultado.
 
 > Altere a velocidade de execução do *ControlRequestor* alterando o valor de *Default Time Scale* para 1.
 
-No documento [Introduction to ONNX Model](introductiontoonnxmodel.md), mostro como executar o modelo diretamente na Godot, sem precisar usar Python.
+No documento [Introduction to ONNX Model](introductiontoonnxutils.md), mostro como executar o modelo diretamente na Godot, sem precisar usar Python.
 
 ![figure](img/GodotDemo1_3.gif)
 

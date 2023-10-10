@@ -122,11 +122,7 @@ public partial class NeuralNetController : Controller
 
 	override public void NewStateEvent()
 	{
-		if (isSingleInput)
-		{
-			var name = metadata.inputs[0].name;
-			GetInputAsArray(name);
-		}
+
 	}
 	
 	private float[] GetInputAsArray(string name)
@@ -137,9 +133,7 @@ public partial class NeuralNetController : Controller
 	private void Inference()
 	{
 		var inputs = new List<NamedOnnxValue>();
-		/*var random = new RandomNumberGenerator();
-		random.Randomize();*/
-		
+
 		for (int i = 0; i < metadata.inputs.Length; i++)
 		{
 			var inputName = metadata.inputs[i].name;
@@ -150,12 +144,6 @@ public partial class NeuralNetController : Controller
 			if (dataDim  >= 1)
 			{ 
 				System.Memory<float> mem = new System.Memory<float>(GetInputAsArray(inputName));
-				/*float[] dt = new float[shape[0] * shape[1]];
-				for (int k = 0; k < shape[0] * shape[1]; k++)
-				{
-					dt[k] = random.Randfn();
-				}
-				System.Memory<float> mem = new System.Memory<float>( dt );*/
 				t = new DenseTensor<float>( mem, shape );
 			}
 			else
@@ -172,13 +160,6 @@ public partial class NeuralNetController : Controller
 			{
 					var output = r.AsEnumerable<float>().ToArray();
 					outputs[r.Name] = output;
-					/*
-					GD.Print("----------------------------------");
-					for (int k = 0; k < output.Length; k++)
-					{
-						GD.Print(output[k]);
-					}
-					GD.Print("----------------------------------");*/
 			}
 		}
 	}
