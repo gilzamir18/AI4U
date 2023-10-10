@@ -1,12 +1,12 @@
 # Introdução
 
-AI4U (Artificial Intelligence for You) é uma ferramenta aberta que traz para a Godot uma abstração de modelagem de comportamentos baseada em Inteligência Artificial. A abstração de agente é usada de maneira magistral para permitir o compartilhamento de soluções. Cada componente de um agente pode ser produzido, aperfeiçoado compartilhado e reaproveitado. Os componentes de um agente são: sensores, atuadores, funções de comportamento, um item controlável e um controlador.
+AI4U (Artificial Intelligence for You) é uma ferramenta aberta que traz para a Godot uma abstração de modelagem de comportamentos baseada em Inteligência Artificial. A abstração de agente é usada de maneira a permitir o compartilhamento de soluções. Cada componente de um agente pode ser produzido, aperfeiçoado, compartilhado e reaproveitado. Os componentes de um agente são: sensores, atuadores, funções de recompensa, um item controlável e um controlador.
 
-O agente enxerga o mundo do jogo por meio de sensores. Atua neste mundo por meio de atuadores. O mapeamento entre sensores e atuadores é realizado por um controlador. Com base no histórico de percepções, o controlador decide qual ação executar. As ações alteram o objeto controlável do agente ou o ambiente ao redor. 
+O agente enxerga o mundo do jogo por meio de sensores e atua neste mundo por meio de atuadores. O mapeamento entre sensores e atuadores é realizado por um controlador. Com base no histórico de percepções, o controlador decide qual ação executar. As ações alteram o objeto controlável do agente ou o ambiente ao redor. 
 
 # Como implementar um agente na Godot?
 
-Em Godot, um agente é composto por um corpo virtual, sensores, atuadores e um controlador. Um corpo virtual pode ser um objeto do tipo RigidBody2D, RigidBody3D, Node2D, Node3D, ou qualquer outro objeto que possa ser controlado pelo usuário.
+Em Godot, um agente é composto por um corpo virtual, sensores, atuadores e um controlador. Um corpo virtual pode ser um objeto do tipo RigidBody2D, RigidBody3D, Node2D, Node3D, ou qualquer outro objeto que o agente tenha controle sobre.
 
 > Contudo, para que um objeto controlável seja útil, é necessário que atuadores e sensores possam ser criados especificamente para ele. Por enquanto, damos suporte apenas para RigidBody3D, mas qualquer programador pode extender nossa biblioteca de classes para suportar outros tipos de objetos.
 
@@ -27,7 +27,7 @@ Uma vez que você tenha instalado AI4U, **bemaker**, **stable-baselines3**, cont
 Na Godot, a estrutura de um agente é uma árvore de nós cuja raiz é o objeto controlável (o corpo do agente) pelo agente. Essa estrutura possui pequenas variações, a depender do objeto controlável.
 
 ## Criando um agente de corpo rígido
-Vamos agora modificar o seu projeto para criarmos um agente com corpo rígido. Criei um projeto denominado [Demo1](https://1drv.ms/u/s!AkkX5pv0cl3aieYYTQz_d9S1kVhJAQ?e=rlCgnh). É preciso criar uma cena onde nosso agente vai viver e interagir com objetos. Por enquanto, vamos criar uma cena muito simples. Para isso, escolha a opção *3D Scene*, como mostrado na *Figura 1*. Execute o atalho CTRL+S para salvar a cena, como mostrado na *Figura 2*.
+Vamos agora modificar o seu projeto para criarmos um agente com corpo rígido. Crie um projeto denominado [Demo1](https://1drv.ms/u/s!AkkX5pv0cl3aieYYTQz_d9S1kVhJAQ?e=rlCgnh). É preciso criar uma cena onde nosso agente vai viver e interagir com objetos. Por enquanto, vamos criar uma cena muito simples. Para isso, escolha a opção *3D Scene*, como mostrado na *Figura 1*. Execute o atalho CTRL+S para salvar a cena, como mostrado na *Figura 2*.
 
 ![figure](img/demo1sceneoptions.png)
 
@@ -43,7 +43,7 @@ Até aqui, suponho que você já copiou o diretório *assets* do repositório AI
 
 *Figure 3. Projeto com assets da AI4U.*
 
-Agora vamos criar a cena. A cena consiste de um piso planar com uma caixa e um agente (representado por uma capsula) sobre o piso. O agente pode se movimentar na cena e tem como objetivo se aproximar e tocar a caixa. O agente ganha uma recompensa toda vez que se aproxima da caixa e uma recompensa maior quando a toca. O episódio termina quando o agente toca a caixa, por isso, o toque deve gerar uma alta recompensa. O agente é penalizado quando cai do plano que representa o terreno. Neste caso, o  episódio também termina.
+Agora vamos criar a cena. A cena consiste de um piso plano com uma caixa e um agente (representado por uma capsula) sobre o piso. O agente pode se movimentar na cena e tem como objetivo se aproximar e tocar a caixa. O agente ganha uma recompensa toda vez que se aproxima da caixa e uma recompensa maior quando a toca. O episódio termina quando o agente toca a caixa, por isso, o toque deve gerar uma alta recompensa. O agente é penalizado quando cai do plano que representa o terreno. Neste caso, o  episódio também termina.
 
 Vamos modelar o terremo como um plano. Para isso, crie um objeto do tipo *StaticBody3D* como filho de Node3D (o nó raiz da cena). Um objeto do tipo *StaticBody3D* também tem que ter como filho um objeto do tipo *CollisionShape* ou do tipo *CollisionPolygon3D*. Vamos usar *CollisionShape3D*. E então, no recurso *Shape* deste objeto, crie uma *Shape* do tipo *BoxShape3D*, com os parâmetros da propriedade *Size* modificados com *x=10m*, *y=0.1m* e *z=10m*. Também adicione  como filho do *StaticBody3D* um objeto do tipo *MeshInstance3D*, que representa a malha visual do chão da cena. Altere os parâmetros x, y e z da propriedade *Scale* para *x=10*, *y=0.1* e *z=10*. A Figura 4 mostra estas configurações realizadas.
 
