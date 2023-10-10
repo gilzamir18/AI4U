@@ -5,8 +5,15 @@ using System.Collections.Generic;
 
 namespace ai4u
 {
+	 /// <summary>
+	/// The BasicAgent class is a partial implementation of an agent that can be used in machine learning environments.
+	/// This class inherits from the Agent class and provides a basic framework for the agent's interaction with the environment.
+	/// </summary>
 	public partial class BasicAgent : Agent
 	{
+		/// <summary>
+		/// Delegate for handling agent episode events.
+		/// </summary>
 		public delegate void AgentEpisodeHandler(BasicAgent agent);
 		public event AgentEpisodeHandler beforeTheResetEvent;
 		public event AgentEpisodeHandler endOfEpisodeEvent;
