@@ -8,27 +8,44 @@ using System.Linq;
 
 namespace  ai4u;
 
+///<summary> An object of NeuralNetController allows the control of an agent through a 
+/// PyTorch model that has been trained with stable-baselines3 and converted to an ONNX model.
+/// Only ONNX models that have been converted using BeMaker tools are supported.
+/// </summary>
 public partial class NeuralNetController : Controller
 {
 	
+	/// <summary>
+	/// The path of the ONNX model. 
+	/// </summary>
 	[Export]
 	private string modelPath;
-	
-	[Export]
+
+    /// <summary>
+    /// The name of the actuator that receives commands from the neural network 
+	/// in the ONNX model.
+    /// </summary>
+    [Export]
 	private string mainOutput = "move";
 	
+	/// <summary>
+	/// If true, episode is restarted after ending.
+	/// </summary>
 	[Export]
 	private bool repeat = true;
 	
-	private bool initialized = false;
-	private ModelMetadata metadata;
-	private bool isSingleInput = true;
-	private Dictionary<string, int> inputName2Idx;
-	private Dictionary<string, float[]> outputs;
-	private ModelOutput modelOutput;
-	private InferenceSession session;
+	private bool initialized = false; //indicates if episode has been initialized.
+	private ModelMetadata metadata; //Metadata of the input and outputs of the agent decision making. 
+	private bool isSingleInput = true; //Flag indicating if agent has single sensor or multiple sensors.
+	private Dictionary<string, int> inputName2Idx; //mapping sensor name to sensor index.
+	private Dictionary<string, float[]> outputs; //mapping model output name to output value.
+	private ModelOutput modelOutput; //output metadata.
+	private InferenceSession session; //inference session of the Microsoft.ML framework.
 	
-
+	/// <summary>
+	/// <see cref="ai4u.Controller.OnSetup"/>
+	/// </summary>
+	/// <exception cref="System.Exception"></exception>
 	override public void OnSetup()
 	{
 		BasicAgent bagent = (BasicAgent) agent;
@@ -71,11 +88,20 @@ public partial class NeuralNetController : Controller
 		session = new InferenceSession(modelPath);
 	}
 	
+	/// <summary>
+	/// <see cref="ai4u.Controller.OnReset(Agent)"/>
+	/// </summary>
+	/// <param name="agent"></param>
 	override public void OnReset(Agent agent)
 	{
 		Inference();
 	}
 
+	/// <summary>
+	/// <see cref="ai4u.Controller.GetAction"/>
+	/// </summary>
+	/// <returns></returns>
+	/// <exception cref="System.Exception"></exception>
 	override public string GetAction()
 	{
 		if (GetStateAsString(0) == "envcontrol")
@@ -120,16 +146,28 @@ public partial class NeuralNetController : Controller
 		}
 	}
 
+	/// <summary>
+	/// <see cref="ai4u.Controller.NewStateEvent"/>
+	/// </summary>
 	override public void NewStateEvent()
 	{
 
 	}
 	
+	/// <summary>
+	/// This method gets state from sensor named <code>name</code> and returns its value as an array of float-point numbers.
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns>float[]: sensor value</returns>
 	private float[] GetInputAsArray(string name)
 	{
 		return GetStateAsFloatArray(inputName2Idx[name]);
 	}
 
+	/// <summary>
+	/// This method runs the current ONNX model with current perceptions of the agent. 
+	/// </summary>
+	/// <exception cref="System.Exception"></exception>
 	private void Inference()
 	{
 		var inputs = new List<NamedOnnxValue>();
