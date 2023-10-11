@@ -1,0 +1,172 @@
+[gd_scene load_steps=21 format=3 uid="uid://dcidj32u05bf2"]
+
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_ew2a2"]
+[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="1_qsqta"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="3_2gh7m"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_56v3n"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="4_qhaue"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="6_0i43s"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="7_2apw3"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="8_g3p31"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="9_lackr"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="10_kjyh4"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lijko"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bf1ba"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_24tri"]
+albedo_color = Color(0, 0.47451, 0.298039, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ar23q"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cmtl1"]
+albedo_color = Color(1, 0.411765, 0.411765, 0.509804)
+
+[sub_resource type="SphereMesh" id="SphereMesh_lontg"]
+material = SubResource("StandardMaterial3D_cmtl1")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_33gy8"]
+size = Vector3(20, 5, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_orx12"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dajvr"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_qysyh"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="." groups=["Floor"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_lijko")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+transform = Transform3D(20, 0, 0, 0, 0.1, 0, 0, 0, 20, 0, 0, 0)
+mesh = SubResource("BoxMesh_bf1ba")
+surface_material_override/0 = SubResource("StandardMaterial3D_24tri")
+
+[node name="Fruit" type="StaticBody3D" parent="." groups=["Fruit"]]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -1.48119, 1.61482, 7.12313)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fruit"]
+shape = SubResource("SphereShape3D_ar23q")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fruit"]
+mesh = SubResource("SphereMesh_lontg")
+
+[node name="LWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.688, 2.5057, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LWall"]
+shape = SubResource("BoxShape3D_33gy8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LWall"]
+transform = Transform3D(0.5, 0, 0, 0, 5, 0, 0, 0, 20, 0, 0, 0)
+mesh = SubResource("BoxMesh_orx12")
+
+[node name="RWall2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.80062, 2.5057, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RWall2"]
+shape = SubResource("BoxShape3D_33gy8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RWall2"]
+transform = Transform3D(0.5, 0, 0, 0, 5, 0, 0, 0, 20, 0, 0, 0)
+mesh = SubResource("BoxMesh_orx12")
+
+[node name="BWall3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.506, -10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BWall3"]
+shape = SubResource("BoxShape3D_33gy8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BWall3"]
+transform = Transform3D(20, 0, 0, 0, 5, 0, 0, 0, 0.5, 0, 0, 0)
+mesh = SubResource("BoxMesh_orx12")
+
+[node name="TWall4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.506, 9.7173)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TWall4"]
+shape = SubResource("BoxShape3D_33gy8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TWall4"]
+transform = Transform3D(20, 0, 0, 0, 5, 0, 0, 0, 0.5, 0, 0, 0)
+mesh = SubResource("BoxMesh_orx12")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.365364, 0.930865, 0, -0.930865, 0.365364, 0, 14.543, 7.17886)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 15.8739, 0)
+
+[node name="ControlLoop" type="Node" parent="."]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+
+[node name="Arrow" parent="RigidBody3D" instance=ExtResource("1_ew2a2")]
+transform = Transform3D(0.2, 0, 0, 0, -8.74228e-09, -0.2, 0, 0.2, -8.74228e-09, 0, 1.3818, 0.123406)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.955093, 0)
+shape = SubResource("CapsuleShape3D_dajvr")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.982763, 0)
+mesh = SubResource("CapsuleMesh_qysyh")
+skeleton = NodePath("")
+
+[node name="Agent" type="Node" parent="RigidBody3D"]
+script = ExtResource("1_qsqta")
+avatarPath = NodePath("")
+doneAtNegativeReward = false
+MaxStepsPerEpisode = 3000
+
+[node name="Actuator" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("3_56v3n")
+moveAmount = 20.0
+turnAmount = 20.0
+jumpPower = 10.0
+jumpForwardPower = 5.0
+actionName = "move"
+
+[node name="Sensors" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("3_2gh7m")
+perceptionKey = "array"
+stackedObservations = 4
+isState = true
+
+[node name="Raycasting" type="Node" parent="RigidBody3D/Agent/Sensors"]
+script = ExtResource("4_qhaue")
+groupCode = PackedInt32Array(0, 20, 100, 200, 255)
+groupName = PackedStringArray("Floor", "Wall", "Enemy", "Player", "Fruit")
+eyePath = NodePath("../../../Arrow")
+flattened = true
+normalized = false
+
+[node name="OnGround" type="Node" parent="RigidBody3D/Agent/Sensors"]
+script = ExtResource("6_0i43s")
+rBMoveActuator = NodePath("../../Actuator")
+
+[node name="OrientationSensor" type="Node" parent="RigidBody3D/Agent/Sensors"]
+script = ExtResource("7_2apw3")
+target = NodePath("../../../../Fruit")
+
+[node name="Node" type="Node" parent="RigidBody3D/Agent/Sensors"]
+
+[node name="MinDistReward" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("8_g3p31")
+target = NodePath("../../../Fruit")
+
+[node name="TouchFruitReward" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("9_lackr")
+reward = 10.0
+targetPath = NodePath("../../../Fruit")
+causeEpisodeToEnd = true
+
+[node name="WASDController" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("10_kjyh4")
+speed = 1.0
