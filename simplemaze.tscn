@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dcidj32u05bf2"]
+[gd_scene load_steps=23 format=3 uid="uid://dcidj32u05bf2"]
 
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_ew2a2"]
 [ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="1_qsqta"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="8_g3p31"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="9_lackr"]
 [ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="10_kjyh4"]
+[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="11_l2bbl"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="12_a84io"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lijko"]
 size = Vector3(20, 0.1, 20)
@@ -103,9 +105,17 @@ transform = Transform3D(1, 0, 0, 0, 0.365364, 0.930865, 0, -0.930865, 0.365364, 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 15.8739, 0)
 
-[node name="ControlLoop" type="Node" parent="."]
+[node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
+script = ExtResource("11_l2bbl")
+agentsList = [NodePath("../RigidBody3D/Agent")]
 
 [node name="RigidBody3D" type="RigidBody3D" parent="."]
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+max_contacts_reported = 10000
+contact_monitor = true
+sleeping = true
+can_sleep = false
 
 [node name="Arrow" parent="RigidBody3D" instance=ExtResource("1_ew2a2")]
 transform = Transform3D(0.2, 0, 0, 0, -8.74228e-09, -0.2, 0, 0.2, -8.74228e-09, 0, 1.3818, 0.123406)
@@ -121,7 +131,7 @@ skeleton = NodePath("")
 
 [node name="Agent" type="Node" parent="RigidBody3D"]
 script = ExtResource("1_qsqta")
-avatarPath = NodePath("")
+avatarPath = NodePath("..")
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 3000
 
@@ -170,3 +180,8 @@ causeEpisodeToEnd = true
 [node name="WASDController" type="Node" parent="RigidBody3D/Agent"]
 script = ExtResource("10_kjyh4")
 speed = 1.0
+
+[node name="FallReward" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("12_a84io")
+successReward = -10.0
+causeEpisodeToEnd = true
