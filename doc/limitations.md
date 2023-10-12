@@ -1,5 +1,7 @@
 # Limitações Conhecidas
 
+[Sumário](summary.md)
+
 * Ainda não implementamos nenhuma sensor ou atuador para agentes 2D.
 * Apenas suportamos o algoritmo SAC da stable-baselines3. O uso de qualquer outro algoritmo ou framework pode ser feito mediante alterações do desenvolvedor.
 * A versão atual da AI4U apenas suporta ou foi testada com dois tipos de política da stable-baselines3: MlpPolicy e MultiInputPolicy.

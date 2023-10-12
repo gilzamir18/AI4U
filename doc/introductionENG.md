@@ -1,5 +1,7 @@
 # Introduction
 
+[Index](summary.md)
+
 AI4U (Artificial Intelligence for You) is an open tool that brings to Godot an abstraction of behavior modeling based on Artificial Intelligence. The agent abstraction is masterfully used to allow the sharing of solutions. Each component of an agent can be produced, improved, shared, and reused. The components of an agent are: sensors, actuators, behavior functions, a controllable item, and a controller.
 
 The agent sees the game world through sensors. It acts in this world through actuators. The mapping between sensors and actuators is performed by a controller. Based on the history of perceptions, the controller decides which action to execute. Actions change the controllable object of the agent or the surrounding environment.

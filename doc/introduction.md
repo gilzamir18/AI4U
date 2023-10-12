@@ -1,5 +1,8 @@
 # Introdução
 
+
+[Sumário](summary.md)
+
 AI4U (Artificial Intelligence for You) é uma ferramenta aberta que traz para a Godot uma abstração de modelagem de comportamentos baseada em Inteligência Artificial. A abstração de agente é usada de maneira a permitir o compartilhamento de soluções. Cada componente de um agente pode ser produzido, aperfeiçoado, compartilhado e reaproveitado. Os componentes de um agente são: sensores, atuadores, funções de recompensa, um item controlável e um controlador.
 
 O agente enxerga o mundo do jogo por meio de sensores e atua neste mundo por meio de atuadores. O mapeamento entre sensores e atuadores é realizado por um controlador. Com base no histórico de percepções, o controlador decide qual ação executar. As ações alteram o objeto controlável do agente ou o ambiente ao redor.
