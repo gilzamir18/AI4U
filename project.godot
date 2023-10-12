@@ -15,6 +15,18 @@ run/main_scene="res://simplemaze.tscn"
 config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/vsync/vsync_mode=0
+
 [dotnet]
 
 project/assembly_name="Demo1"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
+
+[physics]
+
+common/physics_ticks_per_second=320
