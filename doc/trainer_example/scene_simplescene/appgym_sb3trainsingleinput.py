@@ -10,7 +10,7 @@ env = gym.make("BMEnv-v0")
 
 model = SAC("MlpPolicy", env, verbose=1, tensorboard_log="SAC")
 print("Training....")
-model.learn(total_timesteps=20000, log_interval=4,  tb_log_name='SAC')
+model.learn(total_timesteps=1000000, log_interval=4,  tb_log_name='SAC')
 model.save("sac_bemaker")
 print("Trained...")
 del model # remove to demonstrate saving and loading

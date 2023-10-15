@@ -1,4 +1,4 @@
-# AI4U - Artificial Inteligence For Universe
+# AI4U - Artificial Inteligence For You
 
 AI4U tool AI4U is a agent framework for modeling virtual reality and game environment. This repo we keep the reference implementation for Godot Game Engine.
 

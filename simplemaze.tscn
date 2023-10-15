@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://dcidj32u05bf2"]
+[gd_scene load_steps=32 format=3 uid="uid://dcidj32u05bf2"]
 
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_ew2a2"]
 [ext_resource type="Script" path="res://Floor.cs" id="1_g8gpe"]
@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="11_l2bbl"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="12_a84io"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/RBRespawnActuator.cs" id="14_l5oqy"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/CollisionWithRewardFunc.cs" id="16_o2djf"]
+[ext_resource type="Script" path="res://demo1scripts/ShowSteps.cs" id="17_1smsj"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lijko"]
 size = Vector3(20, 0.1, 20)
@@ -182,7 +184,6 @@ visible = false
 
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("11_l2bbl")
-defaultTimeScale = 10.0
 agentsList = [NodePath("../AgentBody/Agent")]
 
 [node name="AgentBody" type="RigidBody3D" parent="." groups=["Player"]]
@@ -210,14 +211,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_623pr")
 [node name="Agent" type="Node" parent="AgentBody"]
 script = ExtResource("1_qsqta")
 avatarPath = NodePath("..")
-remote = true
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 1000
 
 [node name="Actuator" type="Node" parent="AgentBody/Agent"]
 script = ExtResource("3_56v3n")
-moveAmount = 10.0
-turnAmount = 30.0
+moveAmount = 5.0
+turnAmount = 10.0
 jumpPower = 10.0
 jumpForwardPower = 5.0
 actionName = "move"
@@ -268,6 +268,10 @@ script = ExtResource("14_l5oqy")
 respawnOptionsPath = NodePath("../../Positions")
 actionName = "respawn"
 isOutput = false
+
+[node name="CollisionWithWallReward" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("16_o2djf")
+group = "Wall"
 
 [node name="Positions" type="Node" parent="AgentBody"]
 
@@ -341,3 +345,9 @@ shape = SubResource("BoxShape3D_jyg3y")
 
 [node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 13, 0)
+
+[node name="ShowSteps" type="Label" parent="."]
+offset_right = 110.0
+offset_bottom = 32.0
+script = ExtResource("17_1smsj")
+agentPath = NodePath("../AgentBody/Agent")
