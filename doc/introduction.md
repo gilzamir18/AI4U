@@ -88,7 +88,7 @@ Depois de compilar o projeto pela primeira vez, as propriedades do script BasicA
 
 ![figure](img/demo1basicagentconfig.png)
 
-*Figure 9. Configurações do agente. A opção Remote indica que o agente vai se comunicar com um controlador remoto (um script em Python). Já a opção *Max Steps Per Episode* indica a quantidade de passos de tempo máximo de um episódio.*
+*Figure 9. Configurações do agente. A opção Remote indica que o agente vai se comunicar com um controlador remoto (um script em Python). Quando remote estiver desmarcado, você tem que usar ou o NeuralNetController (para carregar uma rede neural diretamente na Godot) ou um WASDMoveActuator combinado com RBMoveActuator ou RBMoveActuator2D  (para controlar o agente diretamente por meio das teclas teclas W, A, S, D, J e U). A última opção é excelente para testar a física do jogo antes de treinar o agente. Já a opção *Max Steps Per Episode* indica a quantidade de passos de tempo máximo de um episódio.*
 
 A Figura 10 mosta a estrutura atual do projeto.
 

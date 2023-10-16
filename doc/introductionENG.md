@@ -6,6 +6,8 @@ AI4U (Artificial Intelligence for You) is an open tool that brings to Godot an a
 
 The agent sees the game world through sensors. It acts in this world through actuators. The mapping between sensors and actuators is performed by a controller. Based on the history of perceptions, the controller decides which action to execute. Actions change the controllable object of the agent or the surrounding environment.
 
+This tutorial is entirely based on Godot version 4.1 for .NET. [The official Godot documentation on the use of C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) is a good starting point to fully understand this tutorial.
+
 # How to implement an agent in Godot?
 
 In Godot, an agent is composed of a virtual body, sensors, actuators, and a controller. A virtual body can be an object of type RigidBody2D, RigidBody3D, Node2D, Node3D, or any other object that can be controlled by the user.
@@ -109,7 +111,7 @@ After compiling the project for the first time, the properties of the BasicAgent
 
 ![figure](img/demo1basicagentconfig.png)
 
-*Figure 9. Agent settings. The Remote option indicates that the agent will communicate with a remote controller (a Python script). The *Max Steps Per Episode* option indicates the maximum number of time steps per episode.*
+*Figure 9. Agent settings. The Remote option indicates that the agent will communicate with a remote controller (a Python script). When remote is unchecked, you have to use either the NeuralNetController (to load a neural network directly into Godot) or a WASDMoveActuator combined with RBMoveActuator or RBMoveActuator2D (to control the agent directly through the keys W, A, S, D, J and U). The last option is excellent for testing the game physics before training the agent. The Max Steps Per Episode option indicates the maximum number of time steps in an episode.*
 
 Figure 10 shows the current structure of the project.
 

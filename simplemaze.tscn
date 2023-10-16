@@ -14,7 +14,7 @@
 [ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="10_kjyh4"]
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="11_l2bbl"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="12_a84io"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/RBRespawnActuator.cs" id="14_l5oqy"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBRespawnActuator.cs" id="15_qn7ou"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/CollisionWithRewardFunc.cs" id="16_o2djf"]
 [ext_resource type="Script" path="res://demo1scripts/ShowSteps.cs" id="17_1smsj"]
 
@@ -264,7 +264,7 @@ successReward = -10.0
 causeEpisodeToEnd = true
 
 [node name="RespawnActuator" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("14_l5oqy")
+script = ExtResource("15_qn7ou")
 respawnOptionsPath = NodePath("../../Positions")
 actionName = "respawn"
 isOutput = false
@@ -347,7 +347,7 @@ shape = SubResource("BoxShape3D_jyg3y")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 13, 0)
 
 [node name="ShowSteps" type="Label" parent="."]
-offset_right = 110.0
-offset_bottom = 32.0
+offset_right = 152.0
+offset_bottom = 39.0
 script = ExtResource("17_1smsj")
 agentPath = NodePath("../AgentBody/Agent")
