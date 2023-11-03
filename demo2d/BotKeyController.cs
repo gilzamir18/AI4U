@@ -18,14 +18,21 @@ public partial class BotKeyController: Node
 	public override void _Ready()
 	{
 		controller = GetNode<BotController>(controllerRef);
+		controller.State = StateEnum.nostarted;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _PhysicsProcess(double delta)
 	{
-		if (controller.State != StateEnum.live)
+		if (Input.IsKeyPressed(Key.R))
 		{
-			controller.State = StateEnum.live;
+            controller.Respawn();
+			return;
+		}
+		if (controller.State == StateEnum.nostarted)
+		{
+			controller.Respawn();
+			return;
 		}
         if (Input.IsActionPressed("ui_right"))
 		{
