@@ -15,6 +15,15 @@ public partial class FruitController : Node2D
 	private int timeToRespawn = 1000;
 	private int countTimeToRespawn = 0;
 
+	[Export]
+	private int energyGain = 100;
+
+	[Export]
+	private bool superPower = false;
+
+	[Export]
+	private int superPowerGain = 1000;
+
 	private bool eaten = false;
 	private Node positions;
 
@@ -62,12 +71,19 @@ public partial class FruitController : Node2D
 
     private void _on_body_shape_entered(Rid rid, Node2D other, int bodyShapeIndex, int localShapeIndex)
 	{
-		if (other.GetGroups().Contains("player"))
+		if (!eaten)
 		{
-			Visible = false;
-			countTimeToRespawn = 0;
-			eaten = true;
-			player.AddEnergy(100);
+			if (other.GetGroups().Contains("player"))
+			{
+				Visible = false;
+				countTimeToRespawn = 0;
+				eaten = true;
+				player.AddEnergy(energyGain);
+				if (superPower)
+				{
+					player.AddSuperPower(superPowerGain);
+				}
+			}
 		}
 	}
 }

@@ -26,6 +26,7 @@ public partial class BotController : RigidBody2D
 {
 
 	public int Energy => energy;
+	public int SuperPower => superPower;
 	public delegate void RespawnHandler();
 	public event RespawnHandler respawnEventHandler;
 
@@ -51,6 +52,8 @@ public partial class BotController : RigidBody2D
 	private int energy = 1000;
 	private int maxEnergy = 1000;
 	private int IDLECounter = 0;
+	private int superPower = 0;
+	private int maxSuperPower = 1000;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -63,6 +66,14 @@ public partial class BotController : RigidBody2D
 		step = 0;
 	}
 
+	public void AddSuperPower(int power)
+	{
+		superPower += power;
+		if (superPower > maxSuperPower)
+		{
+			superPower = maxSuperPower;
+		}
+	}
 
 	public StateEnum State
 	{
@@ -83,9 +94,20 @@ public partial class BotController : RigidBody2D
 		currentAction = action;
 	}
 
+	public void Rescue()
+	{
+		if (State == StateEnum.live)
+		{
+			State = StateEnum.win;
+		}
+	}
+
 	public void Kill()
 	{
-        State = StateEnum.killed;
+		if (State == StateEnum.live)
+		{
+			State = StateEnum.killed;
+		}
     }
 
 	public void AddEnergy(int v)
@@ -99,6 +121,7 @@ public partial class BotController : RigidBody2D
 
 	public void Respawn()
 	{
+		Visible = true;
 		IDLECounter = 0;
 		energy = 1000;
 
@@ -144,8 +167,13 @@ public partial class BotController : RigidBody2D
     // Called every frame. 'delta' is the elapsed time since the previous frame.
     public override void _PhysicsProcess(double delta)
 	{
+
 		//GD.Print(LinearVelocity.Y);
-		if (State == StateEnum.killed)
+		if (State == StateEnum.win)
+		{
+			Visible = false;
+		}
+		else if (State == StateEnum.killed)
 		{
 			if (sprite.Frame <= 4)
 			{
@@ -155,6 +183,7 @@ public partial class BotController : RigidBody2D
         }
 		else if (State == StateEnum.live)
 		{
+
 			if (Mathf.Abs(LinearVelocity.Y) <= jumpThreshhold)
 			{
 				//GD.Print("NO CHAO");
