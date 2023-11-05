@@ -11733,7 +11733,7 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="BoyWorld" type="Node2D"]
+[node name="demo2d" type="Node2D"]
 
 [node name="Set2Background" type="Sprite2D" parent="."]
 position = Vector2(576.5, 271)

@@ -1,9 +1,16 @@
 using Godot;
+using System;
 using System.Text;
 
 namespace ai4u
 {
-	public abstract partial class Controller: Node
+    /// <summary>
+    /// A controller is an object that sends actions to an actuator through 
+    /// callback function GetAction. GetAction returns a string action. A string
+    /// action is a AI4U compressed action description that an Agent (BasicAgent, for example)
+    /// understand.
+    /// </summary>
+    public abstract partial class Controller: Node
 	{
 		
 		public int LastStep {get; set;}
@@ -58,7 +65,23 @@ namespace ai4u
 
 		public bool GetStateAsBool(int i = 0)
 		{
-			return bool.Parse(value[i]);
+			bool vb;
+			if (bool.TryParse(value[i], out vb))
+			{
+				return vb;
+			}
+			else
+			{
+				int vi = 0;
+				if (int.TryParse(value[i], out vi))
+				{
+					return vi != 0;
+				}
+				else
+				{
+					throw new InvalidCastException($"String {value[i]} cannot casted in boolean!");
+				}
+			}
 		}
 
 		public string GetStateName(int i = 0)

@@ -77,11 +77,6 @@ public partial class RBMoveActuator2D : Actuator
                     {
                         jumpForward = 0;
                     }
-
-
-
-
-
                 }
             }
         }

@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 namespace ai4u;
@@ -250,16 +251,25 @@ public abstract partial class Agent : Node
 
 	public bool GetActionArgAsBool(int i = 0)
 	{
-		try
-		{
-			return bool.Parse(this.brain.GetReceivedArgs()[i]);
-		}
-		catch
-		{
-			float[] a = GetActionArgAsFloatArray();
-			return a[i] > 0;
-		}
-	}
+        bool vb;
+		string[] value = this.brain.GetReceivedArgs();
+        if (bool.TryParse(value[i], out vb))
+        {
+            return vb;
+        }
+        else
+        {
+            int vi = 0;
+            if (int.TryParse(value[i], out vi))
+            {
+                return vi != 0;
+            }
+            else
+            {
+                throw new InvalidCastException($"String {value[i]} cannot casted in boolean!");
+            }
+        }
+    }
 
 	public float[] GetActionArgAsFloatArray()
 	{

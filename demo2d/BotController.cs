@@ -66,6 +66,22 @@ public partial class BotController : RigidBody2D
 		step = 0;
 	}
 
+	public bool Live
+	{
+		get
+		{
+			return State == StateEnum.live;
+		}
+	}
+
+	public bool Win
+	{
+		get
+		{
+			return State == StateEnum.win;
+		}
+	}
+
 	public void AddSuperPower(int power)
 	{
 		superPower += power;
@@ -74,6 +90,7 @@ public partial class BotController : RigidBody2D
 			superPower = maxSuperPower;
 		}
 	}
+
 
 	public StateEnum State
 	{
@@ -92,6 +109,30 @@ public partial class BotController : RigidBody2D
 	public void SetAction(ActionEnum action)
 	{
 		currentAction = action;
+	}
+
+	public void SetAction(int value)
+	{
+		if (value == 0)
+		{
+			currentAction = ActionEnum.idle;
+		}
+		else if (value == 1)
+		{
+			currentAction = ActionEnum.right;
+		}
+		else if (value == 2)
+		{
+			currentAction = ActionEnum.left;
+		}
+		else if (value == 3)
+		{
+			currentAction = ActionEnum.attack;
+		}
+		else if (value == 4)
+		{
+			currentAction = ActionEnum.jump;
+		}
 	}
 
 	public void Rescue()
@@ -119,11 +160,18 @@ public partial class BotController : RigidBody2D
 		}
 	}
 
+	public void Reset()
+	{
+        Respawn();
+	}
+
 	public void Respawn()
 	{
-		Visible = true;
+        this.State = StateEnum.live;
+        Visible = true;
 		IDLECounter = 0;
 		energy = 1000;
+		superPower = 0;
 
         PhysicsServer2D.BodySetState(
             GetRid(),
@@ -142,7 +190,7 @@ public partial class BotController : RigidBody2D
             PhysicsServer2D.BodyState.LinearVelocity,
             new Vector3(0, 0, 0)
         );
-        this.State = StateEnum.live;
+
 		if (respawnEventHandler != null)
 		{
 			respawnEventHandler();

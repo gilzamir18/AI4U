@@ -177,11 +177,6 @@ namespace ai4u
 			types = new byte[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
 			values = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
 			
-			foreach (RewardFunc r in rewards)
-			{
-				r.OnSetup(this);
-			}
-			
 			foreach (ISensor sensor in sensorList)
 			{
 				if (sensor.IsResetable())
