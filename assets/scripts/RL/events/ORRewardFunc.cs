@@ -12,11 +12,12 @@ public partial class ORRewardFunc : RewardFunc
 
     private BasicAgent agent;
     private System.Collections.Generic.List<RewardFunc> rewards;
-    private bool eval = false;
+
+    private float acmReward = 0.0f;
 
     public override void OnSetup(Agent agent)
     {
-        eval = false;
+        acmReward = 0.0f;
         rewards = new System.Collections.Generic.List<RewardFunc>();
         agent.AddResetListener(this);
         this.agent = (BasicAgent)agent;
@@ -31,39 +32,45 @@ public partial class ORRewardFunc : RewardFunc
 
     public override void OnUpdate()
     {
-        bool pass = true;
+        if (Eval())
+        {
+            agent.AddReward(acmReward, causeEpisodeToEnd);
+            acmReward = 0.0f;
+        }
+    }
+
+    public override bool Eval()
+    {
+        bool pass = false;
         for (int i = 0; i < rewards.Count; i++)
         {
             if (updateChildren)
             {
                 rewards[i].OnUpdate();
             }
-            if (!rewards[i].Eval())
+            if (rewards[i].Eval())
             {
-                pass = false;
+                pass = true;
             }
             rewards[i].ResetEval();
         }
         if (pass)
         {
-            GD.Print("PASS OK");
-            agent.AddReward(reward, causeEpisodeToEnd);
-            eval = true;
+            acmReward += reward;
+            return true;
         }
-    }
-
-    public override bool Eval()
-    {
-        return eval;
+        else
+        {
+            return false;
+        }
     }
 
     public override void ResetEval()
     {
-        eval = false;
     }
 
     public override void OnReset(Agent agent)
     {
-        eval = false;
+        acmReward = 0;
     }
 }

@@ -15,7 +15,7 @@ public partial class HeliController : Node2D
 
 	private BotController playerController;
 	private Node2D target;
-	private int duration = 5000;
+	private int duration = 1000;
 	private int currentTime = 0;
 
 	private bool started = false;

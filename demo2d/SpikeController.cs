@@ -5,7 +5,7 @@ public partial class SpikeController : RigidBody2D
 {
 
 	[Export]
-	private float speed = 5;
+	private float speed = 150000;
 
 	[Export]
 	private int energyGain = 100;
@@ -13,25 +13,26 @@ public partial class SpikeController : RigidBody2D
 	[Export]
 	private int superPowerDecay = 500;
 
-    [Export]
-    private NodePath playerPath;
+	[Export]
+	private NodePath playerPath;
 
 	[Export]
 	private NodePath referencePath;
 
-    private Transform2D reference;
+	private Transform2D reference;
 
-    private BotController player;
+	private BotController player;
 
 	private int forward = 1;
 
 	private bool killed = false;
 	[Export]
-	private int timeToRespawn = 1000;
+	private int timeToRespawn = 200;
 	private int timeToRespawnCounter = 0;
+	private bool resetRequested = false;
 
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
 	{
 		reference = GetNode<Node2D>(referencePath).Transform;
 		player = GetNode<BotController>(playerPath);
@@ -40,30 +41,44 @@ public partial class SpikeController : RigidBody2D
 
 	public void RespawnHandler()
 	{
-		timeToRespawnCounter = 0;
-		killed = false;
-		Visible = true;
-		CollisionLayer = 1;
+		/*
+		PhysicsServer2D.BodySetState(
+			GetRid(),
+			PhysicsServer2D.BodyState.AngularVelocity,
+			new Vector2(0, 0)
+		);	
+		
+		PhysicsServer2D.BodySetState(
+			GetRid(),
+			PhysicsServer2D.BodyState.LinearVelocity,
+			new Vector2(0, 0)
+		);
+		
 		PhysicsServer2D.BodySetState(
 			GetRid(),
 			PhysicsServer2D.BodyState.Transform,
 			reference
-		);
-				
-		PhysicsServer2D.BodySetState(
-			GetRid(),
-			PhysicsServer2D.BodyState.AngularVelocity,
-			new Vector3(0, 0, 0)
-		);	
-				
-		PhysicsServer2D.BodySetState(
-			GetRid(),
-			PhysicsServer2D.BodyState.LinearVelocity,
-			new Vector3(0, 0, 0)
-		);
+		);*/
+		timeToRespawnCounter = 0;
+		killed = false;
+		Visible = true;
+		forward = -1;
+        resetRequested = true;
     }
 
-	private void _on_body_entered(Node node)
+    public override void _IntegrateForces(PhysicsDirectBodyState2D state)
+    {
+		if (resetRequested)
+		{
+			resetRequested = false;
+			state.LinearVelocity = Vector2.Zero;
+			state.AngularVelocity = 0;
+			state.Transform = reference;
+
+        }
+    }
+
+    private void _on_body_entered(Node node)
 	{
 		if (killed)
 		{
@@ -78,7 +93,6 @@ public partial class SpikeController : RigidBody2D
 					player.AddEnergy(energyGain);
 					Visible = false;
 					killed = true;
-					CollisionLayer = 2;
 					player.AddSuperPower(-superPowerDecay);
 				}
 				else
@@ -95,7 +109,7 @@ public partial class SpikeController : RigidBody2D
 				forward = -1;
 			}
 		}
-    }
+	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _PhysicsProcess(double delta)
@@ -104,18 +118,17 @@ public partial class SpikeController : RigidBody2D
 		{
 			if (!killed)
 			{
-				float f = speed * forward;
-				ApplyCentralImpulse(new Vector2(f, 0));
+				float f = speed * forward * (float)delta;
+				ApplyCentralForce(new Vector2(f, 0));
 			}
 			else
 			{
 				timeToRespawnCounter++;
-				//GD.Print(timeToRespawnCounter);
 				if (timeToRespawnCounter >= timeToRespawn)
 				{
 					RespawnHandler();
 				}
 			}
 		}
-    }
+	}
 }

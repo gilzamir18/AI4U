@@ -149,7 +149,7 @@ public partial class BotController : RigidBody2D
 		{
 			State = StateEnum.killed;
 		}
-    }
+	}
 
 	public void AddEnergy(int v)
 	{
@@ -162,60 +162,59 @@ public partial class BotController : RigidBody2D
 
 	public void Reset()
 	{
-        Respawn();
+		Respawn();
 	}
 
 	public void Respawn()
 	{
-        this.State = StateEnum.live;
-        Visible = true;
+		this.State = StateEnum.live;
+		Visible = true;
 		IDLECounter = 0;
 		energy = 1000;
 		superPower = 0;
+		forward = true;
+		currentAction = ActionEnum.idle;
 
-        PhysicsServer2D.BodySetState(
-            GetRid(),
-            PhysicsServer2D.BodyState.Transform,
-            reference
-        );
+		PhysicsServer2D.BodySetState(
+			GetRid(),
+			PhysicsServer2D.BodyState.Transform,
+			reference
+		);
 
-        PhysicsServer2D.BodySetState(
-            GetRid(),
-            PhysicsServer2D.BodyState.AngularVelocity,
-            new Vector3(0, 0, 0)
-        );
+		PhysicsServer2D.BodySetState(
+			GetRid(),
+			PhysicsServer2D.BodyState.AngularVelocity,
+			new Vector3(0, 0, 0)
+		);
 
-        PhysicsServer2D.BodySetState(
-            GetRid(),
-            PhysicsServer2D.BodyState.LinearVelocity,
-            new Vector3(0, 0, 0)
-        );
+		PhysicsServer2D.BodySetState(
+			GetRid(),
+			PhysicsServer2D.BodyState.LinearVelocity,
+			new Vector3(0, 0, 0)
+		);
 
 		if (respawnEventHandler != null)
 		{
 			respawnEventHandler();
-        }
+		}
 	}
-
 
 	private void UpdateEnergy(int q=1)
 	{
-        IDLECounter += 1;
-        if (IDLECounter % energyDecayFreq == 0)
-        {
-            energy -= q;
-        }
+		IDLECounter += 1;
+		if (IDLECounter % energyDecayFreq == 0)
+		{
+			energy -= q;
+		}
 		if (IDLECounter >= 10000)
 		{
 			IDLECounter = 0;
 		}
-    }
+	}
 
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _PhysicsProcess(double delta)
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _PhysicsProcess(double delta)
 	{
-
 		//GD.Print(LinearVelocity.Y);
 		if (State == StateEnum.win)
 		{
@@ -228,7 +227,7 @@ public partial class BotController : RigidBody2D
 				sprite.FlipH = !forward;
 				sprite.Play("KILLED");
 			}
-        }
+		}
 		else if (State == StateEnum.live)
 		{
 
@@ -256,31 +255,31 @@ public partial class BotController : RigidBody2D
 						sprite.FlipH = !forward;
 						sprite.Play("IDLE");
 						UpdateEnergy();
-                        break;
+						break;
 					case ActionEnum.left:
 						forward = false;
 						sprite.FlipH = !forward;
-						ApplyCentralForce(new Vector2(-1500, 0));
+						ApplyCentralForce(new Vector2(-100000 * (float)delta, 0));
 						sprite.Play("WALK");
 						UpdateEnergy(2);
-                        break;
+						break;
 					case ActionEnum.right:
 						forward = true;
 						sprite.FlipH = !forward;
-						ApplyCentralForce(new Vector2(1500, 0));
+						ApplyCentralForce(new Vector2(100000 * (float)delta, 0));
 						sprite.Play("WALK");
 						UpdateEnergy(2);
-                        break;
+						break;
 					case ActionEnum.attack:
 						sprite.FlipH = !forward;
 						sprite.Play("SLIDING");
 						UpdateEnergy(4);
-                        break;
+						break;
 					case ActionEnum.jump:
 						sprite.FlipH = !forward;
 						sprite.Play("JUMP_UP");
 						UpdateEnergy(4);
-                        ApplyCentralImpulse(new Vector2(0, -800));
+						ApplyCentralImpulse(new Vector2(0, -50000.0f * (float)delta ));
 						break;
 				}
 			}
