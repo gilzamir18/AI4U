@@ -37,11 +37,14 @@ namespace ai4u
 	public partial class ControlRequestor : Node
 	{
 		[Export]
-		public float defaultTimeScale = 1.0f; 
+		private float defaultTimeScale = 1.0f; 
 		[Export]
-		public bool physicsMode = true;
-		
-		public int skipFrame = 8;
+		private bool physicsMode = true;
+		[Export]
+		private bool computePhysicsTicks = true;
+
+
+        public int skipFrame = 8;
 		
 		public bool repeatAction = false;
 		
@@ -70,7 +73,11 @@ namespace ai4u
 			}
 
 			Engine.TimeScale = defaultTimeScale;
-		}
+			if (computePhysicsTicks)
+			{
+				Engine.PhysicsTicksPerSecond = Mathf.Max(60, Mathf.RoundToInt(defaultTimeScale * 60));
+            }
+        }
 
 		public override void _ExitTree()
 		{

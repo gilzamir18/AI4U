@@ -1,0 +1,97 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Godot;
+using ai4u;
+
+namespace ai4u
+{
+
+    /// <summary>
+    /// The 'EvalIntValue' represents an evaluation rewarded event.
+    /// It contains fields as 'targetPath' and 'property'. The field 'targetPath'
+    /// is the link to Node object to be evaluated. The 'property' field
+    /// is the evaluated property from target object. The
+    /// fields is 'minValue' and 'maxValue' the target range of the evaluated 'property'. If  'property' value is in range [minValue, maxValue], 
+    /// than target evaluation is true; else, target evaluation is false.
+    /// </summary>
+    public partial class EvalFloatValue : RewardFunc
+    {
+        /// <summary>
+        /// Target object evaluated property.
+        /// </summary>
+        [Export]
+        private string property;
+
+        /// <summary>
+        /// Minimum value of the reference range.
+        /// </summary>
+        [Export]
+        private float minValue;
+
+        /// <summary>
+        /// Maximum value of the reference range.
+        /// </summary>
+        [Export]
+        private float maxValue;
+
+        /// <summary>
+        /// Generated reward value if evaluation is true.
+        /// </summary>
+        [Export]
+        private float reward = 1;
+
+        /// <summary>
+        /// Target object reference.
+        /// </summary>
+        [Export]
+        private NodePath targetPath;
+
+        private float acmReward = 0;
+
+
+
+        private Node target;
+
+
+        private BasicAgent agent;
+
+        public override void OnSetup(Agent agent)
+        {
+            this.agent = (BasicAgent) agent;
+            this.target = GetNode(targetPath);
+            acmReward = 0;
+        }
+
+        public override void OnUpdate()
+        {
+            this.agent.AddReward(acmReward, this);
+            acmReward = 0.0f;
+        }
+
+        public override bool Eval()
+        {
+            float v = float.Parse(target.GetType().GetProperty(property).GetValue(target).ToString(),
+                System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+            if (v >= minValue && v <= maxValue)
+            {
+                acmReward += reward;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override void ResetEval()
+        {
+
+        }
+
+        public override void OnReset(Agent agent)
+        {
+            acmReward = 0;
+        }
+    }
+}
