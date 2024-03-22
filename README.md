@@ -6,12 +6,15 @@ The Godot version of the AI4U get advantage of the Godot architecture and facili
 
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
-# BeMaker
-AI4U Godot supports gymnasium environment in Python throught [bemaker tool](https://github.com/gilzamir18/bemaker). 
+# Use ai4upy for Training
+The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy and run the command:
+
+    pip install -e . 
+
+This command allows you train and run an agent living in a Godot scene. 
 
 # Requirements
-
-* Godot 4 Mono Version (tested only in Godot 4.1.1 stable, mono version, Windows 11)
+* Godot 4.2.1 Mono Version (tested only in Godot 4.2.1 stable, mono version, Windows 11)
 * Python 3.10
 * Gynasium 
 
