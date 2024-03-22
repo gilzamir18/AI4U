@@ -61,7 +61,7 @@ namespace ai4u
 		private float episodeReward;
 
 
-        private List<RewardFunc> rewards;
+		private List<RewardFunc> rewards;
 
 		private Dictionary<string, bool> firstTouch;
 		private Dictionary<string, ISensor> sensorsMap;
@@ -411,8 +411,8 @@ namespace ai4u
 				beginOfEpisodeEvent(this);
 			}
 			brain.OnReset(this);
-            episodeReward = 0;
-        }
+			episodeReward = 0;
+		}
 
 		public override void AgentRestart()
 		{
@@ -541,3 +541,4 @@ namespace ai4u
 		}
 	}
 }
+

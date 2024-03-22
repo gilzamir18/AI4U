@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Godot;
 
 class Line
@@ -26,33 +26,41 @@ class Line
 
 partial class LineDrawer: Node2D
 {
-	public List<Line> Lines;
+	public List<Line> lines;
 	public Camera3D Camera_Node;
 
 	public override void _Ready()
 	{
 		Camera_Node = GetViewport().GetCamera3D();
-		Lines = new List<Line>();
+		lines = new List<Line>();
 		SetProcess(true);
 	}
 
-	public override void _Draw()
-	{
-		foreach(Line line in Lines)
-		{
 
+	public void Redraw()
+	{
+		QueueRedraw();
+	}
+
+    public override void _Draw()
+	{
+		foreach(Line line in lines)
+		{
 			if (line.originSize > 0)
+			{
 				DrawCircle(line.b, line.originSize*0.5f, line.originColor);
+			}
 			DrawLine(line.a, line.b, line.color, line.thickness);
 			if (line.originSize > 0)
+			{
 				DrawCircle(line.a, line.originSize, line.originColor);
-
+			}
 		}
 	}
 
 	public void Draw_Line3D(int id, Vector3 vector_a, Vector3 vector_b, Color color, Color originColor, float thickness, float originSize)
 	{
-		foreach(Line line in Lines)
+		foreach(Line line in lines)
 		{
 			if (line.id == id)
 			{
@@ -72,7 +80,7 @@ partial class LineDrawer: Node2D
 		new_line.a = Camera_Node.UnprojectPosition(vector_a);
 		new_line.b = Camera_Node.UnprojectPosition(vector_b);
 		new_line.thickness = thickness;
-		Lines.Add(new_line);
+		lines.Add(new_line);
 	}
 		
 	public void Remove_Line(int id)
@@ -80,7 +88,7 @@ partial class LineDrawer: Node2D
 			int i = 0;
 			bool found = false;
 			Line removed = null;
-			foreach(Line line in Lines)
+			foreach(Line line in lines)
 			{
 				if (line.id == id)
 				{
@@ -91,6 +99,6 @@ partial class LineDrawer: Node2D
 				i += 1;
 			}	
 			if (found)
-				Lines.Remove(removed);
+				lines.Remove(removed);
 	}
 }

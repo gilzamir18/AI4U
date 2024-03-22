@@ -19,15 +19,15 @@ public partial class Floor : StaticBody3D
 
 		for (int i = 0; i < 10; i++)
 		{
-            var pos = (int)(GD.Randf() * centroides.Count);
-            Vector3 ct = centroides[pos];
-            var cube = new BoxMesh();
-            var instance = new MeshInstance3D();
-            instance.Mesh = cube;
-            instance.Position =  ct + new Vector3(0, 2.0f, 0) + mymesh.Position;
+			var pos = (int)(GD.Randf() * centroides.Count);
+			Vector3 ct = centroides[pos];
+			var cube = new BoxMesh();
+			var instance = new MeshInstance3D();
+			instance.Mesh = cube;
+			instance.Position =  ct + new Vector3(0, 2.0f, 0) + mymesh.Position;
 			instance.Scale = new Vector3(1, 4, 1);
-            AddChild(instance);
-        }*/
+			AddChild(instance);
+		}*/
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

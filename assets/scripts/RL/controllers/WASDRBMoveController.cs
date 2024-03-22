@@ -5,10 +5,10 @@ using ai4u;
 
 namespace  ai4u
 {
-    /// <summary>
-    /// WASD controller for RigidBody3D game objects.
-    /// </summary>
-    public partial class WASDRBMoveController : Controller
+	/// <summary>
+	/// WASD controller for RigidBody3D game objects.
+	/// </summary>
+	public partial class WASDRBMoveController : Controller
 	{
 		[Export]
 		public string actuatorName = "move";
@@ -99,11 +99,11 @@ namespace  ai4u
 
 		override public void NewStateEvent()
 		{
-            if (!agent.Alive() && !done)
-            {
-                GD.Print("Episode Reward " + ((BasicAgent)agent).AcummulatedReward);
-                done = true;
-            }
-        }
+			if (!agent.Alive() && !done)
+			{
+				GD.Print("Episode Reward " + ((BasicAgent)agent).AcummulatedReward);
+				done = true;
+			}
+		}
 	}
 }

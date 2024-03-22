@@ -50,10 +50,10 @@ surface_material_override/0 = SubResource("StandardMaterial3D_orivf")
 
 [node name="Target" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.39414, 0.57379, 0)
-max_contacts_reported = 100
-contact_monitor = true
 lock_rotation = true
 freeze = true
+max_contacts_reported = 100
+contact_monitor = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Target"]
 shape = SubResource("BoxShape3D_7d1uu")
@@ -65,11 +65,11 @@ surface_material_override/0 = SubResource("StandardMaterial3D_b6kah")
 [node name="RigidBody3D" type="RigidBody3D" parent="."]
 axis_lock_angular_x = true
 axis_lock_angular_z = true
+sleeping = true
+can_sleep = false
 continuous_cd = true
 max_contacts_reported = 10000
 contact_monitor = true
-sleeping = true
-can_sleep = false
 angular_damp = 5.0
 
 [node name="Arrow" parent="RigidBody3D" instance=ExtResource("1_kiqyk")]
