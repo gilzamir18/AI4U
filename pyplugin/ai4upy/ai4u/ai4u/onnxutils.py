@@ -1,7 +1,7 @@
 import torch as th
 from torch import nn
 from stable_baselines3 import SAC
-import gym
+import gymnasium as gym
 
 class OnnxableSACPolicy(th.nn.Module):
     def __init__(self, actor: th.nn.Module, extractors: nn.ModuleDict):

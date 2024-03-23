@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=3 uid="uid://clw5k47l3k2ml"]
+[gd_scene load_steps=65 format=3 uid="uid://clw5k47l3k2ml"]
 
 [ext_resource type="Texture2D" uid="uid://hegbphrp62e" path="res://assets/Backgrounds/set2_background.png" id="1_rc4g3"]
 [ext_resource type="Texture2D" uid="uid://dbwfdrj66tl07" path="res://assets/Backgrounds/set2_hills.png" id="2_jl8do"]
@@ -35,6 +35,7 @@
 [ext_resource type="Script" path="res://assets/scripts/ControllerConfiguration.cs" id="27_iq8vd"]
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="27_lf32s"]
 [ext_resource type="Script" path="res://demo2d/HeliController.cs" id="28_6mh4f"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc2D.cs" id="28_573b1"]
 [ext_resource type="Texture2D" uid="uid://cdlnlldau8qk5" path="res://assets/sprites/SpritePack/heli/heli-1.png" id="29_cru68"]
 [ext_resource type="Texture2D" uid="uid://cbie8q2fw5cct" path="res://assets/sprites/SpritePack/heli/heli-2.png" id="30_670tr"]
 [ext_resource type="Texture2D" uid="uid://b4lavxpy654su" path="res://assets/sprites/SpritePack/heli/heli-3.png" id="31_pr13q"]
@@ -11767,7 +11768,7 @@ layer_0/tile_data = PackedInt32Array(2162687, 6291462, 40, 2228223, 6291462, 41,
 
 [node name="AgentLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("27_lf32s")
-defaultTimeScale = 5.0
+computePhysicsTicks = false
 stopOnQuit = true
 agentsList = [NodePath("../Boy/Agent")]
 
@@ -11803,7 +11804,6 @@ mesh = SubResource("QuadMesh_pkcvr")
 [node name="Agent" type="Node" parent="Boy"]
 script = ExtResource("21_mehqi")
 avatarPath = NodePath("..")
-remote = true
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 5000
 
@@ -11829,55 +11829,65 @@ script = ExtResource("25_kcet8")
 reward = 100.0
 causeEpisodeToEnd = true
 
-[node name="LiveSensor" type="Node" parent="Boy/Agent/NotLiveAndWin"]
+[node name="LiveSensor" type="Node" parent="Boy/Agent/NotLiveAndWin" node_paths=PackedStringArray("target")]
 script = ExtResource("24_ckar3")
 property = "Live"
 reward = 0.0
-targetPath = NodePath("../../..")
+target = NodePath("../../..")
 
-[node name="Win" type="Node" parent="Boy/Agent/NotLiveAndWin"]
+[node name="Win" type="Node" parent="Boy/Agent/NotLiveAndWin" node_paths=PackedStringArray("target")]
 script = ExtResource("24_ckar3")
 property = "Win"
 value = true
 reward = 0.0
-targetPath = NodePath("../../..")
+target = NodePath("../../..")
 
 [node name="NotLiveAndNotWin" type="Node" parent="Boy/Agent"]
 script = ExtResource("25_kcet8")
 reward = -100.0
 causeEpisodeToEnd = true
 
-[node name="LiveSensor" type="Node" parent="Boy/Agent/NotLiveAndNotWin"]
+[node name="LiveSensor" type="Node" parent="Boy/Agent/NotLiveAndNotWin" node_paths=PackedStringArray("target")]
 script = ExtResource("24_ckar3")
 property = "Live"
 reward = 0.0
-targetPath = NodePath("../../..")
+target = NodePath("../../..")
 
-[node name="Win" type="Node" parent="Boy/Agent/NotLiveAndNotWin"]
+[node name="Win" type="Node" parent="Boy/Agent/NotLiveAndNotWin" node_paths=PackedStringArray("target")]
 script = ExtResource("24_ckar3")
 property = "Win"
 reward = 0.0
-targetPath = NodePath("../../..")
+target = NodePath("../../..")
 
 [node name="LiveReward" type="Node" parent="Boy/Agent"]
 script = ExtResource("25_kcet8")
-reward = 0.01
 
-[node name="LiveSensor" type="Node" parent="Boy/Agent/LiveReward"]
+[node name="LiveSensor" type="Node" parent="Boy/Agent/LiveReward" node_paths=PackedStringArray("target")]
 script = ExtResource("24_ckar3")
 property = "Live"
 value = true
 reward = 0.0
-targetPath = NodePath("../../..")
+target = NodePath("../../..")
 
 [node name="LoopConfig" type="Node" parent="Boy/Agent"]
 script = ExtResource("27_iq8vd")
 skipFrame = 8
 
+[node name="TouchFruitReward" type="Node" parent="Boy/Agent" node_paths=PackedStringArray("target")]
+script = ExtResource("28_573b1")
+reward = 100.0
+target = NodePath("../../../Fruit")
+
+[node name="PowerUpReward" type="Node" parent="Boy/Agent" node_paths=PackedStringArray("target")]
+script = ExtResource("28_573b1")
+reward = 100.0
+target = NodePath("../../../SuperPower")
+
 [node name="Static" type="Node" parent="."]
 
 [node name="Left" type="StaticBody2D" parent="Static" groups=["left_wall"]]
 position = Vector2(10, -464)
+collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Static/Left"]
 position = Vector2(-42.5, 597.5)
@@ -11886,6 +11896,7 @@ shape = SubResource("RectangleShape2D_togmy")
 [node name="right" type="StaticBody2D" parent="Static" groups=["right_wall"]]
 position = Vector2(1150, 324)
 scale = Vector2(-0.906102, 31.9286)
+collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Static/right"]
 position = Vector2(-27.0387, -6.42058)
@@ -11921,7 +11932,7 @@ lock_rotation = true
 max_contacts_reported = 180
 contact_monitor = true
 script = ExtResource("22_jy8rt")
-speed = 99999.0
+speed = 100000.0
 playerPath = NodePath("../Boy")
 referencePath = NodePath("../EnemyPosition")
 

@@ -1,12 +1,12 @@
 using Godot;
 using System;
 
-public partial class FruitController : Node2D
+public partial class FruitController : Area2D
 {
 
 
-    [Export]
-    private NodePath playerPath;
+	[Export]
+	private NodePath playerPath;
 
 	[Export] 
 	private NodePath positionsPath;
@@ -27,10 +27,10 @@ public partial class FruitController : Node2D
 	private bool eaten = false;
 	private Node positions;
 
-    
-    private BotController player;
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
+	
+	private BotController player;
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
 	{
 		positions = GetNode<Node>(positionsPath);
 		player = GetNode<BotController>(playerPath);
@@ -52,7 +52,8 @@ public partial class FruitController : Node2D
 
 	public void Respwan()
 	{
-		Visible = true;
+        CollisionLayer = 1;
+        Visible = true;
 		eaten = false;
 		countTimeToRespawn = 0;
 		var children = positions.GetChildren();
@@ -60,7 +61,7 @@ public partial class FruitController : Node2D
 		if (n > 0)
 		{
 			int idx = (new RandomNumberGenerator()).RandiRange(0, children.Count - 1);
-            Position = ((Node2D)children[idx]).Position;
+			Position = ((Node2D)children[idx]).Position;
 			
 		}
 		else
@@ -69,13 +70,14 @@ public partial class FruitController : Node2D
 		}
 	}
 
-    private void _on_body_shape_entered(Rid rid, Node2D other, int bodyShapeIndex, int localShapeIndex)
+	private void _on_body_shape_entered(Rid rid, Node2D other, int bodyShapeIndex, int localShapeIndex)
 	{
 		if (!eaten)
 		{
 			if (other.GetGroups().Contains("player"))
 			{
-				Visible = false;
+                CollisionLayer = 2;
+                Visible = false;
 				countTimeToRespawn = 0;
 				eaten = true;
 				player.AddEnergy(energyGain);

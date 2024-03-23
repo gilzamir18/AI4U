@@ -42,9 +42,10 @@ namespace ai4u
 		private bool physicsMode = true;
 		[Export]
 		private bool computePhysicsTicks = true;
+		[Export] int maxPhysicsFrames = 60;
 
 
-        public int skipFrame = 8;
+		public int skipFrame = 8;
 		
 		public bool repeatAction = false;
 		
@@ -75,9 +76,9 @@ namespace ai4u
 			Engine.TimeScale = defaultTimeScale;
 			if (computePhysicsTicks)
 			{
-				Engine.PhysicsTicksPerSecond = Mathf.Max(60, Mathf.RoundToInt(defaultTimeScale * 60));
-            }
-        }
+				Engine.PhysicsTicksPerSecond = Mathf.Max(maxPhysicsFrames, Mathf.RoundToInt(defaultTimeScale * maxPhysicsFrames));
+			}
+		}
 
 		public override void _ExitTree()
 		{

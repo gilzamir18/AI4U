@@ -1,12 +1,12 @@
-from bemaker.onnxutils import sac_export_to
-from bemaker.controllers import BasicGymController
-import BMEnv
+from ai4u.onnxutils import sac_export_to
+from ai4u.controllers import BasicGymController
+import AI4UEnv
 import  gymnasium  as gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
 
-env = gym.make("BMEnv-v0")
+env = gym.make("AI4UEnv-v0")
 
 print('''
 bemaker Client Controller

@@ -41,7 +41,7 @@ public partial class SpikeController : RigidBody2D
 
 	public void RespawnHandler()
 	{
-		/*
+        /*
 		PhysicsServer2D.BodySetState(
 			GetRid(),
 			PhysicsServer2D.BodyState.AngularVelocity,
@@ -59,7 +59,9 @@ public partial class SpikeController : RigidBody2D
 			PhysicsServer2D.BodyState.Transform,
 			reference
 		);*/
-		timeToRespawnCounter = 0;
+        //SetDeferred("CollisionLayer", 1);
+        CollisionLayer = 1;
+        timeToRespawnCounter = 0;
 		killed = false;
 		Visible = true;
 		forward = -1;
@@ -90,7 +92,9 @@ public partial class SpikeController : RigidBody2D
 			{
 				if (player.SuperPower > 0)
 				{
-					player.AddEnergy(energyGain);
+					CollisionLayer = 2;
+                    //SetDeferred("CollisionLayer", 2);
+                    player.AddEnergy(energyGain);
 					Visible = false;
 					killed = true;
 					player.AddSuperPower(-superPowerDecay);
