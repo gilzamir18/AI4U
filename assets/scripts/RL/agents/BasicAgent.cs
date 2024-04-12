@@ -490,7 +490,7 @@ namespace ai4u
 						}
 						SetStateAsString(i, s.GetKey(), fv4);
 						break;
-					case SensorType.sbool:
+                    case SensorType.sbool:
 						var fv5 = s.GetBoolValue();
 						SetStateAsBool(i, s.GetKey(), fv5);
 						break;
@@ -502,7 +502,15 @@ namespace ai4u
 						}
 						SetStateAsByteArray(i, s.GetKey(), fv6);
 						break;
-					default:
+                    case SensorType.sstrings:
+                        var fv7 = s.GetStringValues();
+                        if (fv7 == null)
+                        {
+                            throw new System.Exception("Error: string array sensor " + s.GetName() + " returning null value!");
+                        }
+                        SetStateAsStringArray(i, s.GetKey(), fv7);
+                        break;
+                    default:
 						break;
 				}
 			}

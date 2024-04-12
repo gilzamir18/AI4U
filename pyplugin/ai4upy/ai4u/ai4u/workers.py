@@ -3,6 +3,7 @@ from inspect import signature
 import sys
 from queue import Queue
 from .utils import get_float_from, get_int_from
+from .types import *
 
 class BasicWorker:
     def proccess(self, data):
@@ -75,22 +76,36 @@ class BMWorker:
             pos += 8
             value = data[pos:pos+valuesize]
 
-            if datatype == 0:
+            if datatype == SENSOR_SFLOAT:
                 fields[desc] = float(str(value, 'utf-8').strip())
-            elif datatype == 1:
+            elif datatype == SENSOR_SSTRING:
                 fields[desc] = int(str(value, 'utf-8').strip())
-            elif datatype == 2:
+            elif datatype == SENSOR_SBOOL:
                 fields[desc] = True if int(str(value, 'utf-8').strip()) == 1 else False
-            elif datatype == 3:
+            elif datatype == SENSOR_SINT:
                 fields[desc] = str(value, 'utf-8').strip()
-            elif datatype == 4:
+            elif datatype == SENSOR_SBYTEARRAY:
                 fields[desc] = str(value, 'utf-8').strip()
-            elif datatype == 5:
+            elif datatype == SENSOR_SFLOATARRAY:
                 v = str(value, 'utf-8').strip()
                 vs = v.split(' ')
                 a = np.zeros(len(vs))
                 for idx, e in enumerate(vs):
-                    a[idx] = e.replace(",", ".")
+                    a[idx] = float(e.replace(",", "."))
+                fields[desc] = a
+            elif datatype == SENSOR_SINTARRAY:
+                v = str(value, 'utf-8').strip()
+                vs = v.split(' ')
+                a = np.zeros(len(vs), dtype=np.int32)
+                for idx, e in enumerate(vs):
+                    a[idx] = int(e)
+                fields[desc] = a
+            elif datatype == SENSOR_SSTRINGS:
+                v = str(value, 'utf-8').strip()
+                vs = v.split(' ')
+                a = [] 
+                for e in vs:
+                    a.append(e)
                 fields[desc] = a
             count += 1
             pos += valuesize

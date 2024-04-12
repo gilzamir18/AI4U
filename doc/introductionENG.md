@@ -6,7 +6,7 @@ AI4U (Artificial Intelligence for You) is an open tool that brings to Godot an a
 
 The agent sees the game world through sensors. It acts in this world through actuators. The mapping between sensors and actuators is performed by a controller. Based on the history of perceptions, the controller decides which action to execute. Actions change the controllable object of the agent or the surrounding environment.
 
-This tutorial is entirely based on Godot version 4.1 for .NET. [The official Godot documentation on the use of C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) is a good starting point to fully understand this tutorial.
+This tutorial is entirely based on Godot version 4.2.1 for .NET. [The official Godot documentation on the use of C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) is a good starting point to fully understand this tutorial.
 
 # How to implement an agent in Godot?
 
@@ -19,11 +19,9 @@ The best way to install AI4U in your project is by downloading the [AI4U](https:
 
 Then create a new C# project in Godot (leave the default project creation options).
 
-> For now, AI4U only runs 3D projects.
+Copy the **assets** directory from the AI4U repository to your project. This is enough for Godot to recognize the classes you need to model an agent. But to train this agent using reinforcement learning, you need to download and install the [pyplugin](https://github.com/gilzamir18/ai4u) utility. This plugin allows you to connect your agent in Godot with a Python framework that allows training the agent. AI4U and bemaker are specially designed to communicate properly with the [stable-baselines3](https://github.com/DLR-RM/stable-baselines3) framework.
 
-Copy the **assets** directory from the AI4U repository to your project. This is enough for Godot to recognize the classes you need to model an agent. But to train this agent using reinforcement learning, you need to download and install the [bemaker](https://github.com/gilzamir18/bemaker) utility. This repository allows you to connect your agent in Godot with a Python framework that allows training the agent. AI4U and bemaker are specially designed to communicate properly with the [stable-baselines3](https://github.com/DLR-RM/stable-baselines3) framework.
-
-Once you have installed AI4U, **bemaker**, **stable-baselines3**, continue reading this tutorial.
+Once you have installed AI4U, pyplugin, **stable-baselines3**, continue reading this tutorial.
 
 # The Structure of an Agent in Godot
 
@@ -188,20 +186,21 @@ In theory, this agent can already be trained. But there are still some flaws in 
 Now we can train our agent. To do this, create a Python file (let's say, train.py) and copy the following content into it:
 
 ```Python
-import bemaker
-from bemaker.controllers import BasicGymController
-import BMEnv
 import gymnasium as gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
+import ai4u
+from ai4u.controllers import BasicGymController
+import AI4UEnv
+import gymnasium as gym
 
-env = gym.make("BMEnv-v0")
+env = gym.make("AI4U-v0")
 
 model = SAC(MultiInputPolicy, env, verbose=1, tensorboard_log="SAC")
 print("Training....")
 model.learn(total_timesteps=20000, log_interval=4,  tb_log_name='SAC')
-model.save("sac_bemaker")
+model.save("ai4u_model")
 print("Trained...")
 del model # remove to demonstrate saving and loading
 print("Train finished!!!")
@@ -237,19 +236,29 @@ After approximately 16 thousand steps of updating the agent's neural network, th
 After training the agent, a file *sac_bemaker.zip* is generated. This file contains the neural network model that knows how to control the agent to perform a task. We can run this model using a Python loop or using the model directly in Godot itself. To use Python, create a test file with the following content:
 
 ```Python
-from bemaker.controllers import BasicGymController
-import BMEnv
-import  gymnasium  as gym
+import gymnasium as gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
+import ai4u
+from ai4u.controllers import BasicGymController
+from ai4u.onnxutils import sac_export_to
+import AI4UEnv
+import gymnasium as gym
 
-env = gym.make("BMEnv-v0")
 
-model = SAC.load("sac_bemaker")
+env = gym.make("AI4U-v0")
+
+print('''
+AI4U Client Controller
+=======================
+This example controll a movable character in game.
+''')
+model = SAC.load("ai4u_model")
+
+sac_export_to("ai4u_model", metadatamodel=env.controller.metadataobj)
 
 obs, info = env.reset()
-
 reward_sum = 0
 while True:
     action, _states = model.predict(obs, deterministic=True)

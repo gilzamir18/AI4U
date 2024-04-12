@@ -20,7 +20,7 @@ namespace ai4u
 			{
 				if (s.IsInput())
 				{
-					inputs.Add(new ModelInput(s.GetName(), s.GetSensorType(), s.GetShape(), s.GetStackedObservations(), s.GetRangeMin(), s.GetRangeMax()));
+					inputs.Add(new ModelInput(s.GetName(), s.GetSensorType(), s.GetShape(), s.GetStackedObservations(), s.GetRangeMin(), s.GetRangeMax(), s.GetDataType()));
 				}
 			}
 

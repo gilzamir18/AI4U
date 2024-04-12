@@ -65,6 +65,7 @@ class BasicController:
                print("Empty message in reset. Trying reset again...")
                tryreset = True
             except KeyboardInterrupt as e:
+                print("PRESS EXIT")
                 sys.exit(0)
     
         if info == "halt":
@@ -89,6 +90,7 @@ class BasicController:
             info = self.agent.qout.get(timeout=self.agent.timeout)
         except TimeoutError as e:
             print(f"Step timeout after {self.agent.timeout} seconds!")
+            sys.exit(0)
         except KeyboardInterrupt:
             sys.exit(0)
         except Empty as e:
@@ -148,6 +150,7 @@ class BasicAgent:
 
                 time.sleep(self.waittime)
             except KeyboardInterrupt as e:
+                print("Exiting...")
                 sys.exit(0)
 
     def act(self, info):

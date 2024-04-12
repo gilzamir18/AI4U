@@ -7,11 +7,11 @@ AI4U (Artificial Intelligence for You) é uma ferramenta aberta que traz para a 
 
 O agente enxerga o mundo do jogo por meio de sensores e atua neste mundo por meio de atuadores. O mapeamento entre sensores e atuadores é realizado por um controlador. Com base no histórico de percepções, o controlador decide qual ação executar. As ações alteram o objeto controlável do agente ou o ambiente ao redor.
 
-Este tutorial se baseia inteiramente em Godot versão 4.1 para .NET. A [documentação oficial da Godot sobre o uso de C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) é um bom ponto-de-partida para compreender este tutorial completamente.
+Este tutorial se baseia inteiramente na versão 4.2.1 da Godot (mono ou .NET). A [documentação oficial da Godot sobre o uso de C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) é um bom ponto-de-partida para compreender este tutorial completamente.
 
 # Como implementar um agente na Godot?
 
-Em Godot, um agente é composto por um corpo virtual, sensores, atuadores e um controlador. Um corpo virtual pode ser um objeto do tipo RigidBody2D, RigidBody3D, Node2D, Node3D, ou qualquer outro objeto que o agente tenha controle sobre.
+Em Godot, um agente é composto por um corpo virtual, sensores, atuadores e um controlador. Um corpo virtual pode ser um objeto do tipo RigidBody2D, CharacterBody2D, RigidBody3D, CharacterBody3D, Node2D, Node3D, ou qualquer outro objeto que o agente tenha controle sobre.
 
 > Contudo, para que um objeto controlável seja útil, é necessário que atuadores e sensores possam ser criados especificamente para ele. Por enquanto, damos suporte apenas para RigidBody3D, mas qualquer programador pode extender nossa biblioteca de classes para suportar outros tipos de objetos.
 
@@ -21,11 +21,9 @@ A melhor forma de instalar a AI4U em seu projeto é baixando em seu computador o
 
 Então, crie um novo projeto C# na Godot (deixe as opções padrões de criação de projeto).
 
-> Por enquanto, AI4U roda apenas projetos 3D.
+Copie o diretório **assets** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário copiar o diretório [*AI4U/pyplugin*](https://github.com/gilzamir18/ai4u). Este plugin permite você conectar o seu agente na Godot com um framework Python que permite treinar o agente. A AI4U é o *pypluing* foram  especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
 
-Copie o diretório **assets** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário baixar e instalar o utilitário [bemaker](https://github.com/gilzamir18/bemaker). Este repositório permite você conectar o seu agente na Godot com um framework Python que permite treinar o agente. AI4U e bemaker são especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
-
-Uma vez que você tenha instalado AI4U, **bemaker**, **stable-baselines3**, continue lendo este tutorial.
+Uma vez que você tenha instalado AI4U, pypluing e **stable-baselines3**, continue lendo este tutorial.
 
 # A Estrutura de um Agente na Godot
 
@@ -166,20 +164,21 @@ Em tese, este agente já pode ser treinado. Mas ainda há algumas falhas em seu 
 Agora podemos treinar o nosso agente. Para isso, crie um arquivo Python (digamos, train.py) e copie o seguinte conteúdo nele:
 
 ```Python
-import bemaker
-from bemaker.controllers import BasicGymController
-import BMEnv
 import gymnasium as gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
+import ai4u
+from ai4u.controllers import BasicGymController
+import AI4UEnv
+import gymnasium as gym
 
-env = gym.make("BMEnv-v0")
+env = gym.make("AI4U-v0")
 
 model = SAC(MultiInputPolicy, env, verbose=1, tensorboard_log="SAC")
 print("Training....")
 model.learn(total_timesteps=20000, log_interval=4,  tb_log_name='SAC')
-model.save("sac_bemaker")
+model.save("mymodel")
 print("Trained...")
 del model # remove to demonstrate saving and loading
 print("Train finished!!!")
@@ -215,19 +214,29 @@ Após aproximadamente 16 mil passos de atualização da rede neural do agente, o
 Após o treino do agente, é gerado um arquivo *sac_bemaker.zip*. Este arquivo contém o modelo de rede neural que sabe como controlar o agente para realizar uma tarefa. Podemos executar este modelo usando um laço em Python ou usando o modelo diretamente na própria Godot. Para usar Python, crie um arquivo teste com o seguinte conteúdo:
 
 ```Python
-from bemaker.controllers import BasicGymController
-import BMEnv
-import  gymnasium  as gym
+import gymnasium as gym
 import numpy as np
 from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
+import ai4u
+from ai4u.controllers import BasicGymController
+from ai4u.onnxutils import sac_export_to
+import AI4UEnv
+import gymnasium as gym
 
-env = gym.make("BMEnv-v0")
 
-model = SAC.load("sac_bemaker")
+env = gym.make("AI4U-v0")
+
+print('''
+AI4U Client Controller
+=======================
+This example controll a movable character in game.
+''')
+model = SAC.load("ai4u_model")
+
+sac_export_to("ai4u_model", metadatamodel=env.controller.metadataobj)
 
 obs, info = env.reset()
-
 reward_sum = 0
 while True:
     action, _states = model.predict(obs, deterministic=True)

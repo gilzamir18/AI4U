@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://clw5k47l3k2ml"]
+[gd_scene load_steps=66 format=3 uid="uid://clw5k47l3k2ml"]
 
 [ext_resource type="Texture2D" uid="uid://hegbphrp62e" path="res://assets/Backgrounds/set2_background.png" id="1_rc4g3"]
 [ext_resource type="Texture2D" uid="uid://dbwfdrj66tl07" path="res://assets/Backgrounds/set2_hills.png" id="2_jl8do"]
@@ -36,6 +36,7 @@
 [ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="27_lf32s"]
 [ext_resource type="Script" path="res://demo2d/HeliController.cs" id="28_6mh4f"]
 [ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc2D.cs" id="28_573b1"]
+[ext_resource type="Script" path="res://assets/scripts/RemoteConfiguration.cs" id="29_3aqok"]
 [ext_resource type="Texture2D" uid="uid://cdlnlldau8qk5" path="res://assets/sprites/SpritePack/heli/heli-1.png" id="29_cru68"]
 [ext_resource type="Texture2D" uid="uid://cbie8q2fw5cct" path="res://assets/sprites/SpritePack/heli/heli-2.png" id="30_670tr"]
 [ext_resource type="Texture2D" uid="uid://b4lavxpy654su" path="res://assets/sprites/SpritePack/heli/heli-3.png" id="31_pr13q"]
@@ -11768,7 +11769,7 @@ layer_0/tile_data = PackedInt32Array(2162687, 6291462, 40, 2228223, 6291462, 41,
 
 [node name="AgentLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("27_lf32s")
-defaultTimeScale = 5.0
+defaultTimeScale = 10.0
 stopOnQuit = true
 agentsList = [NodePath("../Boy/Agent")]
 
@@ -11806,7 +11807,7 @@ script = ExtResource("21_mehqi")
 avatarPath = NodePath("..")
 remote = true
 doneAtNegativeReward = false
-MaxStepsPerEpisode = 5000
+MaxStepsPerEpisode = 1000
 
 [node name="Move" type="Node" parent="Boy/Agent"]
 script = ExtResource("21_pjfxx")
@@ -11883,6 +11884,11 @@ target = NodePath("../../../Fruit")
 script = ExtResource("28_573b1")
 reward = 100.0
 target = NodePath("../../../SuperPower")
+
+[node name="RemoteConfig" type="Node" parent="Boy/Agent"]
+script = ExtResource("29_3aqok")
+receiveBufferSize = 81920
+sendBufferSize = 81920
 
 [node name="Static" type="Node" parent="."]
 
