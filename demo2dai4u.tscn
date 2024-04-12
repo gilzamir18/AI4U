@@ -11816,7 +11816,7 @@ actionName = "move"
 [node name="Vision" type="Node" parent="Boy/Agent"]
 script = ExtResource("23_87605")
 width = 81
-height = 62
+height = 81
 perceptionKey = "vision"
 stackedObservations = 3
 normalized = false
