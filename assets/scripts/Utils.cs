@@ -1,4 +1,6 @@
 using System.Text;
+using System;
+using System.Collections.Generic;
 
 namespace ai4u
 {
@@ -152,9 +154,54 @@ namespace ai4u
 			sb.Append(")");
 			return sb.ToString();
 		}
-	}
+    }
 
-	public partial class HistoryStack<T>
+	public class MaxSizeQueue<T>
+    {
+        private Queue<T> queue;
+        private int maxSize;
+
+        public MaxSizeQueue(int maxSize)
+        {
+            if (maxSize <= 0)
+                throw new ArgumentException("Max size must be greater than zero.", nameof(maxSize));
+
+            this.queue = new Queue<T>();
+            this.maxSize = maxSize;
+        }
+
+        public void Enqueue(T item)
+        {
+            if (queue.Count >= maxSize)
+                queue.Dequeue(); // Remove the oldest item if the queue is full
+
+            queue.Enqueue(item);
+        }
+
+        public T Dequeue()
+        {
+			return queue.Dequeue();
+        }
+
+		public T[] Values
+		{
+			get
+			{
+				T[] values = new T[maxSize];
+				var i = 0;
+				foreach (var v in this.queue)
+				{
+					values[i] = v; i++;
+				}
+				return values;
+			}
+		}
+
+
+        public int Count => queue.Count;
+    }
+
+    public partial class HistoryStack<T>
 	{
 		private T[] values;
 		private int pos;

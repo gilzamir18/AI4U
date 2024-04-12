@@ -20,8 +20,10 @@ public abstract class Brain
 	public static byte INT = 1;
 	public static byte BOOL = 2;
 	public static byte STR = 3;
-	public static byte OTHER = 4;
+	public static byte BYTE_ARRAY = 4;
 	public static byte FLOAT_ARRAY = 5;
+	public static byte INT_ARRAY = 6;
+	public static byte STRING_ARRAY = 7;
 	
 	protected Agent agent = null;
 	

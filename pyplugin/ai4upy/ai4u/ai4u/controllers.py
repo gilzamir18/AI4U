@@ -7,9 +7,10 @@ import json
 from .types import *
 import base64
 import gymnasium as gym
-#from PIL import Image
+from PIL import Image
+import io
 
-codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8}
+codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8, 7: np.uint8}
 
 class BasicGymController(BasicController):
     """
@@ -85,18 +86,18 @@ class BasicGymController(BasicController):
         return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
     
     def loadimagefrominput(self, modelinput, info):
-        if modelinput['type'] == SENSOR_SSTRING:
-            img_stream = info[modelinput['name']]
-            imgdata = base64.b64decode(img_stream)
-            data = np.frombuffer(imgdata, dtype=np.uint8)
-            vision = np.reshape(data, modelinput['shape'])
-            #for i in range(vision.shape[0]):
-            #    im = Image.fromarray(vision[i])
-            #    im.save("/Users/gilza/tmp/frame_%d_%d.jpeg"%(info['steps'], i))
-            return  np.array([vision], dtype=np.uint8)
-        else:
-            vision = np.reshape(info[ modelinput['name'] ], modelinput['shape'])
-            return  np.array([vision], dtype=codetypes[modelinput['type']] )
+        img_streams = info[modelinput['name']]
+        frames = []
+        i = 0
+        for img_stream in img_streams:
+            bf = base64.b64decode(img_stream)
+            im = Image.open(io.BytesIO(bf))
+            #im = im.resize((modelinput['shape'][1], modelinput['shape'][2]))
+            #im.save("<path>/frame_%d_%d.jpeg"%(info['steps'], i))
+            i += 1
+            frames.append(np.array(im, dtype=np.int8))
+        vision = np.reshape(np.array(frames), modelinput['shape'])
+        return  np.array([vision], dtype=np.uint8)
 
     def dict_input_extractor(self, modelinputs, info):
         inputs = {}

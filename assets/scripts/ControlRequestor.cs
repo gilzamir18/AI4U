@@ -360,7 +360,10 @@ namespace ai4u
 		/// 2 = boolean
 		/// 3 = string
 		/// 4 = byte array
-		/// e value is the value of the information sent.
+		/// 5 = float array
+		/// 6 = int array
+		/// 7 = string array
+		/// @return the value of the information sent.
 		/// </summary>
 		public string SendMessageFrom(RemoteBrain rbrain, string[] desc, byte[] tipo, string[] valor)
 		{

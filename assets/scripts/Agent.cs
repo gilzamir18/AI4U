@@ -195,7 +195,14 @@ public abstract partial class Agent : Node
 		this.values[i] = value;
 	}
 
-	public void SetStateAsBool(int i, string desc, bool value)
+    public void SetStateAsStringArray(int i, string desc, string[] value)
+    {
+        this.desc[i] = desc;
+        this.types[i] = Brain.STRING_ARRAY;
+        this.values[i] = string.Join(" ", value);
+	}
+
+    public void SetStateAsBool(int i, string desc, bool value)
 	{
 		this.desc[i] = desc;
 		this.types[i] = Brain.BOOL;
@@ -205,7 +212,7 @@ public abstract partial class Agent : Node
 	public void SetStateAsByteArray(int i, string desc, byte[] value)
 	{
 		this.desc[i] = desc;
-		this.types[i] = Brain.OTHER;
+		this.types[i] = Brain.BYTE_ARRAY;
 		this.values[i] = System.Convert.ToBase64String(value);
 	}
 

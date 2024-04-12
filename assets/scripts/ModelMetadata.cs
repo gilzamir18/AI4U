@@ -13,8 +13,9 @@ namespace ai4u
 		public SensorType type {get; set;}
 		public float rangeMin {get; set;}
 		public float rangeMax {get; set;}
+		public SensorType dataType {  get; set;}
 
-		public ModelInput(string name, SensorType type, int[] shape, int stackedObservations, float rangeMin, float rangeMax)
+		public ModelInput(string name, SensorType type, int[] shape, int stackedObservations, float rangeMin, float rangeMax, SensorType dataType)
 		{
 			this.name = name;
 			
@@ -27,6 +28,7 @@ namespace ai4u
 			this.type = type;
 			this.rangeMin = rangeMin;
 			this.rangeMax = rangeMax;
+			this.dataType = dataType;
 		}
 	}
 

@@ -3,120 +3,87 @@ using System;
 
 namespace ai4u;
 
+/// <summary>
+/// This sensor get a screenshot from the viewport.
+/// </summary>
 public partial class ScreenSensor : Sensor
 {
 
+    /// <summary>
+    /// The <code>grayScale</code> field defines the format of the generated image.If true, the image format is L8,
+    /// containing only the luminance of the captured image from the viewport.
+    /// Otherwise, the format is RGB8.Prefer grayscale images for performance reasons.
+    /// </summary>
     [Export]
     private bool grayScale = true;
+
+    /// <summary>
+    /// The <code>width</code> field is the image width in pixels.
+    /// </summary>
     [Export]
     private int width = 30;
+    
+    /// <summary>
+    /// The <code>height</code> field is the tmage height in pixels.
+    /// </summary>
     [Export]
     private int height = 30;
 
     private Image currentImg = null;
-    private HistoryStack<int> ihistory;
-    private HistoryStack<float> fhistory;
+    private MaxSizeQueue<string> history;
 
     public override void OnSetup(Agent agent)
     {
         MakeData();
+        this.agent = (BasicAgent)agent;
     }
 
     private void MakeData()
     {
+        type = SensorType.sstrings;
+        history = new(stackedObservations);
+
         if (grayScale)
         {
             shape = new int[] { width, height };
-            if (Normalized)
-            {
-                fhistory = new(stackedObservations * width * height);
-                type = SensorType.sfloatarray;
-            }
-            else
-            {
-                ihistory = new(stackedObservations * width * height);
-                type = SensorType.sintarray;
-            }
         }
         else
         {
             shape = new int[] { width, height, 3 };
-            if (Normalized)
-            {
-                fhistory = new(stackedObservations * width * height * 3);
-                type = SensorType.sfloatarray;
-            }
-            else
-            {
-                ihistory = new(stackedObservations * width * height);
-                type = SensorType.sintarray;
-            }
         }
     }
-
-    public override void _Process(double delta)
+    
+    public override int GetIntValue()
     {
-        base._Process(delta);
+        return 0;
+    }
+
+    public override string[] GetStringValues()
+    {
+
         if (agent != null && !agent.Done)
         {
             currentImg = GetViewport().GetTexture().GetImage();
-        }
-    }
-
-    public override float[] GetFloatArrayValue()
-    {
-        if (currentImg != null)
-        {
-            for (int i = 0; i < currentImg.GetWidth(); i++)
+            
+            if (grayScale)
             {
-                for (int j = 0; j < currentImg.GetHeight(); j++)
-                {
-                    if (grayScale)
-                    {
-                        var c = currentImg.GetPixel(i, j);
-                        fhistory.Push(0.3f * c.R + 0.59f * c.G + 0.11f * c.B);
-                    }
-                    else
-                    {
-                        var c = currentImg.GetPixel(i, j);
-                        
-                        fhistory.Push(c.R);
-                        fhistory.Push(c.G);
-                        fhistory.Push(c.B);
-                    }
-                }
+                currentImg.Convert(Image.Format.L8);
+            }
+            currentImg.Resize(width, height);
+            var dt = currentImg.SavePngToBuffer();
+            history.Enqueue(System.Convert.ToBase64String(dt));
+            while (history.Count < stackedObservations)
+            {
+                history.Enqueue(System.Convert.ToBase64String(dt));
             }
         }
 
-        return fhistory.Values;
+        return history.Values;
     }
 
-    public override int[] GetIntArrayValue()
+    public override SensorType GetDataType()
     {
-        if (currentImg != null)
-        {
-            for (int i = 0; i < currentImg.GetWidth(); i++)
-            {
-                for (int j = 0; j < currentImg.GetHeight(); j++)
-                {
-                    if (grayScale)
-                    {
-                        var c = currentImg.GetPixel(i, j);
-                        ihistory.Push(Mathf.RoundToInt( 0.3f * c.R * 255 + 0.59f * c.G * 255 + 0.11f * c.B * 255) );
-                    }
-                    else
-                    {
-                        var c = currentImg.GetPixel(i, j);
-
-                        ihistory.Push(Mathf.RoundToInt(c.R * 255));
-                        ihistory.Push(Mathf.RoundToInt(c.G * 255));
-                        ihistory.Push(Mathf.RoundToInt(c.B * 255));
-                    }
-                }
-            }
-        }
-
-        return ihistory.Values;
+        return SensorType.simage;
     }
 
     public override void OnReset(Agent agent)
