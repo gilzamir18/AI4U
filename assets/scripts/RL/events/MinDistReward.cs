@@ -41,7 +41,7 @@ namespace ai4u
 			if (dist < minDistance)
 			{
 				if (minDistance != System.Single.PositiveInfinity)
-				this.agent.AddReward(successReward, this);
+					this.agent.AddReward(successReward, this);
 				minDistance = dist;
 			} else
 			{

@@ -13,6 +13,43 @@ import io
 codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8, 7: np.uint8}
 
 class BasicGymController(BasicController):
+    def convertoboxspace(modelinput):
+        shape = modelinput["shape"]
+        data_dim = len(shape) - 1
+        if data_dim == 1:
+            size = shape[-1]
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, ), dtype=codetypes[modelinput["type"]]), False
+        if data_dim == 2:
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shape, dtype=codetypes[modelinput["type"]]), True
+        if data_dim == 3:
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, shape[1], shape[2]), dtype=codetypes[modelinput["type"]]), True
+        else:
+            raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check your environment configuration. Perception Key: ", modelinput['name'])
+    
+    def get_env_spaces(metadataobj):
+            print("Metadata Model ", metadataobj)
+            inputs = metadataobj['inputs']
+            outputs = metadataobj['outputs']
+            observation_space = None
+            action_space = None
+            if len(inputs) == 1: #single box input
+                observation_space, _ = BasicGymController.convertoboxspace(inputs[0])
+            elif len(inputs) > 1: #dictionary input
+                dict_space = gym.spaces.Dict()
+                for i in inputs:
+                    shape = i["shape"]
+                    dict_space[i['name']], _ = BasicGymController.convertoboxspace(i)
+                observation_space = dict_space    
+            if len(outputs) == 1:
+                out = outputs[0]
+                if out['isContinuous']:
+                    action_space = gym.spaces.Box(low=np.array(out['rangeMin']), high=np.array(out['rangeMax']), dtype=np.float32)
+                else:
+                    action_space = gym.spaces.Discrete(out['shape'][-1])
+            else:
+                raise Exception("Controller configuration: multiple model outputs is not supported.")
+            return observation_space, action_space
+
     """
     This basic controller only works with Godot testing
     application or similar environments. For a custom controller,
@@ -68,19 +105,6 @@ class BasicGymController(BasicController):
         Release allocated resources .
         """
         sys.exit(0)
-
-    def convertoboxspace(self, modelinput):
-        shape = modelinput["shape"]
-        data_dim = len(shape) - 1
-        if data_dim == 1:
-            size = shape[-1]
-            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, ), dtype=codetypes[modelinput["type"]]), False
-        if data_dim == 2:
-            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shape, dtype=codetypes[modelinput["type"]]), True
-        if data_dim == 3:
-            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, shape[1], shape[2]), dtype=codetypes[modelinput["type"]]), True
-        else:
-            raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check your environment configuration. Perception Key: ", modelinput['name'])
 
     def loadarrayfrominput(self, modelinput, info):
         return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
@@ -154,7 +178,7 @@ class BasicGymController(BasicController):
         self.inputs = self.metadataobj['inputs']
         self.outputs = self.metadataobj['outputs']
         if len(self.inputs) == 1: #single box input
-            self.observation_space, isImage = self.convertoboxspace(self.inputs[0])
+            self.observation_space, isImage = BasicGymController.convertoboxspace(self.inputs[0])
             if isImage:
                 self.input_extractor = self.loadimagefrominput
             else:
@@ -162,7 +186,7 @@ class BasicGymController(BasicController):
         elif len(self.inputs) > 1: #dictionary input
             dict_space = gym.spaces.Dict()
             for i in self.inputs:
-                dict_space[i['name']], isImage = self.convertoboxspace(i)
+                dict_space[i['name']], isImage = BasicGymController.convertoboxspace(i)
             self.observation_space = dict_space
             self.input_extractor = self.dict_input_extractor
         

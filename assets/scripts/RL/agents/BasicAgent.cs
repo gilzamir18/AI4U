@@ -232,6 +232,11 @@ namespace ai4u
 			setupIsDone = true;
 		}
 
+		public string GetMetadataAsJson()
+		{
+			return metadataLoader.toJson();
+		}
+
 		public override void ResetCommandBuffer()
 		{
 			desc = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];

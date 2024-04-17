@@ -52,7 +52,7 @@ namespace ai4u {
 		/// if this property is activated, or between 0 and maxDistance if not.
 		/// </summary>
 		[Export]
-		private bool normalized;
+		private bool _normalized;
 
 		/// <summary>
 		/// The sensor is only activated if there is visibility between the reference system and the target. 
@@ -114,7 +114,7 @@ namespace ai4u {
 			}
 
 			history = new HistoryStack<float>(shape[0]*stackedObservations);
-			Normalized =  normalized;
+			normalized =  _normalized;
 		}
 
 		public override void OnReset(Agent aget)

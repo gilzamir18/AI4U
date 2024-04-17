@@ -6,7 +6,6 @@ namespace ai4u {
 		[Export]
 		public float reward = 0.0f;
 		[Export]
-		public NodePath targetPath;
 		private Node target;
 		private float acmReward = 0.0f;
 		private BasicAgent agent;
@@ -20,7 +19,6 @@ namespace ai4u {
 				configured = true;
 				agent.AddResetListener(this);
 				this.agent = (BasicAgent) agent;
-				target = GetNode(targetPath);
 				RigidBody3D body = this.agent.GetAvatarBody() as RigidBody3D;
 				body.BodyEntered += OnEntered;
 			}

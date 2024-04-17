@@ -47,7 +47,7 @@ namespace ai4u
             {
                 if (dist <= minDistance)
                 {
-                    agent.AddReward(0, this);
+                    agent.AddReward(maxReward, this);
                 }
                 else
                 {

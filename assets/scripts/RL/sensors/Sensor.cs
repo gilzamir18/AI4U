@@ -32,7 +32,6 @@ namespace ai4u
 		public string GetName();
 		public string GetKey();
 		public int[] GetShape();
-		public bool IsState();
 		public bool IsResetable();
 		public bool IsActive();
 		public bool IsInput();
@@ -61,7 +60,6 @@ namespace ai4u
 		private int stackedObservations = 1;
 		private bool isActive = true;
 		private bool isInput = false;
-		private bool isState = false;
 		private bool resetable = true;
 		private float rangeMin = 0;
 		private float rangeMax = 1;
@@ -127,11 +125,6 @@ namespace ai4u
 		public virtual int[] GetShape()
 		{
 			return shape;
-		}
-
-		public virtual bool IsState()
-		{
-			return isState;
 		}
 
 		public virtual bool IsInput()
@@ -244,8 +237,6 @@ namespace ai4u
 		public float rangeMin = 0.0f;
 		[Export]
 		public float rangeMax = 1.0f;
-		[Export]
-		public bool isState;
 		
 		protected SensorType Type;
 		protected int[] Shape;
@@ -377,11 +368,6 @@ namespace ai4u
 		public int[] GetShape()
 		{
 			return shape;
-		}
-
-		public bool IsState()
-		{
-			return isState;
 		}
 
 		public bool IsResetable()

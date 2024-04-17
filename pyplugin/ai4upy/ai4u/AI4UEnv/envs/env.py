@@ -30,8 +30,8 @@ class GenericEnvironment(gym.Env):
     if type(controller_class) is list:
       controller_classes = controller_class
     else:
-      controller_classes =  [controller_class] * len(rid)
-    
+      controller_classes =  [controller_class] * len(rid)    
+
     if not GenericEnvironment.controllers:
       GenericEnvironment.controllers = {}
       controllers = startasdaemon(rid, controller_classes, config)
@@ -42,16 +42,20 @@ class GenericEnvironment(gym.Env):
     self.controller = GenericEnvironment.controllers[self.rid]
     GenericEnvironment.envidx += 1
     self.event_callback = event_callback
-    self.reset()
-    if self.controller.action_space is not None:
-      self.action_space = self.controller.action_space
+    if "metadata" in config:
+      self.controller.metadata = config["metadata"]
+      self.observation_space, self.action_space = BasicGymController.get_env_spaces(self.controller.metadata)
     else:
-      self.action_space = None
+      self.reset()
+      if self.controller.action_space is not None:
+        self.action_space = self.controller.action_space
+      else:
+        self.action_space = None
 
-    if self.controller.observation_space is not None:
-      self.observation_space = self.controller.observation_space
-    else:
-      self.observation_space = None
+      if self.controller.observation_space is not None:
+        self.observation_space = self.controller.observation_space
+      else:
+        self.observation_space = None
   
     self.rid =  rid
 
@@ -79,3 +83,4 @@ class GenericEnvironment(gym.Env):
 
   def close (self):
     return self.controller.close()
+  

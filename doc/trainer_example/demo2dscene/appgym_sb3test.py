@@ -13,7 +13,7 @@ bemaker Client Controller
 =======================
 This example controll a movable character in game (unity or godot).
 ''')
-model = SAC.load("sac_bemaker")
+model = SAC.load("model")
 
 sac_export_to("sac_bemaker", metadatamodel=env.controller.metadataobj)
 
