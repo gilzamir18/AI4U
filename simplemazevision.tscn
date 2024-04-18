@@ -1,22 +1,22 @@
-[gd_scene load_steps=32 format=3 uid="uid://dcidj32u05bf2"]
+[gd_scene load_steps=32 format=3 uid="uid://np1pfadsxuve"]
 
-[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_ew2a2"]
-[ext_resource type="Script" path="res://Floor.cs" id="1_g8gpe"]
-[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="1_qsqta"]
-[ext_resource type="Script" path="res://demo1scripts/TargetPositions.cs" id="2_uevud"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="3_2gh7m"]
-[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_56v3n"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="4_qhaue"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="6_0i43s"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="7_2apw3"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="8_g3p31"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="9_lackr"]
-[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="10_kjyh4"]
-[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="11_l2bbl"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="12_a84io"]
-[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBRespawnActuator.cs" id="15_qn7ou"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/CollisionWithRewardFunc.cs" id="16_o2djf"]
-[ext_resource type="Script" path="res://demo1scripts/ShowSteps.cs" id="17_1smsj"]
+[ext_resource type="Script" path="res://Floor.cs" id="1_wkh22"]
+[ext_resource type="Script" path="res://demo1scripts/TargetPositions.cs" id="2_w3vbb"]
+[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="3_2kj82"]
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="4_efsag"]
+[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="5_nc0rj"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="6_6ld77"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/Camera3DSensor.cs" id="7_55b43"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="7_o7ab5"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/GroundStatusSensor.cs" id="9_mhwwr"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="10_5b66a"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="11_0lnpa"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="12_mrms7"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="13_yjfx1"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="14_gpq2t"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBRespawnActuator.cs" id="15_q0pkc"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/CollisionWithRewardFunc.cs" id="16_icot2"]
+[ext_resource type="Script" path="res://demo1scripts/ShowSteps.cs" id="17_rloet"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lijko"]
 size = Vector3(20, 0.1, 20)
@@ -86,7 +86,7 @@ size = Vector3(8, 3, 1)
 transform = Transform3D(0.999999, 0.000418613, -0.001643, -0.000416837, 0.999999, 0.00107453, 0.00164345, -0.00107384, 0.999998, 0, 0, 0)
 
 [node name="Floor" type="StaticBody3D" parent="." groups=["Floor"]]
-script = ExtResource("1_g8gpe")
+script = ExtResource("1_wkh22")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_lijko")
@@ -127,7 +127,7 @@ shape = SubResource("SphereShape3D_ar23q")
 mesh = SubResource("SphereMesh_lontg")
 
 [node name="Respawn" type="Node" parent="Fruit" node_paths=PackedStringArray("basicAgent", "body3D")]
-script = ExtResource("2_uevud")
+script = ExtResource("2_w3vbb")
 basicAgent = NodePath("../../AgentBody/Agent")
 body3D = NodePath("..")
 respawnOptionsPath = NodePath("../../FruitPositions")
@@ -185,7 +185,7 @@ transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 15.87
 visible = false
 
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
-script = ExtResource("11_l2bbl")
+script = ExtResource("3_2kj82")
 agentsList = [NodePath("../AgentBody/Agent")]
 
 [node name="AgentBody" type="RigidBody3D" parent="." groups=["Player"]]
@@ -197,7 +197,7 @@ continuous_cd = true
 max_contacts_reported = 10000
 contact_monitor = true
 
-[node name="Arrow" parent="AgentBody" instance=ExtResource("1_ew2a2")]
+[node name="Arrow" parent="AgentBody" instance=ExtResource("4_efsag")]
 transform = Transform3D(0.2, 0, 0, 0, -8.74228e-09, -0.2, 0, 0.2, -8.74228e-09, 0, 1.3818, 0.123406)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AgentBody"]
@@ -211,65 +211,72 @@ skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_623pr")
 
 [node name="Agent" type="Node" parent="AgentBody"]
-script = ExtResource("1_qsqta")
+script = ExtResource("5_nc0rj")
 avatarPath = NodePath("..")
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 1000
 
+[node name="AgentCamera" type="Camera3D" parent="AgentBody/Agent"]
+transform = Transform3D(-0.997188, -0.000335138, -0.0749415, -0.000416837, 0.999999, 0.00107453, 0.074941, 0.00110274, -0.997187, 0, 1.63748, 1.05195)
+current = true
+
 [node name="Actuator" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("3_56v3n")
+script = ExtResource("6_6ld77")
 moveAmount = 5.0
 turnAmount = 10.0
 jumpPower = 10.0
 jumpForwardPower = 5.0
 actionName = "move"
 
-[node name="Sensors" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("3_2gh7m")
+[node name="Vision" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("camera")]
+script = ExtResource("7_55b43")
+camera = NodePath("../AgentCamera")
+width = 81
+height = 81
+perceptionKey = "vision"
+stackedObservations = 3
+
+[node name="ArraySensors" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("7_o7ab5")
 perceptionKey = "array"
 stackedObservations = 4
 
-[node name="Raycasting" type="Node" parent="AgentBody/Agent/Sensors"]
-script = ExtResource("4_qhaue")
-groupCode = PackedInt32Array(0, 20, 100, 200, 255, 10)
-groupName = PackedStringArray("Floor", "Wall", "Enemy", "Player", "Fruit", "InternalWall")
-eyePath = NodePath("../../../Arrow")
-flattened = true
-normalized = false
-
-[node name="OnGround" type="Node" parent="AgentBody/Agent/Sensors"]
-script = ExtResource("6_0i43s")
+[node name="OnGround" type="Node" parent="AgentBody/Agent/ArraySensors"]
+script = ExtResource("9_mhwwr")
 rBMoveActuator = NodePath("../../Actuator")
 
-[node name="OrientationSensor" type="Node" parent="AgentBody/Agent/Sensors"]
-script = ExtResource("7_2apw3")
+[node name="OrientationSensor" type="Node" parent="AgentBody/Agent/ArraySensors" node_paths=PackedStringArray("target", "reference")]
+script = ExtResource("10_5b66a")
+target = NodePath("../../../../Fruit")
+reference = NodePath("../../..")
 
 [node name="MinDistReward" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("8_g3p31")
+script = ExtResource("11_0lnpa")
 target = NodePath("../../../Fruit")
 
-[node name="TouchFruitReward" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("9_lackr")
+[node name="TouchFruitReward" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("target")]
+script = ExtResource("12_mrms7")
 reward = 10.0
+target = NodePath("../../../Fruit")
 causeEpisodeToEnd = true
 
 [node name="WASDController" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("10_kjyh4")
+script = ExtResource("13_yjfx1")
 speed = 1.0
 
 [node name="FallReward" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("12_a84io")
+script = ExtResource("14_gpq2t")
 successReward = -10.0
 causeEpisodeToEnd = true
 
 [node name="RespawnActuator" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("15_qn7ou")
+script = ExtResource("15_q0pkc")
 respawnOptionsPath = NodePath("../../Positions")
 actionName = "respawn"
 isOutput = false
 
 [node name="CollisionWithWallReward" type="Node" parent="AgentBody/Agent"]
-script = ExtResource("16_o2djf")
+script = ExtResource("16_icot2")
 group = "Wall"
 
 [node name="Positions" type="Node" parent="AgentBody"]
@@ -348,5 +355,5 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 13,
 [node name="ShowSteps" type="Label" parent="."]
 offset_right = 152.0
 offset_bottom = 39.0
-script = ExtResource("17_1smsj")
+script = ExtResource("17_rloet")
 agentPath = NodePath("../AgentBody/Agent")
