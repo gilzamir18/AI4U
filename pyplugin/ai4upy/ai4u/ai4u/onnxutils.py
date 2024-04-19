@@ -34,8 +34,7 @@ class OnnxableSACPolicy(th.nn.Module):
         return self.actor(input_tensor)
 
 
-def sac_export_to(path, env, modelname="model.onnx", device="cpu"):
-    metadata=env.controller.metadatamodel
+def sac_export_to(path, metadata, modelname="model.onnx", device="cpu"):
 
     model = SAC.load(path, device=device)
     if metadata is None:

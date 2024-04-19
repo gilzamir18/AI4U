@@ -4,5 +4,9 @@
 *.v2
 *.bin
 .vs/Demo1/v17/.suo
-doc/trainer_example/demo2dscene/DQN/DNQ_3/events.out.tfevents.1711142789.zamirfgomes.13844.0
+.vs
+doc/trainer_example/demo2dscene/DQN
 /doc/trainer_example/demo2dscene/DQN
+doc/trainer_example/scene_simplescene_vision/SAC
+doc/trainer_example/scene_simplescene_vision/model.onnx
+doc/trainer_example/scene_simplescene_vision/ai4u_model.zip

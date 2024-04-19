@@ -15,7 +15,7 @@ This example controll a movable character in game (unity or godot).
 ''')
 model = SAC.load("model")
 
-sac_export_to("sac_bemaker", metadatamodel=env.controller.metadataobj)
+sac_export_to("sac_bemaker", env)
 
 obs, info = env.reset()
 

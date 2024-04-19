@@ -9,20 +9,28 @@ namespace ai4u {
 		//forces applied on the x, y and z axes.    
 		private float move, turn, jump, jumpForward;
 		[Export]
-		public float moveAmount = 1;
+		private float moveAmount = 1;
 		[Export]
-		public float turnAmount = 1;
+		private float turnAmount = 1;
 		[Export]
-		public float jumpPower = 1;
+		private float jumpPower = 1;
 		[Export]
-		public float jumpForwardPower = 1;
+		private float jumpForwardPower = 1;
+		[Export]
+		private float collisionShapeHalfHeight = 1.0f;
+		
+		[Export]
+		private float precision = 0.001f;
 
 		[Export]
-		public float minActivityThreshold = 0.001f;
+		public string floorGroup = "Floor";
 
 		private BasicAgent agent;
 		
 		private RigidBody3D rBody;
+		private PhysicsDirectSpaceState3D spaceState;
+
+		private CollisionShape3D collisionShape;
 
 		public RBMoveActuator()
 		{
@@ -31,6 +39,7 @@ namespace ai4u {
 
 		public override void OnSetup(Agent agent)
 		{
+
 			shape = new int[1]{4};
 			isContinuous = true;
 			rangeMin = new float[]{0, -1, 0, 0};
@@ -38,6 +47,15 @@ namespace ai4u {
 			this.agent = (BasicAgent) agent;
 			agent.AddResetListener(this);
 			rBody = this.agent.GetAvatarBody() as RigidBody3D;
+			this.spaceState = rBody.GetWorld3D().DirectSpaceState;
+			foreach (Node child in rBody.GetChildren())
+			{
+				if (child is CollisionShape3D)
+				{
+					collisionShape = (CollisionShape3D)child;
+					break;
+				}
+			}
 		}
 
 
@@ -49,6 +67,30 @@ namespace ai4u {
 			{
 				return onGround;
 			}
+		}
+
+		private bool CheckOnGround()
+		{	
+			var query = PhysicsRayQueryParameters3D.Create(collisionShape.GlobalPosition, 
+				collisionShape.GlobalPosition + Vector3.Down * collisionShapeHalfHeight, 2147483647);
+
+			var result = this.spaceState.IntersectRay( query );
+
+			if (result.Count > 0)
+			{
+
+				var n3d = (Node3D)result["collider"];
+				//GD.Print("COLLIDE WITH " + n3d.Name);
+				if (n3d.Name == floorGroup)
+				{
+					//GD.Print("ONGRONUD");
+					return true;
+				}
+			}
+			
+			//GD.Print("NOGROUND");
+
+			return false;
 		}
 
 		public override void Act()
@@ -63,27 +105,21 @@ namespace ai4u {
 
 				if (rBody != null)
 				{
-					if (Mathf.Abs(rBody.LinearVelocity.Y) > 0.001)
-					{
-						onGround = false;
-					}
-					else
-					{
-						onGround = true;
-					}
+					onGround = CheckOnGround();
+					
 					if (onGround)
 					{	
-						if (Mathf.Abs(turn) < minActivityThreshold)
+						if (Mathf.Abs(turn) < precision)
 						{
 							turn = 0;
 						}
 						
-						if (Mathf.Abs(jump) < minActivityThreshold)
+						if (Mathf.Abs(jump) < precision)
 						{
 							jump = 0;
 						}
 						
-						if (Mathf.Abs(jumpForward) < minActivityThreshold)
+						if (Mathf.Abs(jumpForward) < precision)
 						{
 							jumpForward = 0;
 						}

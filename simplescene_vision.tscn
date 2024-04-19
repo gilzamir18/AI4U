@@ -1,18 +1,22 @@
-[gd_scene load_steps=23 format=3 uid="uid://bmnf1pmaxkvv5"]
+[gd_scene load_steps=27 format=3 uid="uid://bwguxx5chuw00"]
 
-[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="1_ckp2k"]
-[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_kiqyk"]
-[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_tlu8w"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/RayCastingSensor.cs" id="4_h8s45"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="5_nkaqn"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="6_afios"]
-[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBRespawnActuator.cs" id="7_lwuy7"]
-[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="8_hgrol"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="8_vphps"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="9_4vlpf"]
-[ext_resource type="Script" path="res://assets/scripts/RL/sensors/ActionSensor.cs" id="10_monn0"]
-[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="11_oe0ee"]
-[ext_resource type="Script" path="res://assets/scripts/RL/controllers/NeuralNetController.cs" id="12_lg036"]
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://assets/3DModel/Arrow.dae" id="1_n8dhr"]
+[ext_resource type="Script" path="res://assets/scripts/RL/agents/BasicAgent.cs" id="2_2jycq"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBMoveActuator.cs" id="3_0d0ew"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/Camera3DSensor.cs" id="4_bna63"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/MinDistReward.cs" id="5_oesql"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/TouchRewardFunc.cs" id="6_aeb1i"]
+[ext_resource type="Script" path="res://assets/scripts/RL/actuators/RBRespawnActuator.cs" id="7_qbfk2"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="8_8p7iy"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/OrientationSensor.cs" id="9_8jnim"]
+[ext_resource type="Script" path="res://assets/scripts/RL/sensors/ActionSensor.cs" id="10_fgbth"]
+[ext_resource type="Script" path="res://assets/scripts/RL/events/FallReward.cs" id="11_jf1h7"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/NeuralNetController.cs" id="12_2uh5i"]
+[ext_resource type="Script" path="res://assets/scripts/RL/controllers/WASDRBMoveController.cs" id="13_ur6et"]
+[ext_resource type="Script" path="res://assets/scripts/ControlRequestor.cs" id="13_wjgf5"]
+[ext_resource type="Script" path="res://assets/scripts/Tools/ExportAgentMetadata.cs" id="14_qyhry"]
+[ext_resource type="Script" path="res://assets/scripts/RemoteConfiguration.cs" id="15_pu7ux"]
+[ext_resource type="Script" path="res://assets/scripts/ControllerConfiguration.cs" id="16_3goyg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_l3602"]
 size = Vector3(10, 0.1, 10)
@@ -72,10 +76,14 @@ max_contacts_reported = 10000
 contact_monitor = true
 angular_damp = 5.0
 
-[node name="Arrow" parent="RigidBody3D" instance=ExtResource("1_kiqyk")]
+[node name="AgentCam" type="Camera3D" parent="RigidBody3D"]
+transform = Transform3D(-1, -2.66454e-15, -8.74228e-08, -5.30961e-08, 0.794436, 0.607348, 6.94518e-08, 0.607348, -0.794436, 0, 3.13159, -3.00561)
+
+[node name="Arrow" parent="RigidBody3D" instance=ExtResource("1_n8dhr")]
 transform = Transform3D(0.2, 0, 0, 0, -8.74228e-09, -0.2, 0, 0.2, -8.74228e-09, 0, 1.29594, 0.474278)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.848259, 0)
 shape = SubResource("CapsuleShape3D_768m2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D"]
@@ -84,46 +92,45 @@ mesh = SubResource("CapsuleMesh_vl1w0")
 surface_material_override/0 = SubResource("StandardMaterial3D_jxcle")
 
 [node name="Agent" type="Node" parent="RigidBody3D"]
-script = ExtResource("1_ckp2k")
+script = ExtResource("2_2jycq")
 avatarPath = NodePath("..")
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 3000
 
 [node name="Actuator" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("3_tlu8w")
-moveAmount = 20.0
+script = ExtResource("3_0d0ew")
+moveAmount = 3.0
 turnAmount = 20.0
-jumpPower = 0.0
+jumpPower = 10.0
 jumpForwardPower = 0.0
 actionName = "move"
 
-[node name="Sensor" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("4_h8s45")
-groupCode = PackedInt32Array(50, 100, 200)
-groupName = PackedStringArray("FLOOR", "PLAYER", "TARGET")
-eyePath = NodePath("../../Arrow")
-visionMaxDistance = 15.0
-flattened = true
+[node name="Sensor" type="Node" parent="RigidBody3D/Agent" node_paths=PackedStringArray("camera", "viewport")]
+script = ExtResource("4_bna63")
+camera = NodePath("../../AgentCam")
+viewport = NodePath("../../../SubViewportContainer/SubViewport")
 perceptionKey = "vision"
+stackedObservations = 3
 normalized = false
 
 [node name="MinDist" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("5_nkaqn")
+script = ExtResource("5_oesql")
 target = NodePath("../../../Target")
 
-[node name="TouchReward" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("6_afios")
+[node name="TouchReward" type="Node" parent="RigidBody3D/Agent" node_paths=PackedStringArray("target")]
+script = ExtResource("6_aeb1i")
 reward = 100.0
+target = NodePath("../../../Target")
 causeEpisodeToEnd = true
 
 [node name="Respawn" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("7_lwuy7")
+script = ExtResource("7_qbfk2")
 respawnOptionsPath = NodePath("../RespawnOptions")
 actionName = "respawn"
 isOutput = false
 
 [node name="RespawnOptions" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("7_lwuy7")
+script = ExtResource("7_qbfk2")
 respawnOptionsPath = NodePath(".")
 actionName = "respawn"
 isOutput = false
@@ -140,35 +147,63 @@ transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, 0, 0, 4)
 transform = Transform3D(-0.78631, 0, -0.617832, 0, 1, 0, 0.617832, 0, -0.78631, 4.17127, 0, 0)
 
 [node name="ArraySensor" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("8_vphps")
+script = ExtResource("8_8p7iy")
 perceptionKey = "array2"
 
-[node name="OrientationSensor" type="Node" parent="RigidBody3D/Agent/ArraySensor"]
-script = ExtResource("9_4vlpf")
+[node name="OrientationSensor" type="Node" parent="RigidBody3D/Agent/ArraySensor" node_paths=PackedStringArray("target", "reference")]
+script = ExtResource("9_8jnim")
 target = NodePath("../../../../Target")
+reference = NodePath("../../../Arrow")
 perceptionKey = "orientation"
 
 [node name="ActionSensor" type="Node" parent="RigidBody3D/Agent/ArraySensor"]
-script = ExtResource("10_monn0")
+script = ExtResource("10_fgbth")
 actionName = "move"
 actionSize = 4
 perceptionKey = "actions"
 
 [node name="FallReward" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("11_oe0ee")
+script = ExtResource("11_jf1h7")
 causeEpisodeToEnd = true
 
 [node name="NeuralNetController" type="Node" parent="RigidBody3D/Agent"]
-script = ExtResource("12_lg036")
+script = ExtResource("12_2uh5i")
 modelPath = "model.onnx"
 
+[node name="WASDController" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("13_ur6et")
+speed = 1.0
+
+[node name="ExportJson" type="Node" parent="RigidBody3D/Agent" node_paths=PackedStringArray("agent")]
+script = ExtResource("14_qyhry")
+agent = NodePath("..")
+filePath = "/home/gilzamir/model.json"
+
+[node name="RemoteConfig" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("15_pu7ux")
+receiveBufferSize = 81920
+sendBufferSize = 81920
+
+[node name="ControlConfig" type="Node" parent="RigidBody3D/Agent"]
+script = ExtResource("16_3goyg")
+
 [node name="ControlRequestor" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
-script = ExtResource("8_hgrol")
+script = ExtResource("13_wjgf5")
 stopOnQuit = true
 agentsList = [NodePath("../RigidBody3D/Agent")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.881995, 0.471258, 0, -0.471258, 0.881995, 0, 5.33702, 7.68783)
+current = true
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.110758, 0.993847, 0, -0.993847, 0.110758, 0, 5, 0)
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+offset_right = 121.0
+offset_bottom = 123.0
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(61, 61)
+render_target_update_mode = 4

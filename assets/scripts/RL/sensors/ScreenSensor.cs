@@ -21,13 +21,13 @@ public partial class ScreenSensor : Sensor
     /// The <code>width</code> field is the image width in pixels.
     /// </summary>
     [Export]
-    private int width = 30;
+    private int width = 61;
     
     /// <summary>
     /// The <code>height</code> field is the tmage height in pixels.
     /// </summary>
     [Export]
-    private int height = 30;
+    private int height = 61;
 
     private Image currentImg = null;
     private MaxSizeQueue<string> history;

@@ -178,6 +178,7 @@ mesh = SubResource("BoxMesh_orx12")
 transform = Transform3D(1, 0, 0, 0, 0.111989, 0.993709, 0, -0.993709, 0.111989, 0, 15.7217, 1.34229)
 visible = false
 projection = 1
+current = true
 size = 20.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -186,6 +187,8 @@ visible = false
 
 [node name="ControlLoop" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
 script = ExtResource("3_2kj82")
+defaultTimeScale = 10.0
+stopOnQuit = true
 agentsList = [NodePath("../AgentBody/Agent")]
 
 [node name="AgentBody" type="RigidBody3D" parent="." groups=["Player"]]
@@ -196,6 +199,9 @@ can_sleep = false
 continuous_cd = true
 max_contacts_reported = 10000
 contact_monitor = true
+
+[node name="AgentCamera" type="Camera3D" parent="AgentBody"]
+transform = Transform3D(-0.997063, -0.000750173, -0.0765806, -0.000914737, 0.999998, 0.00211398, 0.0765788, 0.00217782, -0.997061, 0.00112417, 1.6363, 1.10112)
 
 [node name="Arrow" parent="AgentBody" instance=ExtResource("4_efsag")]
 transform = Transform3D(0.2, 0, 0, 0, -8.74228e-09, -0.2, 0, 0.2, -8.74228e-09, 0, 1.3818, 0.123406)
@@ -213,12 +219,9 @@ surface_material_override/0 = SubResource("StandardMaterial3D_623pr")
 [node name="Agent" type="Node" parent="AgentBody"]
 script = ExtResource("5_nc0rj")
 avatarPath = NodePath("..")
+remote = true
 doneAtNegativeReward = false
 MaxStepsPerEpisode = 1000
-
-[node name="AgentCamera" type="Camera3D" parent="AgentBody/Agent"]
-transform = Transform3D(-0.997188, -0.000335138, -0.0749415, -0.000416837, 0.999999, 0.00107453, 0.074941, 0.00110274, -0.997187, 0, 1.63748, 1.05195)
-current = true
 
 [node name="Actuator" type="Node" parent="AgentBody/Agent"]
 script = ExtResource("6_6ld77")
@@ -228,11 +231,12 @@ jumpPower = 10.0
 jumpForwardPower = 5.0
 actionName = "move"
 
-[node name="Vision" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("camera")]
+[node name="Vision" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("camera", "viewport")]
 script = ExtResource("7_55b43")
-camera = NodePath("../AgentCamera")
-width = 81
-height = 81
+camera = NodePath("../../AgentCamera")
+width = 61
+height = 61
+viewport = NodePath("../../../SubViewport")
 perceptionKey = "vision"
 stackedObservations = 3
 
@@ -357,3 +361,7 @@ offset_right = 152.0
 offset_bottom = 39.0
 script = ExtResource("17_rloet")
 agentPath = NodePath("../AgentBody/Agent")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+size = Vector2i(61, 61)
+render_target_update_mode = 4

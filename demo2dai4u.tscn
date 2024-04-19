@@ -11771,7 +11771,7 @@ layer_0/tile_data = PackedInt32Array(2162687, 6291462, 40, 2228223, 6291462, 41,
 script = ExtResource("27_lf32s")
 defaultTimeScale = 10.0
 stopOnQuit = true
-agentsList = [NodePath("../Boy/Agent")]
+agentsList = []
 
 [node name="Boy" type="RigidBody2D" parent="." groups=["player"]]
 z_index = 1
@@ -11821,7 +11821,6 @@ perceptionKey = "vision"
 stackedObservations = 3
 normalized = false
 rangeMax = 255.0
-isState = true
 
 [node name="Controller" type="Node" parent="Boy/Agent"]
 script = ExtResource("26_lnv7d")

@@ -1,7 +1,7 @@
-from bemaker.utils import stepfv
-from bemaker.bemaker2unity import create_server
+from ai4u.utils import stepfv
+from ai4u.ai4u2unity import create_server
 import bemaker
-from bemaker.agents import BasicController
+from ai4u.agents import BasicController
 import gym
 import json
 
