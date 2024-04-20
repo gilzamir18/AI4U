@@ -18,12 +18,17 @@ namespace ai4u
 			moveActuator = GetNode(rBMoveActuator) as RBMoveActuator;
 			
 			this.type = SensorType.sfloatarray;
-			this.shape = new int[1]{1};
+			shape = new int[]{stackedObservations};
 			this.agent = (BasicAgent) agent;
-			stack = new HistoryStack<float>(1 * stackedObservations);
+			stack = new HistoryStack<float>(stackedObservations);
 		}
 
-		public override float[] GetFloatArrayValue()
+        public override void OnReset(Agent agent)
+        {
+			stack = new HistoryStack<float>(stackedObservations);
+        }
+
+        public override float[] GetFloatArrayValue()
 		{
 			stack.Push(moveActuator.OnGround? 1.0f : -1.0f);
 			return stack.Values;

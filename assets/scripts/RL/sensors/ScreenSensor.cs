@@ -45,11 +45,11 @@ public partial class ScreenSensor : Sensor
 
         if (grayScale)
         {
-            shape = new int[] { width, height };
+            shape = new int[] { stackedObservations, width, height };
         }
         else
         {
-            shape = new int[] { width, height, 3 };
+            shape = new int[] { stackedObservations, 3, width, height};
         }
     }
     

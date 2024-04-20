@@ -37,7 +37,6 @@ public partial class Camera3DSensor : Sensor
     /// </summary>
     [Export]
     private int height = 61;
-
     
     /// <summary>
     /// The viewport to rendering. If null, it use default viewport.
@@ -60,6 +59,7 @@ public partial class Camera3DSensor : Sensor
         }
 
         MakeData();
+        normalized = false;
     }
 
     private void MakeData()
@@ -69,12 +69,16 @@ public partial class Camera3DSensor : Sensor
 
         if (grayScale)
         {
-            shape = new int[] { width, height };
+            shape = new int[] {stackedObservations, width, height };
         }
         else
         {
-            shape = new int[] { width, height, 3 };
+            shape = new int[] {stackedObservations, 3, width, height};
         }
+
+        normalized = false;
+        rangeMin = 0;
+        rangeMax = 255;
     }
     
     public override int GetIntValue()

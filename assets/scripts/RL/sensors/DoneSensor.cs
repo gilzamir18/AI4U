@@ -12,7 +12,7 @@ namespace ai4u
 			this.agent = (BasicAgent) agent;
 			perceptionKey = "done";
 			type = SensorType.sbool;
-			shape = new int[0];
+			shape = new int[]{stackedObservations};
 		}
 
 		public override bool GetBoolValue()

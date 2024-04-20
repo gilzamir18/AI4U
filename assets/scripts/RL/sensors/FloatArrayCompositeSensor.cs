@@ -24,25 +24,24 @@ namespace ai4u
 					{
 						sensors.Add(s);
 						s.OnSetup(agent);
-						if (s.type == SensorType.sfloatarray)
+
+						var prod = 1;
+						foreach(var d in s.shape)
 						{
-							size += s.shape[0];
-						} else if (s.type == SensorType.sfloat || 
-									s.type == SensorType.sint  ||
-									s.type == SensorType.sbool)
-						{
-							size += 1;
+							prod *= d;
 						}
+						size += prod;
+						
 					}
 				}
 			}
 			this.shape = new int[1]{size};
-			this.stack = new HistoryStack<float>(this.shape[0] * stackedObservations);
+			this.stack = new HistoryStack<float>(this.shape[0]);
 		}
 
 		public override void OnReset(Agent agent)
 		{
-			this.stack = new HistoryStack<float>(this.shape[0] * stackedObservations);
+			this.stack = new HistoryStack<float>(this.shape[0]);
 			int n = sensors.Count;
 			for (int i = 0; i < n; i++)
 			{

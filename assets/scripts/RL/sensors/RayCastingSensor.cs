@@ -70,23 +70,31 @@ namespace ai4u
 		[Export]
 		public float horizontalShift = 0;
 		[Export]
-		public float verticalShift = 0;
+		public float verticalShift = 30;
 	
 		[Export]
-		public NodePath eyePath;
 		public Node3D eye;
 
 		[Export]
-		public float visionMaxDistance = 500f;
+		public float visionMaxDistance = 30f;
 		
 		[Export]
-		public float fieldOfView = 90.0f;
+		public float fieldOfView = 45.0f;
 
 		[Export]
 		public bool debugEnabled = false;
 
 		[Export]
 		public bool flattened = false;
+
+		[Export]
+		private bool _normalized = true;
+
+		[Export]
+		private float[] modelDataRange = {-1, 1};
+		[Export]
+		private float[] worldDataRange = {0, 255};
+
 
 		private Dictionary<string, int> mapping;
 		private Ray[,] raysMatrix = null;
@@ -96,16 +104,20 @@ namespace ai4u
 
 		public override void OnSetup(Agent agent) 
 		{
+			normalized = _normalized;
+			rangeMin = modelDataRange[0];
+			rangeMax = modelDataRange[1];
+
 			type = SensorType.sfloatarray;
-			if (!flattened)
+			if (flattened)
 			{
-				shape = new int[2]{hSize,  vSize};
-				history = new HistoryStack<float>(stackedObservations * shape[0] * shape[1]);
+				shape = new int[1]{stackedObservations * hSize * vSize};
+				history = new HistoryStack<float>(shape[0]);
 			}
 			else
 			{
-				shape = new int[1]{hSize * vSize};
-				history = new HistoryStack<float>(stackedObservations * shape[0]);
+				shape = new int[3]{stackedObservations, hSize,  vSize};
+				history = new HistoryStack<float>(shape[0] * shape[1] * shape[2]);	
 			}
 			
 			agent.AddResetListener(this);
@@ -115,9 +127,7 @@ namespace ai4u
 			this.agent = (BasicAgent) agent;
 			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody3D).GetWorld3D().DirectSpaceState;
 
-			if (this.eyePath != null && this.eyePath != "") {
-				this.eye = GetNode(this.eyePath) as Node3D;
-			} else {
+			if (this.eye == null) {
 				this.eye = this.agent.GetAvatarBody() as Node3D;
 			}
 			raysMatrix = new Ray[hSize, vSize];
@@ -187,7 +197,7 @@ namespace ai4u
 						if (mapping.ContainsKey(g))
 						{
 							int code = mapping[g];
-							history.Push(code);
+							AddValueToHistory(code);
 							isTagged = true;
 							break;
 						}
@@ -195,32 +205,63 @@ namespace ai4u
 				}
 				if (!isTagged)
 				{
-					history.Push(noObjectCode);
+					AddValueToHistory(noObjectCode);
 				}				
 			}
 			else
 			{
-				history.Push(noObjectCode);
+				AddValueToHistory(noObjectCode);
 			}
 			if (debugEnabled)
 			{
 				if (isTagged) {
-					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * visionMaxDistance, new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
+					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
+																		myray.Origin + myray.Direction * visionMaxDistance, 
+																		new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
 				} else 
 				{
-					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, myray.Origin + myray.Direction * visionMaxDistance, new Color(1, 1, 1, 1), new Color(0, 1, 0, 1), 1, 10);					
+					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
+																			myray.Origin + myray.Direction * visionMaxDistance, 
+																			new Color(1, 1, 1, 1), 
+																			new Color(0, 1, 0, 1), 1, 10);					
 				}
-			}			
+				GetNode<LineDrawer>("/root/LineDrawer").Redraw();
+			}
 		}
-		
-		public override void OnReset(Agent agent) {
-			if (!flattened)
+
+		private void AddValueToHistory(float v)
+		{
+			if (normalized)
 			{
-				history = new HistoryStack<float>(stackedObservations * shape[0] * shape[1]);
+				history.Push( MapRange(v, worldDataRange[0], worldDataRange[1], modelDataRange[0], modelDataRange[1] ) );
 			}
 			else
 			{
-				history = new HistoryStack<float>(stackedObservations * shape[0]);
+				history.Push(v);
+			}
+		}
+
+		public static float MapRange(float value, float fromSource, float toSource, float fromTarget, float toTarget)
+		{
+			// Primeiro, normalizamos o valor de entrada para o intervalo [0, 1]
+			float normalizedValue = (value - fromSource) / (toSource - fromSource);
+
+			// Em seguida, escalamos o valor normalizado para o intervalo de destino [a, b]
+			float mappedValue = fromTarget + (normalizedValue * (toTarget - fromTarget));
+
+			return mappedValue;
+		}
+
+		public override void OnReset(Agent agent) {
+			if (flattened)
+			{
+				shape = new int[1]{stackedObservations * hSize * vSize};
+				history = new HistoryStack<float>(shape[0]);
+			}
+			else
+			{
+				shape = new int[3]{stackedObservations, hSize,  vSize};
+				history = new HistoryStack<float>(shape[0] * shape[1] * shape[2]);	
 			}
 			mapping = new Dictionary<string, int>();
 			

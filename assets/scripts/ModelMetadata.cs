@@ -19,12 +19,7 @@ namespace ai4u
 		{
 			this.name = name;
 			
-			this.shape = new int[shape.Length + 1];
-			this.shape[0] = stackedObservations;
-			for (int i = 1; i < this.shape.Length; i++)
-			{
-				this.shape[i] = shape[i-1];
-			}
+			this.shape = shape;
 			this.type = type;
 			this.rangeMin = rangeMin;
 			this.rangeMax = rangeMax;

@@ -24,7 +24,7 @@ namespace ai4u
 			{
 				type = SensorType.sfloat; 
 			}
-			shape = new int[0];
+			shape = new int[]{stackedObservations};
 		}
 
 		public override int GetIntValue()

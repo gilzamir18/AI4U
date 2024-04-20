@@ -18,14 +18,14 @@ namespace ai4u {
 			this.agent = (BasicAgent)agent;
 
 			type = SensorType.sfloatarray;
-			shape = new int[1]{actionSize};
+			shape = new int[1]{actionSize*stackedObservations};
 			previewsAction = new float[shape[0]];
-			history = new HistoryStack<float>(shape[0]*stackedObservations);
+			history = new HistoryStack<float>(shape[0]);
 		}
 
 		public override void OnReset(Agent aget)
 		{
-			history = new HistoryStack<float>(shape[0]*stackedObservations);
+			history = new HistoryStack<float>(shape[0]);
 			previewsAction = new float[shape[0]];
 		}
 		

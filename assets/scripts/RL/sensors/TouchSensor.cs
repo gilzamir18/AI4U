@@ -17,12 +17,17 @@ public partial class TouchSensor : Sensor
 		public override void OnSetup(Agent agent)
 		{
 			this.type = SensorType.sfloatarray;
-			this.shape = new int[1]{1};
+			this.shape = new int[1]{stackedObservations};
 			this.agent = (BasicAgent) agent;
-			stack = new HistoryStack<float>(1 * stackedObservations);
+			stack = new HistoryStack<float>(stackedObservations);
 			RigidBody3D body = this.agent.GetAvatarBody() as RigidBody3D;
 			body.BodyEntered += OnEntered;
 			body.BodyExited += OnExited;
+		}
+
+		public override void OnReset(Agent agent)
+		{
+			stack = new HistoryStack<float>(stackedObservations);
 		}
 
 		public void OnEntered(Node body) {

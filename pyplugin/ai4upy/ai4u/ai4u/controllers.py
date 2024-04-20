@@ -15,16 +15,21 @@ codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 
 class BasicGymController(BasicController):
     def convertoboxspace(modelinput):
         shape = modelinput["shape"]
-        data_dim = len(shape) - 1
+        data_dim = len(shape)
+        print(data_dim)
         if data_dim == 1:
-            size = shape[-1]
-            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, ), dtype=codetypes[modelinput["type"]]), False
-        if data_dim == 2:
+            size = shape[0]
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(size, ), dtype=codetypes[modelinput["type"]]), False
+        elif data_dim == 2:
+            shapeimg = (1, shape[0], shape[1])
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shapeimg, dtype=codetypes[modelinput["type"]]), True
+        elif data_dim == 3:
             return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shape, dtype=codetypes[modelinput["type"]]), True
-        if data_dim == 3:
-            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=(shape[0] * size, shape[1], shape[2]), dtype=codetypes[modelinput["type"]]), True
+        elif data_dim == 4:
+            shapeimg = (shape[0] * shape[1], shape[2], shape[3])
+            return gym.spaces.Box(modelinput["rangeMin"], modelinput["rangeMax"], shape=shapeimg, dtype=codetypes[modelinput["type"]]), True
         else:
-            raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check your environment configuration. Perception Key: ", modelinput['name'])
+            raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Source error was the Sensor with the Perception Key: ", modelinput['name'])
     
     def get_env_spaces(metadataobj):
             print("Metadata Model ", metadataobj)
@@ -69,6 +74,7 @@ class BasicGymController(BasicController):
         self._seed = 0
         self.action_space = None
         self.observation_space = None
+        self.inputs = None
 
     def handleNewEpisode(self, info):
         """
@@ -109,7 +115,7 @@ class BasicGymController(BasicController):
     def loadarrayfrominput(self, modelinput, info):
         return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
     
-    def loadimagefrominput(self, modelinput, info):
+    def loadimagefrominput(self, modelinput, info, imgshape):
         img_streams = info[modelinput['name']]
         frames = []
         i = 0
@@ -127,11 +133,18 @@ class BasicGymController(BasicController):
         inputs = {}
         for i in modelinputs:
             shape = i['shape']
-            data_dim = len(shape) - 1
+            data_dim = len(shape)
             if data_dim == 1:
                 inputs[i['name']] = self.loadarrayfrominput(i, info)
-            elif data_dim == 2:
-                inputs[i['name']] = self.loadimagefrominput(i, info)
+            elif data_dim >= 2 and data_dim <= 4:
+                imgshape = None
+                if data_dim == 2:
+                    imgshape = (1, shape[0], shape[1])
+                elif data_dim == 3:
+                    imgshape = shape
+                elif data_dim == 4:
+                    imgshape = (shape[0] * shape[1], shape[2], shape[3])
+                inputs[i['name']] = self.loadimagefrominput(i, info, imgshape)
             else:
                 raise Exception("Controller configuration: unsuported data dimenstion: ", shape, ". Check agetn's environment configuration by Perception Key: ", i['name'], ".")
         return inputs
@@ -228,6 +241,9 @@ class BasicGymController(BasicController):
         state from the information sent by the game environment
         implemented in the ai4u Testing code.
         """
+        if self.inputs is None:
+        	print("Environment initialized already! Please close any opened environments and initialize them only when ai4ypy has started!", file=sys.stderr)
+        	sys.exit(1)
         return self.extractstatefrominputs(self.inputs, info), info
 
     def step_behavior(self, action):

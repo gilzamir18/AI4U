@@ -106,20 +106,20 @@ namespace ai4u {
 			type = SensorType.sfloatarray;
 			if (info == InfoType.BOTH)
 			{
-				shape = new int[1]{2};
+				shape = new int[1]{2*stackedObservations};
 			}
 			else
 			{
-				shape = new int[]{1};
+				shape = new int[]{1*stackedObservations};
 			}
 
-			history = new HistoryStack<float>(shape[0]*stackedObservations);
+			history = new HistoryStack<float>(shape[0]);
 			normalized =  _normalized;
 		}
 
 		public override void OnReset(Agent aget)
 		{
-			history = new HistoryStack<float>(shape[0]*stackedObservations);
+			history = new HistoryStack<float>(shape[0]);
 			lastFloatArrayValue = null;
 		}
 		

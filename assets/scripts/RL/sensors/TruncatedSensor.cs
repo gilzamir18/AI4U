@@ -13,7 +13,7 @@ public partial class TruncatedSensor : AbstractSensor
 			SetIsInput(false);
 			SetStackedObservations(1);
 			SetSensorType(SensorType.sbool);
-			SetShape(new int[0]);
+			SetShape(new int[]{GetStackedObservations()});
 		}
 
 		public override void OnSetup(Agent agent)

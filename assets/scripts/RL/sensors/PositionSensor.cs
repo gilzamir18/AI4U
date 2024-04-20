@@ -35,14 +35,14 @@ namespace ai4u
 		{
 			targetNode = GetNode(target) as Node3D;
 			this.type = SensorType.sfloatarray;
-			this.shape = new int[1]{3};
+			this.shape = new int[1]{stackedObservations * 3};
 			this.agent = (BasicAgent) agent;
-			stack = new HistoryStack<float>(3 * stackedObservations);
+			stack = new HistoryStack<float>(shape[0]);
 		}
 
 		public override void OnReset(Agent agent)
 		{
-			stack = new HistoryStack<float>(3 * stackedObservations);
+			stack = new HistoryStack<float>(shape[0]);
 			GetFloatArrayValue();
 		}
 

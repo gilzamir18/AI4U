@@ -12,7 +12,7 @@ namespace ai4u
 			this.agent = (BasicAgent) agent;
 			perceptionKey = "reward";
 			type = SensorType.sfloat;
-			shape = new int[0];
+			shape = new int[]{stackedObservations};
 			this.agent = (BasicAgent) agent;
 		}
 

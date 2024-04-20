@@ -230,14 +230,14 @@ namespace ai4u
 		[Export]
 		public bool isInput = true;
 		[Export]
-		public bool  normalized = true;
-		[Export]
 		public bool resetable = true;
-		[Export]
-		public float rangeMin = 0.0f;
-		[Export]
-		public float rangeMax = 1.0f;
-		
+
+		protected float rangeMin = 0.0f;
+
+		protected float rangeMax = 1.0f;
+
+		protected bool  normalized = true;
+
 		protected SensorType Type;
 		protected int[] Shape;
 		protected BasicAgent agent;

@@ -81,7 +81,7 @@ namespace ai4u {
 
 				var n3d = (Node3D)result["collider"];
 				//GD.Print("COLLIDE WITH " + n3d.Name);
-				if (n3d.Name == floorGroup)
+				if (n3d.IsInGroup(floorGroup))
 				{
 					//GD.Print("ONGRONUD");
 					return true;
@@ -125,9 +125,11 @@ namespace ai4u {
 						}
 						
 						var velocity = new Vector3(0, 0, 0);
+						
+						
 						velocity.Z += move * moveAmount + jumpForward * jumpForwardPower;
 						
-						var r = rBody.Transform.Basis.Y * turn;
+						var r = Vector3.Up * turn * turnAmount;
 						
 						PhysicsServer3D.BodySetState(
 							rBody.GetRid(),
@@ -136,8 +138,10 @@ namespace ai4u {
 						);
 						
 						velocity.Y += jump * jumpPower + jumpForward * jumpPower;
+						
 						velocity = velocity.Rotated(Vector3.Up, rBody.Rotation.Y);
-						//rBody.AddConstantCentralForce(velocity);
+						
+						
 						PhysicsServer3D.BodySetState(
 							rBody.GetRid(),
 							PhysicsServer3D.BodyState.LinearVelocity,

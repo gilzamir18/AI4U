@@ -11,7 +11,7 @@ namespace ai4u
 			this.agent = (BasicAgent) agent;
 			perceptionKey = "id";
 			type = SensorType.sstring;
-			shape = new int[0];
+			shape = new int[]{stackedObservations};
 		}
 
 		public override string GetStringValue()
