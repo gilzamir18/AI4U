@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections;
 using ai4u;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace ai4u
 {	
@@ -62,6 +63,12 @@ namespace ai4u
 		public int noObjectCode;
 	
 		[Export]
+		private bool selfExclude = true;
+
+		[Export(PropertyHint.Layers3DPhysics)]
+		private uint collisionMask = uint.MaxValue;
+
+		[Export]
 		public int hSize = 10;
 		
 		[Export]
@@ -83,6 +90,12 @@ namespace ai4u
 
 		[Export]
 		public bool debugEnabled = false;
+
+		[Export]
+		private Color detectionFailColor = new Color(1, 1, 1, 1);
+
+		[Export]
+		private Color detectionSuccessColor = new Color(1, 0, 0, 1);
 
 		[Export]
 		public bool flattened = false;
@@ -178,7 +191,12 @@ namespace ai4u
 		public void UpdateView(int i, int j, int debug_line = 0)
 		{
 			var myray = raysMatrix[i,j];
-			var query = PhysicsRayQueryParameters3D.Create(myray.Origin, myray.Origin + myray.Direction*visionMaxDistance, 2147483647);
+			var query = PhysicsRayQueryParameters3D.Create(myray.Origin, myray.Origin + myray.Direction*visionMaxDistance, collisionMask);
+			
+			if (selfExclude)
+			{
+				query.Exclude.Add( ((PhysicsBody3D) agent.GetAvatarBody()).GetRid() );
+			}
 			var result = this.spaceState.IntersectRay( query);//new Godot.Collections.Array { agent.GetBody() }
 			bool isTagged = false;
 			float t = -1;
@@ -217,13 +235,13 @@ namespace ai4u
 				if (isTagged) {
 					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
 																		myray.Origin + myray.Direction * visionMaxDistance, 
-																		new Color(1, 0, 0, 1), new Color(0, 1, 0, 1), 1, 10);
+																		detectionSuccessColor, new Color(0, 1, 0, 1), 1, 10);
 				} else 
 				{
 					GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
 																			myray.Origin + myray.Direction * visionMaxDistance, 
-																			new Color(1, 1, 1, 1), 
-																			new Color(0, 1, 0, 1), 1, 10);					
+																			detectionFailColor, 
+																			new Color(0, 0, 0, 1), 1, 10);					
 				}
 				GetNode<LineDrawer>("/root/LineDrawer").Redraw();
 			}

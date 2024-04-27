@@ -169,7 +169,7 @@ namespace ai4u {
 					}
 					else
 					{
-						history.Push(-1);
+						history.Push(-2);
 					}
 				}
 
@@ -188,7 +188,7 @@ namespace ai4u {
 					}
 					else
 					{
-						history.Push(0);
+						history.Push(-1);
 					}
 				}
 				lastFloatArrayValue = history.Values;
@@ -219,12 +219,12 @@ namespace ai4u {
 			{
 				if (info == InfoType.ANGLE || info == InfoType.BOTH)
 				{
-					history.Push(-1);
+					history.Push(-2);
 				}
 
 				if (info == InfoType.DIST || info == InfoType.BOTH)
 				{
-					history.Push(0);
+					history.Push(-1);
 				}
 			}
 			lastFloatArrayValue = history.Values;

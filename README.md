@@ -15,7 +15,7 @@ This command allows you train and run an agent living in a Godot scene.
 
 # Requirements
 * Godot 4.2.1 Mono Version (tested only in Godot 4.2.1 stable, mono version, Windows 11)
-* Python 3.10
+* Python 3.10 (Python 3.12 was tested in Ubuntu 24.04 using virtual environment)
 * Gynasium 
 
 # Documentation
