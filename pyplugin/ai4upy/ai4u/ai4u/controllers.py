@@ -13,6 +13,14 @@ import io
 codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8, 7: np.uint8}
 
 class BasicGymController(BasicController):
+
+    step_callback = None
+    reset_callback = None
+    fields = []
+
+    def add_field(name, value):
+        BasicGymController.fields.append((name, value))
+
     def convertoboxspace(modelinput):
         shape = modelinput["shape"]
         data_dim = len(shape)
@@ -75,6 +83,7 @@ class BasicGymController(BasicController):
         self.action_space = None
         self.observation_space = None
         self.inputs = None
+        self.last_obs = None
 
     def handleNewEpisode(self, info):
         """
@@ -230,7 +239,8 @@ class BasicGymController(BasicController):
         if  type(info) is tuple:
             info = info[0]
     
-        return self.extractstatefrominputs(self.inputs, info), info["reward"], info['done'], info['truncated'], info
+        self.last_obs = self.extractstatefrominputs(self.inputs, info)
+        return self.last_obs, info["reward"], info['done'], info['truncated'], info
 
     def reset_behavior(self, info):
         """
@@ -242,9 +252,12 @@ class BasicGymController(BasicController):
         implemented in the ai4u Testing code.
         """
         if self.inputs is None:
-        	print("Environment initialized already! Please close any opened environments and initialize them only when ai4ypy has started!", file=sys.stderr)
-        	sys.exit(1)
-        return self.extractstatefrominputs(self.inputs, info), info
+            print("Environment initialized already! Please close any opened environments and initialize them only when ai4ypy has started!", file=sys.stderr)
+            sys.exit(1)
+        self.last_obs = self.extractstatefrominputs(self.inputs, info)
+        if BasicGymController.reset_callback is not None:
+            BasicGymController.reset_callback(self.last_obs, info)
+        return self.last_obs, info
 
     def step_behavior(self, action):
         """
@@ -256,5 +269,9 @@ class BasicGymController(BasicController):
         a decision, producing the action represented by the
         variable "action".
         """
+        if BasicGymController.step_callback is not None:
+            BasicGymController.fields = []
+            BasicGymController.step_callback(self.last_obs, action)
+            self.fields = BasicGymController.fields
         for o in self.outputs:
             self.output_controller(action, o)
