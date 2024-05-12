@@ -12,6 +12,9 @@ import io
 
 codetypes = {0: np.float32, 1: np.uint8, 2: np.uint8, 3: np.uint8, 4: np.uint8, 5: np.float32, 6: np.uint8, 7: np.uint8}
 
+def step_callback_definition(last_obs, action, reward):
+    pass
+
 class BasicGymController(BasicController):
 
     step_callback = None
@@ -84,6 +87,7 @@ class BasicGymController(BasicController):
         self.observation_space = None
         self.inputs = None
         self.last_obs = None
+        self.last_info = None
 
     def handleNewEpisode(self, info):
         """
@@ -238,7 +242,7 @@ class BasicGymController(BasicController):
         #print(info)
         if  type(info) is tuple:
             info = info[0]
-    
+        self.last_info = info
         self.last_obs = self.extractstatefrominputs(self.inputs, info)
         return self.last_obs, info["reward"], info['done'], info['truncated'], info
 
@@ -257,6 +261,7 @@ class BasicGymController(BasicController):
         self.last_obs = self.extractstatefrominputs(self.inputs, info)
         if BasicGymController.reset_callback is not None:
             BasicGymController.reset_callback(self.last_obs, info)
+        self.last_info = info
         return self.last_obs, info
 
     def step_behavior(self, action):
@@ -271,7 +276,7 @@ class BasicGymController(BasicController):
         """
         if BasicGymController.step_callback is not None:
             BasicGymController.fields = []
-            BasicGymController.step_callback(self.last_obs, action)
+            BasicGymController.step_callback(self.last_obs, action, self.last_info)
             self.fields = BasicGymController.fields
         for o in self.outputs:
             self.output_controller(action, o)
