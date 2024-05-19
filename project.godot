@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Demo1"
-run/main_scene="res://demo2dai4u.tscn"
+run/main_scene="res://demo_scenes/demo2dai4u.tscn"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

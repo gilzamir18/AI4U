@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2tki2fk7rnlm"]
+
+[ext_resource type="Script" path="res://addons/prefabs/HomeostaticHUD.cs" id="1_4s2wj"]
+
+[node name="HomeostaticHud" type="Control"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 801.0
+offset_bottom = 279.0
+script = ExtResource("1_4s2wj")
+test = true
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 220.0
+offset_bottom = 282.0
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 5
+columns = 3
