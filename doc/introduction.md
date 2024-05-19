@@ -21,7 +21,7 @@ A melhor forma de instalar a AI4U em seu projeto é baixando em seu computador o
 
 Então, crie um novo projeto C# na Godot (deixe as opções padrões de criação de projeto).
 
-Copie o diretório **assets** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário copiar o diretório [*AI4U/pyplugin*](https://github.com/gilzamir18/ai4u). Este plugin permite você conectar o seu agente na Godot com um framework Python que permite treinar o agente. A AI4U é o *pypluing* foram  especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
+Copie o diretório **addons/ai4u** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário copiar o diretório [*AI4U/pyplugin*](https://github.com/gilzamir18/ai4u). Este plugin permite você conectar o seu agente na Godot com um framework Python que permite treinar o agente. A AI4U é o *pypluing* foram  especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
 
 Uma vez que você tenha instalado AI4U, pypluing e **stable-baselines3**, continue lendo este tutorial.
 
@@ -40,7 +40,7 @@ Vamos agora modificar o seu projeto para criarmos um agente com corpo rígido. C
 
 *Figure 2. Salvando uma cena.*
 
-Até aqui, suponho que você já copiou o diretório *assets* do repositório AI4U em em seu projeto. Se sim, seu projeto deveria estar como mostrado na Figura 3.
+Até aqui, suponho que você já copiou o diretório *addon/ai4u* do repositório AI4U em em seu projeto. Se sim, seu projeto deveria estar como mostrado na Figura 3.
 
 ![figure](img/demo1withassets.png)
 
@@ -66,7 +66,7 @@ Estes objetos ficarão fixos na cena. É importante renomeálos na raiz para nã
 
 *Figure 6. Renomeação dos componentes da cena.*
 
-Agora vamos criar um agente que aprende a se aproximar e a tocar o alvo sem cair do plano. Para isso, crie um nó do tipo RigidBody3D e adicione um CollisionShape3D e um MeshInstance3D como fizemos no caso do alvo, exceto que a Shape e a Mesh devem ser do tipo CapsuleShape3D e CapsuleMesh, respectivamente. Posicione a capsula para ficar sobre o plano. Além disso, mude as cores do plano, do alvo e do agente. Isso pode ser feito alterando o campo *Surface Material Override* do *MeshInstance3D* de cada objeto. A estrutura parcial do agente é mostrada na *Figura 7*. Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na Godot, usamos o eixo z para indicar a direção frontal de um objeto 3D. Contudo, este eixo não fica visível e, quando o agente estiver se movimentando na cena, não saberemos qual o seu lado da frente, pois o cilindro é simétrico em uma dada direção. Para resolvermos isso, em *assets/3DModel*, selecione o modelo Arrow.dae e o arraste como filho de RigidBody3D. Altere as dimensões e a orientação da seta para ficar como mostrado na Figura 8.
+Agora vamos criar um agente que aprende a se aproximar e a tocar o alvo sem cair do plano. Para isso, crie um nó do tipo RigidBody3D e adicione um CollisionShape3D e um MeshInstance3D como fizemos no caso do alvo, exceto que a Shape e a Mesh devem ser do tipo CapsuleShape3D e CapsuleMesh, respectivamente. Posicione a capsula para ficar sobre o plano. Além disso, mude as cores do plano, do alvo e do agente. Isso pode ser feito alterando o campo *Surface Material Override* do *MeshInstance3D* de cada objeto. A estrutura parcial do agente é mostrada na *Figura 7*. Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na Godot, usamos o eixo z para indicar a direção frontal de um objeto 3D. Contudo, este eixo não fica visível e, quando o agente estiver se movimentando na cena, não saberemos qual o seu lado da frente, pois o cilindro é simétrico em uma dada direção. Para resolvermos isso, em *addons/ai4u/3DModel*, selecione o modelo Arrow.dae e o arraste como filho de RigidBody3D. Altere as dimensões e a orientação da seta para ficar como mostrado na Figura 8.
 
 ![figure](img/demo1scenev1.png)
 

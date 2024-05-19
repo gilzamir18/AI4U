@@ -4,8 +4,12 @@
 
 * [Introduction (Portuguese)](introduction.md)
 
-* [Introduction (English) Automatic Translation](introductionENG.md)
+* [Introduction (English)](introductionENG.md)
 
 * [Introduction to ONNX Utils (Portuguese) ](introductionwithonnxmodels.md)
 
-* [Limitations](limitations.md)
+* [AI4U for 2D Games](introduction2dgodot.md)
+
+* [Limitations (Portuguese)](limitations.md)
+
+* [Limitations (English)](limitationsENG.md)
