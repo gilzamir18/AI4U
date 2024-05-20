@@ -294,6 +294,11 @@ public abstract partial class Agent : Node
 		return args[argidx];
 	}
 
+	public bool ContainsField(string cmdname)
+	{
+		return brain.containsCommandField(cmdname);
+	}
+
 	public float GetFieldArgAsFloat(string cmdname, int i = 0)
 	{
 		string[] args = brain.GetField(cmdname);

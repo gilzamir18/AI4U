@@ -61,11 +61,21 @@ namespace ai4u {
 		[Export]
 		private bool visibilityTest = false;
 
+
+		/// <summary>
+		/// Exclude agent from visibility test.
+		/// </summary>
+		[Export]
+		private bool excludeAgentFromVisibilityTest = true;
+
 		/// <summary>
 		/// A vertical offset to prevent the visibility test from failing because the raycasting hits the ground.
 		/// </summary>
 		[Export]
 		private float verticalShiftForVisibility = 0.5f;
+
+		[Export(PropertyHint.LayersAvoidance)]
+		private uint visibilityTestMask = uint.MaxValue;
 
 		[Export]
 		private bool ignoreVibilityTestForAngle = false;
@@ -138,10 +148,13 @@ namespace ai4u {
 			if (visibilityTest && !(ignoreVibilityTestForAngle && ignoreVibilityTestForDist))
 			{
 				var vshift = reference.GlobalTransform.Basis.Y * verticalShiftForVisibility;
-				var query = PhysicsRayQueryParameters3D.Create(reference.GlobalTransform.Origin + vshift,  target.GlobalTransform.Origin + vshift);	
-				var rb = agent.GetAvatarBody() as PhysicsBody3D;
-				query.Exclude = new Godot.Collections.Array<Rid> { rb.GetRid() };
+				var query = PhysicsRayQueryParameters3D.Create(reference.GlobalTransform.Origin + vshift,  target.GlobalTransform.Origin + vshift, visibilityTestMask);	
 				
+				if (excludeAgentFromVisibilityTest)
+				{
+					var rb = agent.GetAvatarBody() as PhysicsBody3D;
+					query.Exclude = new Godot.Collections.Array<Rid> { rb.GetRid() };
+				}
 				
 				var result = this.spaceState.IntersectRay( query );
 				if (result.Count > 0)
