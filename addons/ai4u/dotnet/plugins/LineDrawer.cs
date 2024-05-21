@@ -9,14 +9,8 @@ partial class LineDrawer: MeshInstance3D
 
 	private ImmediateMesh imesh;
 
-	public override void _Ready()
-	{
-		linesA = new ();
-		imesh = new ImmediateMesh();
-		Mesh = imesh;
-	}
 
-	public void StartInEditor()
+	public void StartMeshes()
 	{
 		linesA = new ();
 		imesh = new ImmediateMesh();

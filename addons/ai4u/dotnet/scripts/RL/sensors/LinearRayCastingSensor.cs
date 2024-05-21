@@ -64,16 +64,16 @@ namespace ai4u
 		private HistoryStack<float> history;
 		private PhysicsDirectSpaceState3D spaceState;
 
-		private LineDrawer inEditorLineDrawer = null;
+		private LineDrawer lineDrawer = null;
 
         public override void _Ready()
         {
 			if (Engine.IsEditorHint())
 			{
-				inEditorLineDrawer = new LineDrawer();
-				inEditorLineDrawer.SetColor(debugColor);
-				AddChild(inEditorLineDrawer);
-				inEditorLineDrawer.StartInEditor();
+				lineDrawer = new LineDrawer();
+				lineDrawer.SetColor(debugColor);
+				AddChild(lineDrawer);
+				lineDrawer.StartMeshes();
 			}	
         }
 
@@ -122,7 +122,10 @@ namespace ai4u
 
 			if (debugEnabled)
 			{
-				GetNode<LineDrawer>("/root/LineDrawer").SetColor(debugColor);				
+				lineDrawer = new LineDrawer();
+				lineDrawer.SetColor(debugColor);
+				AddChild(lineDrawer);
+				lineDrawer.StartMeshes();
 			}
 		}
 
@@ -138,15 +141,8 @@ namespace ai4u
 
 		private void StartRays(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 90, bool inEditor = false)
 		{
-			if (debugEnabled && !inEditor)
-			{
-				GetNode<LineDrawer>("/root/LineDrawer").Clear();
-			}
-			else
-			{
-				inEditorLineDrawer.Clear();
-			}
 
+			lineDrawer.Clear();
 
 			var interval = fieldOfView / (numberOfRays + 1);
 
@@ -216,12 +212,12 @@ namespace ai4u
 			if (debugEnabled)
 			{
 				if (isTagged) {
-					GetNode<LineDrawer>("/root/LineDrawer").AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
+					lineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
 				} else 
 				{
-					GetNode<LineDrawer>("/root/LineDrawer").AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
+					lineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
 				}
-				GetNode<LineDrawer>("/root/LineDrawer").DrawLines();
+				lineDrawer.DrawLines();
 			}
 		}
 
@@ -261,12 +257,12 @@ namespace ai4u
 			if (debugEnabled)
 			{
 				if (isTagged) {
-					inEditorLineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
+					lineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
 				} else 
 				{
-					inEditorLineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
+					lineDrawer.AddLine(ray.Origin, ray.Origin + ray.Direction * visionMaxDistance);
 				}
-				inEditorLineDrawer.DrawLines();
+				lineDrawer.DrawLines();
 			}
 		}
 
@@ -298,12 +294,18 @@ namespace ai4u
 			history = new HistoryStack<float>(shape[0]);
 
 			mapping = new Dictionary<string, int>();
-			
-			for (int o = 0; o < groupName.Length; o++ )
+			if (groupName != null && groupCode != null)
 			{
-				var code = groupCode[o];
-				var name = groupName[o];
-				mapping[name] = code;
+				for (int o = 0; o < groupName.Length; o++ )
+				{
+					var code = groupCode[o];
+					var name = groupName[o];
+					mapping[name] = code;
+				}
+			}
+			else
+			{
+				GD.PrintRaw("The LinearRayCastingSensor does not have a group name or a group code, so the agent will not perceive anything!");
 			}
 		} 
 	}
