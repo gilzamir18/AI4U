@@ -20,9 +20,7 @@ This command allows you train and run an agent living in a Godot scene.
 
 # Demo Projects
 
-|             Project Name                                                        |  Type              |
-|---------------------------------------------------------------------------------|--------------------|
-| [JumpObstacles](https://github/gilzamir18/ai4u_demo_projects/JumpObstacles/)    |        3D          |
+[Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
 
 
 # Maintainers
