@@ -18,8 +18,12 @@ This command allows you train and run an agent living in a Godot scene.
 * Python 3.10 (Python 3.12 was tested in Ubuntu 24.04 using Godot 4.2.2 with DotNet and virtual environment)
 * Gynasium
 
-# Documentation
-[Documentation](/doc/summary.md)
+# Demo Projects
+
+|             Project Name                                                        |  Type              |
+|---------------------------------------------------------------------------------|--------------------|
+| [JumpObstacles](https://github/gilzamir18/ai4u_demo_projects/JumpObstacles/)    |        3D          |
+
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir_gomes@uvanet.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).
