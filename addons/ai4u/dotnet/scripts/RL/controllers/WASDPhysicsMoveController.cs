@@ -25,7 +25,7 @@ namespace  ai4u
 
 		override public void OnSetup()
 		{
-		
+			((BasicAgent) agent).endOfEpisodeEvent += EndEpisodeHandler;
 		}
 		
 		override public void OnReset(Agent agent)
@@ -97,13 +97,10 @@ namespace  ai4u
 			}
 		}
 
-		override public void NewStateEvent()
+		public void EndEpisodeHandler(BasicAgent agent)
 		{
-			if (!agent.Alive() && !done)
-			{
-				GD.Print("Episode Reward " + ((BasicAgent)agent).EpisodeReward);
-				done = true;
-			}
+			GD.Print("Episode Reward " + ((BasicAgent)agent).EpisodeReward);
+			done = true;
 		}
 	}
 }

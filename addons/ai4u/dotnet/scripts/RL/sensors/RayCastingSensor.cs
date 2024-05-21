@@ -8,49 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace ai4u
 {	
-	public struct Ray
-	{
-		private Vector3 origin;
-		private Vector3 direction;
-		private Vector3 endPoint;
-		
-		public Ray(Vector3 o, Vector3 d)
-		{
-			this.origin = o;
-			this.direction = d.Normalized();
-			this.endPoint = origin + direction;
-		}
-		
-		public Vector3 Origin
-		{
-			get
-			{
-				return origin;
-			}
-		}
-		
-		public Vector3 Direction
-		{
-			get
-			{
-				return direction;
-			}
-		}
-		
-		public Vector3 EndPoint
-		{
-			get
-			{
-				return endPoint;
-			}
-		}
-		
-		public float GetDist(Vector3 q)
-		{
-			return (q - origin).Length();
-		}
-	}
-
+	[Obsolete("")]
 	public partial class RayCastingSensor : Sensor
 	{
 		

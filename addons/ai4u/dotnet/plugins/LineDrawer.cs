@@ -9,6 +9,10 @@ partial class LineDrawer: MeshInstance3D
 
 	private ImmediateMesh imesh;
 
+	public LineDrawer()
+	{
+		linesA = new ();	
+	}
 
 	public void StartMeshes()
 	{

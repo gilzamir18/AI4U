@@ -71,7 +71,7 @@ namespace ai4u
 		private int numberOfActuators = 0;
 		private ModelMetadataLoader metadataLoader;
 		private int NUMBER_OF_CONTROLINFO = 7;
-		
+
 		private int totalNumberOfSensors = 0;
 		public override void SetupAgent(ControlRequestor requestor)
 		{	
@@ -299,7 +299,12 @@ namespace ai4u
 			
 			set
 			{
+				var pd = done;
 				done = value;
+				if (!pd && done)
+                {
+                    EndOfEpisode();
+                }			
 			}
 		}
 		
@@ -337,6 +342,9 @@ namespace ai4u
 		}
 		
 		public virtual void AddReward(float v, RewardFunc from = null){
+			reward += v;
+			lastReward = v;
+			episodeReward += v;
 			if (doneAtNegativeReward && v < 0) {
 				Done = true;
 			}
@@ -352,9 +360,6 @@ namespace ai4u
 					Done = true;
 				}
 			}
-			reward += v;
-			lastReward = v;
-			episodeReward += v;
 		}
 		
 		public void AddReward(float v, bool causeEpisodeToEnd){
