@@ -36,7 +36,16 @@ partial class LineDrawer: MeshInstance3D
 
 	public void Clear()
 	{
+		if (linesA == null)
+		{
+			linesA = new();
+		}
 		linesA.Clear();
+
+		if (imesh == null)
+		{
+			imesh = new ImmediateMesh();
+		}
 		imesh.ClearSurfaces();
 	}
 

@@ -140,10 +140,14 @@ namespace ai4u
 		}
 
 		private void StartRays(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 90, bool inEditor = false)
-		{
+		{	
 
-			lineDrawer.Clear();
 
+			if (lineDrawer != null)
+			{
+				lineDrawer.Clear();
+			}
+			
 			var interval = fieldOfView / (numberOfRays + 1);
 
 			for (int i = 0; i < numberOfRays; i++)
