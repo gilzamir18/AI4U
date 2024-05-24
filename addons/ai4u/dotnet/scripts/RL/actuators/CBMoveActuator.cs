@@ -22,9 +22,16 @@ public partial class CBMoveActuator : MoveActuator
     private float precision = 0.001f;
     [Export]
     private float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
+    
     [Export]
     private float lerpFactor = 0.4f;
 
+
+    [ExportCategory("Action Shape")]
+    [Export]
+    private float[] actionRangeMin = new float[]{0, -1, -1, -1};
+    [Export]
+    private float[] actionRangeMax = new float[]{1, 1, 1, 1};
 
     private BasicAgent agent;
     
@@ -42,8 +49,8 @@ public partial class CBMoveActuator : MoveActuator
     {
         shape = new int[1]{4};
         isContinuous = true;
-        rangeMin = new float[]{0, -1, 0, 0};
-        rangeMax = new float[]{1, 1, 1, 1};
+        rangeMin = actionRangeMin;
+        rangeMax = actionRangeMax;
         this.agent = (BasicAgent) agent;
         agent.AddResetListener(this);
         body = this.agent.GetAvatarBody() as CharacterBody3D;
@@ -83,6 +90,11 @@ public partial class CBMoveActuator : MoveActuator
             {
                 jumpForward = 0;
             }
+
+            if (Mathf.Abs(move) < precision)
+            {
+                move = 0;
+            }
             
             // Add the gravity.
             if (!body.IsOnFloor())
@@ -121,21 +133,9 @@ public partial class CBMoveActuator : MoveActuator
 
                 if (!forwarding)
                 {
-                    var o = body.Transform.Basis.Z;
-                    if (Mathf.Abs(o.X) > precision)
-                    {
-                        velocity.X = Mathf.Lerp(velocity.X, 0, lerpFactor);
-                    }
-
-                    if (Mathf.Abs(o.Y) > precision)
-                    {
-                        velocity.Y = Mathf.Lerp(velocity.Y, 0, lerpFactor);
-                    }
-
-                    if (Mathf.Abs(o.Z) > precision)
-                    {
-                        velocity.Z = Mathf.Lerp(velocity.Z, 0, lerpFactor);
-                    }
+                    velocity.X = Mathf.Lerp(velocity.X, 0, lerpFactor);
+                    velocity.Y = Mathf.Lerp(velocity.Y, 0, lerpFactor);
+                    velocity.Z = Mathf.Lerp(velocity.Z, 0, lerpFactor);
                 }
             }
             body.Velocity = velocity;
