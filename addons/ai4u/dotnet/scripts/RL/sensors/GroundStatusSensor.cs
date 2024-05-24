@@ -9,14 +9,12 @@ namespace ai4u
 		private HistoryStack<float> stack;
 		// Start is called before the first frame update
 		
+
 		[Export]
-		private NodePath rBMoveActuator;
-		private RBMoveActuator moveActuator;
+		private MoveActuator moveActuator;
 
 		public override void OnSetup(Agent agent)
 		{
-			moveActuator = GetNode(rBMoveActuator) as RBMoveActuator;
-			
 			this.type = SensorType.sfloatarray;
 			shape = new int[]{stackedObservations};
 			this.agent = (BasicAgent) agent;

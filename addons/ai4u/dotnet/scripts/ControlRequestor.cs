@@ -198,7 +198,7 @@ namespace ai4u
 		{
 			if (physicsMode)
 			{
-				AI4UUpdate();
+				AI4UUpdate(delta);
 			}
 		}
 
@@ -206,19 +206,19 @@ namespace ai4u
 		{
 			if (!physicsMode)
 			{
-				AI4UUpdate();
+				AI4UUpdate(delta);
 			}
 		}
 
-		void AI4UUpdate()
+		void AI4UUpdate(double delta)
 		{
 			foreach(var agent in agents)
 			{
-				AgentUpdate(agent);
+				AgentUpdate(agent, delta);
 			}
 		}
 
-		private void AgentUpdate(Agent agent)
+		private void AgentUpdate(Agent agent, double delta)
 		{
 			if (agent == null || !agent.SetupIsDone)
 			{
@@ -229,6 +229,7 @@ namespace ai4u
 				return;
 			}
 			AgentControlInfo ctrl = agent.ControlInfo;
+			ctrl.deltaTime = delta;
 			if (!ctrl.envmode)
 			{
 				if (!ctrl.applyingAction)

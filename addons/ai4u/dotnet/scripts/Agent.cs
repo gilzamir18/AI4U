@@ -17,6 +17,8 @@ public class AgentControlInfo
 
 	public string lastEnvResetId = "";
 
+	public double deltaTime = 0;
+
 	public bool envmode = true;
 }
 

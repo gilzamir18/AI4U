@@ -4,7 +4,7 @@ using System;
 
 namespace ai4u;
 
-public partial class CBMoveActuator : Actuator
+public partial class CBMoveActuator : MoveActuator
 {
     //forces applied on the x, y and z axes.    
     private float move, turn, jump, jumpForward;
@@ -50,7 +50,7 @@ public partial class CBMoveActuator : Actuator
         this.spaceState = body.GetWorld3D().DirectSpaceState;
     }
 
-    public bool OnGround
+    public override bool OnGround
     {
         get
         {
@@ -60,7 +60,7 @@ public partial class CBMoveActuator : Actuator
 
     public override void Act()
     {
-        double delta = this.agent.GetPhysicsProcessDeltaTime();
+        double delta = this.agent.ControlInfo.deltaTime;
         Vector3 velocity = body.Velocity;
         if (agent != null && !agent.Done)
         {
@@ -93,11 +93,7 @@ public partial class CBMoveActuator : Actuator
             {
                 if ( Math.Abs(turn) > 0)
                 {
-                    var newdirection = Quaternion.FromEuler(new Vector3(0, turn * turnAmount, 0)) * body.Basis.Z;
-                
-                    var targetposition = body.Position + newdirection;
-
-                    body.LookAt(targetposition);
+                    body.Rotate(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount * 100 * (float)delta));
                 }
 
                 // Get the input direction and handle the movement/deceleration.

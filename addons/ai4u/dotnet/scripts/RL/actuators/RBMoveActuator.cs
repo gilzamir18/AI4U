@@ -4,7 +4,7 @@ using Godot;
 
 
 namespace ai4u {
-	public partial class RBMoveActuator : Actuator
+	public partial class RBMoveActuator : MoveActuator
 	{
 		//forces applied on the x, y and z axes.    
 		private float move, turn, jump, jumpForward;
@@ -61,7 +61,7 @@ namespace ai4u {
 
 		private bool onGround = false;
 
-		public bool OnGround
+		public override bool OnGround
 		{
 			get
 			{

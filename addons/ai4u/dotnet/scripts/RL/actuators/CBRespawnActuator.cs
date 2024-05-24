@@ -16,12 +16,17 @@ namespace ai4u
 			private NodePath respawnOptionsPath;
 
 			[Export]
+			private bool radomizeDirection = true;
+
+			[Export]
 			private bool early = true;
+
 
 			private Node nodeRef;
 		
 			private CharacterBody3D cBody;
 			private Godot.Collections.Array<Node> children;
+			
 
 
 			private int lastSelected = 0;
@@ -66,7 +71,12 @@ namespace ai4u
 					lastSelected = -1;
 				}
                 cBody.Velocity = Vector3.Zero;
+				cBody.Transform = reference;
                 cBody.Position = reference.Origin;
+				if (radomizeDirection)
+				{
+                	cBody.Rotate(cBody.Basis.Y, (float)GD.RandRange(0.0, 2.0 * Mathf.Pi));
+				}
 			}
 	}
 }
