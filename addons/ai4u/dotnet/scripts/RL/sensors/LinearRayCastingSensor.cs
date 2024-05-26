@@ -51,13 +51,19 @@ namespace ai4u
 		[Export]
 		private float[] worldDataRange = {-1, 1};
 
+		[ExportCategory("Distance")]
+		[Export]
+		public bool returnDistance = false;
+		[Export]
+		public bool normalizeDistance = false;
+		[Export]
+		public float maxDistance = 30;
 
 		[ExportCategory("Debug")]
 		[Export]
 		public bool debugEnabled = false;
 		[Export]
 		public Color debugColor = new Color(1, 0, 0);
-
 
 
 		private Dictionary<string, int> mapping;
@@ -83,6 +89,7 @@ namespace ai4u
 			{
 				if (debugEnabled && eye != null)
 				{
+					lineDrawer.SetColor(debugColor);
 					if (spaceState == null)
 					{
 						var spid = PhysicsServer3D.SpaceCreate();
@@ -100,12 +107,20 @@ namespace ai4u
 
         public override void OnSetup(Agent agent) 
 		{
+
+			int k = 1;
+			if (returnDistance)
+			{
+				k = 2;
+			}
+
+
 			normalized = _normalized;
 			rangeMin = modelDataRange[0];
 			rangeMax = modelDataRange[1];
 
 			type = SensorType.sfloatarray;
-			shape = new int[1]{stackedObservations * numberOfRays};
+			shape = new int[1]{stackedObservations * numberOfRays * k};
 			history = new HistoryStack<float>(shape[0]);
 			
 			
@@ -198,7 +213,8 @@ namespace ai4u
 						if (mapping.ContainsKey(g))
 						{
 							int code = mapping[g];
-							AddValueToHistory(code);
+							AddCodeToHistory(code);
+							AddDistanceToHistory(t);
 							isTagged = true;
 							break;
 						}
@@ -206,12 +222,14 @@ namespace ai4u
 				}
 				if (!isTagged)
 				{
-					AddValueToHistory(noObjectCode);
+					AddCodeToHistory(noObjectCode);
+					AddDistanceToHistory(t);
 				}				
 			}
 			else
 			{
-				AddValueToHistory(noObjectCode);
+				AddCodeToHistory(noObjectCode);
+				AddDistanceToHistory(0);
 			}
 			if (debugEnabled)
 			{
@@ -250,12 +268,23 @@ namespace ai4u
 						if (mapping.ContainsKey(g))
 						{
 							int code = mapping[g];
-							AddValueToHistory(code);
+							AddCodeToHistory(code);
+							AddDistanceToHistory(t);
 							isTagged = true;
 							break;
 						}
 					}
 				}
+				if (!isTagged)
+				{
+					AddCodeToHistory(noObjectCode);
+					AddDistanceToHistory(t);
+				}	
+			} 
+			else
+			{
+				AddCodeToHistory(noObjectCode);
+				AddDistanceToHistory(0);
 			}
 
 			if (debugEnabled)
@@ -270,15 +299,33 @@ namespace ai4u
 			}
 		}
 
-		private void AddValueToHistory(float v)
+		private void AddCodeToHistory(float v)
 		{
-			if (normalized)
+			if (history != null)
 			{
-				history.Push( MapRange(v, worldDataRange[0], worldDataRange[1], modelDataRange[0], modelDataRange[1] ) );
+				if (normalized)
+				{
+					history.Push( MapRange(v, worldDataRange[0], worldDataRange[1], modelDataRange[0], modelDataRange[1] ) );
+				}
+				else
+				{
+					history.Push(v);
+				}
 			}
-			else
+		}
+
+		private void AddDistanceToHistory(float v)
+		{
+			if (returnDistance && history != null)
 			{
-				history.Push(v);
+				if (normalizeDistance)
+				{
+					history.Push( MapRange(v, 0, float.MaxValue, 0, 1 ) );
+				}
+				else
+				{
+					history.Push(v);
+				}
 			}
 		}
 

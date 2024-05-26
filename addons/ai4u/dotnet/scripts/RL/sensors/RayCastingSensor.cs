@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace ai4u
 {	
-	[Obsolete("")]
+	[Obsolete("RayCastingSensor will be discontinued soon. Please use LinearRayCastingSensor instead!")]
 	public partial class RayCastingSensor : Sensor
 	{
 		

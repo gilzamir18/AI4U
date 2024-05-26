@@ -19,14 +19,14 @@ namespace ai4u
 		
 		private BasicAgent agent;
 		private float minDistance;
-		private RigidBody3D rBody;
+		private PhysicsBody3D rBody;
 		
 		public override void OnSetup(Agent agent)
 		{
 			targetNode = GetNode(target) as Node3D;
 			this.agent = (BasicAgent)agent;
 			
-			rBody = (RigidBody3D) this.agent.GetAvatarBody();
+			rBody = (PhysicsBody3D) this.agent.GetAvatarBody();
 			
 			this.agent.AddResetListener(this);
 			//minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using Godot;
 using ai4u;
 using System.Diagnostics;
+using System;
 
 namespace  ai4u
 {
 	/// <summary>
 	/// WASD controller for RigidBody3D game objects.
 	/// </summary>
+	[Obsolete("This controller is deprecated. Use ArrowPhysicsMoveController instead.")]
 	public partial class WASDRBMoveController : Controller
 	{
 		[Export]

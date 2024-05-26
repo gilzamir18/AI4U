@@ -4,7 +4,7 @@ using ai4u;
 
 namespace ai4u;
 
-public partial class RestlessnessReward : RewardFunc
+public partial class RestlessnessRewardFunc : RewardFunc
 {
 
 	[Export]

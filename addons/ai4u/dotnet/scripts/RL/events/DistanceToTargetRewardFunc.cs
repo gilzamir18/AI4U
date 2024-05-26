@@ -4,7 +4,7 @@ using Godot;
 
 namespace ai4u
 {
-	public partial class DistanceToTargetReward : RewardFunc
+	public partial class DistanceToTargetRewardFunc: RewardFunc
 	{
 		[Export]
 		private Node3D target;

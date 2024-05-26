@@ -242,7 +242,7 @@ namespace ai4u
 						ctrl.frameCounter = 0;
 						agent.NSteps = 0;
 					}
-					else if (CheckCmd(cmd, "__restart__"))
+					else if (CheckCmd(cmd, "__restart__") || CheckCmd(cmd, "__reset__"))
 					{
 						if (cmd[0].args.Length > 0)
 						{
@@ -278,6 +278,7 @@ namespace ai4u
 						agent.ApplyAction();
 						if (!agent.Alive())
 						{
+							agent.EndOfEpisode();
 							ctrl.stopped = true;
 							ctrl.applyingAction = false;
 							agent.UpdateReward();
@@ -295,6 +296,10 @@ namespace ai4u
 						ctrl.frameCounter = 0;
 						ctrl.applyingAction = false;
 						agent.NSteps = agent.NSteps + 1;
+						if (!agent.Alive())
+						{
+							agent.EndOfEpisode();
+						}
 					}
 					else
 					{
@@ -305,6 +310,7 @@ namespace ai4u
 						
 						if (!agent.Alive())
 						{
+							agent.EndOfEpisode();
 							ctrl.stopped = true;
 							ctrl.applyingAction = false;
 							agent.UpdateReward();
@@ -322,14 +328,14 @@ namespace ai4u
 			{
 				RequestCommand request = new RequestCommand(3);
 				request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-				request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume");
+				request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume, start_and_reset, start");
 				request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
 				var cmds = RequestEnvControl(agent, request);
 				if (cmds == null)
 				{
 					throw new System.Exception($"AI4U connection error! Agent ID: {agent.ID}.");
 				}
-				if (CheckCmd(cmds, "__restart__"))
+				if (CheckCmd(cmds, "__restart__")) //obsolete
 				{
 					ctrl.frameCounter = -1;
 					agent.NSteps = 0;
@@ -347,7 +353,48 @@ namespace ai4u
 					ctrl.stopped = false;
 					ctrl.applyingAction = false;
 					ctrl.envmode = false;
-					agent.AgentRestart();
+					agent.AgentStart();
+				}
+				else if (CheckCmd(cmds, "__start_agent__"))
+				{
+					ctrl.frameCounter = -1;
+					agent.NSteps = 0;
+					Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
+					for (int i = 0; i < cmds.Length; i++)
+					{
+						fields[cmds[i].name] = cmds[i].args;
+					}
+					agent.Brain.SetCommandFields(fields);
+					if (cmds[0].args.Length > 0)
+					{
+							ctrl.lastResetId = cmds[0].args[0];
+					}
+					ctrl.paused = false;
+					ctrl.stopped = false;
+					ctrl.applyingAction = false;
+					ctrl.envmode = false;
+					agent.AgentStart();
+				}
+				else if (CheckCmd(cmds, "__reset__"))
+				{
+					ctrl.frameCounter = 0;
+					agent.NSteps = 0;
+					Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
+					for (int i = 0; i < cmds.Length; i++)
+					{
+						fields[cmds[i].name] = cmds[i].args;
+					}
+					agent.Brain.SetCommandFields(fields);
+					if (cmds[0].args.Length > 0)
+					{
+							ctrl.lastResetId = cmds[0].args[0];
+					}
+					ctrl.paused = false;
+					ctrl.stopped = false;
+					ctrl.applyingAction = false;
+					ctrl.envmode = false;
+					agent.AgentStart();
+					agent.AgentReset();
 				}
 			}
 		}

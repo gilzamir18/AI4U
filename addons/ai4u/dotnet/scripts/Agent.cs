@@ -363,7 +363,7 @@ public abstract partial class Agent : Node
 		}
 	}
 
-	public virtual void AgentRestart()
+	public virtual void AgentStart()
 	{
 		
 	}

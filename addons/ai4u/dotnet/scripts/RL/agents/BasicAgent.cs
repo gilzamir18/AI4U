@@ -2,516 +2,595 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace ai4u
 {
-	 /// <summary>
-	/// The BasicAgent class is a partial implementation of an agent that can be used in machine learning environments.
-	/// This class inherits from the Agent class and provides a basic framework for the agent's interaction with the environment.
-	/// </summary>
-	public partial class BasicAgent : Agent
-	{
-		/// <summary>
-		/// Delegate for handling agent episode events.
-		/// </summary>
-		public delegate void AgentEpisodeHandler(BasicAgent agent);
-		public event AgentEpisodeHandler beforeTheResetEvent;
-		public event AgentEpisodeHandler endOfEpisodeEvent;
-		public event AgentEpisodeHandler beginOfEpisodeEvent;
-		public event AgentEpisodeHandler endOfStepEvent;
-		public event AgentEpisodeHandler beginOfStepEvent;
-		public event AgentEpisodeHandler beginOfUpdateStateEvent;
-		public event AgentEpisodeHandler endOfUpdateStateEvent;
-		public event AgentEpisodeHandler beginOfApplyActionEvent;
-		public event AgentEpisodeHandler endOfApplyActionEvent; 
-		public event AgentEpisodeHandler agentRestartEvent;	
+    /// <summary>
+    /// The BasicAgent class is a partial implementation of an agent that can be used in machine learning environments.
+    /// This class inherits from the Agent class and provides a basic framework for the agent's interaction with the environment.
+    /// </summary>
+    public partial class BasicAgent : Agent
+    {
+        /// <summary>
+        /// Delegate for handling agent episode events.
+        /// </summary>
+        /// <param name="agent">The agent that triggered the event.</param>
+        public delegate void AgentEpisodeHandler(BasicAgent agent);
 
-		[Export]
-		private NodePath avatarPath;
-		private Node avatarBody;
+        /// <summary>
+        /// Event triggered before the reset.
+        /// </summary>
+        public event AgentEpisodeHandler beforeTheResetEvent;
 
-		[Export]
-		private bool remote;
+        /// <summary>
+        /// Event triggered at the end of an episode.
+        /// </summary>
+        public event AgentEpisodeHandler endOfEpisodeEvent;
 
-		///<summary> <code>doneAtNegativeReward</code> ends the simulation whenever the agent receives a negative reward.</summary>		
-		[Export]
-		private bool doneAtNegativeReward = true;
-		
-		///<summary> <code>doneAtPositiveReward</code> ends the simulation whenever the agent receives a positive reward.</summary>
-		[Export]
-		public bool doneAtPositiveReward = false;
-		
-		///<summary>The maximum number of steps per episode.</summary>
-		[Export]
-		public int MaxStepsPerEpisode = 0;
+        /// <summary>
+        /// Event triggered at the beginning of an episode.
+        /// </summary>
+        public event AgentEpisodeHandler beginOfEpisodeEvent;
 
-		[Export]
-		public float rewardScale = 1.0f;
+        /// <summary>
+        /// Event triggered at the end of a step.
+        /// </summary>
+        public event AgentEpisodeHandler endOfStepEvent;
 
-		[Export]
-		public bool checkEpisodeTruncated = true;
+        /// <summary>
+        /// Event triggered at the beginning of a step.
+        /// </summary>
+        public event AgentEpisodeHandler beginOfStepEvent;
 
+        /// <summary>
+        /// Event triggered at the beginning of state update.
+        /// </summary>
+        public event AgentEpisodeHandler beginOfUpdateStateEvent;
 
-		public float EpisodeReward => episodeReward;
+        /// <summary>
+        /// Event triggered at the end of state update.
+        /// </summary>
+        public event AgentEpisodeHandler endOfUpdateStateEvent;
 
-		private bool truncated;
-		private float reward;
-		private float lastReward;
-		private bool done;
-		private float episodeReward;
+        /// <summary>
+        /// Event triggered at the beginning of applying an action.
+        /// </summary>
+        public event AgentEpisodeHandler beginOfApplyActionEvent;
 
+        /// <summary>
+        /// Event triggered at the end of applying an action.
+        /// </summary>
+        public event AgentEpisodeHandler endOfApplyActionEvent;
 
-		private List<RewardFunc> rewards;
+        /// <summary>
+        /// Event triggered when the agent starts.
+        /// </summary>
+        public event AgentEpisodeHandler agentStartEvent;
 
-		private Dictionary<string, bool> firstTouch;
-		private Dictionary<string, ISensor> sensorsMap;
-		private List<Actuator> actuatorList;
-		private List<ISensor> sensorList;
-		private int numberOfSensors = 0;
-		private int numberOfActuators = 0;
-		private ModelMetadataLoader metadataLoader;
-		private int NUMBER_OF_CONTROLINFO = 7;
+        [Export]
+        private Node avatarBody;
 
-		private int totalNumberOfSensors = 0;
-		public override void SetupAgent(ControlRequestor requestor)
-		{	
-			totalNumberOfSensors = 0;
-			episodeReward = 0;
-			controlRequestor = requestor;
-			numberOfSensors = 0;
-			System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        [Export]
+        private bool remote;
 
-			avatarBody = GetNode<Node>(avatarPath);
+        /// <summary>
+        /// Ends the simulation whenever the agent receives a negative reward.
+        /// </summary>
+        [Export]
+        private bool doneAtNegativeReward = true;
 
-			actuatorList = new List<Actuator>();
-			rewards = new List<RewardFunc>();
-			sensorList = new List<ISensor>();
-			sensorsMap = new Dictionary<string, ISensor>();
+        /// <summary>
+        /// Ends the simulation whenever the agent receives a positive reward.
+        /// </summary>
+        [Export]
+        public bool doneAtPositiveReward = false;
 
-			if (remote)
+        /// <summary>
+        /// The maximum number of steps per episode.
+        /// </summary>
+        [Export]
+        public int MaxStepsPerEpisode = 0;
+
+        [Export]
+        public float rewardScale = 1.0f;
+
+        [Export]
+        public bool checkEpisodeTruncated = true;
+
+        [Export]
+        internal int initialInputSize = 0;
+
+        /// <summary>
+        /// Gets the total reward for the current episode.
+        /// </summary>
+        public float EpisodeReward => episodeReward;
+
+        private bool truncated;
+        private float reward;
+        private float lastReward;
+        private bool done = true;
+        private float episodeReward;
+
+        private List<RewardFunc> rewards;
+
+        private Dictionary<string, bool> firstTouch;
+        private Dictionary<string, ISensor> sensorsMap;
+        private List<Actuator> actuatorList;
+        private List<ISensor> sensorList;
+        private int numberOfSensors = 0;
+        private int numberOfActuators = 0;
+        private ModelMetadataLoader metadataLoader;
+        private int NUMBER_OF_CONTROLINFO = 7;
+
+        private int totalNumberOfSensors = 0;
+
+		private AgentRewardFunc agentRewardFunc;
+
+        private AgentArraySensor agentArraySensor;
+
+		public AgentRewardFunc Rewards => agentRewardFunc;
+
+        public AgentArraySensor ArraySensor => agentArraySensor;
+
+        /// <summary>
+        /// Sets up the agent with the given control requestor.
+        /// </summary>
+        /// <param name="requestor">The control requestor to use for setup.</param>
+        public override void SetupAgent(ControlRequestor requestor)
+        {
+
+			if (avatarBody == null)
 			{
-				RemoteBrain r = new RemoteBrain();
-				SetBrain(r);
+				//GD.PrintErr("Avatar body is null. Set a RigidBody or CharacterBody instead!");
+				avatarBody = GetParent();
 			}
 
-			var children = GetChildren();
-			foreach (Node node in children)
-			{
-				if (remote && node is RemoteConfiguration && brain != null)
-				{
-					RemoteBrain r = (RemoteBrain) brain;
-					var config = (RemoteConfiguration) node;
-					r.Port = config.port;
-					r.Host = config.host;
-					r.Managed = config.managed;
-					r.ReceiveTimeout = config.receiveTimeout;
-					r.ReceiveBufferSize = config.receiveBufferSize;
-					r.SendBufferSize = config.sendBufferSize;
-				}
-				else if (!remote && node is Controller)
-				{
-					var ctrl = (Controller) node;
-					SetBrain(new LocalBrain(ctrl));
-					
-				}
-				else if (node is ControllerConfiguration)
-				{
-					var controllerConfig = (ControllerConfiguration)node; 
-					ControlInfo.skipFrame = controllerConfig.skipFrame;
-					ControlInfo.repeatAction = controllerConfig.repeatAction;
-				} 
-				else if (node is RewardFunc)
-				{
-					RewardFunc rf = (RewardFunc)node;
-					rf.OnSetup(this);
-					rewards.Add(rf);
-				}
-				else if (node is Sensor)
-				{
-					var s = (Sensor) node;
-					sensorList.Add(s);
-					numberOfSensors++;
-				}
-				else if (node is Actuator)
-				{
-					var a = (Actuator) node;
-					actuatorList.Add(a);
-					numberOfActuators++;
-				}
-			}
-			
-		
-			DoneSensor doneSensor = new DoneSensor();
-			doneSensor.isInput = false;
-			doneSensor.SetAgent(this);
-			sensorList.Add(doneSensor);
-			CallDeferred("add_child", doneSensor);
+            totalNumberOfSensors = 0;
+            episodeReward = 0;
+            controlRequestor = requestor;
+            numberOfSensors = 0;
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
-			RewardSensor rewardSensor = new RewardSensor();
-			rewardSensor.isInput = false;
-			rewardSensor.SetAgent(this);
-			sensorList.Add(rewardSensor);
-			CallDeferred("add_child", rewardSensor);
+            actuatorList = new List<Actuator>();
+            rewards = new List<RewardFunc>();
+            sensorList = new List<ISensor>();
+            sensorsMap = new Dictionary<string, ISensor>();
 
-			IDSensor idSensor = new IDSensor();
-			idSensor.isInput = false;
-			idSensor.SetAgent(this);
-			sensorList.Add(idSensor);
-			CallDeferred("add_child", idSensor);
+			agentRewardFunc = new AgentRewardFunc();
+        	agentRewardFunc.OnSetup(this);
+			rewards.Add(agentRewardFunc);
+            CallDeferred("add_child", agentRewardFunc);
 
-			StepSensor stepSensor = new StepSensor();
-			stepSensor.isInput = false;
-			stepSensor.SetAgent(this);
-			sensorList.Add(stepSensor);
-			CallDeferred("add_child", stepSensor);
-			numberOfSensors = 4;
+            if (remote)
+            {
+                RemoteBrain r = new RemoteBrain();
+                SetBrain(r);
+            }
 
-			if (checkEpisodeTruncated)
-			{
-				TruncatedSensor truncatedSensor = new TruncatedSensor();
-				truncatedSensor.SetIsInput(false);
-				truncatedSensor.SetAgent(this);
-				sensorList.Add(truncatedSensor);
-				sensorsMap[truncatedSensor.GetKey()] = truncatedSensor;
-				numberOfSensors += 1;
-			}
-
-
-			totalNumberOfSensors = sensorList.Count;
-
-			desc = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-			types = new byte[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-			values = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-			
-			foreach (ISensor sensor in sensorList)
-			{
-				if (sensor.IsResetable())
-				{
-					AddResetListener(sensor);
-				}
-				sensor.OnSetup(this);
-			}
-
-			foreach(Actuator a in actuatorList)
-			{
-				a.OnSetup(this);
-			}
-
-			metadataLoader = new ModelMetadataLoader(this);
-			Metadata = metadataLoader.Metadata;
-			string metadatastr = metadataLoader.toJson();
-
-			RequestCommand request = new RequestCommand(5);
-			request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-			request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
-			request.SetMessage(2, "id", ai4u.Brain.STR, ID);
-			request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
-			request.SetMessage(4, "config", ai4u.Brain.INT, 1);
-
-			if (brain != null)
-			{
-				brain.Setup(this);
-			}
-			else
-			{
-				if (remote)
-				{
-					throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
-				}
-				else
-				{
-					throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
-				}
-			}
-
-			var cmds = controlRequestor.RequestEnvControl(this, request);
-			if (cmds == null)
-			{
-				throw new System.Exception("ai4u2unity connection error!");
-			}
-			setupIsDone = true;
-		}
-
-		public string GetMetadataAsJson()
-		{
-			return metadataLoader.toJson();
-		}
-
-		public override void ResetCommandBuffer()
-		{
-			desc = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-			types = new byte[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-			values = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
-		}
-
-		public override void ResetReward()
-		{
-
-			reward = 0;
-			if (beginOfStepEvent != null)
-			{
-				beginOfStepEvent(this);
-			}
-		}
-		
-		public Node GetAvatarBody()
-		{
-			return avatarBody;
-		}
-		
-		public override void UpdateReward()
-		{
-			int n = rewards.Count;
-
-			for (int i = 0; i < n; i++)
-			{
-				rewards[i].OnUpdate();
-			}
-			brain.OnStepReward(nSteps, Reward);
-			if (endOfStepEvent != null)
-			{
-				endOfStepEvent(this);
-			}
-		}
-		
-		public List<Actuator> Actuators
-		{
-			get 
-			{
-				return actuatorList;
-			}
-		}
-
-		public List<ISensor> Sensors 
-		{
-			get
-			{
-				return sensorList;
-			}
-		}
-
-		public bool Done
-		{
-			get
-			{
-				return done;
-			}
-			
-			set
-			{
-				var pd = done;
-				done = value;
-				if (!pd && done)
+            var children = GetChildren();
+            foreach (Node node in children)
+            {
+                if (remote && node is RemoteConfiguration && brain != null)
                 {
-                    EndOfEpisode();
-                }			
-			}
-		}
-		
-		public bool Truncated
-		{
-			get
-			{
-				return truncated;
-			}
-		}
+                    RemoteBrain r = (RemoteBrain)brain;
+                    var config = (RemoteConfiguration)node;
+                    r.Port = config.port;
+                    r.Host = config.host;
+                    r.Managed = config.managed;
+                    r.ReceiveTimeout = config.receiveTimeout;
+                    r.ReceiveBufferSize = config.receiveBufferSize;
+                    r.SendBufferSize = config.sendBufferSize;
+                }
+                else if (!remote && node is Controller)
+                {
+                    var ctrl = (Controller)node;
+                    SetBrain(new LocalBrain(ctrl));
+                }
+                else if (node is ControllerConfiguration)
+                {
+                    var controllerConfig = (ControllerConfiguration)node;
+                    ControlInfo.skipFrame = controllerConfig.skipFrame;
+                    ControlInfo.repeatAction = controllerConfig.repeatAction;
+                }
+                else if (node is RewardFunc)
+                {
+                    RewardFunc rf = (RewardFunc)node;
+                    rf.OnSetup(this);
+                    rewards.Add(rf);
+                }
+                else if (node is Sensor)
+                {
+                    var s = (Sensor)node;
+                    sensorList.Add(s);
+                    numberOfSensors++;
+                }
+                else if (node is Actuator)
+                {
+                    var a = (Actuator)node;
+                    actuatorList.Add(a);
+                    numberOfActuators++;
+                }
+            }
 
-		[Obsolete]
-		public float AcummulatedReward
-		{
-			get
-			{
-				return this.reward;
-			}
-		}
-		
-		public float LastReward
-		{
-			get
-			{
-				return this.lastReward;
-			}
-		}
-		
-		public float Reward
-		{
-			get
-			{
-				return this.reward;
-			}	
-		}
-		
-		public virtual void AddReward(float v, RewardFunc from = null){
-			reward += v;
-			lastReward = v;
-			episodeReward += v;
-			if (doneAtNegativeReward && v < 0) {
-				Done = true;
-			}
+            DoneSensor doneSensor = new DoneSensor();
+            doneSensor.isInput = false;
+            doneSensor.SetAgent(this);
+            sensorList.Add(doneSensor);
+            CallDeferred("add_child", doneSensor);
 
-			if (doneAtPositiveReward && v > 0) {
-				Done = true;
-			}
+            RewardSensor rewardSensor = new RewardSensor();
+            rewardSensor.isInput = false;
+            rewardSensor.SetAgent(this);
+            sensorList.Add(rewardSensor);
+            CallDeferred("add_child", rewardSensor);
 
-			if (from != null)
-			{
-				if (from.causeEpisodeToEnd && v != 0)
-				{
-					Done = true;
-				}
-			}
-		}
-		
-		public void AddReward(float v, bool causeEpisodeToEnd){
-			if (doneAtNegativeReward && v < 0) {
-				Done = true;
-			}
+            IDSensor idSensor = new IDSensor();
+            idSensor.isInput = false;
+            idSensor.SetAgent(this);
+            sensorList.Add(idSensor);
+            CallDeferred("add_child", idSensor);
 
-			if (doneAtPositiveReward && v > 0) {
-				Done = true;
-			}
+            StepSensor stepSensor = new StepSensor();
+            stepSensor.isInput = false;
+            stepSensor.SetAgent(this);
+            sensorList.Add(stepSensor);
+            CallDeferred("add_child", stepSensor);
+            
+            if (initialInputSize > 0)
+            {
+                agentArraySensor = new AgentArraySensor();
+                agentArraySensor.isInput = true;
+                agentArraySensor.SetAgent(this);
+                sensorList.Add(agentArraySensor);
+                CallDeferred("add_child", agentArraySensor);
+                numberOfSensors = 5;
+            }
+            else
+            {
+                numberOfSensors = 4;
+            }
 
-			if (causeEpisodeToEnd)
-			{
-				Done = true;
-			}
+            if (checkEpisodeTruncated)
+            {
+                TruncatedSensor truncatedSensor = new TruncatedSensor();
+                truncatedSensor.SetIsInput(false);
+                truncatedSensor.SetAgent(this);
+                sensorList.Add(truncatedSensor);
+                sensorsMap[truncatedSensor.GetKey()] = truncatedSensor;
+                numberOfSensors += 1;
+            }
 
-			reward += v;
-			episodeReward += v;
-		}
+            totalNumberOfSensors = sensorList.Count;
 
-		public override void  ApplyAction()
-		{
-			if (beginOfApplyActionEvent != null)
-			{
-				beginOfApplyActionEvent(this);
-			}
-			if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode) {
-				Done = true;
-			}
-			int n = actuatorList.Count;
-			for (int i = 0; i < n; i++)
-			{
-				if (!Done)
-				{
-					if (GetActionName() == actuatorList[i].actionName)
-					{
-						actuatorList[i].Act();
-					}
-				}
-			}
-			if (!Done)
-			{
-				if (endOfApplyActionEvent != null)
-				{
-					endOfApplyActionEvent(this);
-				}
-			}
-		}
+            desc = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
+            types = new byte[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
+            values = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
 
-		public override void AgentReset() 
-		{
-			if (beforeTheResetEvent != null)
-			{
-				beforeTheResetEvent(this);
-			}
-			ResetPlayer();
-			if (beginOfEpisodeEvent != null)
-			{
-				beginOfEpisodeEvent(this);
-			}
-			brain.OnReset(this);
-			episodeReward = 0;
-		}
+            foreach (ISensor sensor in sensorList)
+            {
+                if (sensor.IsResetable())
+                {
+                    AddResetListener(sensor);
+                }
+                sensor.OnSetup(this);
+            }
 
-		public override void AgentRestart()
-		{
-			if (agentRestartEvent != null)
-			{
-				agentRestartEvent(this);
-			}
-		}
+            foreach (Actuator a in actuatorList)
+            {
+                a.OnSetup(this);
+            }
 
-		public virtual void RequestDoneFrom(RewardFunc rf) {
-			Done = true;
-		}
+            metadataLoader = new ModelMetadataLoader(this);
+            Metadata = metadataLoader.Metadata;
+            string metadatastr = metadataLoader.toJson();
 
-		public override bool Alive()
-		{
-			return !Done;
-		}
+            RequestCommand request = new RequestCommand(5);
+            request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
+            request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
+            request.SetMessage(2, "id", ai4u.Brain.STR, ID);
+            request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
+            request.SetMessage(4, "config", ai4u.Brain.INT, 1);
 
-		public override void EndOfEpisode()
-		{
-			if (endOfEpisodeEvent != null)
-			{
-				endOfEpisodeEvent(this);
-			}
-		}
+            if (brain != null)
+            {
+                brain.Setup(this);
+            }
+            else
+            {
+                if (remote)
+                {
+                    throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
+                }
+                else
+                {
+                    throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
+                }
+            }
 
-		public override void UpdateState()
-		{
-			if (beginOfUpdateStateEvent != null)
-			{
-				beginOfUpdateStateEvent(this);
-			}
+            var cmds = controlRequestor.RequestEnvControl(this, request);
+            if (cmds == null)
+            {
+                throw new System.Exception("ai4u2unity connection error!");
+            }
+            setupIsDone = true;
+        }
 
-			InitializeDataFromSensor();
+        /// <summary>
+        /// Gets the metadata as a JSON string.
+        /// </summary>
+        /// <returns>A JSON string representing the metadata.</returns>
+        public string GetMetadataAsJson()
+        {
+            return metadataLoader.toJson();
+        }
 
+        /// <summary>
+        /// Resets the command buffer.
+        /// </summary>
+        public override void ResetCommandBuffer()
+        {
+            desc = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
+            types = new byte[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
+            values = new string[totalNumberOfSensors + NUMBER_OF_CONTROLINFO];
+        }
 
-			if (endOfUpdateStateEvent != null)
-			{
-				endOfUpdateStateEvent(this);
-			}
-		}
-		
-		private void InitializeDataFromSensor()
-		{
-			int n = sensorList.Count;
-			for (int i = 0; i < n; i++) {
-				ISensor s = sensorList[i];
-				switch(s.GetSensorType())
-				{
-					case SensorType.sfloatarray:
-						var fv = s.GetFloatArrayValue();
-						if (fv == null)
-						{
-							throw new System.Exception("Error: array of float sensor " + s.GetName() + " returning null value!");
-						}
-						SetStateAsFloatArray(i, s.GetKey(), fv);
-						break;
-					case SensorType.sfloat:
-						var fv2 = s.GetFloatValue();
-						SetStateAsFloat(i, s.GetKey(), fv2);
-						break;
-					case SensorType.sint:
-						var fv3 = s.GetIntValue();
-						SetStateAsInt(i, s.GetKey(), fv3);
-						break;
-					case SensorType.sintarray:
-						var v = s.GetIntArrayValue();
-						SetStateAsIntArray(i, s.GetKey(), v);
-						break;
-					case SensorType.sstring:
-						var fv4 = s.GetStringValue();
-						if (fv4 == null)
-						{
-							throw new System.Exception("Error: string sensor " + s.GetName() + " returning null value!");
-						}
-						SetStateAsString(i, s.GetKey(), fv4);
-						break;
+        /// <summary>
+        /// Resets the reward to zero.
+        /// </summary>
+        public override void ResetReward()
+        {
+            reward = 0;
+            beginOfStepEvent?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Gets the avatar body node.
+        /// </summary>
+        /// <returns>The avatar body node.</returns>
+        public Node GetAvatarBody()
+        {
+            return avatarBody;
+        }
+
+        /// <summary>
+        /// Updates the reward by calling the update method on each reward function.
+        /// </summary>
+        public override void UpdateReward()
+        {
+            int n = rewards.Count;
+
+            for (int i = 0; i < n; i++)
+            {
+                rewards[i].OnUpdate();
+            }
+            brain.OnStepReward(nSteps, Reward);
+            endOfStepEvent?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Gets the list of actuators.
+        /// </summary>
+        public List<Actuator> Actuators => actuatorList;
+
+        /// <summary>
+        /// Gets the list of sensors.
+        /// </summary>
+        public List<ISensor> Sensors => sensorList;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the agent is done.
+        /// </summary>
+        public bool Done
+        {
+            get => done;
+            set => done = value;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the episode was truncated.
+        /// </summary>
+        public bool Truncated => truncated;
+
+        /// <summary>
+        /// Gets the accumulated reward.
+        /// </summary>
+        [Obsolete]
+        public float AcummulatedReward => reward;
+
+        /// <summary>
+        /// Gets the last reward received.
+        /// </summary>
+        public float LastReward => lastReward;
+
+        /// <summary>
+        /// Gets the current reward.
+        /// </summary>
+        public float Reward => reward;
+
+        /// <summary>
+        /// Adds a reward to the current reward.
+        /// </summary>
+        /// <param name="v">The reward value to add.</param>
+        /// <param name="from">The reward function that caused the reward.</param>
+        internal virtual void AddReward(float v, RewardFunc from = null)
+        {
+            reward += v;
+            lastReward = v;
+            episodeReward += v;
+            if (doneAtNegativeReward && v < 0)
+            {
+                Done = true;
+            }
+
+            if (doneAtPositiveReward && v > 0)
+            {
+                Done = true;
+            }
+
+            if (from != null && from.causeEpisodeToEnd && v != 0)
+            {
+                Done = true;
+            }
+        }
+
+        /// <summary>
+        /// Adds a reward to the current reward and optionally ends the episode.
+        /// </summary>
+        /// <param name="v">The reward value to add.</param>
+        /// <param name="causeEpisodeToEnd">Whether the reward should cause the episode to end.</param>
+        internal void AddReward(float v, bool causeEpisodeToEnd)
+        {
+            if (doneAtNegativeReward && v < 0)
+            {
+                Done = true;
+            }
+
+            if (doneAtPositiveReward && v > 0)
+            {
+                Done = true;
+            }
+
+            if (causeEpisodeToEnd)
+            {
+                Done = true;
+            }
+
+            reward += v;
+            episodeReward += v;
+        }
+
+        /// <summary>
+        /// Applies the current action.
+        /// </summary>
+        public override void ApplyAction()
+        {
+            beginOfApplyActionEvent?.Invoke(this);
+
+            if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode)
+            {
+                Done = true;
+            }
+
+            int n = actuatorList.Count;
+            for (int i = 0; i < n; i++)
+            {
+                if (!Done && GetActionName() == actuatorList[i].actionName)
+                {
+                    actuatorList[i].Act();
+                }
+            }
+
+            if (!Done)
+            {
+                endOfApplyActionEvent?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// Resets the agent.
+        /// </summary>
+        public override void AgentReset()
+        {
+            beforeTheResetEvent?.Invoke(this);
+            ResetPlayer();
+            beginOfEpisodeEvent?.Invoke(this);
+            brain.OnReset(this);
+            episodeReward = 0;
+        }
+
+        /// <summary>
+        /// Starts the agent.
+        /// </summary>
+        public override void AgentStart()
+        {
+            agentStartEvent?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Requests to end the episode from the specified reward function.
+        /// </summary>
+        /// <param name="rf">The reward function requesting the end of the episode.</param>
+        public virtual void RequestDoneFrom(RewardFunc rf)
+        {
+            Done = true;
+        }
+
+        /// <summary>
+        /// Determines whether the agent is alive.
+        /// </summary>
+        /// <returns>True if the agent is alive; otherwise, false.</returns>
+        public override bool Alive()
+        {
+            return !Done;
+        }
+
+        /// <summary>
+        /// Ends the episode.
+        /// </summary>
+        public override void EndOfEpisode()
+        {
+            endOfEpisodeEvent?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Updates the agent's state.
+        /// </summary>
+        public override void UpdateState()
+        {
+            beginOfUpdateStateEvent?.Invoke(this);
+            InitializeDataFromSensor();
+            endOfUpdateStateEvent?.Invoke(this);
+        }
+
+        private void InitializeDataFromSensor()
+        {
+            int n = sensorList.Count;
+            for (int i = 0; i < n; i++)
+            {
+                ISensor s = sensorList[i];
+                switch (s.GetSensorType())
+                {
+                    case SensorType.sfloatarray:
+                        var fv = s.GetFloatArrayValue();
+                        if (fv == null)
+                        {
+                            throw new System.Exception("Error: array of float sensor " + s.GetName() + " returning null value!");
+                        }
+                        SetStateAsFloatArray(i, s.GetKey(), fv);
+                        break;
+                    case SensorType.sfloat:
+                        var fv2 = s.GetFloatValue();
+                        SetStateAsFloat(i, s.GetKey(), fv2);
+                        break;
+                    case SensorType.sint:
+                        var fv3 = s.GetIntValue();
+                        SetStateAsInt(i, s.GetKey(), fv3);
+                        break;
+                    case SensorType.sintarray:
+                        var v = s.GetIntArrayValue();
+                        SetStateAsIntArray(i, s.GetKey(), v);
+                        break;
+                    case SensorType.sstring:
+                        var fv4 = s.GetStringValue();
+                        if (fv4 == null)
+                        {
+                            throw new System.Exception("Error: string sensor " + s.GetName() + " returning null value!");
+                        }
+                        SetStateAsString(i, s.GetKey(), fv4);
+                        break;
                     case SensorType.sbool:
-						var fv5 = s.GetBoolValue();
-						SetStateAsBool(i, s.GetKey(), fv5);
-						break;
-					case SensorType.sbytearray:
-						var fv6 = s.GetByteArrayValue();
-						if (fv6 == null)
-						{
-							throw new System.Exception("Error: byte array sensor " + s.GetName() + " returning null value!");
-						}
-						SetStateAsByteArray(i, s.GetKey(), fv6);
-						break;
+                        var fv5 = s.GetBoolValue();
+                        SetStateAsBool(i, s.GetKey(), fv5);
+                        break;
+                    case SensorType.sbytearray:
+                        var fv6 = s.GetByteArrayValue();
+                        if (fv6 == null)
+                        {
+                            throw new System.Exception("Error: byte array sensor " + s.GetName() + " returning null value!");
+                        }
+                        SetStateAsByteArray(i, s.GetKey(), fv6);
+                        break;
                     case SensorType.sstrings:
                         var fv7 = s.GetStringValues();
                         if (fv7 == null)
@@ -521,42 +600,45 @@ namespace ai4u
                         SetStateAsStringArray(i, s.GetKey(), fv7);
                         break;
                     default:
-						break;
-				}
-			}
-			SetStateAsBool(n, "__ctrl_paused__", ControlInfo.paused);
-			SetStateAsBool(n+1, "__ctrl_stopped__", ControlInfo.stopped);
-			SetStateAsBool(n+2, "__ctrl_applyingAction__", ControlInfo.applyingAction);
-			SetStateAsInt(n+3, "__ctrl_frameCounter__", ControlInfo.frameCounter);
-			SetStateAsInt(n+4, "__ctrl_skipFrame__", ControlInfo.skipFrame);
-			SetStateAsBool(n+5, "__ctrl_repeatAction__", ControlInfo.repeatAction);
-			SetStateAsBool(n+6, "__ctrl_envMode__", ControlInfo.envmode);
-		}
-		
-		private void ResetPlayer()
-		{
-			nSteps = 0;
-			reward = 0;
-			truncated = false;
-			Done = false;
-			firstTouch = new Dictionary<string, bool>(); 
-			UpdateState();
-			NotifyReset();
-		}
-		
-		private bool checkFirstTouch(string tag){
-			if (firstTouch.ContainsKey(tag)) {
-				return false;
-			} else {
-				firstTouch[tag] = false;
-				return true;
-			}
-		}
-		
-		private bool TryGetSensor(string key, out ISensor s)
-		{
-			return sensorsMap.TryGetValue(key, out s);
-		}
-	}
-}
+                        break;
+                }
+            }
+            SetStateAsBool(n, "__ctrl_paused__", ControlInfo.paused);
+            SetStateAsBool(n + 1, "__ctrl_stopped__", ControlInfo.stopped);
+            SetStateAsBool(n + 2, "__ctrl_applyingAction__", ControlInfo.applyingAction);
+            SetStateAsInt(n + 3, "__ctrl_frameCounter__", ControlInfo.frameCounter);
+            SetStateAsInt(n + 4, "__ctrl_skipFrame__", ControlInfo.skipFrame);
+            SetStateAsBool(n + 5, "__ctrl_repeatAction__", ControlInfo.repeatAction);
+            SetStateAsBool(n + 6, "__ctrl_envMode__", ControlInfo.envmode);
+        }
 
+        private void ResetPlayer()
+        {
+            nSteps = 0;
+            reward = 0;
+            truncated = false;
+            Done = false;
+            firstTouch = new Dictionary<string, bool>();
+            UpdateState();
+            NotifyReset();
+        }
+
+        private bool checkFirstTouch(string tag)
+        {
+            if (firstTouch.ContainsKey(tag))
+            {
+                return false;
+            }
+            else
+            {
+                firstTouch[tag] = false;
+                return true;
+            }
+        }
+
+        private bool TryGetSensor(string key, out ISensor s)
+        {
+            return sensorsMap.TryGetValue(key, out s);
+        }
+    }
+}

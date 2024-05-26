@@ -35,7 +35,7 @@ namespace ai4u
 					}
 				}
 			}
-			this.shape = new int[1]{size};
+			this.shape = new int[1]{size * stackedObservations};
 			this.stack = new HistoryStack<float>(this.shape[0]);
 		}
 
