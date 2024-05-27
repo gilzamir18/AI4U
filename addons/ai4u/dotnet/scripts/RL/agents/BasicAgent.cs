@@ -636,7 +636,7 @@ namespace ai4u
             }
         }
 
-        private bool TryGetSensor(string key, out ISensor s)
+        public bool TryGetSensor(string key, out ISensor s)
         {
             return sensorsMap.TryGetValue(key, out s);
         }

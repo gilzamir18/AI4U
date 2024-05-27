@@ -5,7 +5,9 @@ using ai4u;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using System.Linq;
-
+using System.IO;
+using System;
+using System.Drawing;
 namespace  ai4u;
 
 ///<summary> An object of NeuralNetController allows the control of an agent through a 
@@ -122,7 +124,7 @@ public partial class NeuralNetController : Controller
 			for (int i = 0; i < action.Length; i++)
 			{
 				var d = (modelOutput.rangeMax[i]-modelOutput.rangeMin[i]);
-				action[i] = (action[i] + 1)/2;
+				action[i] = (action[i] + 1.0f)/2.0f;
 				action[i] = modelOutput.rangeMin[i] + action[i] * d;
 			}
 			return ai4u.Utils.ParseAction(mainOutput, action);
@@ -164,6 +166,30 @@ public partial class NeuralNetController : Controller
 		return GetStateAsFloatArray(inputName2Idx[name]);
 	}
 
+	private float[] GetGrayImageInputAsArray(string name, int width = 61, int height = 61, Image.Format format = Image.Format.L8)
+	{
+		string content = GetStateAsString(inputName2Idx[name]);
+		string[] streams = content.Trim().Split(' ');
+		float[] data = new float[width * height * streams.Length];
+		int k = 0;
+		for (int i = 0; i < streams.Length; i++)
+		{
+			byte[] bytes = System.Convert.FromBase64String(streams[i]);
+			
+			Image image = new Image();
+			image.LoadPngFromBuffer(bytes);
+			for (int x = 0; x < width; x++)
+			{
+				for (int y = 0; y < height; y++)
+				{
+					data[k] = image.GetPixel(y, x).Luminance;
+					k ++;
+				}
+			}
+		}
+		return data;
+	}
+
 	/// <summary>
 	/// This method runs the current ONNX model with current perceptions of the agent. 
 	/// </summary>
@@ -175,20 +201,36 @@ public partial class NeuralNetController : Controller
 		for (int i = 0; i < metadata.inputs.Length; i++)
 		{
 			var inputName = metadata.inputs[i].name;
-			//GD.Print(inputName);
 			var shape = metadata.inputs[i].shape;
-			var dataDim = shape.Length - 1;
-			DenseTensor<float> t;
-			if (dataDim  >= 1)
+			var dataDim = shape.Length;
+			
+			if (dataDim  == 1)
 			{ 
 				System.Memory<float> mem = new System.Memory<float>(GetInputAsArray(inputName));
-				t = new DenseTensor<float>( mem, shape );
+				DenseTensor<float> t = new DenseTensor<float>( mem, new int[2]{1, shape[0]} );
+				inputs.Add(NamedOnnxValue.CreateFromTensor<float>(inputName, t));
+			}
+			else if (dataDim == 2)
+			{
+
+				int width = shape[0];
+				int height = shape[1];
+
+				System.Memory<float> mem = new System.Memory<float>(GetGrayImageInputAsArray(inputName, width, height));
+				DenseTensor<float> t = new DenseTensor<float>( mem, new int[3]{1, width, height});
+				inputs.Add(NamedOnnxValue.CreateFromTensor<float>(inputName, t));
+			} else if (dataDim == 3)
+			{
+				int width = shape[1];
+				int height = shape[2];
+				System.Memory<float> mem = new System.Memory<float>(GetGrayImageInputAsArray(inputName, width, height));
+				DenseTensor<float> t = new DenseTensor<float>( mem, new int[4]{1, shape[0], width, height});
+				inputs.Add(NamedOnnxValue.CreateFromTensor<float>(inputName, t));
 			}
 			else
 			{
 				throw new System.Exception($"Controller configuration: unsuported data dimenstion: {shape}. Check agetn's environment configuration by Perception Key {inputName}.");
 			}
-			inputs.Add(NamedOnnxValue.CreateFromTensor<float>(inputName, t));
 		}
 
 

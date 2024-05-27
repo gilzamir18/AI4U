@@ -4,12 +4,14 @@ using System;
 
 namespace ai4u;
 
-public abstract partial class MoveActuator : Actuator
+public partial class MoveActuator : Actuator
 {
 
-    public abstract bool OnGround
+    public virtual bool OnGround
     {
-        get;
+        get
+        {
+            return true;
+        }
     }
-
 }

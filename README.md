@@ -11,15 +11,20 @@ The Python side of the AI4U can be installed using local pip package. To install
 
     pip install -e . 
 
-This command allows you train and run an agent living in a Godot scene. 
+This command allows you train and run an agent living in a Godot scene.
+
+# Tutorials
+
+* [Introduction](doc/introduction.md)
+
 
 # Requirements
 * Godot 4.2.* Mono Version (tested only in Godot 4.2.2 stable, mono version, Windows 11)
 * Python 3.10 (Python 3.12 was tested in Ubuntu 24.04 using Godot 4.2.2 with DotNet and virtual environment)
+* Micrsoft.ML.OnnxRuntime
 * Gynasium
 
 # Demo Projects
-
 [Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
 
 

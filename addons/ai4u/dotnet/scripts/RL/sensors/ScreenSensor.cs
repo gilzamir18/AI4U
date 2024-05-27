@@ -60,22 +60,18 @@ public partial class ScreenSensor : Sensor
 
     public override string[] GetStringValues()
     {
-
-        if (agent != null && !agent.Done)
+        currentImg = GetViewport().GetTexture().GetImage();
+        
+        if (grayScale)
         {
-            currentImg = GetViewport().GetTexture().GetImage();
-            
-            if (grayScale)
-            {
-                currentImg.Convert(Image.Format.L8);
-            }
-            currentImg.Resize(width, height);
-            var dt = currentImg.SavePngToBuffer();
+            currentImg.Convert(Image.Format.L8);
+        }
+        currentImg.Resize(width, height);
+        var dt = currentImg.SavePngToBuffer();
+        history.Enqueue(System.Convert.ToBase64String(dt));
+        while (history.Count < stackedObservations)
+        {
             history.Enqueue(System.Convert.ToBase64String(dt));
-            while (history.Count < stackedObservations)
-            {
-                history.Enqueue(System.Convert.ToBase64String(dt));
-            }
         }
 
         return history.Values;

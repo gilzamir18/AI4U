@@ -108,7 +108,6 @@ namespace  ai4u
 
         override public string GetAction()
 		{
-			GD.Print(actionName);
 			var action = ai4u.Utils.ParseAction(actionName, actionValue);
 			if (receivedResetAction)
 			{

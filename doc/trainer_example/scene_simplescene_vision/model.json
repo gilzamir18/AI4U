@@ -1,1 +1,0 @@
-{"inputs":[{"name":"vision","shape":[4,186],"type":5,"rangeMin":0,"rangeMax":1,"dataType":5},{"name":"array","shape":[4,11],"type":5,"rangeMin":0,"rangeMax":1,"dataType":5}],"outputs":[{"name":"move","isContinuous":true,"shape":[4],"rangeMin":[0,-1,0,0],"rangeMax":[1,1,1,1]}]}

@@ -138,7 +138,10 @@ class BasicGymController(BasicController):
             #im = im.resize((modelinput['shape'][1], modelinput['shape'][2]))
             #im.save("/home/gilzamir/tmp/frame_%d_%d.jpeg"%(info['steps'], i))
             i += 1
-            frames.append(np.array(im, dtype=np.int8))
+            frames.append(np.array(im, dtype=np.uint8))
+        #print("-----------------------------------------------------------------------------")
+        #print(frames[-1])
+        #print("-----------------------------------------------------------------------------")
         vision = np.reshape(np.array(frames), modelinput['shape'])
         return  np.array([vision], dtype=np.uint8)
 
