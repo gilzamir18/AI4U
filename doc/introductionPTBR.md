@@ -100,7 +100,6 @@ Agora vamos criar um agente que aprende a se aproximar e a tocar o alvo sem cair
 *Figure 7. Versão parcial da cena.*
 
 
-
 Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na Godot, usamos o eixo z para indicar a direção frontal de um objeto 3D. Contudo, este eixo não fica visível e, quando o agente estiver se movimentando na cena, não saberemos qual o seu lado da frente, pois a capsula é simétrica. Para resolvermos isso, em *assets/3DModel*, selecione o modelo Arrow.dae e o arraste como filho de RigidBody3D. Altere as dimensões e a orientação da seta para ficar como mostrado na Figura 8.
 
 
