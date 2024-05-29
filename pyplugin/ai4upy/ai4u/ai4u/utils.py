@@ -168,8 +168,11 @@ def eval_from(config, parameter, default_value):
 def bemakercmd_parser(cmdname, args=None):
     if args is None:
         args = []
-    if hasattr(args, '__len__'):
+
+    if args is list:
         nsize = len(args)
+    elif args is np.ndarray:
+        nsize = args.size()
     else:
         nsize = 1
         args = [args]

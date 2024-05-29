@@ -128,7 +128,9 @@ class BasicGymController(BasicController):
     def loadarrayfrominput(self, modelinput, info):
         return  np.array([ info[modelinput['name']] ], dtype=codetypes[modelinput['type']])
     
-    def loadimagefrominput(self, modelinput, info, imgshape):
+    def loadimagefrominput(self, modelinput, info, imgshape=None):
+        if imgshape is None:
+            imgshape = modelinput['shape']
         img_streams = info[modelinput['name']]
         frames = []
         i = 0

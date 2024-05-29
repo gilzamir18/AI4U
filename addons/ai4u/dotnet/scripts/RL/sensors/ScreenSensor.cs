@@ -36,6 +36,8 @@ public partial class ScreenSensor : Sensor
     {
         MakeData();
         this.agent = (BasicAgent)agent;
+        rangeMin = 0;
+        rangeMax = 255;
     }
 
     private void MakeData()
