@@ -7,11 +7,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 
 namespace ai4u
-{	
-	[Obsolete("RayCastingSensor will be discontinued soon. Please use LinearRayCastingSensor instead!")]
-	public partial class RayCastingSensor : Sensor
-	{
-		
+{
+    [Tool]
+    public partial class RayCastingSensor : Sensor
+	{	
 		[Export]
 		public int[] groupCode;
 		[Export]
@@ -50,10 +49,8 @@ namespace ai4u
 		public bool debugEnabled = false;
 
 		[Export]
-		private Color detectionFailColor = new Color(1, 1, 1, 1);
+		private Color debugColor = new Color(1, 1, 1, 1);
 
-		[Export]
-		private Color detectionSuccessColor = new Color(1, 0, 0, 1);
 
 		[Export]
 		public bool flattened = false;
@@ -66,29 +63,60 @@ namespace ai4u
 		[Export]
 		private float[] worldDataRange = {0, 255};
 
+        [Export]
+        public bool returnDistance = false;
 
-		private Dictionary<string, int> mapping;
+        [Export]
+        public bool normalizeDistance = false;
+
+        private Dictionary<string, int> mapping;
 		private Ray[,] raysMatrix = null;
 		private HistoryStack<float> history;
 		private PhysicsDirectSpaceState3D spaceState;
-		
+        private LineDrawer lineDrawer = null;
 
-		public override void OnSetup(Agent agent) 
+        public override void _Ready()
+        {
+            if (Engine.IsEditorHint())
+            {
+                lineDrawer = new LineDrawer();
+                lineDrawer.SetColor(debugColor);
+                AddChild(lineDrawer);
+                lineDrawer.StartMeshes();
+            }
+        }
+
+
+        public override void OnSetup(Agent agent) 
 		{
-			normalized = _normalized;
+
+            int k = 1;
+            if (returnDistance)
+            {
+                k = 2;
+            }
+
+            normalized = _normalized;
 			rangeMin = modelDataRange[0];
 			rangeMax = modelDataRange[1];
 
 			type = SensorType.sfloatarray;
 			if (flattened)
 			{
-				shape = new int[1]{stackedObservations * hSize * vSize};
+				shape = new int[1]{stackedObservations * hSize * vSize * k};
 				history = new HistoryStack<float>(shape[0]);
 			}
 			else
 			{
-				shape = new int[3]{stackedObservations, hSize,  vSize};
-				history = new HistoryStack<float>(shape[0] * shape[1] * shape[2]);	
+				if (k == 1)
+				{
+					shape = new int[3] { stackedObservations, hSize, vSize };
+				}
+				else
+				{
+					shape = new int[4] { k, stackedObservations, hSize, vSize };
+				}
+				history = new HistoryStack<float>(k * shape[0] * shape[1] * shape[2]);	
 			}
 			
 			agent.AddResetListener(this);
@@ -110,13 +138,19 @@ namespace ai4u
 			Vector3 forward = aim.Z.Normalized();
 			Vector3 up = aim.Y.Normalized();
 			Vector3 right = aim.X.Normalized();
-			UpdateRaysMatrix(eye.GlobalTransform.Origin, forward, up, right, fieldOfView);
+			StartRays(eye.GlobalTransform.Origin, forward, up, right, fieldOfView);
 			return history.Values;
 		}
 
-		private void UpdateRaysMatrix(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 45.0f)
+		private void StartRays(Vector3 position, Vector3 forward, Vector3 up, Vector3 right, float fieldOfView = 45.0f, bool inEditor = false)
 		{
-			float vangle = 2 * fieldOfView / hSize;
+
+            if (lineDrawer != null)
+            {
+                lineDrawer.Clear();
+            }
+
+            float vangle = 2 * fieldOfView / hSize;
 			float hangle = 2 * fieldOfView / vSize;
 
 			
@@ -139,16 +173,21 @@ namespace ai4u
 						k2 = 0;
 					}
 					var direction = fwd.Rotated(right, Mathf.DegToRad( (iangle * k2 + verticalShift) + hangle * j)).Normalized();
-					raysMatrix[i, j] =  new Ray(position, direction);
-					UpdateView(i, j, debugline);
-					debugline ++;
+					var ray =  new Ray(position, direction);
+					if (inEditor)
+					{
+						ThrowRayInEditor(ray);
+					}
+					else
+					{
+                        ThrowRay(ray);
+                    }
 				}
 			}
 		}
 		
-		public void UpdateView(int i, int j, int debug_line = 0)
+		public void ThrowRay(Ray myray)
 		{
-			var myray = raysMatrix[i,j];
 			var query = PhysicsRayQueryParameters3D.Create(myray.Origin, myray.Origin + myray.Direction*visionMaxDistance, collisionMask);
 			
 			if (selfExclude)
@@ -173,7 +212,8 @@ namespace ai4u
 						if (mapping.ContainsKey(g))
 						{
 							int code = mapping[g];
-							AddValueToHistory(code);
+							AddCodeToHistory(code);
+							AddDistanceToHistory(t);
 							isTagged = true;
 							break;
 						}
@@ -181,43 +221,114 @@ namespace ai4u
 				}
 				if (!isTagged)
 				{
-					AddValueToHistory(noObjectCode);
+					AddCodeToHistory(noObjectCode);
+					AddDistanceToHistory(t);
 				}				
 			}
 			else
 			{
-				AddValueToHistory(noObjectCode);
+				AddCodeToHistory(noObjectCode);
+				AddDistanceToHistory(0);
 			}
-			if (debugEnabled)
-			{
-				if (isTagged) {
-					/*GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
-																		myray.Origin + myray.Direction * visionMaxDistance, 
-																		detectionSuccessColor, new Color(0, 1, 0, 1), 1, 10);*/
-				} else 
-				{
-					/*GetNode<LineDrawer>("/root/LineDrawer").Draw_Line3D(debug_line, myray.Origin, 
-																			myray.Origin + myray.Direction * visionMaxDistance, 
-																			detectionFailColor, 
-																			new Color(0, 0, 0, 1), 1, 10); */					
+            if (debugEnabled)
+            {
+                if (isTagged)
+                {
+                    lineDrawer.AddLine(myray.Origin, myray.Origin + myray.Direction * visionMaxDistance);
+                }
+                else
+                {
+                    lineDrawer.AddLine(myray.Origin, myray.Origin + myray.Direction * visionMaxDistance);
+                }
+                lineDrawer.DrawLines();
+            }
+        }
+
+        public void ThrowRayInEditor(Ray myray)
+        {
+            var query = PhysicsRayQueryParameters3D.Create(myray.Origin, myray.Origin + myray.Direction * visionMaxDistance, collisionMask);
+
+            var result = this.spaceState.IntersectRay(query);//new Godot.Collections.Array { agent.GetBody() }
+            bool isTagged = false;
+            float t = -1;
+            if (result.Count > 0)
+            {
+                t = myray.GetDist((Vector3)result["position"]);
+
+                Node3D gobj = (Node3D)result["collider"];
+
+                var groups = gobj.GetGroups();
+
+                if (t <= visionMaxDistance)
+                {
+                    foreach (string g in groups)
+                    {
+                        if (mapping.ContainsKey(g))
+                        {
+                            int code = mapping[g];
+                            AddCodeToHistory(code);
+							AddDistanceToHistory(t);
+                            isTagged = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isTagged)
+                {
+                    AddCodeToHistory(noObjectCode);
+					AddDistanceToHistory(t);
 				}
-				/*GetNode<LineDrawer>("/root/LineDrawer").Redraw();*/
+            }
+            else
+            {
+                AddCodeToHistory(noObjectCode);
+				AddDistanceToHistory(0);
 			}
-		}
+            if (debugEnabled)
+            {
+                if (isTagged)
+                {
+                    lineDrawer.AddLine(myray.Origin, myray.Origin + myray.Direction * visionMaxDistance);
+                }
+                else
+                {
+                    lineDrawer.AddLine(myray.Origin, myray.Origin + myray.Direction * visionMaxDistance);
+                }
+                lineDrawer.DrawLines();
+            }
+        }
 
-		private void AddValueToHistory(float v)
+        private void AddCodeToHistory(float v)
 		{
-			if (normalized)
+			if (history != null)
 			{
-				history.Push( MapRange(v, worldDataRange[0], worldDataRange[1], modelDataRange[0], modelDataRange[1] ) );
-			}
-			else
-			{
-				history.Push(v);
+				if (normalized)
+				{
+					history.Push(MapRange(v, worldDataRange[0], worldDataRange[1], modelDataRange[0], modelDataRange[1]));
+				}
+				else
+				{
+					history.Push(v);
+				}
 			}
 		}
 
-		public static float MapRange(float value, float fromSource, float toSource, float fromTarget, float toTarget)
+        private void AddDistanceToHistory(float v)
+        {
+            if (returnDistance && history != null)
+            {
+                if (normalizeDistance)
+                {
+                    history.Push(MapRange(v, 0, float.MaxValue, 0, 1));
+                }
+                else
+                {
+                    history.Push(v);
+                }
+            }
+        }
+
+        public static float MapRange(float value, float fromSource, float toSource, float fromTarget, float toTarget)
 		{
 			// Primeiro, normalizamos o valor de entrada para o intervalo [0, 1]
 			float normalizedValue = (value - fromSource) / (toSource - fromSource);
@@ -248,6 +359,27 @@ namespace ai4u
 				mapping[name] = code;
 			}
 			raysMatrix = new Ray[hSize, vSize];
-		} 
-	}
+		}
+
+        public override void _PhysicsProcess(double delta)
+        {
+            if (Engine.IsEditorHint())
+            {
+                if (debugEnabled && eye != null)
+                {
+                    lineDrawer.SetColor(debugColor);
+                    if (spaceState == null)
+                    {
+                        var spid = PhysicsServer3D.SpaceCreate();
+                        spaceState = PhysicsServer3D.SpaceGetDirectState(spid);
+                    }
+                    var aim = eye.GlobalTransform.Basis;
+                    Vector3 forward = aim.Z.Normalized();
+                    Vector3 up = aim.Y.Normalized();
+                    Vector3 right = aim.X.Normalized();
+                    StartRays(eye.GlobalTransform.Origin, forward, up, right, fieldOfView, true);
+                }
+            }
+        }
+    }
 }
