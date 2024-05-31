@@ -7,11 +7,15 @@ The Godot version of the AI4U get advantage of the Godot architecture and facili
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
 # Use ai4upy for Training
-The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy and run the command:
+The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy/ai4u and run the command:
 
     pip install -e . 
 
-This command allows you train and run an agent living in a Godot scene.
+Additionally, install the libraries related to training. To do this, navigate to the `pyplugin` directory and run the following command:
+
+    pip install -r sb3_requirements.txt
+
+This command allows you to train and run an agent within a Godot scene.
 
 # Tutorials
 
@@ -19,10 +23,11 @@ This command allows you train and run an agent living in a Godot scene.
 
 
 # Requirements
-* Godot 4.2.* Mono Version (tested only in Godot 4.2.2 stable, mono version, Windows 11)
-* Python 3.10 (Python 3.12 was tested in Ubuntu 24.04 using Godot 4.2.2 with DotNet and virtual environment)
-* Micrsoft.ML.OnnxRuntime
-* Gynasium
+* Godot 4.2.2 Mono Version.
+* Python 3.12.
+* Micrsoft.ML.OnnxRuntime.
+* Gynasium.
+* Tested in Windows 11 and Ubuntu 24.04.
 
 # Demo Projects
 [Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
