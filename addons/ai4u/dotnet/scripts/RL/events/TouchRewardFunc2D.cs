@@ -11,7 +11,7 @@ namespace ai4u
 		private Node2D target;
 
 		[Export]
-		private float _collisionInterval = 5;
+		private float _collisionCheckInterval = 5;
 		
 		[Export]
 		private bool onlyOneTime = true;
@@ -34,6 +34,7 @@ namespace ai4u
 				configured = true;
 				agent.AddResetListener(this);
 				this.agent = (BasicAgent)agent;
+				this.agent.OnStepEnd += PhysicsUpdate;
 				var body = this.agent.GetAvatarBody();
 
 				if (body.GetType() == typeof(CharacterBody2D))
@@ -80,14 +81,11 @@ namespace ai4u
             }
         }
 
-		public override void _PhysicsProcess(double delta)
+		public void PhysicsUpdate(BasicAgent agent)
         {
-            base._PhysicsProcess(delta);
-
-
-			if (isCharacterBody && (!onlyOneTime || !entered))
+			if (agent.SetupIsDone && agent.Alive() && isCharacterBody && (!onlyOneTime || !entered))
             {
-				this._collisionIntervalCoolDown -= (float)delta;
+				this._collisionIntervalCoolDown -= (float)GetPhysicsProcessDeltaTime();
 				if (this._collisionIntervalCoolDown > 0)
 				{
 					return;
@@ -99,12 +97,14 @@ namespace ai4u
                     var kc = characterBody.GetSlideCollision(i);
     
                     var n = (Node)kc.GetCollider();
-                    if (n == target)
+                    if (n == target && !entered)
                     {
 						entered = true;
+						GD.Print(" " + agent.Alive());
                         acmReward += this.reward;
 						eval = true;
-						this._collisionIntervalCoolDown = this._collisionInterval; 
+						this._collisionIntervalCoolDown = this._collisionCheckInterval; 
+						break;
                     }
                 }
             }
@@ -131,6 +131,8 @@ namespace ai4u
 		{
 			eval = false;
 			acmReward = 0.0f;
+			entered = false;
+			_collisionIntervalCoolDown = 0;
 		}
 	}
 }

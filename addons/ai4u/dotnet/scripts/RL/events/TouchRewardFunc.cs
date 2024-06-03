@@ -11,7 +11,7 @@ namespace ai4u {
 
 		[ExportCategory("CharacterBody3D Options")]
 		[Export]
-		private float _collisionInterval = 5;
+		private float _collisionCheckInterval = 5;
 		[Export]
 		private bool onlyOneTime = true;
 
@@ -36,6 +36,7 @@ namespace ai4u {
 				configured = true;
 				agent.AddResetListener(this);
 				this.agent = (BasicAgent) agent;
+				this.agent.OnStepEnd += PhysicsUpdate;
 				var body = this.agent.GetAvatarBody();
 				if (body.GetType() == typeof(RigidBody3D))
                 {
@@ -59,14 +60,13 @@ namespace ai4u {
 			}
 		}
 
-        public override void _PhysicsProcess(double delta)
+        public void PhysicsUpdate(BasicAgent agent)
         {
-            base._PhysicsProcess(delta);
 
 
-			if (isCharacterBody && (!onlyOneTime || !entered))
+			if (agent.SetupIsDone && agent.Alive() && isCharacterBody && (!onlyOneTime || !entered) && !agent.Done)
             {
-				this._collisionIntervalCoolDown -= (float)delta;
+				this._collisionIntervalCoolDown -= (float)this.agent.GetPhysicsProcessDeltaTime();
 				if (this._collisionIntervalCoolDown > 0)
 				{
 					return;
@@ -83,7 +83,8 @@ namespace ai4u {
 						entered = true;
                         acmReward += this.reward;
 						eval = true;
-						this._collisionIntervalCoolDown = this._collisionInterval; 
+						this._collisionIntervalCoolDown = this._collisionCheckInterval; 
+						break;
                     }
                 }
             }

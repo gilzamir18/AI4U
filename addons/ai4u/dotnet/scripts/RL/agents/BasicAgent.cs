@@ -21,52 +21,52 @@ namespace ai4u
         /// <summary>
         /// Event triggered before the reset.
         /// </summary>
-        public event AgentEpisodeHandler beforeTheResetEvent;
+        public event AgentEpisodeHandler OnResetStart;
 
         /// <summary>
         /// Event triggered at the end of an episode.
         /// </summary>
-        public event AgentEpisodeHandler endOfEpisodeEvent;
+        public event AgentEpisodeHandler OnEpisodeEnd;
 
         /// <summary>
         /// Event triggered at the beginning of an episode.
         /// </summary>
-        public event AgentEpisodeHandler beginOfEpisodeEvent;
+        public event AgentEpisodeHandler OnEpisodeStart;
 
         /// <summary>
         /// Event triggered at the end of a step.
         /// </summary>
-        public event AgentEpisodeHandler endOfStepEvent;
+        public event AgentEpisodeHandler OnStepEnd;
 
         /// <summary>
         /// Event triggered at the beginning of a step.
         /// </summary>
-        public event AgentEpisodeHandler beginOfStepEvent;
+        public event AgentEpisodeHandler OnStepStart;
 
         /// <summary>
         /// Event triggered at the beginning of state update.
         /// </summary>
-        public event AgentEpisodeHandler beginOfUpdateStateEvent;
+        public event AgentEpisodeHandler OnStateUpdateStart;
 
         /// <summary>
         /// Event triggered at the end of state update.
         /// </summary>
-        public event AgentEpisodeHandler endOfUpdateStateEvent;
+        public event AgentEpisodeHandler OnStateUpdateEnd;
 
         /// <summary>
         /// Event triggered at the beginning of applying an action.
         /// </summary>
-        public event AgentEpisodeHandler beginOfApplyActionEvent;
+        public event AgentEpisodeHandler OnActionStart;
 
         /// <summary>
         /// Event triggered at the end of applying an action.
         /// </summary>
-        public event AgentEpisodeHandler endOfApplyActionEvent;
+        public event AgentEpisodeHandler OnActionEnd;
 
         /// <summary>
         /// Event triggered when the agent starts.
         /// </summary>
-        public event AgentEpisodeHandler agentStartEvent;
+        public event AgentEpisodeHandler OnAgentStart;
 
         [Export]
         private Node avatarBody;
@@ -341,7 +341,7 @@ namespace ai4u
         public override void ResetReward()
         {
             reward = 0;
-            beginOfStepEvent?.Invoke(this);
+            OnStepStart?.Invoke(this);
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace ai4u
                 rewards[i].OnUpdate();
             }
             brain.OnStepReward(nSteps, Reward);
-            endOfStepEvent?.Invoke(this);
+            OnStepEnd?.Invoke(this);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace ai4u
         /// </summary>
         public override void ApplyAction()
         {
-            beginOfApplyActionEvent?.Invoke(this);
+            OnActionStart?.Invoke(this);
 
             if (MaxStepsPerEpisode > 0 && nSteps >= MaxStepsPerEpisode)
             {
@@ -483,7 +483,7 @@ namespace ai4u
 
             if (!Done)
             {
-                endOfApplyActionEvent?.Invoke(this);
+                OnActionEnd?.Invoke(this);
             }
         }
 
@@ -492,9 +492,9 @@ namespace ai4u
         /// </summary>
         public override void AgentReset()
         {
-            beforeTheResetEvent?.Invoke(this);
+            OnResetStart?.Invoke(this);
             ResetPlayer();
-            beginOfEpisodeEvent?.Invoke(this);
+            OnEpisodeStart?.Invoke(this);
             brain.OnReset(this);
             episodeReward = 0;
         }
@@ -504,7 +504,7 @@ namespace ai4u
         /// </summary>
         public override void AgentStart()
         {
-            agentStartEvent?.Invoke(this);
+            OnAgentStart?.Invoke(this);
         }
 
         /// <summary>
@@ -530,7 +530,7 @@ namespace ai4u
         /// </summary>
         public override void EndOfEpisode()
         {
-            endOfEpisodeEvent?.Invoke(this);
+            OnEpisodeEnd?.Invoke(this);
         }
 
         /// <summary>
@@ -538,9 +538,9 @@ namespace ai4u
         /// </summary>
         public override void UpdateState()
         {
-            beginOfUpdateStateEvent?.Invoke(this);
+            OnStateUpdateStart?.Invoke(this);
             InitializeDataFromSensor();
-            endOfUpdateStateEvent?.Invoke(this);
+            OnStateUpdateEnd?.Invoke(this);
         }
 
         private void InitializeDataFromSensor()

@@ -47,11 +47,11 @@ namespace ai4u
 
 				if (early)
 				{
-					((BasicAgent)agent).beforeTheResetEvent += HandleReset;
+					((BasicAgent)agent).OnResetStart += HandleReset;
 				}
 				else
 				{
-					((BasicAgent)agent).beginOfEpisodeEvent += HandleReset;
+					((BasicAgent)agent).OnEpisodeStart += HandleReset;
 				}
 			
 			}
