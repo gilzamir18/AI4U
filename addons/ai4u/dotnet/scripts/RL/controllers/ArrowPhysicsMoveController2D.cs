@@ -8,7 +8,7 @@ namespace  ai4u
 	/// <summary>
 	/// WASD controller for physics body (rigid or character) game objects.
 	/// </summary>
-	public partial class ArrowPhysicsMoveController : Controller
+	public partial class ArrowPhysicsMoveController2D : Controller
 	{
 		[Export]
 		public string actuatorName = "move";
@@ -46,13 +46,7 @@ namespace  ai4u
 					if (Input.IsActionPressed("ui_up"))
 					{
 						actionName = "move";
-						actionValue[0] = speed;
-					}
-
-					if (Input.IsActionPressed("ui_down"))
-					{
-						actionName = "move";
-						actionValue[0] = -speed;
+						actionValue[2] = jumpPower;
 					}
 
 					if (Input.IsActionPressed("ui_select"))
@@ -67,16 +61,28 @@ namespace  ai4u
 						actionValue[3] = jumpPower;
 					}
 
-					if (Input.IsActionPressed("ui_left"))
+					if (Input.IsKeyPressed(Key.A))
 					{
 						actionName = "move";
 						actionValue[1] = -turnAmount;
 					}
 
-					if (Input.IsActionPressed("ui_right"))
+					if (Input.IsKeyPressed(Key.D))
 					{
 						actionName = "move";
 						actionValue[1] = turnAmount;
+					}
+
+					if (Input.IsActionPressed("ui_left"))
+					{
+						actionName = "move";
+						actionValue[0] = -speed;
+					}
+
+					if (Input.IsActionPressed("ui_right"))
+					{
+						actionName = "move";
+						actionValue[0] = speed;
 					}
 
 					if (Input.IsActionJustPressed("ui_cancel") )

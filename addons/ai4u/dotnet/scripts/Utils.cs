@@ -5,6 +5,48 @@ using Godot;
 
 namespace ai4u
 {
+	public struct Ray2D
+	{
+		private Vector2 origin;
+		private Vector2 direction;
+		private Vector2 endPoint;
+		
+		public Ray2D(Vector2 o, Vector2 d)
+		{
+			this.origin = o;
+			this.direction = d.Normalized();
+			this.endPoint = origin + direction;
+		}
+		
+		public Vector2 Origin
+		{
+			get
+			{
+				return origin;
+			}
+		}
+		
+		public Vector2 Direction
+		{
+			get
+			{
+				return direction;
+			}
+		}
+		
+		public Vector2 EndPoint
+		{
+			get
+			{
+				return endPoint;
+			}
+		}
+		
+		public float GetDist(Vector2 q)
+		{
+			return (q - origin).Length();
+		}
+	}
 
 
 	public struct Ray

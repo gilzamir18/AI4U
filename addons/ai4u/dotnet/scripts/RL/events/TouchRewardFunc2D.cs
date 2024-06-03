@@ -9,12 +9,24 @@ namespace ai4u
 		public float reward = 0.0f;
 		[Export]
 		private Node2D target;
+
+		[Export]
+		private float _collisionInterval = 5;
+		
+		[Export]
+		private bool onlyOneTime = true;
+
 		private float acmReward = 0.0f;
 		private BasicAgent agent;
 		private bool configured = false;
 		private bool eval = false;
-		private RigidBody2D agentBody;
+		private RigidBody2D rigidBody;
 
+		private CharacterBody2D characterBody;
+		private float _collisionIntervalCoolDown = 0;
+		private bool isCharacterBody = false;
+
+		private bool entered = false;
 		public override void OnSetup(Agent agent)
 		{
 			if (!configured)
@@ -22,11 +34,22 @@ namespace ai4u
 				configured = true;
 				agent.AddResetListener(this);
 				this.agent = (BasicAgent)agent;
-				agentBody = this.agent.GetAvatarBody() as RigidBody2D;
-				agentBody.BodyEntered += OnEntered;
-				if (target is Area2D)
+				var body = this.agent.GetAvatarBody();
+
+				if (body.GetType() == typeof(CharacterBody2D))
 				{
-					((Area2D)target).BodyEntered += OnAreaEntered;
+					characterBody = body as CharacterBody2D;
+					isCharacterBody = true;
+				}
+				else
+				{
+					isCharacterBody = false;
+					rigidBody = body  as RigidBody2D;
+					rigidBody.BodyEntered += OnEntered;
+					if (target is Area2D)
+					{
+						((Area2D)target).BodyEntered += OnAreaEntered;
+					}
 				}
 			}
 		}
@@ -39,7 +62,7 @@ namespace ai4u
 
 		public void OnAreaEntered(Node body)
 		{
-			if (body == agentBody)
+			if (body == rigidBody)
 			{
 				if (target.Visible)
 				{
@@ -56,6 +79,37 @@ namespace ai4u
                 acmReward += this.reward;
             }
         }
+
+		public override void _PhysicsProcess(double delta)
+        {
+            base._PhysicsProcess(delta);
+
+
+			if (isCharacterBody && (!onlyOneTime || !entered))
+            {
+				this._collisionIntervalCoolDown -= (float)delta;
+				if (this._collisionIntervalCoolDown > 0)
+				{
+					return;
+				}
+
+                var nc = characterBody.GetSlideCollisionCount();
+                for (int i = 0; i < nc; i++)
+                {
+                    var kc = characterBody.GetSlideCollision(i);
+    
+                    var n = (Node)kc.GetCollider();
+                    if (n == target)
+                    {
+						entered = true;
+                        acmReward += this.reward;
+						eval = true;
+						this._collisionIntervalCoolDown = this._collisionInterval; 
+                    }
+                }
+            }
+        }
+
 
 		public override bool Eval()
 		{
