@@ -1,4 +1,4 @@
-# Introdução
+# Não Quebre o Jogo
 
 O objeto base de toda interação de agente com o ambiente é defindo pela classe ai4u.BasicAgent. Apesar desta classe implementar a classe abstrata ai4u.Agent, se você quiser criar uma classe própria de agente, é altamente recomendado que sua nova classe de agente herde de ai4u.BasicAgent. Exceto se você realmente sabe o que está fazendo. Podemos ser mais radicais e sugerir que você nunca tente criar uma classe de agente de sua autoria, toda personalização do framework deveria ser feita nos sensores, atuadores, controladores e funções de recompensa. Mas, ainda assim, se você quiser se arriscar, é possível (embora muito difícil) criar sua própria classe de agente sem quebrar as coisas. 
 

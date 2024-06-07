@@ -1,4 +1,4 @@
-# Event Handler
+# Events
 
 An `ai4u.BasicAgent` object provides a set of events that allow you to intercept relevant events occurring during the agent's lifecycle. By intercepting an event, you can, for example, change a time indicator on the graphical user interface or even make convenient changes to the environment.
 

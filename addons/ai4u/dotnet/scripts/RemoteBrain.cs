@@ -91,7 +91,9 @@ namespace ai4u
 			}
 			catch(System.Exception e)
 			{
-				throw new System.Exception("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
+				GD.PrintErr("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
+				agent.GetTree().Quit();
+				return false;
 			}
 		}
 	}

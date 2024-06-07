@@ -29,7 +29,6 @@ public partial class CBMoveActuator2D : MoveActuator
     [Export]
     private bool flipWhenTurn = true;
 
-
     [ExportCategory("Action Shape")]
     [Export]
     private float[] actionRangeMin = new float[]{0, -1, -1, -1};
@@ -46,6 +45,19 @@ public partial class CBMoveActuator2D : MoveActuator
     public CBMoveActuator2D()
     {
 
+    }
+
+    public float Gravity 
+    {
+        get
+        {
+            return gravity;
+        }
+
+        set 
+        {
+            gravity = value;
+        }
     }
 
     public override void OnSetup(Agent agent)
@@ -108,7 +120,7 @@ public partial class CBMoveActuator2D : MoveActuator
             {
                 if ( Math.Abs(turn) > precision)
                 {
-                    if (flipWhenTurn)
+                    if (flipWhenTurn && Math.Abs(turnAmount) > precision)
                     {
                         if (turn > 0 && body.Transform.Scale.Y < 0)
                         {

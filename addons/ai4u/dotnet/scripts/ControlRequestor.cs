@@ -333,8 +333,9 @@ namespace ai4u
 				var cmds = RequestEnvControl(agent, request);
 				if (cmds == null)
 				{
-					throw new System.Exception($"AI4U connection error! Agent ID: {agent.ID}.");
-				}
+					GD.PrintErr($"AI4U connection error! Agent ID: {agent.ID}.");
+                    agent.GetTree().Quit();
+                }
 				if (CheckCmd(cmds, "__restart__")) //obsolete
 				{
 					ctrl.frameCounter = -1;

@@ -11,7 +11,7 @@ namespace ai4u
 		private Node2D target;
 
 		[Export]
-		private float _collisionCheckInterval = 5;
+		private float _collisionCheckInterval = 0.2f;
 		
 		[Export]
 		private bool onlyOneTime = true;
@@ -97,11 +97,10 @@ namespace ai4u
                     var kc = characterBody.GetSlideCollision(i);
     
                     var n = (Node)kc.GetCollider();
-                    if (n == target && !entered)
+                    if (n == target)
                     {
 						entered = true;
-						GD.Print(" " + agent.Alive());
-                        acmReward += this.reward;
+						acmReward += this.reward;
 						eval = true;
 						this._collisionIntervalCoolDown = this._collisionCheckInterval; 
 						break;

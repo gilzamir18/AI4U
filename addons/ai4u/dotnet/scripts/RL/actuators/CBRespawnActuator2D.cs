@@ -16,15 +16,15 @@ namespace ai4u
 			private NodePath respawnOptionsPath;
 
 			[Export]
-			private bool radomizeDirection = true;
-
-			[Export]
 			private bool early = true;
 
 			[Export]
 			private bool flipWhenTurn = true;
 
 
+			[Export]
+			private bool randomize = true;
+			
 			private Node nodeRef;
 		
 			private CharacterBody2D cBody;
@@ -75,20 +75,23 @@ namespace ai4u
                 cBody.Velocity = Vector2.Zero;
 				cBody.Transform = reference;
                 cBody.Position = reference.Origin;
-				if (flipWhenTurn)
+				if (randomize)
 				{
-					if (GD.RandRange(0, 1) > 0 && cBody.Transform.Scale.Y < 0)
+					if (flipWhenTurn)
 					{
-						cBody.Scale *= new Vector2(-1, 1);
+						if (GD.RandRange(0, 1) > 0 && cBody.Transform.Scale.Y < 0)
+						{
+							cBody.Scale *= new Vector2(-1, 1);
+						}
+						else if (cBody.Transform.Scale.Y > 0)
+						{
+							cBody.Scale *= new Vector2(-1, 1);
+						}
 					}
-					else if (cBody.Transform.Scale.Y > 0)
+					else
 					{
-						cBody.Scale *= new Vector2(-1, 1);
+						cBody.Rotate(Mathf.DegToRad(-GD.RandRange(0, 360)));
 					}
-				}
-				else
-				{
-					cBody.Rotate(Mathf.DegToRad(-GD.RandRange(0, 360)));
 				}
 			}
 	}
