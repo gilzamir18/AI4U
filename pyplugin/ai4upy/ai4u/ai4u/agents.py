@@ -56,17 +56,14 @@ class BasicController:
         tryreset = True
         while tryreset:
             try:
-                info = self.agent.qout.get()
+                info = self.agent.qout.get(0)
                 tryreset = False
-            except TimeoutError as e:
-                print(f"Trying reset again after {self.agent.timeout} seconds!")
+            except TimeoutError:
                 tryreset = True
-            except Empty as e:
-               print("Empty message in reset. Trying reset again...")
+            except Empty:
                tryreset = True
             except KeyboardInterrupt as e:
-                print("PRESS EXIT")
-                sys.exit(0)
+                info = "halt"
     
         if info == "halt":
             sys.exit(0)
@@ -87,16 +84,17 @@ class BasicController:
         self.agent.qin.put(['act', action])
         info = None
         try:
-            info = self.agent.qout.get(timeout=self.agent.timeout)
-        except TimeoutError as e:
-            print(f"Step timeout after {self.agent.timeout} seconds!")
-            sys.exit(0)
+            while True:
+                try:
+                    info = self.agent.qout.get()
+                    break
+                except TimeoutError:
+                    pass
+                except Empty as e:
+                    info = self.agent.last_info
         except KeyboardInterrupt:
             sys.exit(0)
-        except Empty as e:
-            print("Empty message in request step.")
-            info = self.agent.last_info
-    
+       
         if info=="halt":
             sys.exit(0)
         self.restoreDefaultAction()

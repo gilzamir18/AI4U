@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from typing import Any
 import gymnasium as gym
 from ai4u.controllers import BasicGymController
 from ai4u.appserver import startasdaemon
+
 
 class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""

@@ -1,5 +1,5 @@
 import sys
-import socketserver
+import time
 from .workers import BMWorker
 from .utils import get_int_from, get_bool_from, get_float_from, get_from
 import socket
@@ -17,26 +17,33 @@ class UDPServer:
         self.force_exit = force_exit
         self.max_packet_size = 8192
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.bind((self.host, self.port))
         self.socket.settimeout(timeout)
         self.handler = handler
 
     def listen(self):
+        print("Waiting for your Godot app on {}:{}".format(self.host, self.port))       
+        #print(f"After {self.timeout} seconds, this terminal will automatically shut down if it does not receive a request!")
+        print("Press CTRL+C to exit!")
         try:
-            self.socket.bind((self.host, self.port))
-            print("Waiting for your Godot app on {}:{}".format(self.host, self.port))       
-            print(f"After {self.timeout} seconds, this terminal will automatically shut down if it does not receive a request!")
+            t = 1
             while True:
-                mydata, addr = self.socket.recvfrom(self.max_packet_size)
-                self.handler.handle(self.socket, mydata, addr)
-                #print("Received message from {}: {}".format(addr, data.decode()))
-        except socket.timeout:
-            # Aqui você pode chamar a função desejada após o tempo limite
-            self.handle_exit("Timeout occurred, no message received within {} seconds".format(self.timeout))
+                try:
+                    mydata, addr = self.socket.recvfrom(self.max_packet_size)
+                    self.handler.handle(self.socket, mydata, addr)
+                except socket.timeout:
+                    print("Waiting data from Godot App >> ", "."*t, end="\r")
+                    t += 1
+                    if t > 10:
+                        print(" "*100, end="\r")
+                        t = 1
+                    pass
         except KeyboardInterrupt:
-            self.handle_exit("Exiting...")
+            self.socket.close()
+            self.handle_exit(f"Good bye!!! \n")
         except Exception as e:
-            self.handle_exit(f"Unexpected error: \n {print(traceback.format_exc())}")
-            
+            self.handle_exit(f"Unexpected error: \n {traceback.format_exc()}")
+
     def handle_exit(self, msg):
         print(msg)
         if self.force_exit:
@@ -68,8 +75,7 @@ def create_server(agents, ids, config=None):
     for i in range(len(agents)):
         if not BMWorker.register_agent(agents[i], ids[i], config):
             sys.exit(-1)
-
-    serverUDP = UDPServer(get_from(config, 'server_IP', '127.0.0.1'), get_int_from(config, 'server_port', 8080), get_float_from(config, 'timeout', 30), get_bool_from(config, "force_exit", True), BMUDPHandler())
+    serverUDP = UDPServer(get_from(config, 'server_IP', '127.0.0.1'), get_int_from(config, 'server_port', 8080), get_float_from(config, 'timeout', 2), get_bool_from(config, "force_exit", True), BMUDPHandler())
     serverUDP.max_packet_size = get_int_from(config, 'buffer_size', 8192)
     serverUDP.listen()
 

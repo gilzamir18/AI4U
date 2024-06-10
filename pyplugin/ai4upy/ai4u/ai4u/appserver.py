@@ -26,3 +26,4 @@ def startasdaemon(ids, controllers_classes=None, config=None):
     print("ai4u2godot started...")
     return [agent.controller for agent in agents]
 
+
