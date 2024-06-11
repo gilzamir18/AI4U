@@ -308,6 +308,7 @@ namespace ai4u
                 }
             }
 
+            
             var cmds = controlRequestor.RequestEnvControl(this, request);
             if (cmds == null)
             {

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Godot;
 using System.Text;
+using System;
+using GodotPlugins.Game;
 
 namespace ai4u
 {
@@ -36,25 +38,14 @@ namespace ai4u
 
 	public partial class ControlRequestor : Node
 	{
-		[Export]
-		private float defaultTimeScale = 1.0f; 
-		[Export]
-		private bool physicsMode = true;
-		[Export]
-		private bool computePhysicsTicks = true;
+		[Export] private float defaultTimeScale = 1.0f; 
+		[Export] private bool physicsMode = true;
+		[Export] private bool computePhysicsTicks = true;
 		[Export] int maxPhysicsFrames = 60;
-
-
-		public int skipFrame = 8;
+		[Export] public Godot.Collections.Array<Agent> agentsList { get; set; }
 		
-		public bool repeatAction = false;
-		
-		[Export]
-		public bool stopOnQuit = false;
-		
-		[Export]
-		public Godot.Collections.Array<Agent> agentsList { get; set; }
 		private List<Agent> agents;
+		
 		public override void _Ready()
 		{
 			agents = new List<Agent>();
@@ -68,8 +59,6 @@ namespace ai4u
 			{
 				Agent a = agents[i];
 				a.ControlInfo = new AgentControlInfo();
-				a.ControlInfo.repeatAction = repeatAction;
-				a.ControlInfo.skipFrame = skipFrame;
 				a.SetupAgent(this);
 			}
 
@@ -77,23 +66,24 @@ namespace ai4u
 			if (computePhysicsTicks)
 			{
 				Engine.PhysicsTicksPerSecond = Mathf.Max(maxPhysicsFrames, Mathf.RoundToInt(defaultTimeScale * maxPhysicsFrames));
-			}
-		}
+            }
+        }
 
-		public override void _ExitTree()
-		{
-			if (stopOnQuit)
+
+        public override void _Notification(int what)
+        {
+			if (what == NotificationWMCloseRequest)
 			{
-				foreach(var agent in agents)
-				{
-					RequestCommand request = new RequestCommand(3);
-					request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-					request.SetMessage(1, "__stop__", ai4u.Brain.STR, "stop");
-					request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
-					var cmds = RequestEnvControl(agent, request);
-				}
-			}
-		}
+                foreach (var agent in agents)
+                {
+                    RequestCommand request = new RequestCommand(3);
+                    request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
+                    request.SetMessage(1, "__stop__", ai4u.Brain.STR, "stop");
+                    request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
+                    var cmds = RequestEnvControl(agent, request);
+                }
+            }
+        }
 
 		public Command[] RequestEnvControl(Agent agent, RequestCommand request)
 		{
