@@ -114,7 +114,7 @@ public partial class CBMoveActuator2D : MoveActuator
             // Add the gravity.
             if (!body.IsOnFloor())
             {
-			    velocity.Y += gravity;
+			    velocity.Y += gravity * 10 * (float)delta;
             }
             else
             {
@@ -122,18 +122,14 @@ public partial class CBMoveActuator2D : MoveActuator
                 {
                     if (flipWhenTurn && Math.Abs(turnAmount) > precision)
                     {
-                        if (turn > 0 && body.Transform.Scale.Y < 0)
-                        {
-                            body.Scale *= new Vector2(-1, 1);
-                        }
-                        else if (turn < 0 && body.Transform.Scale.Y > 0)
+                        if ( (turn > 0 && body.Transform.Scale.Y < 0) || (turn < 0 && body.Transform.Scale.Y > 0))
                         {
                             body.Scale *= new Vector2(-1, 1);
                         }
                     }
                     else
                     {
-                        body.Rotate(Mathf.DegToRad(-turn * turnAmount * 100 * (float)delta));
+                        body.Rotate(Mathf.DegToRad(-turn * turnAmount));
                     }
                 }
 
@@ -142,15 +138,15 @@ public partial class CBMoveActuator2D : MoveActuator
 
                 if (jump > 0)
                 {
-                    velocity -= body.GlobalTransform.Y * jump * jumpPower;
+                    velocity -= body.GlobalTransform.Y * jump * jumpPower * 100;
                 }
 
                 bool forwarding = false;
 
                 if (jumpForward > 0)
                 {
-                    velocity -= body.GlobalTransform.Y * jumpForward * jumpPower;
-                    velocity += body.GlobalTransform.X * jumpForwardPower * jumpForward;
+                    velocity -= body.GlobalTransform.Y * jumpForwardPower * jumpForward * 100;
+                    velocity += body.GlobalTransform.X * jumpForwardPower * jumpForward * 100;
                     forwarding = true;
                 }
                 

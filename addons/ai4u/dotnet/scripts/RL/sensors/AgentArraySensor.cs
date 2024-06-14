@@ -18,9 +18,11 @@ namespace ai4u
 			perceptionKey = "__initial_input__";
 			type = SensorType.sfloatarray;
 			shape = new int[]{stackedObservations*data.Length};
+            rangeMin = float.MinValue;
+            rangeMax = float.MaxValue;
 		}
 
-        public void SetArray(int pos, float v)
+        public void SetValue(int pos, float v)
         {
             data[pos] = v;
         }

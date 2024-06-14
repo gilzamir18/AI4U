@@ -79,11 +79,9 @@ namespace ai4u
 				{
 					if (flipWhenTurn)
 					{
-						if (GD.RandRange(0, 1) > 0 && cBody.Transform.Scale.Y < 0)
-						{
-							cBody.Scale *= new Vector2(-1, 1);
-						}
-						else if (cBody.Transform.Scale.Y > 0)
+						int	 d = GD.RandRange(0, 1);
+
+                        if ( (d == 0 && cBody.Transform.Scale.Y < 0) || (d == 1 && cBody.Transform.Scale.Y > 0))
 						{
 							cBody.Scale *= new Vector2(-1, 1);
 						}

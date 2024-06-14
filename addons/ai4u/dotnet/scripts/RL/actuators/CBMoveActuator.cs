@@ -99,13 +99,13 @@ public partial class CBMoveActuator : MoveActuator
             // Add the gravity.
             if (!body.IsOnFloor())
             {
-			    velocity.Y -= gravity;
+			    velocity.Y -= gravity * (float)delta * 10;
             }
             else
             {
                 if ( Math.Abs(turn) > 0)
                 {
-                    body.Rotate(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount * 100 * (float)delta));
+                    body.Rotate(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount));
                 }
 
                 // Get the input direction and handle the movement/deceleration.
@@ -120,8 +120,8 @@ public partial class CBMoveActuator : MoveActuator
 
                 if (jumpForward > 0)
                 {
-                    velocity += body.Transform.Basis.Y * jumpForward * jumpPower;
-                    velocity += body.Transform.Basis.Z * jumpForwardPower * jumpForward;
+                    velocity += body.Transform.Basis.Y * jumpForwardPower * jumpForward * 100;
+                    velocity += body.Transform.Basis.Z * jumpForwardPower * jumpForward * 100;
                     forwarding = true;
                 }
                 
