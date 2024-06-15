@@ -98,8 +98,14 @@ namespace ai4u
         [Export]
         public bool checkEpisodeTruncated = true;
 
+        [ExportCategory("Optional Inputs")]
         [Export]
         internal int initialInputSize = 0;
+
+        [Export]
+        internal float rangeMin = 0;
+        [Export]
+        internal float rangeMax = 1;
 
         /// <summary>
         /// Gets the total reward for the current episode.
@@ -241,6 +247,7 @@ namespace ai4u
             {
                 agentArraySensor = new AgentArraySensor();
                 agentArraySensor.isInput = true;
+                agentArraySensor.SetRange(rangeMin, rangeMax);
                 agentArraySensor.SetAgent(this);
                 sensorList.Add(agentArraySensor);
                 CallDeferred("add_child", agentArraySensor);
