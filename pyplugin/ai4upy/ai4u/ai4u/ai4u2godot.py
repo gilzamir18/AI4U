@@ -27,7 +27,10 @@ class UDPServer:
             print(f"After {self.timeout} seconds, this terminal will automatically shut down if it does not receive a request!")
             while True:
                 mydata, addr = self.socket.recvfrom(self.max_packet_size)
-                self.handler.handle(self.socket, mydata, addr)
+                msg = self.handler.handle(self.socket, mydata, addr)
+                if msg == "halt":
+                    print("AI4U - AppServer is off ...")
+                    break
                 #print("Received message from {}: {}".format(addr, data.decode()))
         except socket.timeout:
             # Aqui você pode chamar a função desejada após o tempo limite
@@ -57,10 +60,12 @@ class BMUDPHandler:
         if  content is not None:
             #self.wfile.write(content.encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
+            return content
         else:
             print("WARNING: returning empty message!")
             #self.wfile.write("".encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
+            return ""
 
 def create_server(agents, ids, config=None):
     if config is None:

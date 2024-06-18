@@ -135,5 +135,7 @@ class BMWorker:
                 return agent.handleEnvCtrl(info)
             else:
                 print("ERROR: invalid target! Set a valid __target__ field when you send a message from Unity Editor.")
+                return "halt"
         else:
             print("ERROR: no registered agent with id ", id)
+            return "halt"

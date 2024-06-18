@@ -4,6 +4,7 @@ import time
 import sys
 from threading import Thread
 from queue import Empty, Queue
+import os
 
 class BasicController:    
     def __init__(self):
@@ -57,6 +58,8 @@ class BasicController:
         while tryreset:
             try:
                 info = self.agent.qout.get()
+                if info == "halt":
+                    break
                 tryreset = False
             except TimeoutError as e:
                 print(f"Trying reset again after {self.agent.timeout} seconds!")
@@ -65,11 +68,11 @@ class BasicController:
                print("Empty message in reset. Trying reset again...")
                tryreset = True
             except KeyboardInterrupt as e:
-                print("PRESS EXIT")
-                sys.exit(0)
+                info = "halt"
     
         if info == "halt":
-            sys.exit(0)
+            print("Agent reset loop is closed ...")
+            sys.exit()
         self.restoreDefaultAction()
         return self.reset_behavior(info)
 
@@ -89,16 +92,16 @@ class BasicController:
         try:
             info = self.agent.qout.get(timeout=self.agent.timeout)
         except TimeoutError as e:
-            print(f"Step timeout after {self.agent.timeout} seconds!")
-            sys.exit(0)
+            info = "halt"
         except KeyboardInterrupt:
-            sys.exit(0)
+            info = "halt"
         except Empty as e:
             print("Empty message in request step.")
             info = self.agent.last_info
     
         if info=="halt":
-            sys.exit(0)
+            print("Agent step loop is closed ...")
+            sys.exit()
         self.restoreDefaultAction()
         self.lastinfo = info
         return info
@@ -131,6 +134,7 @@ class BasicAgent:
         self.timeout = timeout
         self.last_info = None
         t = Thread(target=self.cmdserver)
+        t.daemon = True
         t.start()
 
     def cmdserver(self):
@@ -147,11 +151,13 @@ class BasicAgent:
                 elif cmd[0] == "act":
                     self.action = cmd[1]
                     self.request_action = True
-
+                elif cmd == "halt":
+                    break
                 time.sleep(self.waittime)
             except KeyboardInterrupt as e:
-                print("Exiting...")
-                sys.exit(0)
+                break
+        print("Command receiver is off ...")
+        sys.exit()
 
     def act(self, info):
         self.last_info = info
@@ -206,10 +212,10 @@ class BasicAgent:
             return ("@".join(control))
         if '__stop__' in a:
             print("--*-- GAME IS CLOSED --*--")
-            print(f"This agent will kill in {self.timeout} seconds...")
-            self.qout.put("halt")
-            self.qin.put("halt")
-            sys.exit()
+            self.qout.put("halt", False)
+            self.qin.put("halt", False)
+            print("Trying to stop ...")
+            return "halt"
         if 'wait_command' in a:
             if self.request_reset:
                 self.initial_state = None
