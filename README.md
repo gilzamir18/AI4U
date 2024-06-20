@@ -17,6 +17,9 @@ Additionally, install the libraries related to training. To do this, navigate to
 
 This command allows you to train and run an agent within a Godot scene.
 
+# Try AI4USharp
+An experimental version of AI4U that don't depend of the Python is available [here](https://github.com/gilzamir18/AI4USharp).
+
 # Tutorials
 
 * [Introduction](doc/introduction.md)
