@@ -8,6 +8,7 @@ using System.Linq;
 using System.IO;
 using System;
 using System.Drawing;
+
 namespace  ai4u;
 
 ///<summary> An object of NeuralNetController allows the control of an agent through a 

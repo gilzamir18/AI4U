@@ -36,8 +36,8 @@ namespace ai4u
 				this.agent = (BasicAgent)agent;
 				this.agent.OnStepEnd += PhysicsUpdate;
 				var body = this.agent.GetAvatarBody();
-
-				if (body.GetType() == typeof(CharacterBody2D))
+				
+				if (body.GetType() == typeof(CharacterBody2D) || body is CharacterBody2D)
 				{
 					characterBody = body as CharacterBody2D;
 					isCharacterBody = true;

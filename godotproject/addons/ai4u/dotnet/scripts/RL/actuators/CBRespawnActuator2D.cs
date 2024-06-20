@@ -45,6 +45,7 @@ namespace ai4u
 			{
 				nodeRef = GetNode(respawnOptionsPath);
 				children = nodeRef.GetChildren();
+				isOutput = false;
 				cBody = ( (BasicAgent) agent).GetAvatarBody() as CharacterBody2D;
 
 				if (early)
@@ -73,7 +74,7 @@ namespace ai4u
 					lastSelected = -1;
 				}
                 cBody.Velocity = Vector2.Zero;
-				cBody.Transform = reference;
+				cBody.Rotation = reference.Rotation;
                 cBody.Position = reference.Origin;
 				if (randomize)
 				{

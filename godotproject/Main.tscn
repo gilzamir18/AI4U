@@ -1,0 +1,130 @@
+[gd_scene load_steps=16 format=3 uid="uid://qwn7lq4qmfiy"]
+
+[ext_resource type="Script" path="res://AgentBody.cs" id="1_ronsf"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/agents/BasicAgent.cs" id="1_vt1q8"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/actuators/DiscretActuator.cs" id="2_mp8v8"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward2D.cs" id="3_wauwv"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/sensors/OrientationSensor2D.cs" id="4_s7wq2"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/ControlRequestor.cs" id="6_g4j3j"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBRespawnActuator2D.cs" id="6_mqyyi"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/events/TouchRewardFunc2D.cs" id="7_k3qe6"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/controllers/PPOTrainer.cs" id="7_tiprw"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/controllers/TrainController.cs" id="8_b3iyv"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/scripts/RL/events/GroupTouchRewardFunc2D.cs" id="10_yo41t"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dcnmv"]
+size = Vector2(20, 52)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_c4gty"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j3433"]
+size = Vector2(18, 257)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aycpo"]
+size = Vector2(18, 257)
+
+[node name="Main" type="Node2D"]
+
+[node name="AgentBody" type="CharacterBody2D" parent="."]
+position = Vector2(110, 61)
+scale = Vector2(4.16, 0.24)
+motion_mode = 1
+script = ExtResource("1_ronsf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AgentBody"]
+position = Vector2(0, 16)
+shape = SubResource("RectangleShape2D_dcnmv")
+debug_color = Color(0.896528, 0.180237, 0, 0.42)
+
+[node name="Agent" type="Node" parent="AgentBody" node_paths=PackedStringArray("avatarBody")]
+script = ExtResource("1_vt1q8")
+avatarBody = NodePath("..")
+doneAtNegativeReward = false
+MaxStepsPerEpisode = 50
+
+[node name="MoveActuator" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("2_mp8v8")
+size = 4
+actionName = "move"
+
+[node name="ApproxReward" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("3_wauwv")
+target = NodePath("../../../Target")
+stepReward = -0.005
+
+[node name="OrientationSensor" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("target", "reference")]
+script = ExtResource("4_s7wq2")
+target = NodePath("../../../Target")
+reference = NodePath("../..")
+maxDistance = 10.0
+_normalized = true
+perceptionKey = "position"
+
+[node name="Respawner" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("6_mqyyi")
+respawnOptionsPath = NodePath("../../../AgentPosition")
+flipWhenTurn = false
+randomize = false
+isOutput = false
+
+[node name="GetTargetReward" type="Node" parent="AgentBody/Agent" node_paths=PackedStringArray("target")]
+script = ExtResource("7_k3qe6")
+reward = 10.0
+target = NodePath("../../../Target")
+causeEpisodeToEnd = true
+
+[node name="PPOTrainer" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("7_tiprw")
+
+[node name="TrainerController" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("8_b3iyv")
+trainerPath = NodePath("../PPOTrainer")
+tryInitialize = true
+
+[node name="WallCollisionReward" type="Node" parent="AgentBody/Agent"]
+script = ExtResource("10_yo41t")
+reward = -10.0
+group = "WALL"
+causeEpisodeToEnd = true
+
+[node name="Target" type="StaticBody2D" parent="."]
+modulate = Color(0.7, 0, 0.0116665, 1)
+position = Vector2(157, 159)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Target"]
+shape = SubResource("CircleShape2D_c4gty")
+
+[node name="ControlRequestor" type="Node" parent="." node_paths=PackedStringArray("agentsList")]
+script = ExtResource("6_g4j3j")
+agentsList = [NodePath("../AgentBody/Agent")]
+
+[node name="AgentPosition" type="Node2D" parent="."]
+position = Vector2(91, 62)
+
+[node name="Wall" type="StaticBody2D" parent="." groups=["WALL"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" groups=["WALL"]]
+position = Vector2(-1, 118.5)
+shape = SubResource("RectangleShape2D_j3433")
+
+[node name="Wall3" type="StaticBody2D" parent="." groups=["WALL"]]
+position = Vector2(264, 2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall3" groups=["WALL"]]
+position = Vector2(-1, 118.5)
+shape = SubResource("RectangleShape2D_j3433")
+
+[node name="Wall2" type="StaticBody2D" parent="." groups=["WALL"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall2" groups=["WALL"]]
+position = Vector2(139, -1)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_aycpo")
+
+[node name="Wall4" type="StaticBody2D" parent="." groups=["WALL"]]
+position = Vector2(0, 247)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall4" groups=["WALL"]]
+position = Vector2(139, -1)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_aycpo")

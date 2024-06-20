@@ -6,6 +6,9 @@ The Godot version of the AI4U get advantage of the Godot architecture and facili
 
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
+# Use AI4USharp
+AI4USharp is the implementation of reinforcement learning algorithms using TorchSharp. The current implementation is in an experimental state and contains a very simple version of the PPO algorithm.
+
 # Use ai4upy for Training
 The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy/ai4u and run the command:
 

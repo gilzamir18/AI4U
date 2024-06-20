@@ -112,7 +112,7 @@ public partial class CBMoveActuator2D : MoveActuator
             }
             
             // Add the gravity.
-            if (!body.IsOnFloor())
+            if (!body.IsOnFloor() && body.MotionMode == CharacterBody2D.MotionModeEnum.Grounded)
             {
 			    velocity.Y += gravity * 10 * (float)delta;
             }

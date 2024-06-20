@@ -22,6 +22,11 @@ public partial class Trainer : Node
 
 	}
 	
+	public virtual void EnvironmentMessage()
+	{
+		
+	}
+
 	///<summary>
 	/// Here you get agent life cicle callback about episode resetting.
 	///</summary>

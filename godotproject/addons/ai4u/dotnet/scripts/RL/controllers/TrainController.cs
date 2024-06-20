@@ -9,11 +9,16 @@ public partial class TrainController : Controller
 {
 	[Export]
 	public NodePath trainerPath;
+
+	[Export]
+	public bool tryInitialize = false;
+
 	private Trainer trainer;
 
 	private string cmdName = null;
 	private float[] fargs = null;
 	private int[] iargs = null;
+	private bool initialized = false; //indicates if episode has been initialized.
 
 	override public void OnSetup()
 	{		
@@ -40,7 +45,15 @@ public partial class TrainController : Controller
 
 	override public string GetAction()
 	{
-		if (cmdName != null)
+		if (GetStateAsString(0) == "envcontrol")
+		{
+			if (GetStateAsString(1).Contains("restart"))
+			{
+				return ai4u.Utils.ParseAction("__restart__");
+			}
+			return ai4u.Utils.ParseAction("__noop__");			
+		}
+		if (cmdName != null && !((BasicAgent)agent).Done )
 		{
 			if (iargs != null) 
 			{
@@ -63,12 +76,34 @@ public partial class TrainController : Controller
 				return ai4u.Utils.ParseAction(cmd);
 			}
 		}
-		return ai4u.Utils.ParseAction("noop");
+		else 
+		{
+			if (initialized)
+			{
+				if (tryInitialize)
+				{
+					initialized = true;
+					return ai4u.Utils.ParseAction("__restart__");
+				}
+				return ai4u.Utils.ParseAction("__noop__");
+			}
+			else
+			{
+				initialized = true;
+				return ai4u.Utils.ParseAction("__restart__");
+			}
+		}
 	}
 
 	override public void NewStateEvent()
 	{
-		trainer.StateUpdated();
+		if (GetStateAsString(0) == "envcontrol")
+		{
+			trainer.EnvironmentMessage();			
+		} else
+		{
+			trainer.StateUpdated();
+		}
 	}
 
 	private void ResetCmd()
