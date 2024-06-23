@@ -77,15 +77,11 @@ namespace ai4u
 
         public override void _Ready()
         {
-            if (Engine.IsEditorHint())
-            {
-                lineDrawer = new LineDrawer();
-                lineDrawer.SetColor(debugColor);
-                AddChild(lineDrawer);
-                lineDrawer.StartMeshes();
-            }
+               lineDrawer = new LineDrawer();
+               lineDrawer.SetColor(debugColor);
+               AddChild(lineDrawer);
+               lineDrawer.StartMeshes();
         }
-
 
         public override void OnSetup(Agent agent) 
 		{
@@ -156,7 +152,6 @@ namespace ai4u
 			
 			float iangle = -fieldOfView;
 			
-			var debugline = 0;
 			for (int i = 0; i < hSize; i++)
 			{
 				var k1 = 1;
