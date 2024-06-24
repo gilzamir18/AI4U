@@ -73,7 +73,7 @@ namespace ai4u
 					lastSelected = -1;
 				}
                 cBody.Velocity = Vector2.Zero;
-				cBody.Transform = reference;
+				cBody.Rotation = reference.Rotation;
                 cBody.Position = reference.Origin;
 				if (randomize)
 				{

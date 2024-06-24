@@ -98,10 +98,13 @@ namespace ai4u {
 			if (agent != null && !agent.Done)
 			{
 				float[] action = agent.GetActionArgAsFloatArray();
+				float delta = (float)agent.GetPhysicsProcessDeltaTime();
 				move = action[0];
 				turn = action[1];
 				jump = action[2];
 				jumpForward = action[3];
+				//GD.Print("Move " + move);
+				//GD.Print("Turn " + turn);
 
 				if (rBody != null)
 				{
@@ -127,7 +130,7 @@ namespace ai4u {
 						var velocity = new Vector3(0, 0, 0);
 						
 						
-						velocity.Z += move * moveAmount + jumpForward * jumpForwardPower;
+						velocity.Z += (move * moveAmount + jumpForward * jumpForwardPower) * delta * 100;
 						
 						var r = Vector3.Up * turn * turnAmount;
 						
@@ -137,7 +140,7 @@ namespace ai4u {
 							r
 						);
 						
-						velocity.Y += jump * jumpPower + jumpForward * jumpPower;
+						velocity.Y += (jump * jumpPower + jumpForward * jumpPower) * delta * 100;
 						
 						velocity = velocity.Rotated(Vector3.Up, rBody.Rotation.Y);
 						
