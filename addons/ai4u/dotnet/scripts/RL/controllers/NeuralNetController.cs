@@ -50,7 +50,7 @@ public partial class NeuralNetController : Controller
 	/// <exception cref="System.Exception"></exception>
 	override public void OnSetup()
 	{
-		BasicAgent bagent = (BasicAgent) agent;
+		RLAgent bagent = (RLAgent) agent;
 		inputName2Idx = new Dictionary<string, int>();
 		outputs = new Dictionary<string, float[]>();
 		metadata = agent.Metadata;
@@ -113,7 +113,7 @@ public partial class NeuralNetController : Controller
 				return ai4u.Utils.ParseAction("__restart__");
 			}			
 		}
-		if (initialized && !((BasicAgent)agent).Done )
+		if (initialized && !((RLAgent)agent).Done )
 		{
 			if (mainOutput == null)
 			{

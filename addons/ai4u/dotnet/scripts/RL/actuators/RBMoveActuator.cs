@@ -25,7 +25,7 @@ namespace ai4u {
 		[Export]
 		public string floorGroup = "Floor";
 
-		private BasicAgent agent;
+		private RLAgent agent;
 		
 		private RigidBody3D rBody;
 		private PhysicsDirectSpaceState3D spaceState;
@@ -44,7 +44,7 @@ namespace ai4u {
 			isContinuous = true;
 			rangeMin = new float[]{0, -1, 0, 0};
 			rangeMax = new float[]{1, 1, 1, 1};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			agent.AddResetListener(this);
 			rBody = this.agent.GetAvatarBody() as RigidBody3D;
 			this.spaceState = rBody.GetWorld3D().DirectSpaceState;
@@ -132,7 +132,7 @@ namespace ai4u {
 						
 						velocity.Z += (move * moveAmount + jumpForward * jumpForwardPower) * delta * 100;
 						
-						var r = Vector3.Up * turn * turnAmount;
+						var r = Vector3.Up * turn * turnAmount * delta * 100;
 						
 						PhysicsServer3D.BodySetState(
 							rBody.GetRid(),

@@ -18,7 +18,7 @@ public partial class TruncatedSensor : AbstractSensor
 
 		public override void OnSetup(Agent agent)
 		{
-			SetAgent((BasicAgent) agent);
+			SetAgent((RLAgent) agent);
 		}
 
 		public override bool GetBoolValue()

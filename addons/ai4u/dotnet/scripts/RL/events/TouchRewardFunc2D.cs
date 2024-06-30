@@ -17,7 +17,7 @@ namespace ai4u
 		private bool onlyOneTime = true;
 
 		private float acmReward = 0.0f;
-		private BasicAgent agent;
+		private RLAgent agent;
 		private bool configured = false;
 		private bool eval = false;
 		private RigidBody2D rigidBody;
@@ -33,7 +33,7 @@ namespace ai4u
 			{
 				configured = true;
 				agent.AddResetListener(this);
-				this.agent = (BasicAgent)agent;
+				this.agent = (RLAgent)agent;
 				this.agent.OnStepEnd += PhysicsUpdate;
 				var body = this.agent.GetAvatarBody();
 
@@ -81,7 +81,7 @@ namespace ai4u
             }
         }
 
-		public void PhysicsUpdate(BasicAgent agent)
+		public void PhysicsUpdate(RLAgent agent)
         {
 			if (agent.SetupIsDone && agent.Alive() && isCharacterBody && (!onlyOneTime || !entered))
             {

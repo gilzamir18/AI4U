@@ -10,13 +10,13 @@ namespace ai4u
     /// The BasicAgent class is a partial implementation of an agent that can be used in machine learning environments.
     /// This class inherits from the Agent class and provides a basic framework for the agent's interaction with the environment.
     /// </summary>
-    public partial class BasicAgent : Agent
+    public partial class RLAgent : Agent
     {
         /// <summary>
         /// Delegate for handling agent episode events.
         /// </summary>
         /// <param name="agent">The agent that triggered the event.</param>
-        public delegate void AgentEpisodeHandler(BasicAgent agent);
+        public delegate void AgentEpisodeHandler(RLAgent agent);
 
         /// <summary>
         /// Event triggered before the reset.
@@ -367,12 +367,13 @@ namespace ai4u
         public override void UpdateReward()
         {
             int n = rewards.Count;
-
             for (int i = 0; i < n; i++)
             {
                 rewards[i].OnUpdate();
             }
+            //GD.Print(EpisodeReward);
             brain.OnStepReward(nSteps, Reward);
+
             OnStepEnd?.Invoke(this);
         }
 

@@ -20,14 +20,14 @@ namespace ai4u
 
 		private bool usedInEvaluation = false;
 		
-		private BasicAgent agent;
+		private RLAgent agent;
 
 		private float rewardAccumulator = 0.0f;
 		
 		public override void OnSetup(Agent agent)
 		{
 			usedInEvaluation = GetParent() is RewardFunc;
-			this.agent = (BasicAgent)agent;
+			this.agent = (RLAgent)agent;
 			this.agent.AddResetListener(this);
 		}
 
@@ -84,7 +84,7 @@ namespace ai4u
 
         public override void OnReset(Agent agent)
 		{ 
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 		}
 	}
 }

@@ -128,7 +128,7 @@ namespace ai4u
 			
 			mapping = new Dictionary<string, int>();
 
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody3D).GetWorld3D().DirectSpaceState;
 
 			if (this.eye == null) {

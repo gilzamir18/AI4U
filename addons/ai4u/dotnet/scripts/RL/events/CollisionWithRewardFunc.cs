@@ -15,7 +15,7 @@ namespace ai4u
         [Export]
         public string group = "";
         private float acmReward = 0.0f;
-        private BasicAgent agent;
+        private RLAgent agent;
         private bool configured = false;
 
         public bool stayInCollision = false;
@@ -30,7 +30,7 @@ namespace ai4u
             {
                 configured = true;
                 agent.AddResetListener(this);
-                this.agent = (BasicAgent)agent;
+                this.agent = (RLAgent)agent;
 
                 var body = this.agent.GetAvatarBody();
                 if (body.GetType() == typeof(RigidBody3D))

@@ -17,14 +17,14 @@ namespace ai4u
 		[Export]
 		private float stepReward = -0.001f;
 		
-		private BasicAgent agent;
+		private RLAgent agent;
 		private float minDistance;
 		private PhysicsBody2D rBody;
 		
 		public override void OnSetup(Agent agent)
 		{
 			targetNode = GetNode(target) as Node2D;
-			this.agent = (BasicAgent)agent;
+			this.agent = (RLAgent)agent;
 			
 			rBody = (PhysicsBody2D) this.agent.GetAvatarBody();
 			
@@ -51,7 +51,7 @@ namespace ai4u
 
 		public override void OnReset(Agent agent)
 		{ 
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			//minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
 			minDistance = System.Single.PositiveInfinity;
 		}

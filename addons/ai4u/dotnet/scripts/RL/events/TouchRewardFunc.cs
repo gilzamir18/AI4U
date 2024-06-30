@@ -3,6 +3,9 @@ using System;
 using ai4u;
 namespace ai4u {
 	public partial class TouchRewardFunc : RewardFunc {
+
+		[Signal] public delegate void OnTouchEventHandler(TouchRewardFunc source);
+			
 		[Export]
 		public float reward = 0.0f;
 		[Export]
@@ -57,6 +60,7 @@ namespace ai4u {
 			if (body == target) {
 				acmReward += this.reward;
 				eval = true;
+				EmitSignal(SignalName.OnTouch, this);
 			}
 		}
 
@@ -83,8 +87,9 @@ namespace ai4u {
 						entered = true;
                         acmReward += this.reward;
 						eval = true;
-						this._collisionIntervalCoolDown = this._collisionCheckInterval; 
-						break;
+						this._collisionIntervalCoolDown = this._collisionCheckInterval;
+                        EmitSignal(SignalName.OnTouch, this);
+                        break;
                     }
                 }
             }

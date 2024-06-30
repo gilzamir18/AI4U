@@ -15,7 +15,7 @@ namespace ai4u {
         private float rewards = 0.0f;
         private bool requestDone = false;
 
-        private BasicAgent agent;
+        private RLAgent agent;
 
 		/// <summary>
 		/// OnSetup class runs when the owner agent starts the cycle of life.
@@ -25,7 +25,7 @@ namespace ai4u {
 		{
             this.requestDone = false;
             rewards = 0;
-            this.agent = (BasicAgent) agent;
+            this.agent = (RLAgent) agent;
 		}
 
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d2tki2fk7rnlm"]
 
-[ext_resource type="Script" path="res://addons/ai4u/prefabs/HomeostaticHUD.cs" id="1_4s2wj"]
+[ext_resource type="Script" path="res://addons/ai4u/dotnet/prefabs/HomeostaticHUD.cs" id="1_4s2wj"]
 
 [node name="HomeostaticHud" type="Control"]
 custom_minimum_size = Vector2(10, 10)

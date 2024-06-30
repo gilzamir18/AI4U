@@ -9,7 +9,7 @@ public partial class DiscretActuator : Actuator
     [Export]
     private int size = 5;
 
-    private BasicAgent agent;
+    private RLAgent agent;
 
     public override void OnSetup(Agent agent)
     {
@@ -17,7 +17,7 @@ public partial class DiscretActuator : Actuator
         isContinuous = false;
         rangeMin = new float[size];
         rangeMax = new float[size];
-        this.agent = (BasicAgent)agent;
+        this.agent = (RLAgent)agent;
         agent.AddResetListener(this);
     }
 

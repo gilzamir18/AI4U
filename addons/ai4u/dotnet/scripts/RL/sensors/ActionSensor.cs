@@ -15,7 +15,7 @@ namespace ai4u {
 		private float[] previewsAction;
 
 		public override void OnSetup(Agent agent) {
-			this.agent = (BasicAgent)agent;
+			this.agent = (RLAgent)agent;
 
 			type = SensorType.sfloatarray;
 			shape = new int[1]{actionSize*stackedObservations};

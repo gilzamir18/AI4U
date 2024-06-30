@@ -30,7 +30,7 @@ namespace  ai4u
 
 		override public void OnSetup()
 		{
-			((BasicAgent) agent).OnEpisodeEnd += EndEpisodeHandler;
+			((RLAgent) agent).OnEpisodeEnd += EndEpisodeHandler;
 			_firstTime = true;
 			receivedResetAction = false;
 		}
@@ -121,9 +121,9 @@ namespace  ai4u
 			return action;
 		}
 
-		public void EndEpisodeHandler(BasicAgent agent)
+		public void EndEpisodeHandler(RLAgent agent)
 		{
-			GD.Print("Episode Reward " + ((BasicAgent)agent).EpisodeReward);
+			GD.Print("Episode Reward " + ((RLAgent)agent).EpisodeReward);
 		}
 	}
 }

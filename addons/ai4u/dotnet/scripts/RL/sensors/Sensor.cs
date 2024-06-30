@@ -18,7 +18,7 @@ namespace ai4u
 
 	public interface ISensor: IAgentResetListener
 	{
-		public void SetAgent(BasicAgent own);
+		public void SetAgent(RLAgent own);
 		public void OnSetup(Agent agent);
 		public float GetFloatValue();
 		public string GetStringValue();
@@ -54,7 +54,7 @@ namespace ai4u
 	{
 		private SensorType type;
 		private int[] shape;
-		private BasicAgent agent;
+		private RLAgent agent;
 		private string key;
 		private string name;
 		private int stackedObservations = 1;
@@ -64,14 +64,14 @@ namespace ai4u
 		private float rangeMin = 0;
 		private float rangeMax = 1;
 		
-		public void SetAgent(BasicAgent own)
+		public void SetAgent(RLAgent own)
 		{
 			this.agent = own;
 		}
 
 		public virtual void OnSetup(Agent agent)
 		{
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 		}
 
 		public virtual float GetFloatValue() {
@@ -147,7 +147,7 @@ namespace ai4u
 			return stackedObservations;
 		}
 
-		public BasicAgent GetAgent()
+		public RLAgent GetAgent()
 		{
 			return this.agent;
 		}
@@ -240,7 +240,7 @@ namespace ai4u
 
 		protected SensorType Type;
 		protected int[] Shape;
-		protected BasicAgent agent;
+		protected RLAgent agent;
 		
 		public bool Normalized
 		{
@@ -308,7 +308,7 @@ namespace ai4u
 			}
 		}
 
-		public void SetAgent(BasicAgent own)
+		public void SetAgent(RLAgent own)
 		{
 			agent = own;
 		}
@@ -415,7 +415,7 @@ namespace ai4u
 			this.type = t;
 		}
 
-		public BasicAgent GetAgent()
+		public RLAgent GetAgent()
 		{
 			return this.agent;
 		}

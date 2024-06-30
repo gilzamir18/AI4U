@@ -9,7 +9,7 @@ namespace ai4u
 	{
 		public override void OnSetup(Agent agent)
 		{
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			perceptionKey = "done";
 			type = SensorType.sbool;
 			shape = new int[]{stackedObservations};

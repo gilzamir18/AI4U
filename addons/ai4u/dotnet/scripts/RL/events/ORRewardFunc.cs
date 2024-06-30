@@ -10,7 +10,7 @@ public partial class ORRewardFunc : RewardFunc
     private bool updateChildren = false;
 
 
-    private BasicAgent agent;
+    private RLAgent agent;
     private System.Collections.Generic.List<RewardFunc> rewards;
 
     private float acmReward = 0.0f;
@@ -20,7 +20,7 @@ public partial class ORRewardFunc : RewardFunc
         acmReward = 0.0f;
         rewards = new System.Collections.Generic.List<RewardFunc>();
         agent.AddResetListener(this);
-        this.agent = (BasicAgent)agent;
+        this.agent = (RLAgent)agent;
         var children = GetChildren();
         for (int i = 0; i < children.Count; i++)
         {

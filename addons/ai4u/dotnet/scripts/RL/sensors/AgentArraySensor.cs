@@ -12,7 +12,7 @@ namespace ai4u
 		public override void OnSetup(Agent agent)
 		{
             stackedObservations = 1;
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
             this.agent.AddResetListener(this);
             data = new float[this.agent.initialInputSize];
 			perceptionKey = "__initial_input__";

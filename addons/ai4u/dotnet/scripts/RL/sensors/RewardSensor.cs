@@ -9,11 +9,11 @@ namespace ai4u
 		public float rewardScale = 1.0f;
 		public override void OnSetup(Agent agent)
 		{
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			perceptionKey = "reward";
 			type = SensorType.sfloat;
 			shape = new int[]{stackedObservations};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 		}
 
 		public override float GetFloatValue()

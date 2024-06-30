@@ -104,7 +104,7 @@ namespace  ai4u
 		{
 			if (!agent.Alive() && !done)
 			{
-				GD.Print("Episode Reward " + ((BasicAgent)agent).EpisodeReward);
+				GD.Print("Episode Reward " + ((RLAgent)agent).EpisodeReward);
 				done = true;
 			}
 		}

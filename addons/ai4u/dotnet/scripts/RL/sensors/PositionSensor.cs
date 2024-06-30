@@ -36,7 +36,7 @@ namespace ai4u
 			targetNode = GetNode(target) as Node3D;
 			this.type = SensorType.sfloatarray;
 			this.shape = new int[1]{stackedObservations * 3};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			stack = new HistoryStack<float>(shape[0]);
 		}
 

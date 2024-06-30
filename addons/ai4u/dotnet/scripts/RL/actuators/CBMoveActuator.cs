@@ -33,7 +33,7 @@ public partial class CBMoveActuator : MoveActuator
     [Export]
     private float[] actionRangeMax = new float[]{1, 1, 1, 1};
 
-    private BasicAgent agent;
+    private RLAgent agent;
     
     private CharacterBody3D body;
     private PhysicsDirectSpaceState3D spaceState;
@@ -51,7 +51,7 @@ public partial class CBMoveActuator : MoveActuator
         isContinuous = true;
         rangeMin = actionRangeMin;
         rangeMax = actionRangeMax;
-        this.agent = (BasicAgent) agent;
+        this.agent = (RLAgent) agent;
         agent.AddResetListener(this);
         body = this.agent.GetAvatarBody() as CharacterBody3D;
         this.spaceState = body.GetWorld3D().DirectSpaceState;

@@ -18,7 +18,7 @@ public partial class GroupTouchSensor : Sensor
 		{
 			this.type = SensorType.sfloatarray;
 			this.shape = new int[1]{1};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			stack = new HistoryStack<float>(1 * stackedObservations);
 			RigidBody3D body = this.agent.GetAvatarBody() as RigidBody3D;
 			body.BodyEntered += OnEntered;

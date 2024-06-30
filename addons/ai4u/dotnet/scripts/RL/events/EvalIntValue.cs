@@ -51,11 +51,11 @@ namespace ai4u
         private float acmReward = 0;
 
 
-        private BasicAgent agent;
+        private RLAgent agent;
 
         public override void OnSetup(Agent agent)
         {
-            this.agent = (BasicAgent) agent;
+            this.agent = (RLAgent) agent;
             this.target = GetNode(targetPath);
             acmReward = 0;
         }

@@ -24,7 +24,7 @@ public partial class RestlessnessRewardFunc : RewardFunc
 
     public float Restlessness => restlessness;
 
-    private BasicAgent basicAgent;
+    private RLAgent basicAgent;
 
     private Vector3 currentPosition;
     private Vector3 previousPosition;
@@ -33,11 +33,11 @@ public partial class RestlessnessRewardFunc : RewardFunc
 
     public override void OnSetup(Agent agent)
     {
-        basicAgent = (BasicAgent) agent;
+        basicAgent = (RLAgent) agent;
         basicAgent.OnStepEnd += CheckDist;
     }
 
-    private void CheckDist(BasicAgent basicAgent)
+    private void CheckDist(RLAgent basicAgent)
     {
         currentPosition = ((PhysicsBody3D)this.basicAgent.GetAvatarBody()).Position;
         float dist = currentPosition.DistanceTo(previousPosition);

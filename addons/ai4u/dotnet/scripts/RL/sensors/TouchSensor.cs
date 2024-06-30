@@ -18,7 +18,7 @@ public partial class TouchSensor : Sensor
 		{
 			this.type = SensorType.sfloatarray;
 			this.shape = new int[1]{stackedObservations};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			stack = new HistoryStack<float>(stackedObservations);
 			RigidBody3D body = this.agent.GetAvatarBody() as RigidBody3D;
 			body.BodyEntered += OnEntered;

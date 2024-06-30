@@ -29,11 +29,11 @@ namespace ai4u
 		
 		private float acmReward = 0.0f;
 		private int rewards = 0;
-		private BasicAgent agent;
+		private RLAgent agent;
 		
 		public override void OnSetup(Agent agent)
 		{	
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			agent.AddResetListener(this);
 		}
 		

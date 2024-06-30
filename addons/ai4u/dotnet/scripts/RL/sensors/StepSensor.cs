@@ -14,7 +14,7 @@ namespace ai4u
 		
 		public override void OnSetup(Agent agent)
 		{
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			perceptionKey = "steps";
 			if (!realNumber)
 			{

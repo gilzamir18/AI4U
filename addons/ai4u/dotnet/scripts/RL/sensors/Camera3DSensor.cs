@@ -50,7 +50,7 @@ public partial class Camera3DSensor : Sensor
 
     public override void OnSetup(Agent agent)
     {
-        this.agent = (BasicAgent)agent;
+        this.agent = (RLAgent)agent;
         if (viewport != null)
         {
             this.viewport.Size = new Vector2I(width, height);

@@ -11,7 +11,7 @@ namespace ai4u
 
 		ModelMetadata metadata;
 
-		public ModelMetadataLoader(BasicAgent agent)
+		public ModelMetadataLoader(RLAgent agent)
 		{
 			List<ModelInput> inputs = new List<ModelInput>();
 			List<ModelOutput> outputs = new List<ModelOutput>();

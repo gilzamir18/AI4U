@@ -23,7 +23,7 @@ public partial class RestlessnessRewardFunc2D : RewardFunc
     [Export(PropertyHint.Range, "-1, 1")]
     private int ignoredAxis = -1;
     
-    private BasicAgent basicAgent;
+    private RLAgent basicAgent;
 
     private Vector2 currentPosition;
     private Vector2 previousPosition;
@@ -38,11 +38,11 @@ public partial class RestlessnessRewardFunc2D : RewardFunc
         {
             GD.PrintErr("Invalid range of the property IgnoredAx is. Try: -1 (no axis ignored), 0 (axis x ignored) or 1 (axis y ignored).");
         }
-        basicAgent = (BasicAgent)agent;
+        basicAgent = (RLAgent)agent;
         basicAgent.OnStepEnd += CheckDist;
     }
 
-    private void CheckDist(BasicAgent basicAgent)
+    private void CheckDist(RLAgent basicAgent)
     {
         currentPosition = ((PhysicsBody2D)this.basicAgent.GetAvatarBody()).Position;
         float dist = 0;

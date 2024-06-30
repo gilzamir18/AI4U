@@ -17,7 +17,7 @@ namespace ai4u
 		{
 			this.type = SensorType.sfloatarray;
 			shape = new int[]{stackedObservations};
-			this.agent = (BasicAgent) agent;
+			this.agent = (RLAgent) agent;
 			stack = new HistoryStack<float>(stackedObservations);
 		}
 
