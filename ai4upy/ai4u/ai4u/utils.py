@@ -5,10 +5,25 @@ import numpy as np
 import base64
 import sys
 from typing import Callable
+import os
 
 INVALID_TYPE_ERROR = 1
 NAN_DETECTED_ERROR = 2
 VALUE_PROPERTY_ERROR = 3
+
+def start_envs_windows(paths, rids, host, port_generator):
+    for idx, path in enumerate(paths):
+        p = "".join(["start ",  path, " --ai4u_rid ", rids[idx], " --ai4u_port ", str(next(port_generator)), " --ai4u_host ", host])
+        print(p)
+        os.system(p)
+
+def  rid_generator(_from: int = 0, _n: int = 1, _step:int = 1):
+    for i in range(_from, _n, _step):
+        yield str(i)
+
+def address_port_generator(server_port, n):
+  for i in range(n):
+    yield server_port+i
 
 def linear_schedule(initial_value) -> Callable[[float], float]:
     """

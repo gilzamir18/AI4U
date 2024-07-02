@@ -1,7 +1,6 @@
 import sys
 import socketserver
 from .workers import BMWorker
-from .utils import get_int_from, get_bool_from, get_float_from, get_from
 import socket
 import platform
 import os
@@ -62,15 +61,9 @@ class BMUDPHandler:
             #self.wfile.write("".encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
 
-def create_server(agents, ids, config=None):
-    if config is None:
-        config = {}
-    for i in range(len(agents)):
-        if not BMWorker.register_agent(agents[i], ids[i], config):
-            sys.exit(-1)
-
-    serverUDP = UDPServer(get_from(config, 'server_IP', '127.0.0.1'), get_int_from(config, 'server_port', 8080), get_float_from(config, 'timeout', 30), get_bool_from(config, "force_exit", True), BMUDPHandler())
-    serverUDP.max_packet_size = get_int_from(config, 'buffer_size', 8192)
+def create_server(host='127.0.0.1', port=8080, buffer_size=819200, timeout=30, force_exit=True):
+    serverUDP = UDPServer(host, port, timeout, force_exit, BMUDPHandler())
+    serverUDP.max_packet_size = buffer_size
     serverUDP.listen()
 
 if __name__ == "__main__":

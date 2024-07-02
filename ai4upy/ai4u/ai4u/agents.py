@@ -57,7 +57,10 @@ class BasicController:
         while tryreset:
             try:
                 info = self.agent.qout.get()
-                tryreset = False
+                if info[0] == "reset":
+                    tryreset = False
+                elif info[0] == "halt":
+                    break
             except TimeoutError as e:
                 print(f"Trying reset again after {self.agent.timeout} seconds!")
                 tryreset = True
@@ -68,10 +71,36 @@ class BasicController:
                 print("PRESS EXIT")
                 sys.exit(0)
     
-        if info == "halt":
+        if info[0] == "halt":
             sys.exit(0)
         self.restoreDefaultAction()
-        return self.reset_behavior(info)
+        return self.reset_behavior(info[1])
+
+    def request_config(self, args=None):
+        self.agent.qin.put(["config"])
+        msg = None
+        trying = True
+        while trying:
+            try:
+                msg = self.agent.qout.get()
+                if msg[0] == "config":
+                    trying = False
+                elif msg[0] == "halt" or msg[0] == "reset":
+                    break
+            except TimeoutError as e:
+                print(f"Trying again after {self.agent.timeout} seconds!")
+                trying = True
+            except Empty as e:
+               print("Empty message. Trying again...")
+               trying = True
+            except KeyboardInterrupt as e:
+                sys.exit(0)
+    
+        if msg[0] == "halt":
+            sys.exit(0)
+        elif msg[0] == "reset":
+            return self.lastinfo
+        return msg[1]
 
     def request_step(self, action):
         """
@@ -100,8 +129,10 @@ class BasicController:
         if info=="halt":
             sys.exit(0)
         self.restoreDefaultAction()
-        self.lastinfo = info
-        return info
+        if not info:
+            return self.lastinfo
+        self.lastinfo = info[1]
+        return info[1]
 
     def restoreDefaultAction(self):
         self.actionName = "__waitnewaction__"
@@ -122,6 +153,7 @@ class BasicAgent:
         self.qout = qout
         self.request_reset = False
         self.request_action = False
+        self.request_config = False
         self.waittime = waittime
         self.action = None
         self.initial_state = None #initial state is a new state after reseting.
@@ -147,6 +179,10 @@ class BasicAgent:
                 elif cmd[0] == "act":
                     self.action = cmd[1]
                     self.request_action = True
+                elif cmd[0] == "config":
+                    with self.qin.mutex:
+                        self.qin.queue.clear()
+                    self.request_config = True
 
                 time.sleep(self.waittime)
             except KeyboardInterrupt as e:
@@ -156,12 +192,16 @@ class BasicAgent:
     def act(self, info):
         self.last_info = info
 
+        if self.request_config:
+            self.request_config = False
+            return step("__noop__", [0])
+
         if self.request_reset:
             self.initial_state = None
             self.request_reset = False
             self.endOfEpisode = False
             self.new_state = False
-            return step("__restart__", [0])
+            return step("__reset__", [0])
         
         if self.request_action:
             self.request_action = False
@@ -177,19 +217,19 @@ class BasicAgent:
             with self.qout.mutex:
                 self.qout.queue.clear()
             self.__get_controller().handleNewEpisode(info)
-            self.qout.put(info)
-        
+            self.qout.put(("reset", info))
+            
         if self.new_state and not info['done']:
             self.new_state = False
-            if not self.qout.full():
-                self.qout.put(info)
+            #if not self.qout.full():
+            self.qout.put( ("step", info) )
 
         if info['done']:
             self.new_state = False
             self.initial_state = None
             if not self.endOfEpisode:
                 self.endOfEpisode = True
-                self.qout.put(info)
+                self.qout.put( ("step", info) )
                 self.__get_controller().handleEndOfEpisode(info)
         
         return step("__waitnewaction__", [0])
@@ -203,6 +243,12 @@ class BasicAgent:
             control.append(stepfv('max_steps', [self.max_steps]))
             control.append(stepfv('id', [self.id]))
             self.__get_controller().handleConfiguration(self.id, self.max_step, self.modelmetadata)
+            print("-------------------------------------------------------------------------")
+            print(a)
+            if "__reset__" in a:
+                self.qout.put( ("reset", a) )
+            else:
+                self.qout.put( ("config", a) )
             return ("@".join(control))
         if '__stop__' in a:
             print("--*-- GAME IS CLOSED --*--")
@@ -216,7 +262,11 @@ class BasicAgent:
                 self.request_reset = False
                 self.endOfEpisode = False
                 self.new_state = False
-                return step("__restart__", [0])
+                return step("__reset__", [0])
+            elif self.request_config:
+                self.request_config  = False
+                self.qout.put( ("config", a) )
+                return step("__start_agent__", [0])
         return stepfv('__noop__', [0])
 
     def __get_controller(self):

@@ -2,13 +2,15 @@
 import gymnasium as gym
 from ai4u.controllers import BasicGymController
 from ai4u.appserver import startasdaemon
+from ai4u.utils import rid_generator
+import types
 
 class GenericEnvironment(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {}
   envidx = 0
   controllers = None
-  def __init__(self, controller_class=BasicGymController, rid=None, event_callback=None, config=None):
+  def __init__(self, controller_class=BasicGymController, rid=None, event_callback=None, config=None, **kargs):
     super(GenericEnvironment, self).__init__()
     # Define action and observation space
     # They must be gym.spaces objects
@@ -27,15 +29,16 @@ class GenericEnvironment(gym.Env):
     else:
       raise TypeError("Unsupported type of ids parameter: ", type(rid))
 
-    if type(controller_class) is list:
-      controller_classes = controller_class
-    else:
-      controller_classes =  [controller_class] * len(rid)    
-
     if not GenericEnvironment.controllers:
+      if type(controller_class) is list:
+        controller_classes = controller_class
+      else:
+        controller_classes =  [controller_class] * len(rid)    
+
       GenericEnvironment.controllers = {}
       controllers = startasdaemon(rid, controller_classes, config)
       for i in range(len(controllers)):
+        print("env ", rid[i])
         GenericEnvironment.controllers[rid[i]] = controllers[i]
     
     self.rid = rid[GenericEnvironment.envidx]
@@ -45,8 +48,12 @@ class GenericEnvironment(gym.Env):
     if "metadata" in config:
       self.controller.metadata = config["metadata"]
       self.observation_space, self.action_space = BasicGymController.get_env_spaces(self.controller.metadata)
+    elif "observation_space" in config and "action_space" in config:
+      self.observation_space = config['observation_space']
+      self.action_space = config['action_space']
     else:
-      self.reset()
+      self.controller.request_config()
+      #print("env ", info, " was started!")
       if self.controller.action_space is not None:
         self.action_space = self.controller.action_space
       else:
@@ -56,8 +63,6 @@ class GenericEnvironment(gym.Env):
         self.observation_space = self.controller.observation_space
       else:
         self.observation_space = None
-  
-    self.rid =  rid
 
   def step(self, action):
     info = self.controller.request_step(action)
@@ -72,8 +77,7 @@ class GenericEnvironment(gym.Env):
     
     if seed is not None:
       self.seed = seed
-
-    reset_returned_data =  self.controller.request_reset()    
+    reset_returned_data = self.controller.request_reset()
     if self.event_callback is not None:
       self.event_callback.on_reset(reset_returned_data)
     return reset_returned_data
