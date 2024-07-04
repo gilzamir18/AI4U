@@ -19,6 +19,9 @@ class BasicController:
         self.max_steps = 0
         self.metadatamodel = None
         self.lastinfo = None
+        self.step_is_waiting = False
+        self.reset_is_waiting = False
+        self.config_is_waiting = False
 
     def close(self):
         pass #release resources here
@@ -53,54 +56,62 @@ class BasicController:
     def request_reset(self, args=None):
         self.agent.qin.put(["reset"])
         info = None
-        tryreset = True
-        while tryreset:
+        self.reset_is_waiting = True
+        while self.reset_is_waiting:
             try:
                 info = self.agent.qout.get()
                 if info[0] == "reset":
-                    tryreset = False
-                elif info[0] == "halt":
+                    self.reset_is_waiting = False
                     break
             except TimeoutError as e:
-                print(f"Trying reset again after {self.agent.timeout} seconds!")
-                tryreset = True
+                print(f"The environment server is taking a long time to send the configuration!")
+                self.reset_is_waiting = True
             except Empty as e:
-               print("Empty message in reset. Trying reset again...")
-               tryreset = True
+               print("It received a empty message. It is trying to get a valid message!")
+               self.reset_is_waiting = True
             except KeyboardInterrupt as e:
-                print("PRESS EXIT")
                 sys.exit(0)
     
-        if info[0] == "halt":
+        if info[1] == "halt":
+            print("Reset subsystem ended...")
             sys.exit(0)
+
         self.restoreDefaultAction()
-        return self.reset_behavior(info[1])
+        if isinstance(info[1], dict):
+            self.lastinfo = info[1]
+            return self.reset_behavior(info[1])
+        else:
+            return self.reset_behavior(self.lastinfo)
 
     def request_config(self, args=None):
         self.agent.qin.put(["config"])
         msg = None
-        trying = True
-        while trying:
+        self.config_is_waiting = True
+        while self.config_is_waiting:
             try:
-                msg = self.agent.qout.get()
-                if msg[0] == "config":
-                    trying = False
-                elif msg[0] == "halt" or msg[0] == "reset":
+                self.step_is_waiting = True
+                msg, info = self.agent.qout.get()
+                if msg == "config":
+                    self.config_is_waiting = False
                     break
             except TimeoutError as e:
-                print(f"Trying again after {self.agent.timeout} seconds!")
-                trying = True
+                print(f"The environment server is taking a long time to send the configuration!")
+                self.config_is_waiting = True
             except Empty as e:
-               print("Empty message. Trying again...")
-               trying = True
+               print("It received a empty message. It is trying to get a valid message!")
+               self.config_is_waiting = True
             except KeyboardInterrupt as e:
                 sys.exit(0)
     
-        if msg[0] == "halt":
+        if info == "halt":
+            print("Config subsystem ended...")
             sys.exit(0)
-        elif msg[0] == "reset":
+        self.restoreDefaultAction()
+        if isinstance(info, dict):
+            self.lastinfo = info
+            return info
+        else:
             return self.lastinfo
-        return msg[1]
 
     def request_step(self, action):
         """
@@ -115,24 +126,32 @@ class BasicController:
         action['fields'] = self.fields
         self.agent.qin.put(['act', action])
         info = None
+        self.step_is_waiting = True
         try:
-            info = self.agent.qout.get(timeout=self.agent.timeout)
+            while self.step_is_waiting:
+                id, info = self.agent.qout.get(timeout=self.agent.timeout)
+                if id == "step":
+                    self.step_is_waiting = False
+                    break
         except TimeoutError as e:
             print(f"Step timeout after {self.agent.timeout} seconds!")
             sys.exit(0)
         except KeyboardInterrupt:
             sys.exit(0)
         except Empty as e:
-            print("Empty message in request step.")
+            print("Environment server has sended a empty message. It's restoring the last state!")
             info = self.agent.last_info
-    
-        if info=="halt":
+
+        if info == "halt":
+            print("Step subsystem ended...")
             sys.exit(0)
+
         self.restoreDefaultAction()
-        if not info:
+        if isinstance(info, dict):
+            self.lastinfo = info
+            return info
+        else:
             return self.lastinfo
-        self.lastinfo = info[1]
-        return info[1]
 
     def restoreDefaultAction(self):
         self.actionName = "__waitnewaction__"
@@ -194,21 +213,23 @@ class BasicAgent:
 
         if self.request_config:
             self.request_config = False
-            return step("__noop__", [0])
+            return step("__noop__", [0]) #request an update of the environment server and wait a new info!
 
         if self.request_reset:
             self.initial_state = None
             self.request_reset = False
             self.endOfEpisode = False
             self.new_state = False
-            return step("__reset__", [0])
+            return step("__reset__", [0]) #request a reset of the environment server and wait a new info!
         
         if self.request_action:
             self.request_action = False
             self.new_state = True
             if "fields" in self.action:
+                #send an action with extra fields to the environment server and wait a new info.
                 return steps(self.action['name'], self.action['args'], self.action['fields'])
             else:
+                #send an action to the environment server and wait a new info.
                 return step(self.action['name'], self.action['args'])
 
         if self.initial_state is None and not info['done']: #first action after reseting
@@ -217,19 +238,28 @@ class BasicAgent:
             with self.qout.mutex:
                 self.qout.queue.clear()
             self.__get_controller().handleNewEpisode(info)
-            self.qout.put(("reset", info))
+            if self.controller.reset_is_waiting:
+                self.qout.put( ("reset", info) ) #receiving a new info after reseting.
+            if self.controller.config_is_waiting:
+                self.qout.put( ("config", info) )
             
         if self.new_state and not info['done']:
             self.new_state = False
-            #if not self.qout.full():
-            self.qout.put( ("step", info) )
+            if not self.qout.full():
+                if self.controller.step_is_waiting:
+                    self.qout.put( ("step", info) ) #receiving a new info after to send an action.
 
-        if info['done']:
-            self.new_state = False
-            self.initial_state = None
-            if not self.endOfEpisode:
+        if info['done']: #if environment episode is done.
+            self.new_state = False #reset to initial state
+            self.initial_state = None #reset to initial state
+            if not self.endOfEpisode: #if controller was not notified, than notify it. 
                 self.endOfEpisode = True
-                self.qout.put( ("step", info) )
+                if self.controller.step_is_waiting:
+                   self.qout.put( ("step", info) )
+                if self.controller.reset_is_waiting:
+                    self.qout.put( ("reset", info) )
+                if self.controller.config_is_waiting:
+                    self.qout.put( ("config", info) )
                 self.__get_controller().handleEndOfEpisode(info)
         
         return step("__waitnewaction__", [0])
@@ -243,19 +273,19 @@ class BasicAgent:
             control.append(stepfv('max_steps', [self.max_steps]))
             control.append(stepfv('id', [self.id]))
             self.__get_controller().handleConfiguration(self.id, self.max_step, self.modelmetadata)
-            print("-------------------------------------------------------------------------")
-            print(a)
-            if "__reset__" in a:
+            if self.controller.reset_is_waiting:
                 self.qout.put( ("reset", a) )
-            else:
+            if self.controller.config_is_waiting:
                 self.qout.put( ("config", a) )
             return ("@".join(control))
         if '__stop__' in a:
-            print("--*-- GAME IS CLOSED --*--")
-            print(f"This agent will kill in {self.timeout} seconds...")
-            self.qout.put("halt")
+            print("--*-- AI4UGodot Ended --*--")
+            print(f"We are trying turn off actives agent's subsystems! Wait ...")
+            self.qout.put( ("step", "halt") )
+            self.qout.put( ("reset", "halt") )
+            self.qout.put( ("config", "halt") )
             self.qin.put("halt")
-            sys.exit()
+            return "halt"
         if 'wait_command' in a:
             if self.request_reset:
                 self.initial_state = None
@@ -265,7 +295,6 @@ class BasicAgent:
                 return step("__reset__", [0])
             elif self.request_config:
                 self.request_config  = False
-                self.qout.put( ("config", a) )
                 return step("__start_agent__", [0])
         return stepfv('__noop__', [0])
 

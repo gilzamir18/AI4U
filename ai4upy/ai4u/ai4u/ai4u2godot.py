@@ -14,7 +14,7 @@ class UDPServer:
         self.port = port
         self.timeout = timeout
         self.force_exit = force_exit
-        self.max_packet_size = 8192
+        self.max_packet_size = 819200
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.settimeout(timeout)
         self.handler = handler
@@ -26,7 +26,9 @@ class UDPServer:
             print(f"After {self.timeout} seconds, this terminal will automatically shut down if it does not receive a request!")
             while True:
                 mydata, addr = self.socket.recvfrom(self.max_packet_size)
-                self.handler.handle(self.socket, mydata, addr)
+                if not self.handler.handle(self.socket, mydata, addr):
+                    self.handle_exit("Halted")
+                    break
                 #print("Received message from {}: {}".format(addr, data.decode()))
         except socket.timeout:
             # Aqui você pode chamar a função desejada após o tempo limite
@@ -56,10 +58,15 @@ class BMUDPHandler:
         if  content is not None:
             #self.wfile.write(content.encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
+            return True
+        elif content == "halt":
+            socket.sendto(content.encode(encoding="utf-8"), client_address)
+            return False
         else:
             print("WARNING: returning empty message!")
             #self.wfile.write("".encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
+            return True
 
 def create_server(host='127.0.0.1', port=8080, buffer_size=819200, timeout=30, force_exit=True):
     serverUDP = UDPServer(host, port, timeout, force_exit, BMUDPHandler())

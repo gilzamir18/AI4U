@@ -5,6 +5,7 @@ from .ai4u2godot import create_server
 from .workers import BMWorker
 import time
 from .utils import get_int_from, get_bool_from, get_float_from, get_from
+import sys
 
 def startasdaemon(ids, controllers_classes=None, config=None):
     if config is None:
@@ -13,7 +14,6 @@ def startasdaemon(ids, controllers_classes=None, config=None):
     for i in range(len(agents)):
         if not BMWorker.register_agent(agents[i], ids[i], config):
             sys.exit(-1)
-
         force_exit = get_bool_from(config, "force_exit", True)
         port = get_int_from(config, "server_port", 8080)
         host = get_from(config, "server_IP", "127.0.0.1")
