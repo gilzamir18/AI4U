@@ -110,13 +110,13 @@ Notice that the agent as a 3D object should have a front direction. In Godot, we
 
 We have completed the agent's physical body and appearance, but we haven't done much about how the agent perceives the environment and acts in this world. But before doing that, let's change the name of the RigidBody3D node to AgentBody, so we know it is the agent.
 
-The agent needs a main module called *BasicAgent*, capable of coordinating its sensors and actuators through a controller.
+The agent needs a main module called *RLAgent*, capable of coordinating its sensors and actuators through a controller.
 
-To create a *BasicAgent* node, create a child node of the AgentBody node and change its name to *Agent*. In this node's *script* property, add the *BasicAgent* script (use the *Quick Load* property for this). As soon as you add this script, nothing will change in the *Inspector*. Godot will only show the properties of the added component after a new compilation. So, set the current scene as the project's main scene. Then, click *build* to compile the project for the first time. Then, press CTRL+F5. A black screen will open since there is no camera and no light in the scene. But this first compilation was just for Godot to recognize the properties of the *BasicAgent* object.
+To create a *RLAgent* node, create a child node of the AgentBody node and change its name to *Agent*. In this node's *script* property, add the *RLAgent* script (use the *Quick Load* property for this). As soon as you add this script, nothing will change in the *Inspector*. Godot will only show the properties of the added component after a new compilation. So, set the current scene as the project's main scene. Then, click *build* to compile the project for the first time. Then, press CTRL+F5. A black screen will open since there is no camera and no light in the scene. But this first compilation was just for Godot to recognize the properties of the *RLAgent* object.
 
 > For the compilation to work correctly, you need to create a C# solution. To do this, in the Project menu, select Tools >> C# >> "Create C# Solution". Now, your project can be compiled correctly.
 
-After compiling the project for the first time, the properties of the BasicAgent script will be shown in the Godot *Inspector*. Configure these properties as shown in *Figure 9*.
+After compiling the project for the first time, the properties of the RLAgent script will be shown in the Godot *Inspector*. Configure these properties as shown in *Figure 9*.
 
 ![figure](img/demo1basicagentconfig.png)
 
@@ -130,7 +130,7 @@ After compiling the project for the first time, the properties of the BasicAgent
 
 Our agent is still very simple, without sensors and actuators. It is necessary to add actuators and sensors to the agent. Let's use an actuator of type *RBMoveActuator* and a sensor of type *Camera3DSensor*. Add an actuator of type *RBMoveActuator* as a child of the **Agent** node with the settings shown in *Figure 11*. Also, create the node structure shown in *Figure 11*. To create the child nodes of **Agent**, right-click on this node and select the option to create a new node. Select the generic Node option and change the name of this node to one of the names shown in *Figure 11*, under *Agent*.
 
-> Note: Whenever we create an AI4U object, we create a generic Node and then add an AI4U script, such as *BasicAgent* and *RBMoveActuator*. From now on, to simplify the writing, we will just say: create a node of type *BasicAgent*.
+> Note: Whenever we create an AI4U object, we create a generic Node and then add an AI4U script, such as *RLAgent* and *RBMoveActuator*. From now on, to simplify the writing, we will just say: create a node of type *RLAgent*.
 
 ![figure](img/demo1actuator.png)
 
