@@ -17,9 +17,9 @@ namespace ai4u
 		///line arguments do not alter the properties of 
 		///the remote brain.</summary>
 		public bool Managed {get; set;} = false;
-		///<summary>The IP of the bemaker2unity training server.</summary>
+		///<summary>The IP of the ai4upy training server.</summary>
 		public string Host {get; set;} = "127.0.0.1";
-		///<summary>The server port of the bemaker2unity training server.</summary>
+		///<summary>The server port of the ai4upy training server.</summary>
 		public int Port {get; set;} = 8080;
 		public int ReceiveTimeout {get; set;} = 2000;
 		public int ReceiveBufferSize {get; set;} = 81920;
@@ -35,9 +35,9 @@ namespace ai4u
 			this.agent = agent;
 			//one time configuration
 			sockToSend = TrySocket();
-			if (!Managed && runFirstTime){
-				runFirstTime =false;
-				string[] args = System.Environment.GetCommandLineArgs ();
+            if (!Managed && !runFirstTime){
+				runFirstTime = true;
+				string[] args = OS.GetCmdlineArgs();
 				int i = 0;
 				while (i < args.Length)
 				{
@@ -49,6 +49,10 @@ namespace ai4u
 							break;
 						case "--ai4u_host":
 							Host = args[i+1];
+                            i += 2;
+							break;
+						case "--ai4u_rid":
+							agent.ID = args[i + 1];
 							i += 2;
 							break;
 						default:

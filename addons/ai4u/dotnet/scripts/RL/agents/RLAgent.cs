@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 
 namespace ai4u
 {
@@ -187,11 +188,13 @@ namespace ai4u
                     r.ReceiveTimeout = config.receiveTimeout;
                     r.ReceiveBufferSize = config.receiveBufferSize;
                     r.SendBufferSize = config.sendBufferSize;
+                    brain.Setup(this);
                 }
                 else if (!remote && node is Controller)
                 {
                     var ctrl = (Controller)node;
                     SetBrain(new LocalBrain(ctrl));
+                    Brain.Setup(this);
                 }
                 else if (node is ControllerConfiguration)
                 {
@@ -216,6 +219,18 @@ namespace ai4u
                     var a = (Actuator)node;
                     actuatorList.Add(a);
                     numberOfActuators++;
+                }
+            }
+
+            if (Brain == null)
+            {
+                if (remote)
+                {
+                    throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
+                }
+                else
+                {
+                    throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
                 }
             }
 
@@ -299,27 +314,11 @@ namespace ai4u
             request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
             request.SetMessage(4, "config", ai4u.Brain.INT, 1);
 
-            if (brain != null)
-            {
-                brain.Setup(this);
-            }
-            else
-            {
-                if (remote)
-                {
-                    throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
-                }
-                else
-                {
-                    throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
-                }
-            }
 
-            
             var cmds = controlRequestor.RequestEnvControl(this, request);
             if (cmds == null)
             {
-                throw new System.Exception("ai4u2unity connection error!");
+                GD.PrintErr("ai4u2unity :: connection error...");
             }
             setupIsDone = true;
         }
