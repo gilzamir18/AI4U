@@ -188,13 +188,11 @@ namespace ai4u
                     r.ReceiveTimeout = config.receiveTimeout;
                     r.ReceiveBufferSize = config.receiveBufferSize;
                     r.SendBufferSize = config.sendBufferSize;
-                    brain.Setup(this);
                 }
                 else if (!remote && node is Controller)
                 {
                     var ctrl = (Controller)node;
                     SetBrain(new LocalBrain(ctrl));
-                    Brain.Setup(this);
                 }
                 else if (node is ControllerConfiguration)
                 {
@@ -222,17 +220,6 @@ namespace ai4u
                 }
             }
 
-            if (Brain == null)
-            {
-                if (remote)
-                {
-                    throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
-                }
-                else
-                {
-                    throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
-                }
-            }
 
             DoneSensor doneSensor = new DoneSensor();
             doneSensor.isInput = false;
@@ -307,6 +294,20 @@ namespace ai4u
             Metadata = metadataLoader.Metadata;
             string metadatastr = metadataLoader.toJson();
 
+            if (Brain == null)
+            {
+                if (remote)
+                {
+                    throw new System.Exception($"Remote agent without a remote brain. Add a valid remote brain for the agent {ID}");
+                }
+                else
+                {
+                    throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
+                }
+            }
+            Brain.Setup(this);
+
+
             RequestCommand request = new RequestCommand(5);
             request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
             request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
@@ -320,6 +321,7 @@ namespace ai4u
             {
                 GD.PrintErr("ai4u2unity :: connection error...");
             }
+
             setupIsDone = true;
         }
 

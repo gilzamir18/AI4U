@@ -4,6 +4,7 @@ import time
 import sys
 from threading import Thread
 from queue import Empty, Queue
+import threading
 
 class BasicController:    
     def __init__(self):
@@ -22,6 +23,9 @@ class BasicController:
         self.step_is_waiting = False
         self.reset_is_waiting = False
         self.config_is_waiting = False
+        self.lock_step = threading.Lock()
+        self.lock_reset = threading.Lock()
+        self.lock_config = threading.Lock()
 
     def close(self):
         pass #release resources here
@@ -54,64 +58,61 @@ class BasicController:
         self.fields = []
 
     def request_reset(self, args=None):
-        self.agent.qin.put(["reset"])
-        info = None
-        self.reset_is_waiting = True
-        while self.reset_is_waiting:
-            try:
-                info = self.agent.qout.get()
-                if info[0] == "reset":
-                    self.reset_is_waiting = False
-                    break
-            except TimeoutError as e:
-                print(f"The environment server is taking a long time to send the configuration!")
-                self.reset_is_waiting = True
-            except Empty as e:
-               print("It received a empty message. It is trying to get a valid message!")
-               self.reset_is_waiting = True
-            except KeyboardInterrupt as e:
-                sys.exit(0)
-    
-        if info[1] == "halt":
-            print("Reset subsystem ended...")
-            sys.exit(0)
+        with self.lock_reset:
+            self.agent.qin.put(["reset"])
+            info = None
+            self.reset_is_waiting = True
+            while self.reset_is_waiting:
+                try:
+                    info = self.agent.qout.get()
+                    if info[0] == "reset":
+                        self.reset_is_waiting = False
+                        break
+                except TimeoutError as e:
+                    print(f"The environment server is taking a long time to send the configuration!")
+                    self.reset_is_waiting = True
+                except Empty as e:
+                    print("It received a empty message. It is trying to get a valid message!")
+                    self.reset_is_waiting = True
+                except KeyboardInterrupt as e:
+                    sys.exit(0)
 
-        self.restoreDefaultAction()
-        if isinstance(info[1], dict):
+            if info[1] == "halt":
+                print("Reset subsystem ended...")
+                sys.exit(0)
+
+            self.restoreDefaultAction()
             self.lastinfo = info[1]
             return self.reset_behavior(info[1])
-        else:
-            return self.reset_behavior(self.lastinfo)
 
     def request_config(self, args=None):
-        self.agent.qin.put(["config"])
-        msg = None
-        self.config_is_waiting = True
-        while self.config_is_waiting:
-            try:
-                self.step_is_waiting = True
-                msg, info = self.agent.qout.get()
-                if msg == "config":
-                    self.config_is_waiting = False
-                    break
-            except TimeoutError as e:
-                print(f"The environment server is taking a long time to send the configuration!")
-                self.config_is_waiting = True
-            except Empty as e:
-               print("It received a empty message. It is trying to get a valid message!")
-               self.config_is_waiting = True
-            except KeyboardInterrupt as e:
+        with self.lock_config:
+            self.agent.qin.put(["config"])
+            msg = None
+            self.config_is_waiting = True
+            while self.config_is_waiting:
+                try:
+                    self.step_is_waiting = True
+                    msg, info = self.agent.qout.get()
+                    if msg == "config":
+                        self.config_is_waiting = False
+                        break
+                except TimeoutError as e:
+                    print(f"The environment server is taking a long time to send the configuration!")
+                    self.config_is_waiting = True
+                except Empty as e:
+                    print("It received a empty message. It is trying to get a valid message!")
+                    self.config_is_waiting = True
+                except KeyboardInterrupt as e:
+                    sys.exit(0)
+
+            if info == "halt":
+                print("Config subsystem ended...")
                 sys.exit(0)
-    
-        if info == "halt":
-            print("Config subsystem ended...")
-            sys.exit(0)
-        self.restoreDefaultAction()
-        if isinstance(info, dict):
+
+            self.restoreDefaultAction()
             self.lastinfo = info
             return info
-        else:
-            return self.lastinfo
 
     def request_step(self, action):
         """
@@ -119,39 +120,43 @@ class BasicController:
         Never override this method. If you want change step behavior,
         implements step_behavior method.
         """
-        self.step_behavior(action)
-        action = {}
-        action['name'] = self.actionName
-        action['args'] = self.actionArgs
-        action['fields'] = self.fields
-        self.agent.qin.put(['act', action])
-        info = None
-        self.step_is_waiting = True
-        try:
+        with self.lock_step:
+            self.step_behavior(action)
+            action = {}
+            action['name'] = self.actionName
+            action['args'] = self.actionArgs
+            action['fields'] = self.fields
+            self.agent.qin.put(['act', action])
+            info = None
+            self.step_is_waiting = True
+            request_delta_time = 0
             while self.step_is_waiting:
-                id, info = self.agent.qout.get(timeout=self.agent.timeout)
-                if id == "step":
+                try:
+                    id, info = self.agent.qout.get(timeout=self.agent.timeout)
+                    if id == "step":
+                        self.step_is_waiting = False
+                        break
+                except TimeoutError as e:
+                    request_delta_time += self.agent.timeout
+                    print("-------------------------------------------------------------------------------------")
+                    print(f"\tStep request is taking a long time ({request_delta_time} seconds)!")
+                except KeyboardInterrupt:
                     self.step_is_waiting = False
-                    break
-        except TimeoutError as e:
-            print(f"Step timeout after {self.agent.timeout} seconds!")
-            sys.exit(0)
-        except KeyboardInterrupt:
-            sys.exit(0)
-        except Empty as e:
-            print("Environment server has sended a empty message. It's restoring the last state!")
-            info = self.agent.last_info
+                    sys.exit(0)
+                except Empty as e:
+                    request_delta_time += self.agent.timeout
+                    print("-------------------------------------------------------------------------------------")
+                    print(f"\tStep request is taking a long time ({request_delta_time} seconds)!")
+            if self.step_is_waiting:
+                self.step_is_waiting = False 
+            
+            if info == "halt":
+                print("Step subsystem ended...")
+                sys.exit(0)
 
-        if info == "halt":
-            print("Step subsystem ended...")
-            sys.exit(0)
-
-        self.restoreDefaultAction()
-        if isinstance(info, dict):
+            self.restoreDefaultAction()
             self.lastinfo = info
             return info
-        else:
-            return self.lastinfo
 
     def restoreDefaultAction(self):
         self.actionName = "__waitnewaction__"
