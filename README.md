@@ -6,15 +6,33 @@ The Godot version of the AI4U get advantage of the Godot architecture and facili
 
 Agent abstraction defines an agent living in a environment and interacting with this environment by means of sensors and actuators. So, NPC specification is a kind of agent specification. Agent's components are: sensors, actuators, events, reward functions and brain. Sensors and actuators are the interface between agents and environments. A sensor provides data to an agent's brain, while actuators send actions from agent to environment. A brain is a script that proccessing sensors' data e made a decision (selects an action by time).
 
-# Use ai4upy for Training
-The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy/ai4u and run the command:
+# AI4U Components
 
-    pip install -e . 
+There are two components required to run AI4U in a new project: Python scripts and C# scripts.
 
-This command allows you to train and run an agent within a Godot scene.
+## Install Stable Python Scripts
+To install the stable version of AI4U, run the command:
+
+```bash
+pip install ai4u
+```
+
+## Install Stable C# Scripts
+Next, download the latest AI4U release [here](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u.zip). Unzip this file and place it in the main directory of your Godot project.
+
+## Install the Latest Python Scripts
+The Python component of AI4U can be installed using a local pip package. To install it, navigate to the directory `pyplugin/ai4upy/ai4u` and run the command:
+
+```bash
+pip install -e .
+```
+
+This command fetches the latest modifications from the AI4U repository.
+
+## Install the Latest C# Scripts
+Clone the repository and copy the directory `addons/ai4u` to your project.
 
 # Tutorials
-
 * [Introduction](doc/introduction.md)
 * [Don't Break the Game](doc/dontbreakthegame.md)
 * [Events](doc/events.md)
