@@ -11,20 +11,15 @@ The Python side of the AI4U can be installed using local pip package. To install
 
     pip install -e . 
 
-Additionally, install the libraries related to training. To do this, navigate to the `pyplugin` directory and run the following command:
-
-    pip install -r sb3_requirements.txt
-
 This command allows you to train and run an agent within a Godot scene.
-
-# Try AI4USharp
-An experimental version of AI4U that don't depend of the Python is available [here](https://github.com/gilzamir18/AI4USharp).
 
 # Tutorials
 
 * [Introduction](doc/introduction.md)
 * [Don't Break the Game](doc/dontbreakthegame.md)
 * [Events](doc/events.md)
+* [Using ONNX](doc/introductionwithonnxmodels.md)
+* [Why Python?](doc/whypython.md)
 
 
 # Requirements
@@ -39,6 +34,8 @@ The minimum recommended hardware for AI4U is a computer with at least a GeForce 
 # Demo Projects
 [Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
 
+# Try AI4USharp
+An experimental version of AI4U that don't depend of the Python is available [here](https://github.com/gilzamir18/AI4USharp).
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir_gomes@uvanet.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).
