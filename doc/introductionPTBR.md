@@ -260,7 +260,7 @@ from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
 import ai4u
 from ai4u.controllers import BasicGymController
-from ai4u.onnxutils import sac_export_to, read_json_file
+#from ai4u.onnxutils import sac_export_to
 import AI4UEnv
 import gymnasium as gym
 
@@ -274,7 +274,7 @@ This example controll a movable character in game.
 ''')
 model = SAC.load("ai4u_model")
 
-sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
+#sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
 
 obs, info = env.reset()
 
@@ -325,5 +325,4 @@ Depois, abre o link sugerido pelo tensorboard em um navegador (geralmente *http:
 
 *Figure 27. Resultado final do treinamento.*
 
-Observe também que o *script* run.py criou um arquivo "model.onnx". Este arquivo pode ser executado diretamente na Godot, por meio do objeto **NeuralNetController**. Para isso, basta colocar o arquivo model.onnx na raiz do teu projeto e altera o campo *Model Path* do objeto *NeuralNetController* para "model.onnx". Também desmarque a opção *Remote* do agente de forma que o *NeuralNetController* seja efetivamente usado.
-
+Saiba como converter o modelo para rodar diretamente na Godot: [tutorial](introductionwithonnxmodels.md).

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using static Godot.Time;
 
 namespace ai4u
 {
@@ -69,12 +70,21 @@ namespace ai4u
         /// </summary>
         public event AgentEpisodeHandler OnAgentStart;
 
+
+        [ExportCategory("Control Options")]
+        [Export]
+        private bool remote;
+
         [Export]
         private Node avatarBody;
 
         [Export]
-        private bool remote;
+        private bool addControlRequestor = true;
 
+        [Export]
+        private float controlRequestorTimeScale = 1.0f;
+
+        [ExportCategory("Reinforcement Learning")]
         /// <summary>
         /// Ends the simulation whenever the agent receives a negative reward.
         /// </summary>
@@ -99,7 +109,7 @@ namespace ai4u
         [Export]
         public bool checkEpisodeTruncated = true;
 
-        [ExportCategory("Optional Inputs")]
+        [ExportCategory("Array Input (Optional)")]
         [Export]
         internal int initialInputSize = 0;
 
@@ -107,6 +117,14 @@ namespace ai4u
         internal float rangeMin = 0;
         [Export]
         internal float rangeMax = 1;
+        [ExportCategory("Actions (Optional)")]
+        [Export]
+        private Node actionHandler;
+        [Export]
+        private bool actionIsContinuous = true;
+        [Export]
+        private int actionSize = 1;
+
 
         /// <summary>
         /// Gets the total reward for the current episode.
@@ -147,6 +165,7 @@ namespace ai4u
         public override void SetupAgent(ControlRequestor requestor)
         {
 
+
 			if (avatarBody == null)
 			{
 				//GD.PrintErr("Avatar body is null. Set a RigidBody or CharacterBody instead!");
@@ -168,6 +187,7 @@ namespace ai4u
         	agentRewardFunc.OnSetup(this);
 			rewards.Add(agentRewardFunc);
             CallDeferred("add_child", agentRewardFunc);
+
 
             if (remote)
             {
@@ -218,6 +238,29 @@ namespace ai4u
                     actuatorList.Add(a);
                     numberOfActuators++;
                 }
+            }
+
+            if (actionHandler != null)
+            {
+                Actuator defaultActuator = null;
+                if (actionIsContinuous)
+                {
+                    defaultActuator = new ContinuousActuator();
+                    ((ContinuousActuator)defaultActuator).size = actionSize;
+                    defaultActuator.OnSetup(this);
+                }
+                else
+                {
+                    defaultActuator = new DiscretActuator();
+                    ((DiscretActuator)defaultActuator).size = actionSize;
+                    defaultActuator.OnSetup(this);
+                }
+
+                defaultActuator.actionName = "defaultAction";
+                defaultActuator.isOutput = true;
+                CallDeferred("add_child", defaultActuator);
+                actuatorList.Add(defaultActuator);
+                numberOfActuators++;
             }
 
 
@@ -316,7 +359,7 @@ namespace ai4u
             request.SetMessage(4, "config", ai4u.Brain.INT, 1);
 
 
-            var cmds = controlRequestor.RequestEnvControl(this, request);
+            var cmds = ControlRequestor.RequestEnvControl(this, request);
             if (cmds == null)
             {
                 GD.PrintErr("ai4u2unity :: connection error...");
@@ -417,6 +460,16 @@ namespace ai4u
         /// Gets the current reward.
         /// </summary>
         public float Reward => reward;
+
+        public override void _Ready()
+        {
+            if (addControlRequestor)
+            {
+                ControlRequestor ctrl = new ControlRequestor();
+                ctrl.defaultTimeScale = controlRequestorTimeScale;
+                CallDeferred("add_child", ctrl);
+            }
+        }
 
         /// <summary>
         /// Adds a reward to the current reward.

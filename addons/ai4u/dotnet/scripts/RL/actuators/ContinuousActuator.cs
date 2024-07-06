@@ -1,9 +1,8 @@
+using ai4u;
 using Godot;
 using System;
 
-namespace ai4u;
-
-public partial class DiscretActuator : Actuator
+public partial class ContinuousActuator : Actuator
 {
     //forces applied on the x, y and z axes.    
     [Export]
@@ -20,6 +19,13 @@ public partial class DiscretActuator : Actuator
         isContinuous = false;
         rangeMin = new float[size];
         rangeMax = new float[size];
+
+        for (int i = 0; i < size; i++)
+        {
+            rangeMin[i] = -1;
+            rangeMax[i] = 1;
+        }
+
         this.agent = (RLAgent)agent;
 
         if (ActionHandler == null)
@@ -34,7 +40,7 @@ public partial class DiscretActuator : Actuator
     {
         if (agent != null && !agent.Done)
         {
-            int action = agent.GetActionArgAsInt();
+            float[] action = agent.GetActionArgAsFloatArray();
             ActionHandler.Call("SetAction", action);
         }
     }

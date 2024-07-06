@@ -38,9 +38,9 @@ namespace ai4u
 
 	public partial class ControlRequestor : Node
 	{
-		[Export] private float defaultTimeScale = 1.0f; 
-		[Export] private bool physicsMode = true;
-		[Export] private bool computePhysicsTicks = true;
+		[Export] internal float defaultTimeScale = 1.0f; 
+		[Export] internal bool physicsMode = true;
+		[Export] internal bool computePhysicsTicks = true;
 		[Export] int maxPhysicsFrames = 60;
 		[Export] public Godot.Collections.Array<Agent> agentsList { get; set; }
 		
@@ -49,11 +49,13 @@ namespace ai4u
 		public override void _Ready()
 		{
 			agents = new List<Agent>();
-			foreach (var agent in agentsList)
+			if (agentsList != null)
 			{
-				agents.Add(agent);
+				foreach (var agent in agentsList)
+				{
+					agents.Add(agent);
+				}
 			}
-
 			var parentNode = GetParent();
 			if (parentNode != null && parentNode is RLAgent)
 			{
@@ -91,7 +93,7 @@ namespace ai4u
             }
         }
 
-		public Command[] RequestEnvControl(Agent agent, RequestCommand request)
+		internal static Command[] RequestEnvControl(Agent agent, RequestCommand request)
 		{
 			string cmdstr = null;
 			if (agent.Brain is LocalBrain)
@@ -113,7 +115,7 @@ namespace ai4u
 		}
 
 
-		public Command[] RequestControl(Agent agent)
+		internal static Command[] RequestControl(Agent agent)
 		{
 			agent.UpdateState();
 			string cmdstr = null;
@@ -149,7 +151,7 @@ namespace ai4u
 			return null;
 		}
 
-		private Command[] UpdateActionData(string cmd)
+		internal static Command[] UpdateActionData(string cmd)
 		{   
 
 			if (cmd == "halt")
@@ -421,7 +423,7 @@ namespace ai4u
 		/// 7 = string array
 		/// @return the value of the information sent.
 		/// </summary>
-		public string SendMessageFrom(RemoteBrain rbrain, string[] desc, byte[] tipo, string[] valor)
+		internal static string SendMessageFrom(RemoteBrain rbrain, string[] desc, byte[] tipo, string[] valor)
 		{
 			StringBuilder sb = new StringBuilder();
 			int numberoffields = desc.Length;

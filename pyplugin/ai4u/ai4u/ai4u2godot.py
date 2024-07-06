@@ -18,6 +18,7 @@ class UDPServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.settimeout(timeout)
         self.handler = handler
+        self.handler.server = self
 
     def listen(self):
         try:
@@ -50,18 +51,23 @@ class UDPServer:
 
 class BMUDPHandler:
     worker = BMWorker()
+    def __init__(self) -> None:
+        self.server = None
+
     def handle(self, socket, data, client_address):
         # Receive a message from a client
         #print("=============> ", type(data))
         content = BMUDPHandler.worker.proccess(data)
         # Send a message from a client
-        if  content is not None:
+        if  content == "halt":
+            socket.sendto(content.encode(encoding="utf-8"), client_address)
+            if self.server is not None:
+                self.server.socket.close()
+            return False
+        elif content is not None:
             #self.wfile.write(content.encode(encoding="utf-8"))
             socket.sendto(content.encode(encoding="utf-8"), client_address)
             return True
-        elif content == "halt":
-            socket.sendto(content.encode(encoding="utf-8"), client_address)
-            return False
         else:
             print("WARNING: returning empty message!")
             #self.wfile.write("".encode(encoding="utf-8"))

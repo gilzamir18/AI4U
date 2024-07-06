@@ -325,4 +325,7 @@ Then, open the suggested link from TensorBoard in a browser (usually *http://loc
 
 *Figure 27. Final training result.*
 
-Note also that the run.py script created a "model.onnx" file. This file can be run directly in Godot using the **NeuralNetController** object. To do this, place the model.onnx file in the root of your project and change the *Model Path* field of the *NeuralNetController* object to "model.onnx". Also, uncheck the *Remote* option of the agent so that the *NeuralNetController* is effectively used.
+Learn how to convert the model to run directly in Godot: [tutorial](introductionwithonnxmodels.md).
+
+
+
