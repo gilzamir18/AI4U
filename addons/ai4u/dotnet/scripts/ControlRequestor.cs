@@ -53,8 +53,14 @@ namespace ai4u
 			{
 				agents.Add(agent);
 			}
-		
-			agents.Sort( new AgentComparer() );
+
+			var parentNode = GetParent();
+			if (parentNode != null && parentNode is RLAgent)
+			{
+				agents.Add((RLAgent)parentNode);
+			}
+
+            agents.Sort( new AgentComparer() );
 			for (int i = 0; i < agents.Count; i++)
 			{
 				Agent a = agents[i];
@@ -145,6 +151,11 @@ namespace ai4u
 
 		private Command[] UpdateActionData(string cmd)
 		{   
+
+			if (cmd == "halt")
+			{
+                throw new System.Exception("System halted by client!");
+            }
 			string[] cmdTokens = cmd.Trim().Split('@');
 			int nCmds = cmdTokens.Length;
 			Command[] res = new Command[nCmds];
@@ -208,6 +219,7 @@ namespace ai4u
 			}
 		}
 
+		private string last_cmd = "";
 		private void AgentUpdate(Agent agent, double delta)
 		{
 			if (agent == null || !agent.SetupIsDone)
@@ -316,11 +328,13 @@ namespace ai4u
 				}
 			} else
 			{
-				RequestCommand request = new RequestCommand(3);
+				RequestCommand request = new RequestCommand(4);
 				request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
 				request.SetMessage(1, "wait_command", ai4u.Brain.STR, "restart, resume, start_and_reset, start");
 				request.SetMessage(2, "id", ai4u.Brain.STR, agent.ID);
-				var cmds = RequestEnvControl(agent, request);
+                request.SetMessage(3, last_cmd, ai4u.Brain.STR, last_cmd);
+				last_cmd = "";
+                var cmds = RequestEnvControl(agent, request);
 				if (cmds == null)
 				{
 					GD.PrintErr($"AI4U connection error! Agent ID: {agent.ID}.");
@@ -328,7 +342,8 @@ namespace ai4u
                 }
 				if (CheckCmd(cmds, "__restart__")) //obsolete
 				{
-					ctrl.frameCounter = -1;
+					last_cmd = "__restart__";
+                    ctrl.frameCounter = -1;
 					agent.NSteps = 0;
 					Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
 					for (int i = 0; i < cmds.Length; i++)
@@ -348,7 +363,8 @@ namespace ai4u
 				}
 				else if (CheckCmd(cmds, "__start_agent__"))
 				{
-					ctrl.frameCounter = -1;
+					last_cmd = "__start_agent__";
+                    ctrl.frameCounter = -1;
 					agent.NSteps = 0;
 					Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
 					for (int i = 0; i < cmds.Length; i++)
@@ -368,7 +384,8 @@ namespace ai4u
 				}
 				else if (CheckCmd(cmds, "__reset__"))
 				{
-					ctrl.frameCounter = 0;
+					last_cmd = "__reset__";
+                    ctrl.frameCounter = 0;
 					agent.NSteps = 0;
 					Dictionary<string, string[]> fields = new Dictionary<string, string[]>();
 					for (int i = 0; i < cmds.Length; i++)

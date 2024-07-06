@@ -109,13 +109,13 @@ Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na God
 
 Concluímos o corpo físico e a aparência do agente, mas ainda não fizemos muito sobre como o agente percebe o ambiente e age sobre este mundo. Mas antes de fazermos isso, vamos mudar o nome do nó RigidBody3D para AgentBody, assim saberemos que se trata do agente.
 
-O agente precisa de um módulo principal chamado *BasicAgent*, capaz de coordenar seus sensores e atuadores por meio de um controlador. 
+O agente precisa de um módulo principal chamado *RLAgent*, capaz de coordenar seus sensores e atuadores por meio de um controlador. 
 
-Para criar um nó *BasicAgent*, crie um nó filho do nó AgentBody e mude o seu nome para *Agent*. Na propriedade *script* deste nó, coloque o script *BasicAgent* (use a propriedade *Quick Load* para isso). Assim que adicionar este script, nada mudará no *Inspector*. A Godot apenas mostrará as propriedades do componente adicionado depois de uma nova compilação. Portanto, configure a cena atual como cena princpal do projeto. Então, clique em *build* para compilar o projeto pela primeira vez. Depois, execute CTRL+F5. Será aberta uma tela preta, pois não tem nenhuma câmera e nenhuma luz na cena. Mas esta primeira compilação foi apenas para Godot reconhecer as propriedades do objeto *BasicAgent*.
+Para criar um nó *RLAgent*, crie um nó filho do nó AgentBody e mude o seu nome para *Agent*. Na propriedade *script* deste nó, coloque o script *RLAgent* (use a propriedade *Quick Load* para isso). Assim que adicionar este script, nada mudará no *Inspector*. A Godot apenas mostrará as propriedades do componente adicionado depois de uma nova compilação. Portanto, configure a cena atual como cena princpal do projeto. Então, clique em *build* para compilar o projeto pela primeira vez. Depois, execute CTRL+F5. Será aberta uma tela preta, pois não tem nenhuma câmera e nenhuma luz na cena. Mas esta primeira compilação foi apenas para Godot reconhecer as propriedades do objeto *RLAgent*.
 
 > Para a compilação funcionar corretamente, é necessário criar uma solução C#. Para isso, no menu Project, selecione Tools>>C#>>"Create C# Solution". Pronto, seu projeto pode ser compilado corretamente.
 
-Depois de compilar o projeto pela primeira vez, as propriedades do script BasicAgent serão mostradas no *inspector* da Godot. Configure estas propriedades como mostrado na Figura 9.
+Depois de compilar o projeto pela primeira vez, as propriedades do script RLAgent serão mostradas no *inspector* da Godot. Configure estas propriedades como mostrado na Figura 9.
 
 ![figure](img/demo1basicagentconfig.png)
 
@@ -129,7 +129,7 @@ A Figura 10 mosta a estrutura atual do projeto.
 
 O nosso agente ainda está muito simples, sem sensores e sem atuadores. É necessário se adicionar atuadores e sensores para o agente. Vamos utilizar um um atuador do tipo *RBMoveActuator* e um sensor do tipo *Camera3DSensor*. Adicione um atuador do tipo *RBMoveActuator* como filho do nó **Agent** com as configurações mostradas na *Figura 11*. Aproveite e crie a estrutura de nós mostrado na *Figura 11*. Para criar os nós filhos de **Agent**, clique com o botão direito neste nó e selecione a opção que leva à criação de um novo nó. Selecione a opção genérica Node e a modifique o nome deste nó para um dos nomes mostrados na *Figura 11*, abaixo de *Agent*. Então, sob 
 
-> Nota: observe que sempre que criamos um objeto da AI4U, criamos um nó do tipo genérico Node. E então adicionamos um script da AI4U, como *BasicAgent* e *RBMoveActuator*. De agora em diante, para simplificar a escrita, diremos apenas: crie um nó do tipo *BasicAgent*.
+> Nota: observe que sempre que criamos um objeto da AI4U, criamos um nó do tipo genérico Node. E então adicionamos um script da AI4U, como *RLAgent* e *RBMoveActuator*. De agora em diante, para simplificar a escrita, diremos apenas: crie um nó do tipo *RLAgent*.
 
 ![figure](img/demo1actuator.png)
 

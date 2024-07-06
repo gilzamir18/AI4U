@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 
 namespace ai4u
 {
@@ -219,6 +220,7 @@ namespace ai4u
                 }
             }
 
+
             DoneSensor doneSensor = new DoneSensor();
             doneSensor.isInput = false;
             doneSensor.SetAgent(this);
@@ -292,18 +294,7 @@ namespace ai4u
             Metadata = metadataLoader.Metadata;
             string metadatastr = metadataLoader.toJson();
 
-            RequestCommand request = new RequestCommand(5);
-            request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
-            request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
-            request.SetMessage(2, "id", ai4u.Brain.STR, ID);
-            request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
-            request.SetMessage(4, "config", ai4u.Brain.INT, 1);
-
-            if (brain != null)
-            {
-                brain.Setup(this);
-            }
-            else
+            if (Brain == null)
             {
                 if (remote)
                 {
@@ -314,13 +305,23 @@ namespace ai4u
                     throw new System.Exception($"Local agent without a Controller child. Add child Controller node for the agent {ID}");
                 }
             }
+            Brain.Setup(this);
 
-            
+
+            RequestCommand request = new RequestCommand(5);
+            request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
+            request.SetMessage(1, "max_steps", ai4u.Brain.INT, MaxStepsPerEpisode);
+            request.SetMessage(2, "id", ai4u.Brain.STR, ID);
+            request.SetMessage(3, "modelmetadata", ai4u.Brain.STR, metadatastr);
+            request.SetMessage(4, "config", ai4u.Brain.INT, 1);
+
+
             var cmds = controlRequestor.RequestEnvControl(this, request);
             if (cmds == null)
             {
-                throw new System.Exception("ai4u2unity connection error!");
+                GD.PrintErr("ai4u2unity :: connection error...");
             }
+
             setupIsDone = true;
         }
 

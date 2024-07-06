@@ -26,7 +26,7 @@ class BMWorker:
             config = {}
         dirs = dir(Agent_Class)
         action_buffersize = get_int_from(config, 'action_buffersize', 0)
-        agent = Agent_Class(Queue(action_buffersize), Queue(action_buffersize), get_float_from(config, 'waittime', 0), get_float_from(config, 'timeout', 20))
+        agent = Agent_Class(Queue(action_buffersize), Queue(action_buffersize), get_float_from(config, 'waittime', 0), get_float_from(config, 'agent_timeout', 20))
         agent.id = id
         if  "act" in dirs  and  "handleEnvCtrl" in dirs:
             sig = signature(Agent_Class.act)

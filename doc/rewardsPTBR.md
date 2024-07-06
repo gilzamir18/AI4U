@@ -2,9 +2,9 @@
 
 Há duas formas de adicionar recompensa para um agente. Não tente qualquer outra se não quiser quebrar a lógica da AI4U. 
 
-A primeira forma, é colocando um objeto de evento de recompensa como filho do nó BasicAgent que representa o agente. Por exemplo, você pode criar um nó do tipo TouchRewardFunc, que produzirá uma recompensa toda vez que o agente tocar no objeto alvo (chamado de *Target*). Existem vários eventos de recompensa pronto nos [scripts](../addons/ai4u/dotnet/scripts/RL/events).
+A primeira forma, é colocando um objeto de evento de recompensa como filho do nó RLAgent que representa o agente. Por exemplo, você pode criar um nó do tipo TouchRewardFunc, que produzirá uma recompensa toda vez que o agente tocar no objeto alvo (chamado de *Target*). Existem vários eventos de recompensa pronto nos [scripts](../addons/ai4u/dotnet/scripts/RL/events).
 
-A segunda forma de se adicionar recompensas, é por meio da propriedade Rewards do objeto *BasicAgent* do agente. Eis um exemplo de código que usa a propriedade Rewards:
+A segunda forma de se adicionar recompensas, é por meio da propriedade Rewards do objeto *RLAgent* do agente. Eis um exemplo de código que usa a propriedade Rewards:
 
 ```c#
 using Godot;
@@ -14,7 +14,7 @@ using ai4u;
 public partial class GameManager : Node
 {
 	[Export]
-	private BasicAgent agent;
+	private RLAgent agent;
 	[Export]
 	private ArrowPhysicsMoveController2D humanController;
 	[Export]
@@ -37,16 +37,16 @@ public partial class GameManager : Node
 			jumperPower.ValueChanged += (value) => humanController.jumpPower = (float)value;
 		}
 
-		agent.OnResetStart += OnReset;
-		agent.OnStepStart += UpdateDisplay;
+		agent.OnResetStart += OnReset; //registra um evento.
+		agent.OnStepStart += UpdateDisplay; //registra um evento.
 	}
 
-	private void UpdateDisplay(BasicAgent agent)
+	private void UpdateDisplay(RLAgent agent)
 	{
 		labelTimer.Text = "Time: " + agent.NSteps;
 	}
 
-	public void OnReset(BasicAgent agent)
+	public void OnReset(RLAgent agent)
 	{
 		if (randomizeGravity)
 		{	
@@ -67,7 +67,7 @@ public partial class GameManager : Node
 		{
 			if (!agentOnLeftArea)
 			{
-				agent.Rewards.Add(10);
+				agent.Rewards.Add(10); //adiciona uma recompensa ao final do passo de tempo atual.
 			}
 			agentOnLeftArea = true;
 		}
@@ -79,7 +79,7 @@ public partial class GameManager : Node
 		{
 			if (agentOnLeftArea)
 			{
-				agent.Rewards.Add(10);
+				agent.Rewards.Add(10); //adiciona uma recompensa ao final do passo de tempo atual.
 			}
 			agentOnLeftArea = false;
 		}
