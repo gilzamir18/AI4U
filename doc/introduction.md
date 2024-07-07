@@ -200,7 +200,7 @@ There are still two optional nodes, but they are present in this environment: on
 
 *Figure 21. Configurations of the optional nodes in our scene.*
 
-We are almost ready to train our agent. We need to create the object that creates the control loop for all agents in the environment. To do this, create a node of type *ControlRequestor* and add it as a child of the scene's root. This node can be anywhere in the scene, and you must explicitly specify which agents will be executed in the environment. In Figure 22, the ControlRequestor of this demonstration is shown.
+We are almost ready to train our agent. We need to create the object that creates the control loop for all agents in the environment. To do this, certificate that property 'Add Control Requestor' was enabled in RLAgent node or create a node of type *ControlRequestor* and add it as a child of the scene's root (in this case, disable property 'Add Control Requestor'). If a ControlRequestor node was created, it can be anywhere in the scene, and you must explicitly specify which agents will be executed in the environment. In Figure 22, we have an example of *ControlRequestor* that can used in this demonstration is shown. Creating a dedicated node for ControlRequestor is only necessary if there is more than one agent in your scene.
 
 ![figure](img/demo1loop.png)
 
@@ -275,7 +275,8 @@ This example controls a movable character in the game.
 ''')
 model = SAC.load("ai4u_model")
 
-sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
+#Add the next line if you would like exporting trained model to onnx.
+#sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
 
 obs, info = env.reset()
 
@@ -299,7 +300,7 @@ $> python run.py
 
 Run the scene and see the result.
 
-> Change the execution speed of the *ControlRequestor* by changing the *Default Time Scale* value to 1.
+> Change the execution speed of the *RLAgent* by changing the *Control Requestor Time Scale* value to 1; or change the property *Default Time Scale* in the node *ControlRequestor*, if you have created one.
 
 In the document [Introduction to ONNX Model](introductionwithonnxmodels.md), I show how to run the model directly in Godot without using Python.
 
@@ -319,7 +320,7 @@ or
 python -m tensorboard.main --port 6007 --logdir .
 ```
 
-Then, open the suggested link from TensorBoard in a browser (usually *http://localhost:6006*). The results may look like those shown in *Figure 27*.
+Then, open the suggested link from TensorBoard in a browser (usually *http://localhost:6007*). The results may look like those shown in *Figure 27*.
 
 ![figure](img/demo1tb.png)
 
