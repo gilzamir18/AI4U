@@ -13,19 +13,20 @@ public partial class CBMoveActuator : MoveActuator
     [Export]
     private float moveAmount = 1;
     [Export]
+    private float backwarAmount = 0.1f;
+    [Export]
     private float turnAmount = 1;
     [Export]
     private float jumpPower = 1;
     [Export]
     private float jumpForwardPower = 1;
     [Export]
-    private float precision = 0.001f;
+    private float deadZone = 0.001f;
+    [Export]
+    private float velocityDump = 1f;
     [Export]
     private float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
-    
-    [Export]
-    private float lerpFactor = 0.4f;
-
+ 
 
     [ExportCategory("Action Shape")]
     [Export]
@@ -76,22 +77,28 @@ public partial class CBMoveActuator : MoveActuator
             turn = action[1];
             jump = action[2];
             jumpForward = action[3];
-            if (Mathf.Abs(turn) < precision)
+            float amount = moveAmount;
+            if (move < 0)
+            {
+                amount = backwarAmount;
+            }
+
+            if (Mathf.Abs(turn) < deadZone)
             {
                 turn = 0;
             }
 						
-            if (Mathf.Abs(jump) < precision)
+            if (Mathf.Abs(jump) < deadZone)
             {
                 jump = 0;
             }
 						
-            if (Mathf.Abs(jumpForward) < precision)
+            if (Mathf.Abs(jumpForward) < deadZone)
             {
                 jumpForward = 0;
             }
 
-            if (Mathf.Abs(move) < precision)
+            if (Mathf.Abs(move) < deadZone)
             {
                 move = 0;
             }
@@ -103,9 +110,16 @@ public partial class CBMoveActuator : MoveActuator
             }
             else
             {
-                if ( Math.Abs(turn) > 0)
+               /* if ( Math.Abs(turn) > 0)
                 {
-                    body.Rotate(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount));
+                    body.Rotate(body.Basis.Y.Normalized(), Mathf.DegToRad(-turn * turnAmount * (float)delta * 100));
+                }*/
+
+                if (Math.Abs(turn) > 0)
+                {
+                    var newDir = -body.Basis.Z.Rotated(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount));
+
+                    body.LookAt(body.GlobalPosition + newDir);
                 }
 
                 // Get the input direction and handle the movement/deceleration.
@@ -120,22 +134,21 @@ public partial class CBMoveActuator : MoveActuator
 
                 if (jumpForward > 0)
                 {
-                    velocity += body.Transform.Basis.Y * jumpForwardPower * jumpForward * 100;
-                    velocity += body.Transform.Basis.Z * jumpForwardPower * jumpForward * 100;
+                    velocity += body.Transform.Basis.Y * jumpForwardPower * jumpForward;
+                    velocity += body.Transform.Basis.Z * jumpForwardPower * jumpForward;
                     forwarding = true;
                 }
                 
-                if (Mathf.Abs(move) > precision)
+                if (Mathf.Abs(move) > deadZone)
                 {
-                    velocity +=  body.Transform.Basis.Z * moveAmount * move;
+                    velocity +=  body.Transform.Basis.Z * amount * move;
                     forwarding = true;    
                 }
 
                 if (!forwarding)
                 {
-                    velocity.X = Mathf.Lerp(velocity.X, 0, lerpFactor);
-                    velocity.Y = Mathf.Lerp(velocity.Y, 0, lerpFactor);
-                    velocity.Z = Mathf.Lerp(velocity.Z, 0, lerpFactor);
+                    velocity.X = Mathf.MoveToward(velocity.X, 0, velocityDump);
+                    velocity.Z = Mathf.MoveToward(velocity.Z, 0, velocityDump);
                 }
             }
             body.Velocity = velocity;

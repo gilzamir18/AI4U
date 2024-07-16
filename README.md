@@ -36,6 +36,7 @@ Clone the repository and copy the directory `addons/ai4u` to your project.
 * [Introduction](doc/introduction.md)
 * [Don't Break the Game](doc/dontbreakthegame.md)
 * [Events](doc/events.md)
+* [AI4U and Stable-Baselines3](doc/stable_baselines3guide.md)
 * [Using ONNX](doc/introductionwithonnxmodels.md)
 * [Why Python?](doc/whypython.md)
 

@@ -28,6 +28,8 @@ namespace  ai4u
 
 		private bool receivedResetAction = false;
 
+		private object locker;
+
 		override public void OnSetup()
 		{
 			((RLAgent) agent).OnEpisodeEnd += EndEpisodeHandler;
@@ -89,9 +91,9 @@ namespace  ai4u
 				{
 					actionName = "__waitnewaction__";
 					if (_firstTime)
-					{
-						actionName = "__reset__";
-						_firstTime = false;
+                    {
+                        _firstTime = false;
+                        actionName = "__reset__";
 					}
 					else
 					{
@@ -108,7 +110,8 @@ namespace  ai4u
         override public string GetAction()
 		{
 			var action = ai4u.Utils.ParseAction(actionName, actionValue);
-			if (receivedResetAction)
+			actionName = "__waitnewaction__";
+            if (receivedResetAction)
 			{
 				receivedResetAction = false;
 			}

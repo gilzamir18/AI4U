@@ -9,15 +9,19 @@ namespace ai4u
 	[Tool]
 	public partial class LinearRayCastingSensor : Sensor
 	{
-		
-		[ExportCategory("Object Detection")]
-		[Export]
+
+        [ExportCategory("Object Detection")]
+        [Export]
+        public string[] groupName;
+        [Export]
 		public int[] groupCode;
+
+
 		[Export]
-		public string[] groupName;
-		
+		public int noObjectCode = 1;
+
 		[Export]
-		public int noObjectCode;
+		public int objectNoFoundCode = 0;
 	
 		[Export]
 		private bool selfExclude = true;
@@ -47,9 +51,9 @@ namespace ai4u
 		[Export]
 		private bool _normalized = true;
 		[Export]		
-		private float[] modelDataRange = {-1, 1};
+		private float[] modelDataRange = {0, 1};
 		[Export]
-		private float[] worldDataRange = {-1, 1};
+		private float[] worldDataRange = {0, 255};
 
 		[ExportCategory("Distance")]
 		[Export]
@@ -127,8 +131,21 @@ namespace ai4u
 			agent.AddResetListener(this);
 			
 			mapping = new Dictionary<string, int>();
+            if (groupName != null && groupCode != null)
+            {
+                for (int o = 0; o < groupName.Length; o++)
+                {
+                    var code = groupCode[o];
+                    var name = groupName[o];
+                    mapping[name] = code;
+                }
+            }
+            else
+            {
+                GD.PrintRaw("The LinearRayCastingSensor does not have a group name or a group code, so the agent will not perceive anything!");
+            }
 
-			this.agent = (RLAgent) agent;
+            this.agent = (RLAgent) agent;
 			this.spaceState = (this.agent.GetAvatarBody() as PhysicsBody3D).GetWorld3D().DirectSpaceState;
 
 			if (this.eye == null) {
@@ -197,7 +214,7 @@ namespace ai4u
 			}
 			var result = this.spaceState.IntersectRay( query);
 			bool isTagged = false;
-			float t = -1;
+			float t = objectNoFoundCode;
 			if (result.Count > 0)
 			{
 				t = ray.GetDist((Vector3)result["position"]);					
@@ -252,7 +269,7 @@ namespace ai4u
 			
 			
 			bool isTagged = false;
-			float t = -1;
+			float t = objectNoFoundCode;
 			if (result.Count > 0)
 			{
 				t = ray.GetDist((Vector3)result["position"]);					
@@ -343,21 +360,6 @@ namespace ai4u
 		public override void OnReset(Agent agent) {
 			shape = new int[1]{stackedObservations * numberOfRays};
 			history = new HistoryStack<float>(shape[0]);
-
-			mapping = new Dictionary<string, int>();
-			if (groupName != null && groupCode != null)
-			{
-				for (int o = 0; o < groupName.Length; o++ )
-				{
-					var code = groupCode[o];
-					var name = groupName[o];
-					mapping[name] = code;
-				}
-			}
-			else
-			{
-				GD.PrintRaw("The LinearRayCastingSensor does not have a group name or a group code, so the agent will not perceive anything!");
-			}
 		} 
 	}
 }

@@ -99,13 +99,15 @@ namespace ai4u
 			if (agent.Brain is LocalBrain)
 			{
 				cmdstr = ((LocalBrain) (agent.Brain)).SendMessage(request.Command, request.Type, request.Value);
-			}
-			else
+                agent.ResetCommandBuffer();
+            }
+            else
 			{
 				cmdstr = SendMessageFrom((RemoteBrain)agent.Brain, request.Command, request.Type, request.Value);
-			}
-			
-			if (cmdstr != null)
+                agent.ResetCommandBuffer();
+            }
+
+            if (cmdstr != null)
 			{
 				Command[] cmds = UpdateActionData(cmdstr);
 				return cmds;
@@ -154,7 +156,7 @@ namespace ai4u
 		internal static Command[] UpdateActionData(string cmd)
 		{   
 
-			if (cmd == "halt")
+			if (cmd.StartsWith("halt"))
 			{
                 throw new System.Exception("System halted by client!");
             }
