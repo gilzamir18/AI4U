@@ -39,6 +39,10 @@ The minimum recommended hardware for AI4U is a computer with at least a GeForce 
 # Demo Projects
 [Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
 
+# Donation
+![PayPal](doc/img/donation.png)
+
+I love developing this project; particularly, I take pleasure in it. Due to health issues, I have reduced development here. However, I had an idea for developing a game using AI4U tools. If you want to bet on this idea, I'll make an effort to continue developing AI4U in the context of this new idea. Then, I'll update AI4U as I progress. If you want to support the project, use the QR CODE above to donate any amount. Thank you.
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir_gomes@uvanet.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).
