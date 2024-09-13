@@ -197,7 +197,7 @@ Há ainda dois nós opcionais, mas presentes neste ambiente: um do tipo **ArrowP
 
 *Figure 21. Configurações dos nós opcionais em nossa cena.*
 
-Falta pouco para treinarmos nosso agente. Precisamos criar o objeto que cria o laço de controle de todos os agentes no ambiente. Para isso, crie um nó do tipo *ControlRequestor* e o adicione como filho da raiz da cena. Este nó pode ficar em qualquer parte da cena e nele você deve especificar explicitamente quais agentes serão executados no ambiente. Na Figura 22, a ControlRequestor desta demonstração é exibido.
+Falta pouco para treinarmos nosso agente. Precisamos criar o objeto que cria o laço de controle de todos os agentes no ambiente. Para isso, deixe marcada a opção *Add Control Requestor' no nó do RLAgent. Outra opção é você deixar esta opção desmarcada e criar um nó do tipo *ControlRequestor*, adicionando-o como filho da raiz da cena. Este nó pode ficar em qualquer parte da cena e nele você deve especificar explicitamente quais agentes serão executados no ambiente. Na Figura 22, um exemplo de ControlRequestor que poderia ser usado nesta demonstração é exibido. Criar um nó específico para ControlRequestor somente é necessário caso você tenha mais de um agente em sua cena.
 
 ![figure](img/demo1loop.png)
 *Figure 22. Configurações do loop do agente.*
@@ -260,7 +260,7 @@ from stable_baselines3 import SAC
 from stable_baselines3.sac import MultiInputPolicy
 import ai4u
 from ai4u.controllers import BasicGymController
-from ai4u.onnxutils import sac_export_to, read_json_file
+#from ai4u.onnxutils import sac_export_to
 import AI4UEnv
 import gymnasium as gym
 
@@ -274,7 +274,7 @@ This example controll a movable character in game.
 ''')
 model = SAC.load("ai4u_model")
 
-sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
+#sac_export_to("ai4u_model", metadata=env.controller.metadataobj)
 
 obs, info = env.reset()
 
@@ -299,7 +299,7 @@ $> python run.py
 
 Rode a cena e veja o resultado.
 
-> Altere a velocidade de execução do *ControlRequestor* alterando o valor de *Default Time Scale* para 1.
+> Altere a velocidade de execução do *RLAgent* alterando o valor de *Control Requestor Time Scale* para 1. Ou mude a propriedade *Default Time Scale* para 1 (um), se você adicionou um nó *ControlRequestor*.
 
 No documento [Introduction to ONNX Model](introductionwithonnxmodels.md), mostro como executar o modelo diretamente na Godot, sem precisar usar Python.
 
@@ -319,11 +319,10 @@ ou
 python -m tensorboard.main --port 6007 --logdir .
 ```
 
-Depois, abre o link sugerido pelo tensorboard em um navegador (geralmente *http://localhost:6006*). Os resultados podem ser como mostrado na *Figura 27*.
+Depois, abre o link sugerido pelo tensorboard em um navegador (geralmente *http://localhost:6007*). Os resultados podem ser como mostrado na *Figura 27*.
 
 ![figure](img/demo1tb.png)
 
 *Figure 27. Resultado final do treinamento.*
 
-Observe também que o *script* run.py criou um arquivo "model.onnx". Este arquivo pode ser executado diretamente na Godot, por meio do objeto **NeuralNetController**. Para isso, basta colocar o arquivo model.onnx na raiz do teu projeto e altera o campo *Model Path* do objeto *NeuralNetController* para "model.onnx". Também desmarque a opção *Remote* do agente de forma que o *NeuralNetController* seja efetivamente usado.
-
+Saiba como converter o modelo para rodar diretamente na Godot: [tutorial](introductionwithonnxmodels.md).

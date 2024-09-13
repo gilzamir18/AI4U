@@ -23,8 +23,16 @@ namespace ai4u
 		
 		public override void OnSetup(Agent agent)
 		{
-			targetNode = GetNode(target) as Node3D;
-			this.agent = (RLAgent)agent;
+			if (target != null)
+			{
+				targetNode = GetNode(target) as Node3D;
+			}
+            if (target == null)
+            {
+                GD.Print("MinDistReward error: Mandatory field (targetPath) not provided!");
+            }
+
+            this.agent = (RLAgent)agent;
 			
 			rBody = (PhysicsBody3D) this.agent.GetAvatarBody();
 			
@@ -33,7 +41,11 @@ namespace ai4u
 			minDistance = System.Single.PositiveInfinity;
 		}
 
-		// Update is called once per frame
+		public void SetTarget(Node3D t)
+		{
+			this.targetNode = t;
+		}
+		
 		public override void OnUpdate()
 		{
 			Vector3 d = rBody.GlobalTransform.Origin - targetNode.GlobalTransform.Origin;

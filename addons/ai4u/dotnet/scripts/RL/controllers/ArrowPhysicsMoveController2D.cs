@@ -114,6 +114,7 @@ namespace  ai4u
         override public string GetAction()
 		{
 			var action = ai4u.Utils.ParseAction(actionName, actionValue);
+			actionName = "__waitnewaction__";
 			if (receivedResetAction)
 			{
 				receivedResetAction = false;

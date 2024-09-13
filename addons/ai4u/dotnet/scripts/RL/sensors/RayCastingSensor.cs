@@ -17,7 +17,10 @@ namespace ai4u
 		public string[] groupName;
 		
 		[Export]
-		public int noObjectCode;
+		public int noObjectCode = 1;
+
+		[Export]
+		public int objectNotFoundCode = 0;
 	
 		[Export]
 		private bool selfExclude = true;
@@ -59,7 +62,7 @@ namespace ai4u
 		private bool _normalized = true;
 
 		[Export]
-		private float[] modelDataRange = {-1, 1};
+		private float[] modelDataRange = {0, 1};
 		[Export]
 		private float[] worldDataRange = {0, 255};
 
@@ -191,7 +194,7 @@ namespace ai4u
 			}
 			var result = this.spaceState.IntersectRay( query);//new Godot.Collections.Array { agent.GetBody() }
 			bool isTagged = false;
-			float t = -1;
+			float t = objectNotFoundCode;
 			if (result.Count > 0)
 			{
 				t = myray.GetDist((Vector3)result["position"]);					
@@ -245,7 +248,7 @@ namespace ai4u
 
             var result = this.spaceState.IntersectRay(query);//new Godot.Collections.Array { agent.GetBody() }
             bool isTagged = false;
-            float t = -1;
+            float t = objectNotFoundCode;
             if (result.Count > 0)
             {
                 t = myray.GetDist((Vector3)result["position"]);

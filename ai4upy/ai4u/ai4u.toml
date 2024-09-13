@@ -1,7 +1,0 @@
-[project]
-name = "ai4u"
-version = "0.0.1"
-dependencies = [
-    'numpy', 
-    'gymnasium',
-]

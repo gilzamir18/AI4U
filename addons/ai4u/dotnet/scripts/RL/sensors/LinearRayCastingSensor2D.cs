@@ -17,7 +17,10 @@ namespace ai4u
 		public string[] groupName;
 		
 		[Export]
-		public int noObjectCode;
+		public int noObjectCode = 1;
+
+		[Export]
+		public int objectNotFoundCode = 0;
 	
 		[Export]
 		private bool selfExclude = true;
@@ -45,9 +48,9 @@ namespace ai4u
 		[Export]
 		private bool _normalized = true;
 		[Export]		
-		private float[] modelDataRange = {-1, 1};
+		private float[] modelDataRange = {0, 1};
 		[Export]
-		private float[] worldDataRange = {-1, 1};
+		private float[] worldDataRange = {0, 255};
 
 		[ExportCategory("Distance")]
 		[Export]
@@ -181,7 +184,7 @@ namespace ai4u
 			}
 			var result = this.spaceState.IntersectRay( query );
 			bool isTagged = false;
-			float t = -1;
+			float t = objectNotFoundCode;
 			if (result.Count > 0)
 			{
 				t = ray.GetDist((Vector2)result["position"]);					
@@ -233,7 +236,7 @@ namespace ai4u
 			
 			var result = this.spaceState.IntersectRay( query );
 			bool isTagged = false;
-			float t = -1;
+			float t =objectNotFoundCode;
 			if (result.Count > 0)
 			{
 				t = ray.GetDist((Vector2)result["position"]);					

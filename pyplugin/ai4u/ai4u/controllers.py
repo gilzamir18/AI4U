@@ -53,7 +53,6 @@ class BasicGymController(BasicController):
             elif len(inputs) > 1: #dictionary input
                 dict_space = gym.spaces.Dict()
                 for i in inputs:
-                    shape = i["shape"]
                     dict_space[i['name']], _ = BasicGymController.convertoboxspace(i)
                 observation_space = dict_space    
             if len(outputs) == 1:

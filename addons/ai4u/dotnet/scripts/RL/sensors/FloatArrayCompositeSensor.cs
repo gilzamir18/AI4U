@@ -10,8 +10,15 @@ namespace ai4u
 		private int size = 0;
 		private HistoryStack<float> stack;
 
+		[Export]
+		private float _rangeMin = -1;
+		[Export]
+		private float _rangeMax = 1;
+
 		public override void OnSetup(Agent agent)
 		{
+			rangeMin = _rangeMin;
+			rangeMax = _rangeMax;
 			sensors = new List<Sensor>();
 			this.type = SensorType.sfloatarray;
 			var children = GetChildren();
@@ -75,7 +82,7 @@ namespace ai4u
 					stack.Push(s.GetIntValue());
 				} else if (s.type == SensorType.sbool)
 				{
-					stack.Push(s.GetBoolValue() ? 1.0f: -1.0f);
+					stack.Push(s.GetBoolValue() ? rangeMax: rangeMax);
 				}
 			}
 			return stack.Values;
