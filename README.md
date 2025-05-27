@@ -57,13 +57,13 @@ Recent Linux versions may throttle or pause applications when their windows are 
 To ensure consistent performance for such tasks:
 
 * Configure App Window to Start Minimized:
-** Path: In Godot's Project > Project Settings... > Display > Window, find the Mode property.
-** Action: Set Mode to Minimized.
-** Reason: This can prevent the OS from deprioritizing the application due to its window not being visible.
+    * Path: In Godot's Project > Project Settings... > Display > Window, find the Mode property.
+    * Action: Set Mode to Minimized.
+    * Reason: This can prevent the OS from deprioritizing the application due to its window not being visible.
 * Disable V-Sync (Vertical Synchronization):
-** Path: In Godot's Project > Project Settings... > Display > Window, find Vsync Mode or Use Vsync.
-** Action: Set Vsync Mode to Disabled (or uncheck "Use Vsync").
-** Reason: V-Sync is irrelevant for background tasks and can cause issues with occluded windows. Disabling it allows the simulation to run at maximum speed, unconstrained by display refresh rates.
+    * Path: In Godot's Project > Project Settings... > Display > Window, find Vsync Mode or Use Vsync.
+    * Action: Set Vsync Mode to Disabled (or uncheck "Use Vsync").
+    * Reason: V-Sync is irrelevant for background tasks and can cause issues with occluded windows. Disabling it allows the simulation to run at maximum speed, unconstrained by display refresh rates.
 
 These changes help AI4U simulations run reliably in the background on Linux.
 
