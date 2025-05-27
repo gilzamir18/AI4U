@@ -48,15 +48,27 @@ Clone the repository and copy the directory `addons/ai4u` to your project.
 * Gynasium.
 * Tested in Windows 11 and Ubuntu 24.04.
 
-The minimum recommended hardware for AI4U is a computer with at least a GeForce 1050ti (4GB VRAM), 8GB of RAM, and at least 20GB of SSD storage. Naturally, the memory requirement can increase significantly if complex inputs are used in the agent's sensors (such as images) and if algorithms like *Soft-Actor-Critic* (SAC) and DQN are employed. For truly interesting use cases, such as using SAC with an image sensor, a computer with at least 24GB of RAM and a high-end GPU is necessary. For games, we recommend modest sensor configurations, such as moderate use of RayCasting.
+The minimum recommended hardware for AI4U includes a GeForce 1050ti (4GB VRAM), 8GB of RAM, and at least 20GB of SSD storage. Memory requirements can significantly increase when using complex sensor inputs (like images) or employing algorithms such as Soft-Actor-Critic (SAC) and DQN. For more demanding applications, such as using SAC with an image sensor, a computer equipped with at least 24GB of RAM and a high-end GPU is essential. In gaming scenarios, we advise using modest sensor configurations, for example, by moderately utilizing RayCasting.
+
+# Linux Performance Issue with Occluded Windows & Godot Projects
+
+Recent Linux versions may throttle or pause applications when their windows are occluded (minimized, covered, or on an inactive desktop). This impacts background processes like simulations in Godot-based AI4U projects.
+
+To ensure consistent performance for such tasks:
+
+* Configure App Window to Start Minimized:
+** Path: In Godot's Project > Project Settings... > Display > Window, find the Mode property.
+** Action: Set Mode to Minimized.
+** Reason: This can prevent the OS from deprioritizing the application due to its window not being visible.
+* Disable V-Sync (Vertical Synchronization):
+** Path: In Godot's Project > Project Settings... > Display > Window, find Vsync Mode or Use Vsync.
+** Action: Set Vsync Mode to Disabled (or uncheck "Use Vsync").
+** Reason: V-Sync is irrelevant for background tasks and can cause issues with occluded windows. Disabling it allows the simulation to run at maximum speed, unconstrained by display refresh rates.
+
+These changes help AI4U simulations run reliably in the background on Linux.
 
 # Demo Projects
 [Here](https://github.com/gilzamir18/ai4u_demo_projects) we will include AI4U demo projects that you can use for experimentation.
-
-# Donation
-![PayPal](doc/img/donation.png)
-
-I love developing this project; particularly, I take pleasure in it. Due to health issues, I have reduced development here. However, I had an idea for developing a game using AI4U tools. If you want to bet on this idea, I'll make an effort to continue developing AI4U in the context of this new idea. Then, I'll update AI4U as I progress. If you want to support the project, use the QR CODE above to donate any amount. Thank you.
 
 # Maintainers
 AI4U is currently maintained by Gilzamir Gomes (gilzamir_gomes@uvanet.br), Creto A. Vidal (cvidal@dc.ufc.br), Joaquim B. Cavalcante-Neto (joaquimb@dc.ufc.br) and Yuri Nogueira (yuri@dc.ufc.br).
