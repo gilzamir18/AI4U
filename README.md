@@ -42,11 +42,11 @@ Clone the repository and copy the directory `addons/ai4u` to your project.
 
 
 # Requirements
-* Godot 4.2.2 Mono Version.
-* Python 3.12.
+* Godot 4.2.2, 4.3 and 4.4.1 (.NET version).
+* Python 3.12 or upper.
 * Micrsoft.ML.OnnxRuntime.
 * Gynasium.
-* Tested in Windows 11 and Ubuntu 24.04.
+* Tested in Windows 11, Ubuntu 24.04, and PopOS 24.04 (CosmicDE).
 
 The minimum recommended hardware for AI4U includes a GeForce 1050ti (4GB VRAM), 8GB of RAM, and at least 20GB of SSD storage. Memory requirements can significantly increase when using complex sensor inputs (like images) or employing algorithms such as Soft-Actor-Critic (SAC) and DQN. For more demanding applications, such as using SAC with an image sensor, a computer equipped with at least 24GB of RAM and a high-end GPU is essential. In gaming scenarios, we advise using modest sensor configurations, for example, by moderately utilizing RayCasting.
 
