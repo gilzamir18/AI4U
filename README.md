@@ -50,7 +50,7 @@ Clone the repository and copy the directory `addons/ai4u` to your project.
 
 The minimum recommended hardware for AI4U includes a GeForce 1050ti (4GB VRAM), 8GB of RAM, and at least 20GB of SSD storage. Memory requirements can significantly increase when using complex sensor inputs (like images) or employing algorithms such as Soft-Actor-Critic (SAC) and DQN. For more demanding applications, such as using SAC with an image sensor, a computer equipped with at least 24GB of RAM and a high-end GPU is essential. In gaming scenarios, we advise using modest sensor configurations, for example, by moderately utilizing RayCasting.
 
-# Linux Performance Issue with Occluded Windows & Godot Projects
+## Linux Performance Issue with Occluded Windows & Godot Projects
 
 Recent Linux versions may throttle or pause applications when their windows are occluded (minimized, covered, or on an inactive desktop). This impacts background processes like simulations in Godot-based AI4U projects.
 
