@@ -7,37 +7,44 @@ namespace ai4u
 {
 	public partial class AgentArraySensor : Sensor, IAgentResetListener
 	{
+        private int size = 0;
+
         private float[] data;
 
 		public override void OnSetup(Agent agent)
 		{
-            stackedObservations = 1;
 			this.agent = (RLAgent) agent;
             this.agent.AddResetListener(this);
-            data = new float[this.agent.initialInputSize];
+            this.size = stackedObservations * this.agent.arrayInputSize;
+            this.data = new float[this.size];
 			perceptionKey = "__initial_input__";
 			type = SensorType.sfloatarray;
-			shape = new int[]{stackedObservations*data.Length};
+			shape = new int[]{this.size};
         }
 
-        public void SetValue(int pos, float v)
+        public void SetValue(int idx, float v)
         {
-            data[pos] = v;
+            data[idx] = v;
+        }
+
+        public void SetValues(float[] values)
+        {
+            this.data = values;
         }
 
         public int Count()
         {
-            return this.agent.initialInputSize;
+            return shape[0];
         }
 
         public override void OnReset(Agent agent)
         {
-            data = new float[this.agent.initialInputSize];
+            this.data = new float[this.size];
         }
 
 		public override float[] GetFloatArrayValue()
 		{
-			return this.data;   
+			return data;
 		}
 	}
 }

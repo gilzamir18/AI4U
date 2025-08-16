@@ -3,10 +3,13 @@ using System;
 
 namespace ai4u;
 
+
+[Tool]
+[GlobalClass]
 public partial class RemoteConfiguration : Node
 {
 	///<summary>If true, the remote brain will be 
-	///managed manually. Thus, in this case, command 
+	///managed manually. Thus, command 
 	///line arguments do not alter the properties of 
 	///the remote brain.</summary>
 	[Export]

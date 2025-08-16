@@ -29,8 +29,8 @@ public partial class HomeostaticHUD : Control
 	private HSlider[] sliders;
 	private ColorRect[] alerts;
 
-    public override void _Ready()
-    {
+	public override void _Ready()
+	{
 		if (test)
 		{
 			HomeostaticVariable var1 = new HomeostaticVariable();
@@ -52,17 +52,21 @@ public partial class HomeostaticHUD : Control
 			SetupVariables(new HomeostaticVariable[]{var1, var2});
 			UpdateSliders();
 		}
-    }
+	}
 
-    public void SetupVariables(HomeostaticVariable[] variables)
+	public void SetupVariables(HomeostaticVariable[] variables)
 	{
 		this.variables = variables;
+
 		container = GetNode<GridContainer>("GridContainer");
 		sliders = new HSlider[variables.Length];
 		alerts = new ColorRect[variables.Length];
 
 		for (int i = 0; i < variables.Length; i++)
 		{
+			if (!variables[i].Display)
+				continue;
+
 			var v = variables[i];
 
 			Label label = new Label();
@@ -97,7 +101,11 @@ public partial class HomeostaticHUD : Control
 	{
 		for (int i = 0; i < variables.Length; i++)
 		{
-			
+			if (!variables[i].Display)
+			{
+				continue;
+			}
+
 			sliders[i].Value = variables[i].Value;
 			if (variables[i].Check())
 			{

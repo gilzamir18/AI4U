@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="FieldRange" load_steps=2 format=3 uid="uid://24e4ic7y1klh"]
+
+[ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="1_5l4bg"]
+
+[resource]
+script = ExtResource("1_5l4bg")
+Min = 0
+Max = 0

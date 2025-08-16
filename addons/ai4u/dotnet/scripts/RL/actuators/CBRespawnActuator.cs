@@ -70,13 +70,15 @@ namespace ai4u
 					reference = ((Node3D) nodeRef).GlobalTransform;
 					lastSelected = -1;
 				}
-                cBody.Velocity = Vector3.Zero;
-				cBody.Transform = reference;
-                cBody.Position = reference.Origin;
+				var bscale = cBody.Scale;
+				cBody.Velocity = Vector3.Zero;
+				cBody.GlobalTransform = reference;
+                cBody.GlobalPosition = reference.Origin;
 				if (radomizeDirection)
 				{
                 	cBody.Rotate(cBody.Basis.Y, (float)GD.RandRange(0.0, 2.0 * Mathf.Pi));
 				}
-			}
+			    cBody.Scale = bscale;
+        }
 	}
 }

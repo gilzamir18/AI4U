@@ -97,7 +97,7 @@ namespace ai4u
 			{
 				if (agent != null)
 				{
-                    GD.PrintErr("Script ai4u2unity is not connected! Start the ai4u2unity script! Network error: " + e.Message);
+                    GD.PrintErr("Script ai4u2godot is not connected! Start the ai4u2godot script! Network error: " + e.Message);
                     agent.GetTree().Quit();
 				}
 				return false;

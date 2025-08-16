@@ -11,11 +11,8 @@ namespace ai4u
 	{
 
         [ExportCategory("Object Detection")]
-        [Export]
-        public string[] groupName;
-        [Export]
-		public int[] groupCode;
-
+		[Export]
+		public RaycastMapping groupMapping;
 
 		[Export]
 		public int noObjectCode = 1;
@@ -69,12 +66,11 @@ namespace ai4u
 		[Export]
 		public Color debugColor = new Color(1, 0, 0);
 
-
-		private Dictionary<string, int> mapping;
 		private HistoryStack<float> history;
 		private PhysicsDirectSpaceState3D spaceState;
 
 		private LineDrawer lineDrawer = null;
+
 
         public override void _Ready()
         {
@@ -130,17 +126,7 @@ namespace ai4u
 			
 			agent.AddResetListener(this);
 			
-			mapping = new Dictionary<string, int>();
-            if (groupName != null && groupCode != null)
-            {
-                for (int o = 0; o < groupName.Length; o++)
-                {
-                    var code = groupCode[o];
-                    var name = groupName[o];
-                    mapping[name] = code;
-                }
-            }
-            else
+            if (groupMapping == null && groupMapping.Count() == 0)
             {
                 GD.PrintRaw("The LinearRayCastingSensor does not have a group name or a group code, so the agent will not perceive anything!");
             }
@@ -227,9 +213,9 @@ namespace ai4u
 				{
 					foreach(string g in groups)
 					{
-						if (mapping.ContainsKey(g))
+						if (groupMapping.ContainsGroup(g))
 						{
-							int code = mapping[g];
+							int code = groupMapping.GetGroupCode(g);
 							AddCodeToHistory(code);
 							AddDistanceToHistory(t);
 							isTagged = true;
@@ -282,9 +268,9 @@ namespace ai4u
 				{
 					foreach(string g in groups)
 					{
-						if (mapping.ContainsKey(g))
+						if (groupMapping.ContainsGroup(g))
 						{
-							int code = mapping[g];
+							int code = groupMapping.GetGroupCode(g);
 							AddCodeToHistory(code);
 							AddDistanceToHistory(t);
 							isTagged = true;

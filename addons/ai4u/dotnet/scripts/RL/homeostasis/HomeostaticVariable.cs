@@ -11,6 +11,8 @@ public class HomeostaticVariable: Variable
 {
     private bool useDefinedCentroid = false;
     private float userCentroid = 0.0f;
+    public bool Display { get; set; } = true;
+
 
     public void ResetCentroid()
     {

@@ -53,7 +53,7 @@ namespace ai4u
         private string targetGroup = "EMITTER";
 
 		[Export]
-		private Godot.Collections.Dictionary<string, int> groupCode;
+        private Godot.Collections.Dictionary<string, int> groupCode;
 
 		[Export]
 		private int maxCodeValue = 100;
@@ -94,26 +94,30 @@ namespace ai4u
 
         public override float[] GetFloatArrayValue()
 		{
-			var bodies = area.GetOverlappingBodies();
+            history = new HistoryStack<float>(shape[0]);
+            var bodies = area.GetOverlappingBodies();
 
             SortedSet<Node3D> objects = new SortedSet<Node3D>(distanceComparer);
             PhysicsBody3D body = (PhysicsBody3D) this.agent.GetAvatarBody();
 
             for (int i = 0; i < bodies.Count; i++)
 			{
-				if (bodies[i] != null && bodies[i].IsInGroup(targetGroup))
+                if (bodies[i] != null && bodies[i].IsInGroup(targetGroup))
 				{
                     if (this.enableVisibilityTest)
                     {
                         Node3D node3D = bodies[i];
-                        var query = PhysicsRayQueryParameters3D.Create(body.Position, node3D.Position, visibilityTestMask);
+                        var query = PhysicsRayQueryParameters3D.Create(body.GlobalPosition, node3D.GlobalPosition, visibilityTestMask);
                         query.Exclude.Add(body.GetRid());
 
                         var result = body.GetWorld3D().DirectSpaceState.IntersectRay(query);
 
-                        if (result.Count > 0 && ((Node3D)result["collider"]) == node3D)
+                        if (result.Count > 0)
                         {
-                            objects.Add(bodies[i]);
+                            if (((Node)result["collider"]) == node3D)
+                            {
+                                objects.Add(bodies[i]);
+                            }
                         }
                     }
                     else

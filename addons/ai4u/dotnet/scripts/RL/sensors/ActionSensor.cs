@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace ai4u {
@@ -39,6 +40,7 @@ namespace ai4u {
 				}
 				previewsAction = agent.GetActionArgAsFloatArray();
 			}
+			//GD.Print(string.Join(" ", previewsAction));
 			return history.Values;
 		}
 	}
