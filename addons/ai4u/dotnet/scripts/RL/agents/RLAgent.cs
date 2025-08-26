@@ -69,7 +69,9 @@ namespace ai4u
         /// Event triggered when the agent starts.
         /// </summary>
         public event AgentEpisodeHandler OnAgentStart;
-
+        
+        [Signal]
+        public delegate void OnResetEventHandler();
 
         [ExportCategory("Control Options")]
         [Export]
@@ -111,8 +113,8 @@ namespace ai4u
 
         [ExportCategory("Array Input (Optional)")]
         [Export]
-        internal int initialInputSize = 0;
-
+        internal int arrayInputSize = 0;
+        internal int stackSize = 1;
         [Export]
         internal float rangeMin = 0;
         [Export]
@@ -288,9 +290,10 @@ namespace ai4u
             sensorList.Add(stepSensor);
             CallDeferred("add_child", stepSensor);
             
-            if (initialInputSize > 0)
+            if (arrayInputSize > 0)
             {
                 agentArraySensor = new AgentArraySensor();
+                agentArraySensor.stackedObservations = stackSize;
                 agentArraySensor.isInput = true;
                 agentArraySensor.SetRange(rangeMin, rangeMax);
                 agentArraySensor.SetAgent(this);
@@ -448,7 +451,6 @@ namespace ai4u
         /// <summary>
         /// Gets the accumulated reward.
         /// </summary>
-        [Obsolete]
         public float AcummulatedReward => reward;
 
         /// <summary>
@@ -558,8 +560,9 @@ namespace ai4u
             OnResetStart?.Invoke(this);
             ResetPlayer();
             OnEpisodeStart?.Invoke(this);
-            brain.OnReset(this);
             episodeReward = 0;
+            brain.OnReset(this);
+            EmitSignal(nameof(OnReset));
         }
 
         /// <summary>

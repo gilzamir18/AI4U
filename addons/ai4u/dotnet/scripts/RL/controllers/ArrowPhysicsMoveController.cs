@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using Godot;
 using ai4u;
+using System;
 
 namespace  ai4u
 {
+
 	/// <summary>
 	/// WASD controller for physics body (rigid or character) game objects.
 	/// </summary>
@@ -18,21 +20,66 @@ namespace  ai4u
 		public float turnAmount = 1.0f;
 		[Export]
 		public float jumpPower = 1.0f;
-		
-		private float reward_sum = 0;
+
+		[Export]
+		public int numberOfExtraActions = 0;
+
+		[Export]
+		private Godot.Collections.Dictionary<string, string> actionMap;
+
+		[Export]
+        private Godot.Collections.Dictionary<string, string> extraActionsIndex;
+
+        [Export]
+        private Godot.Collections.Dictionary<string, string> extraActionsValue;
+
+
+        private float reward_sum = 0;
 		
 		private bool _firstTime = true;
 
-		private float[] actionValue = new float[4];
+		private float[] actionValue;
 		private string actionName = "__waitnewaction__";
-
+		
 		private bool receivedResetAction = false;
 
-		private object locker;
+		private int nbActions = 5;
 
-		override public void OnSetup()
+		private const int NB_FIXED_ACTIONS = 5;
+		
+		private Godot.Collections.Dictionary<string, string> internalActionMap;
+
+        public override void _Ready()
+        {
+
+			internalActionMap = new Godot.Collections.Dictionary<string, string>();
+			internalActionMap["forward"] = "ui_up";
+			internalActionMap["backward"] = "ui_down";
+			internalActionMap["left"] = "ui_left";
+			internalActionMap["right"] = "ui_right";
+			internalActionMap["turn_left"] = "ui_page_up";
+			internalActionMap["turn_right"] = "ui_page_down";
+			internalActionMap["jump"] = "ui_select";
+			internalActionMap["jump_forward"] = "ui_home";
+			internalActionMap["reset"] = "ui_cancel";
+ 
+            if (actionMap != null && actionMap.Count > 0)
+            {
+				foreach(var k in actionMap.Keys)
+				{
+					internalActionMap[k] = actionMap[k];
+				}
+            }
+
+			nbActions = NB_FIXED_ACTIONS + numberOfExtraActions;
+			actionValue = new float[nbActions];
+		}
+
+        override public void OnSetup()
 		{
-			((RLAgent) agent).OnEpisodeEnd += EndEpisodeHandler;
+            nbActions = NB_FIXED_ACTIONS + numberOfExtraActions;
+            actionValue = new float[nbActions];
+            ((RLAgent) agent).OnEpisodeEnd += EndEpisodeHandler;
 			_firstTime = true;
 			receivedResetAction = false;
 		}
@@ -41,50 +88,76 @@ namespace  ai4u
         {
             if (agent != null && agent.SetupIsDone && !receivedResetAction)
 			{
-				actionValue = new float[4];
+				actionValue = new float[nbActions];
 				if (agent.Alive())
 				{
 					actionName = "move";
-					if (Input.IsActionPressed("ui_up"))
+					if (Input.IsActionPressed(internalActionMap["forward"]))
 					{
 						actionName = "move";
 						actionValue[0] = speed;
 					}
 
-					if (Input.IsActionPressed("ui_down"))
+					if (Input.IsActionPressed(internalActionMap["backward"]))
 					{
 						actionName = "move";
 						actionValue[0] = -speed;
 					}
-
-					if (Input.IsActionPressed("ui_select"))
+					
+					if (Input.IsActionPressed(internalActionMap["left"]))
 					{
 						actionName = "move";
-						actionValue[2] = jumpPower;
+						actionValue[1] = -speed;
 					}
 
-					if (Input.IsKeyPressed(Key.W))
+					if (Input.IsActionPressed(internalActionMap["right"]))
+					{
+						actionName = "move";
+						actionValue[1] = speed;
+					}
+
+					if (Input.IsActionPressed(internalActionMap["turn_left"]))
+					{
+						actionName = "move";
+						actionValue[2] = -turnAmount;
+					}
+
+					if (Input.IsActionPressed(internalActionMap["turn_right"]))
+					{
+						actionName = "move";
+						actionValue[2] = turnAmount;
+					}
+
+					if (Input.IsActionPressed(internalActionMap["jump"]))
 					{
 						actionName = "move";
 						actionValue[3] = jumpPower;
 					}
 
-					if (Input.IsActionPressed("ui_left"))
+					if (Input.IsActionPressed(internalActionMap["jump_forward"]))
 					{
 						actionName = "move";
-						actionValue[1] = -turnAmount;
+						actionValue[4] = jumpPower;
 					}
 
-					if (Input.IsActionPressed("ui_right"))
-					{
-						actionName = "move";
-						actionValue[1] = turnAmount;
-					}
-
-					if (Input.IsActionJustPressed("ui_cancel") )
+					if (Input.IsActionJustPressed(internalActionMap["reset"]) )
 					{
 						actionName = "__reset__";
 						receivedResetAction = true;
+					}
+
+				
+					if (numberOfExtraActions > 0)
+					{
+						foreach (var k in extraActionsIndex.Keys)
+						{
+							if (Input.IsActionPressed(k))
+							{
+                                actionName = "move";
+								var i = extraActionsIndex[k];
+								actionValue[NB_FIXED_ACTIONS + int.Parse(i)] = float.Parse(extraActionsValue[k]);
+							}
+						}
 					}
 				}
 				else
@@ -97,7 +170,7 @@ namespace  ai4u
 					}
 					else
 					{
-						if (Input.IsActionJustPressed("ui_cancel") )
+						if (Input.IsActionJustPressed(internalActionMap["reset"]) )
 						{
 							receivedResetAction = true;
 							actionName = "__reset__";

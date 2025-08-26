@@ -446,7 +446,7 @@ namespace ai4u
 			byte[] b = Encoding.UTF8.GetBytes(sb.ToString());
 			byte[] received = new byte[1000];
 			int total = 0;
-			if (rbrain.sendData(b, out total, received))
+			if (rbrain != null && rbrain.sendData(b, out total, received))
 			{
 				return Encoding.UTF8.GetString(received);
 			}

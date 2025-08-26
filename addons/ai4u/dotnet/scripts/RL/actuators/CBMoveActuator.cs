@@ -1,21 +1,24 @@
 using Godot;
 using System;
 
-
 namespace ai4u;
 
+[Tool]
+[GlobalClass]
 public partial class CBMoveActuator : MoveActuator
 {
     //forces applied on the x, y and z axes.    
-    private float move, turn, jump, jumpForward;
+    private float move_v, move_h, turn, jump, jumpForward;
+
+    private const int NB_ACTIONS = 5;
 
     [ExportCategory("Movement")]
     [Export]
-    private float moveAmount = 1;
+    private float moveAmount = 10;
     [Export]
-    private float backwarAmount = 0.1f;
+    private bool keepForward = true;
     [Export]
-    private float turnAmount = 1;
+    private float turnAmount = 20;
     [Export]
     private float jumpPower = 1;
     [Export]
@@ -26,13 +29,54 @@ public partial class CBMoveActuator : MoveActuator
     private float velocityDump = 1f;
     [Export]
     private float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
- 
 
     [ExportCategory("Action Shape")]
+    [Export(PropertyHint.ResourceType, "FieldRange")] public FieldRange[] actionRange = new FieldRange[NB_ACTIONS];
+
     [Export]
-    private float[] actionRangeMin = new float[]{0, -1, -1, -1};
-    [Export]
-    private float[] actionRangeMax = new float[]{1, 1, 1, 1};
+    private int extraActions = 0;
+
+    private float[] actionRangeMin = new float[]{-1, -1, -1, -1, -1};
+    private float[] actionRangeMax = new float[]{1, 1, 1, 1, 1};
+
+    private Vector3 oldDir = Vector3.Zero;
+
+
+    public float SpeedUp { get; set; } = 0;
+    public float MoveNoise { get; set; } = 0;
+
+    public float TurnNoise { get; set; } = 0;
+
+    public float JumpNoise { get; set; } = 0;
+
+
+    public float TurnAmount
+    { 
+        get { return turnAmount; } 
+    }
+
+    public float JumpPower
+    { 
+        get { return jumpPower; }
+    }
+    
+    public float JumpForwardPower
+    { 
+        get { return jumpForwardPower; }
+    }
+
+    public float VelocityDump
+    { 
+        get { return velocityDump; } 
+    }
+
+    public float DeadZone
+    { 
+        get { return deadZone; } 
+    }
+
+    [Signal]
+    public delegate void OnMoveStepEventHandler(CBMoveActuator actuator, Vector3 direction, float turn, float jump, float jumpForward, float[] extraActions);
 
     private RLAgent agent;
     
@@ -43,12 +87,33 @@ public partial class CBMoveActuator : MoveActuator
 
     public CBMoveActuator()
     {
-
     }
+
+    public override void _Ready()
+    {
+        if (Engine.IsEditorHint())
+        {
+            if (actionRange.Length>=5)
+            {
+                actionRange[0] = new FieldRange(-1, 1);
+                actionRange[1] = new FieldRange(-1, 1);
+                actionRange[2] = new FieldRange(-1, 1);
+                actionRange[3] = new FieldRange(-1, 1);
+                actionRange[4] = new FieldRange(-1, 1);
+            }
+        }
+    }   
 
     public override void OnSetup(Agent agent)
     {
-        shape = new int[1]{4};
+        actionRangeMin = new float[actionRange.Length];
+        actionRangeMax = new float[actionRange.Length];
+        for (int i = 0; i < actionRange.Length; i++)
+        {
+            actionRangeMin[i] = actionRange[i].Min;
+            actionRangeMax[i] = actionRange[i].Max;
+        }
+        shape = new int[1]{NB_ACTIONS+extraActions};
         isContinuous = true;
         rangeMin = actionRangeMin;
         rangeMax = actionRangeMax;
@@ -56,6 +121,7 @@ public partial class CBMoveActuator : MoveActuator
         agent.AddResetListener(this);
         body = this.agent.GetAvatarBody() as CharacterBody3D;
         this.spaceState = body.GetWorld3D().DirectSpaceState;
+        oldDir = body.Transform.Basis.Z.Normalized();
     }
 
     public override bool OnGround
@@ -70,17 +136,43 @@ public partial class CBMoveActuator : MoveActuator
     {
         double delta = this.agent.ControlInfo.deltaTime;
         Vector3 velocity = body.Velocity;
+        float[] extraActionsOutput = null;
         if (agent != null && !agent.Done)
         {
             float[] action = agent.GetActionArgAsFloatArray();
-            move = action[0];
-            turn = action[1];
-            jump = action[2];
-            jumpForward = action[3];
-            float amount = moveAmount;
-            if (move < 0)
+            move_v = action[0] + (MoveNoise != 0 ? (float)GD.Randfn(0, MoveNoise): 0);
+            move_h = action[1] + (MoveNoise != 0 ? (float)GD.Randfn(0, MoveNoise): 0);
+            turn = action[2] + (TurnNoise != 0 ? (float)GD.Randfn(0, TurnNoise) : 0);
+            jump = action[3] + (JumpNoise != 0 ? (float)GD.Randfn(0, JumpNoise) : 0);
+
+            
+            if (keepForward)
             {
-                amount = backwarAmount;
+                move_h = 0;
+                move_v = Mathf.Clamp(move_v, 0, rangeMax[0]);
+            }
+            else
+            {
+                move_v = Mathf.Clamp(move_v, rangeMin[0], rangeMax[0]);
+                move_h = Mathf.Clamp(move_h, rangeMin[1], rangeMax[1]);
+            }
+            turn = Mathf.Clamp(turn, rangeMin[2], rangeMax[2]);
+            jump = Mathf.Clamp(jump, rangeMin[3], rangeMax[3]);
+            jumpForward = Mathf.Clamp(action[4], rangeMin[4], rangeMax[4]);
+
+            //GD.Print(move_v, " ", move_h, " ", turn, " ", jump, " ", jumpForward);
+
+            if (extraActions > 0)
+            {
+                extraActionsOutput = new float[extraActions];
+                for (int i = 0; i < extraActions; i++)
+                {
+                    extraActionsOutput[i] = action[NB_ACTIONS + i];
+                }
+            }
+            else
+            {
+                extraActionsOutput = new float[0];
             }
 
             if (Mathf.Abs(turn) < deadZone)
@@ -98,63 +190,59 @@ public partial class CBMoveActuator : MoveActuator
                 jumpForward = 0;
             }
 
-            if (Mathf.Abs(move) < deadZone)
+            if (Mathf.Abs(move_v) < deadZone)
             {
-                move = 0;
+                move_v = 0;
             }
-            
+
+            if (Mathf.Abs(move_h) < deadZone)
+            {
+                move_h = 0;
+            }
+
+            if (jump > 0 && body.IsOnFloor())
+            {
+                velocity.Y = jump * jumpPower;
+            }
+
+            var direction = Vector3.Zero;
+
             // Add the gravity.
             if (!body.IsOnFloor())
             {
-			    velocity.Y -= gravity * (float)delta * 10;
+			    EmitSignal(nameof(OnMoveStep), this, direction, turn, jump, jumpForward, extraActionsOutput);
+                velocity.Y -= gravity * (float)delta * 10;
             }
             else
             {
-               /* if ( Math.Abs(turn) > 0)
+                if (turn != 0)
                 {
-                    body.Rotate(body.Basis.Y.Normalized(), Mathf.DegToRad(-turn * turnAmount * (float)delta * 100));
-                }*/
-
-                if (Math.Abs(turn) > 0)
-                {
-                    var newDir = -body.Basis.Z.Rotated(body.Basis.Y, Mathf.DegToRad(-turn * turnAmount));
-
-                    body.LookAt(body.GlobalPosition + newDir);
+        		    body.RotateY(-Mathf.DegToRad(turn * turnAmount));
                 }
 
-                // Get the input direction and handle the movement/deceleration.
-                Vector3 direction = body.Transform.Basis.Z.Normalized();
+                var inputDir = new Vector2(move_h, -move_v);
+             
 
-                if (jump > 0)
+                direction = (body.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
+                EmitSignal(nameof(OnMoveStep), this, direction, turn, jump, jumpForward, extraActionsOutput);
+                if (!direction.IsZeroApprox())
                 {
-                    velocity += body.Transform.Basis.Y * jump * jumpPower;
+                    velocity.X = direction.X * moveAmount;
+                    velocity.Z = direction.Z * moveAmount;
                 }
-
-                bool forwarding = false;
-
-                if (jumpForward > 0)
-                {
-                    velocity += body.Transform.Basis.Y * jumpForwardPower * jumpForward;
-                    velocity += body.Transform.Basis.Z * jumpForwardPower * jumpForward;
-                    forwarding = true;
-                }
-                
-                if (Mathf.Abs(move) > deadZone)
-                {
-                    velocity +=  body.Transform.Basis.Z * amount * move;
-                    forwarding = true;    
-                }
-
-                if (!forwarding)
+                else
                 {
                     velocity.X = Mathf.MoveToward(velocity.X, 0, velocityDump);
                     velocity.Z = Mathf.MoveToward(velocity.Z, 0, velocityDump);
                 }
             }
+
+
             body.Velocity = velocity;
             body.MoveAndSlide();
         }
-        move = 0;
+        move_v = 0;
+        move_h = 0;
         turn = 0;
         jump = 0;
         jumpForward = 0;
@@ -163,7 +251,8 @@ public partial class CBMoveActuator : MoveActuator
     public override void OnReset(Agent agent)
     {
         turn = 0;
-        move = 0;
+        move_v = 0;
+        move_h = 0;
         jump = 0;
         jumpForward = 0;
     }

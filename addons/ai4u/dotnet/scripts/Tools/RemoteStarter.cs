@@ -10,8 +10,8 @@ namespace ai4u;
 public partial class RemoteStarter : Node
 {
 
-    [Export]
-    internal RemoteConfiguration config = null;
+    [Export(PropertyHint.NodeType, "RemoteConfiguration")]
+    internal Node configuration = null;
 
     [Export]
     internal string starterAgentId = "0";
@@ -26,9 +26,15 @@ public partial class RemoteStarter : Node
     private bool sceneRunning = false;
 
 
+    private RemoteConfiguration config;
+
+    private int callCounter = 0;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
+        callCounter = 0;
+        config = (RemoteConfiguration) configuration;
         playingRequested = false;
         if (Engine.IsEditorHint() && brain == null)
         { 
@@ -60,29 +66,9 @@ public partial class RemoteStarter : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-        if (Engine.IsEditorHint() && EditorInterface.Singleton.IsPlayingScene())
+        if (Engine.IsEditorHint())
         {
-            playingRequested = false;
-            sceneRunning = true;
-        }
-
-        if (Engine.IsEditorHint() && !EditorInterface.Singleton.IsPlayingScene())
-        {
-            if (sceneRunning == true)
-            {
-                if (turnoffCoolDown >= turnoffTime)
-                {
-                    sceneRunning = false;
-                    turnoffCoolDown = 0;
-                }
-                else
-                {
-                    GD.Print($"RometeStarter will be initilized in {turnoffTime - turnoffCoolDown:0.f} seconds...");
-                    turnoffCoolDown += (float)delta;
-                }
-            }
-
-            if (!playingRequested && !sceneRunning)
+            if ( !EditorInterface.Singleton.IsPlayingScene() && !sceneRunning)
             {
                 RequestCommand request = new RequestCommand(3);
                 request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");
@@ -90,12 +76,17 @@ public partial class RemoteStarter : Node
                 request.SetMessage(2, "id", ai4u.Brain.STR, starterAgentId);
                 if (RequestEnvControl(request) == null)
                 {
-                    //GD.Print("Listening remote agent...");
+                    if (callCounter > 100)
+                    {
+                        GD.Print("Listening remote agent...");
+                        callCounter = 0;
+                    }
+                    callCounter++;
                     Thread.Sleep(10);
                 }
                 else
                 {
-                    playingRequested = true;
+                    sceneRunning = true;
                     PlayScene();
                 }
             }
@@ -103,10 +94,10 @@ public partial class RemoteStarter : Node
 	}
     public override void _Notification(int what)
     {
-        if (what == NotificationWMCloseRequest)
+        if (what == NotificationWMCloseRequest || what == NotificationExitTree)
         {
             GD.Print("Game closed!!!");
-            playingRequested = false;
+            sceneRunning = false;
         }
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using ai4u.math;
 using Godot;
 
 namespace ai4u 
@@ -10,10 +11,33 @@ namespace ai4u
 		private int size = 0;
 		private HistoryStack<float> stack;
 
-		[Export]
+		private float[] lastValues = null;
+
+		public float[] LastValues
+		{
+			get
+			{
+				return lastValues;
+			}
+		}
+
+
+        [ExportCategory("Data Range")]
+        [Export]
 		private float _rangeMin = -1;
 		[Export]
 		private float _rangeMax = 1;
+		[ExportGroup("Data Scale")]
+		[Export]
+		private bool normalize = false;
+		[Export]
+        private float minValue = -1;
+		[Export]
+        private float maxValue = 1;
+
+		public float[] UnnormalizedValues => unnormalizedData;
+
+		private float[] unnormalizedData;
 
 		public override void OnSetup(Agent agent)
 		{
@@ -57,8 +81,22 @@ namespace ai4u
 					sensors[i].OnReset(agent);
 				}
 			}
-			GetFloatArrayValue();
-		}
+
+            unnormalizedData = GetFloatArrayValue();
+
+            if (normalize)
+            {
+                lastValues = new float[this.unnormalizedData.Length];
+                for (int i = 0; i < this.unnormalizedData.Length; i++)
+                {
+                    lastValues[i] = (this.unnormalizedData[i] - minValue) / (maxValue - minValue);
+                }
+            }
+            else
+            {
+                lastValues = this.unnormalizedData;
+            }
+        }
 
 		public override float[] GetFloatArrayValue()
 		{
@@ -82,10 +120,23 @@ namespace ai4u
 					stack.Push(s.GetIntValue());
 				} else if (s.type == SensorType.sbool)
 				{
-					stack.Push(s.GetBoolValue() ? rangeMax: rangeMax);
+					stack.Push(s.GetBoolValue() ? rangeMax: rangeMin);
 				}
 			}
-			return stack.Values;
+			this.unnormalizedData = stack.Values;
+			if (normalize)
+			{
+				lastValues = new float[this.unnormalizedData.Length];
+				for (int i = 0; i < this.unnormalizedData.Length; i++)
+				{
+					lastValues[i] = (this.unnormalizedData[i] - minValue)/(maxValue-minValue);
+				}
+			}
+			else
+			{
+				lastValues = this.unnormalizedData;
+			}
+			return lastValues;
 		}
 	}
 }

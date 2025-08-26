@@ -288,7 +288,7 @@ namespace ai4u
         public int Count => queue.Count;
     }
 
-    public partial class HistoryStack<T>
+ 	public partial class HistoryStack<T>
 	{
 		private T[] values;
 		private int pos;
