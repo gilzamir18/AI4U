@@ -78,6 +78,9 @@ class GenericEnvironment(gym.Env):
     
     if seed is not None:
       self.seed = seed
+    if not GenericEnvironment.metadataobj: 
+      self.controller.request_config()
+      GenericEnvironment.metadataobj = self.controller.metadatamodel
     reset_returned_data = self.controller.request_reset()
     if self.event_callback is not None:
       self.event_callback.on_reset(reset_returned_data)
