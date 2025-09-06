@@ -32,24 +32,29 @@ public partial class DiscretArrowController : Controller
 		string actionName = actuatorName;
 		if (agent.Alive())
 		{
-			if (Input.IsKeyPressed(Key.Right))
+			if (Input.IsActionJustPressed("ui_right"))
 			{
 				actionValue = 1;
 			}
 
-			if (Input.IsKeyPressed(Key.Left))
+			if (Input.IsActionJustPressed("ui_left"))
 			{
 				actionValue = 2;
 			}
 
-			if (Input.IsKeyPressed(Key.Up))
+			if (Input.IsActionJustPressed("ui_up"))
 			{
 				actionValue = 3;
 			}
 
-			if (Input.IsKeyPressed(Key.Space))
+			if (Input.IsActionJustPressed("ui_down"))
 			{
 				actionValue = 4;
+			}
+
+			if (Input.IsActionJustPressed("ui_accept"))
+			{
+				actionValue = 5;
 			}
 
 			if (Input.IsKeyPressed(Key.R))

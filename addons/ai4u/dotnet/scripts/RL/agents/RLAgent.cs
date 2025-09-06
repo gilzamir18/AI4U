@@ -166,9 +166,14 @@ namespace ai4u
         /// <param name="requestor">The control requestor to use for setup.</param>
         public override void SetupAgent(ControlRequestor requestor)
         {
+            if (metadataLoader != null)
+            {
+                throw new System.Exception("Agent already setup! This usually happens when two ControlRequestors try to add the same agent. " +
+                    "A possible cause is leaving the \"Add Control Requestor\" option enabled on an RLAgent while also using a manually created " +
+                    "ControlRequestor (either as a child of the RLAgent node or with the RLAgent node added to an external ControlRequestor's agent list).");
+            }
 
-
-			if (avatarBody == null)
+            if (avatarBody == null)
 			{
 				//GD.PrintErr("Avatar body is null. Set a RigidBody or CharacterBody instead!");
 				avatarBody = GetParent();
@@ -352,7 +357,6 @@ namespace ai4u
                 }
             }
             Brain.Setup(this);
-
 
             RequestCommand request = new RequestCommand(5);
             request.SetMessage(0, "__target__", ai4u.Brain.STR, "envcontrol");

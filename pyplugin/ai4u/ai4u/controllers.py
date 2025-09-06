@@ -204,6 +204,7 @@ class BasicGymController(BasicController):
     def handleConfiguration(self, id, max_step, metadatamodel):
         print("Agent configuration: id=", id, " maxstep=", max_step)
         print("Metadata Model " + metadatamodel)
+        self.metadatamodel = metadatamodel
         self.metadataobj = json.loads(metadatamodel)
         self.inputs = self.metadataobj['inputs']
         self.outputs = self.metadataobj['outputs']
