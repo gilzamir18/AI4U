@@ -9,6 +9,6 @@ Agent abstraction defines an agent living in a environment and interacting with 
 # Use ai4upy for Training
 The Python side of the AI4U can be installed using local pip package. To install it, enter the directory pyplugin/ai4upy/ai4u and run the command:
 
-    pip install ai4upy
+    pip install ai4u
 
 This command allows you to train and run an agent within a Godot scene.

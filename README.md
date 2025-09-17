@@ -20,6 +20,13 @@ pip install ai4u
 ## Install Stable C# Scripts
 Next, download the latest AI4U release [here](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u.zip). Unzip this file and place it in the main directory of your Godot project.
 
+Using the terminal, in your Godot project folder that contains the C# solution, install the prerequisite packages for AI4U:
+
+```Bash
+#> dotnet add package Microsoft.ML Microsoft.ML.OnnxRuntime
+```
+If your project doesn't have a solution yet, you can create one from the Godot editor interface by choosing the Project menu, then the Tools submenu, then the C# submenu, and finally selecting "Create C# Solution".
+
 ## Install the Latest Python Scripts
 The Python component of AI4U can be installed using a local pip package. To install it, navigate to the directory `pyplugin/ai4upy/ai4u` and run the command:
 

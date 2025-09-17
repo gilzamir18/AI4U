@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='ai4u',
-        version='0.1.0',
+        version='0.2.0',
         author="Gilzamir Gomes",  
         description="AI4U connect Godot and python applications compatible with gynasium",
         long_description=long_description,  
