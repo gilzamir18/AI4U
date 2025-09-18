@@ -18,13 +18,18 @@ pip install ai4u
 ```
 
 ## Install Stable C# Scripts
-Next, download the latest AI4U release [here](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u.zip). Unzip this file and place it in the main directory of your Godot project.
+Next, download the latest AI4U release [here](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u.zip). Unzip this file and place it in the main directory of your Godot project. If you need to run ONNX models directly in C# within Godot, also copy the [`ai4u_onnx`](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u_onnx.zip) package to your project.
 
-Using the terminal, in your Godot project folder that contains the C# solution, install the prerequisite packages for AI4U:
+## Prerequisites for Running a Neural Network Directly in Godot
+
+Using the terminal, in your Godot project folder that contains the C# solution, install the prerequisite packages for run ONNX models:
 
 ```Bash
-#> dotnet add package Microsoft.ML Microsoft.ML.OnnxRuntime
+$> dotnet add package Microsoft.ML
+
+$> dotnet add package Microsoft.ML.OnnxRuntime
 ```
+
 If your project doesn't have a solution yet, you can create one from the Godot editor interface by choosing the Project menu, then the Tools submenu, then the C# submenu, and finally selecting "Create C# Solution".
 
 ## Install the Latest Python Scripts

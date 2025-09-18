@@ -5,8 +5,7 @@
 
 ## Requirements
 
-
-* It is required to install 'torch.onnx':
+If you try to run ONNX models, it is required to install `torch.onnx`:
 
 ```sh
 pip install torch.onnx
