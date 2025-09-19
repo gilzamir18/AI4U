@@ -4,7 +4,7 @@ AI4U (Artificial Intelligence for You) é uma ferramenta aberta que traz para a 
 
 O agente enxerga o mundo do jogo por meio de sensores e atua neste mundo por meio de atuadores. O mapeamento entre sensores e atuadores é realizado por um controlador. Com base no histórico de observaçõesss, o controlador decide qual ação executar. As ações alteram o objeto controlável do agente ou o ambiente ao redor.
 
-Este tutorial se baseia inteiramente na versão 4.2.2 da Godot (.NET version). A [documentação oficial da Godot sobre o uso de C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) é um bom ponto-de-partida para compreender este tutorial completamente.
+Este tutorial se baseia inteiramente na versão 4.4.1 da Godot (.NET version). A [documentação oficial da Godot sobre o uso de C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html) é um bom ponto-de-partida para compreender este tutorial completamente.
 
 # Como implementar um agente na Godot?
 
@@ -44,7 +44,7 @@ A melhor forma de instalar a AI4U em seu projeto é baixando em seu computador o
 
 Então, crie um novo projeto C# na Godot (deixe as opções padrões de criação de projeto).
 
-Copie o diretório **addons** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário instalar o componente [*AI4U/pyplugin*](https://github.com/gilzamir18/ai4u). Este plugin permite você conectar o seu agente na Godot com um framework Python, o que permite treinar o agente. A AI4U é o *pypluing* foram  especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
+Copie o diretório **addons** do repositório AI4U para o seu projeto. Isto é o suficiente para a Godot reconhecer as classes que você precisa para modelar um agente. Mas, para treinar este agente usando aprendizagem por reforço, é necessário instalar o componente [*AI4U/pyplugin*](https://github.com/gilzamir18/ai4u). Este plugin permite você conectar o seu agente na Godot com um framework Python, o que permite treinar o agente. A AI4U e o *pypluing* foram  especialmente projetados para se comunicarem adequadamente com o framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
 
 Uma vez que você tenha instalado AI4U, pyplugin e **stable-baselines3**, continue lendo este tutorial.
 
@@ -100,7 +100,7 @@ Agora vamos criar um agente que aprende a se aproximar e a tocar o alvo sem cair
 *Figure 7. Versão parcial da cena.*
 
 
-Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na Godot, usamos o eixo z para indicar a direção frontal de um objeto 3D. Contudo, este eixo não fica visível e, quando o agente estiver se movimentando na cena, não saberemos qual o seu lado da frente, pois a capsula é simétrica. Para resolvermos isso, em *assets/3DModel*, selecione o modelo Arrow.dae e o arraste como filho de RigidBody3D. Altere as dimensões e a orientação da seta para ficar como mostrado na Figura 8.
+Observe que o agente como um objeto 3D deveria ter uma direção frontal. Na Godot, usamos o eixo z para indicar a direção frontal de um objeto 3D. Contudo, este eixo não fica visível e, quando o agente estiver se movimentando na cena, não saberemos qual o seu lado da frente, pois a capsula é simétrica. Para resolvermos isso, em *ai4u_prefabs3d/3DModel*, selecione o modelo Arrow.dae e o arraste como filho de RigidBody3D. Altere as dimensões e a orientação da seta para ficar como mostrado na Figura 8.
 
 
 ![figure](img/demo1scenev2.png)
