@@ -59,13 +59,16 @@ public partial class RemoteStarter : Node
     {
         if (Engine.IsEditorHint())
         {
+#if TOOLS
             EditorInterface.Singleton.PlayCurrentScene();
+#endif
         }
     }
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+#if TOOLS
         if (Engine.IsEditorHint())
         {
             if ( !EditorInterface.Singleton.IsPlayingScene() && !sceneRunning)
@@ -91,7 +94,9 @@ public partial class RemoteStarter : Node
                 }
             }
         }
-	}
+#endif
+    }
+
     public override void _Notification(int what)
     {
         if (what == NotificationWMCloseRequest || what == NotificationExitTree)
