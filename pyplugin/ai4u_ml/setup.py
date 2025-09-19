@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(name='ai4u',
-        version='0.4.0',
+setup(name='ai4u_ml',
+        version='0.3.0',
         author="Gilzamir Gomes",  
-        description="AI4U connect Godot and python applications compatible with gynasium",
+        description="AI4U ML install ml prerequisites for AI4U framework",
         long_description=long_description,  
         long_description_content_type="text/markdown",
         packages=find_packages(),
@@ -16,6 +16,6 @@ setup(name='ai4u',
                 "Operating System :: OS Independent",
         ],
         python_requires='>=3.10',
-        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'shimmy==1.3.0'],
-        py_modules=['ai4u', 'AI4UEnv']
+        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'stable-baselines3==2.3.2', 'torch==2.7.0', 'tensorboard==2.16.2', 'shimmy==1.3.0'],
+        py_modules=['ai4u_ml']
 )

@@ -27,6 +27,14 @@ To use AI4U in a new project, you need:
 pip install ai4u
 ```
 
+### Integration with Stable-Baselines and PyTorch
+
+If you need integration with stable-baselines or PyTorch, install the `ai4u-ml` package:
+
+```bash
+pip install ai4u-ml
+```
+
 ### Install Stable C# Scripts
 
 Download the latest AI4U release [here](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u.zip), unzip it, and place it in your Godot project directory. For ONNX model support, also copy the [`ai4u_onnx`](https://raw.githubusercontent.com/gilzamir18/AI4U/main/packages/ai4u_onnx.zip) package.
@@ -44,7 +52,13 @@ If you don't have a solution, create one in Godot via Project > Tools > C# > "Cr
 
 ### Install Latest Python Scripts
 
-Navigate to `pyplugin/ai4upy/ai4u` and run:
+Navigate to `pyplugin/ai4u/ai4u` and run:
+
+```bash
+pip install -e .
+```
+
+If you need integration with stable-baselines or PyTorch, navegate to  `pyplugin/ai4u/ai4u-ml` and run:
 
 ```bash
 pip install -e .
