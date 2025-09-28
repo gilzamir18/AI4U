@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='ai4u',
-        version='0.4.0',
+        version='0.5.0',
         author="Gilzamir Gomes",  
         description="AI4U connect Godot and python applications compatible with gynasium",
         long_description=long_description,  
@@ -16,6 +16,6 @@ setup(name='ai4u',
                 "Operating System :: OS Independent",
         ],
         python_requires='>=3.10',
-        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'shimmy==1.3.0'],
+        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'shimmy==1.3.0', 'Pillow==11.3.0'],
         py_modules=['ai4u', 'AI4UEnv']
 )
