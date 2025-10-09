@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dc4amiln0mwgo"]
+[gd_scene load_steps=20 format=3 uid="uid://dc4amiln0mwgo"]
 
 [ext_resource type="Script" uid="uid://cndf8gsvfd5lb" path="res://addons/ai4u/dotnet/scripts/RL/agents/RLAgent.cs" id="1_8qwb7"]
 [ext_resource type="Script" uid="uid://3118h8brm6fw" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBMoveActuator.cs" id="2_cingl"]
@@ -11,25 +11,26 @@
 [ext_resource type="Script" uid="uid://btl65hbjhq66l" path="res://addons/ai4u/dotnet/scripts/ControllerConfiguration.cs" id="7_rn3ly"]
 [ext_resource type="Script" uid="uid://ixuty4stydg7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/RewardSensor.cs" id="8_6p0qm"]
 [ext_resource type="Script" uid="uid://71qojaodd6sj" path="res://addons/ai4u/dotnet/scripts/RL/events/FallReward.cs" id="8_dphts"]
+[ext_resource type="Script" uid="uid://chnh2lpd6faxl" path="res://addons/ai4u/dotnet/scripts/RL/sensors/OrientationSensor.cs" id="9_ayhdp"]
 [ext_resource type="Script" uid="uid://csk8vk4qimeq1" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward.cs" id="9_unlba"]
 
-[sub_resource type="Resource" id="Resource_dl5a8"]
+[sub_resource type="Resource" id="Resource_lyt5j"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_v5gob"]
+[sub_resource type="Resource" id="Resource_ayhdp"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_8rebv"]
+[sub_resource type="Resource" id="Resource_j7mra"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_p0b31"]
+[sub_resource type="Resource" id="Resource_tagaf"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_lllsg"]
+[sub_resource type="Resource" id="Resource_g12ee"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
@@ -48,8 +49,11 @@ doneAtNegativeReward = false
 
 [node name="MoveActuator" type="Node" parent="."]
 script = ExtResource("2_cingl")
-turnAmount = 1.0
-actionRange = [SubResource("Resource_dl5a8"), SubResource("Resource_v5gob"), SubResource("Resource_8rebv"), SubResource("Resource_p0b31"), SubResource("Resource_lllsg")]
+moveAmount = 2.0
+turnAmount = 5.0
+jumpPower = 0.0
+jumpForwardPower = 0.0
+actionRange = [SubResource("Resource_lyt5j"), SubResource("Resource_ayhdp"), SubResource("Resource_j7mra"), SubResource("Resource_tagaf"), SubResource("Resource_g12ee")]
 actionName = "move"
 
 [node name="Sensor" type="Node" parent="."]
@@ -99,6 +103,9 @@ actionSize = 5
 [node name="RewardSensor" type="Node" parent="Sensor"]
 script = ExtResource("8_6p0qm")
 perceptionKey = "rewardsensor"
+
+[node name="OrientationSensor" type="Node" parent="Sensor"]
+script = ExtResource("9_ayhdp")
 
 [node name="HumanController" type="Node" parent="."]
 script = ExtResource("6_tqthp")

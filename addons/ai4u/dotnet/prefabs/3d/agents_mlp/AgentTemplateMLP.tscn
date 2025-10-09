@@ -10,23 +10,23 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
 
-[sub_resource type="Resource" id="Resource_v5jru"]
+[sub_resource type="Resource" id="Resource_ix7m5"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_00jtl"]
+[sub_resource type="Resource" id="Resource_crbb1"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_hniim"]
+[sub_resource type="Resource" id="Resource_boxar"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_qmbve"]
+[sub_resource type="Resource" id="Resource_3fpc5"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_y1f7a"]
+[sub_resource type="Resource" id="Resource_867x5"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
@@ -50,8 +50,7 @@ avatarBody = NodePath("..")
 controlRequestorTimeScale = 10.0
 
 [node name="MoveActuator" parent="Agent" index="0"]
-moveAmount = 1.0
-actionRange = [SubResource("Resource_v5jru"), SubResource("Resource_00jtl"), SubResource("Resource_hniim"), SubResource("Resource_qmbve"), SubResource("Resource_y1f7a")]
+actionRange = [SubResource("Resource_ix7m5"), SubResource("Resource_crbb1"), SubResource("Resource_boxar"), SubResource("Resource_3fpc5"), SubResource("Resource_867x5")]
 
 [node name="RayCasting" parent="Agent/Sensor" index="0" node_paths=PackedStringArray("eye")]
 eye = NodePath("../../../eye")
@@ -65,6 +64,9 @@ eye = NodePath("../../../eye")
 [node name="RayCasting4" parent="Agent/Sensor" index="3" node_paths=PackedStringArray("eye")]
 eye = NodePath("../../../eye")
 
+[node name="OrientationSensor" parent="Agent/Sensor" index="6" node_paths=PackedStringArray("reference")]
+reference = NodePath("../../..")
+
 [node name="FallReward" parent="Agent" index="4"]
 causeEpisodeToEnd = true
 
@@ -72,6 +74,7 @@ causeEpisodeToEnd = true
 
 [node name="TouchReward" type="Node" parent="Agent"]
 script = ExtResource("4_1vyay")
+reward = 10.0
 _collisionCheckInterval = 1.0
 onlyOneTime = false
 causeEpisodeToEnd = true
@@ -81,6 +84,7 @@ script = ExtResource("4_1vyay")
 reward = -1.0
 _collisionCheckInterval = 0.2
 onlyOneTime = false
+causeEpisodeToEnd = true
 
 [node name="Respawn" type="Node" parent="Agent"]
 script = ExtResource("5_r0g8j")
