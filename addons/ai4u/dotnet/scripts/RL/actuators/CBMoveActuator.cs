@@ -106,12 +106,26 @@ public partial class CBMoveActuator : MoveActuator
 
     public override void OnSetup(Agent agent)
     {
-        actionRangeMin = new float[actionRange.Length];
-        actionRangeMax = new float[actionRange.Length];
-        for (int i = 0; i < actionRange.Length; i++)
+
+        if (actionRange.Length < NB_ACTIONS)
         {
-            actionRangeMin[i] = actionRange[i].Min;
-            actionRangeMax[i] = actionRange[i].Max;
+            GD.PrintErr("CBMoveActuator: actionRange must have at least ", NB_ACTIONS, " elements.");
+            return;
+        }
+
+        if (actionRange != null)
+        {
+            actionRangeMin = new float[actionRange.Length];
+            actionRangeMax = new float[actionRange.Length];
+            for (int i = 0; i < actionRange.Length; i++)
+            {
+                if (actionRange[i] == null)
+                {
+                    actionRange[i] = new FieldRange(-1, 1);
+                }
+                actionRangeMin[i] = actionRange[i].Min;
+                actionRangeMax[i] = actionRange[i].Max;
+            }
         }
         shape = new int[1]{NB_ACTIONS+extraActions};
         isContinuous = true;

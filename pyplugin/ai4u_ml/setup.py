@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='ai4u_ml',
-        version='0.3.0',
+        version='0.4.0',
         author="Gilzamir Gomes",  
         description="AI4U ML install ml prerequisites for AI4U framework",
         long_description=long_description,  

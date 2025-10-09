@@ -1,0 +1,96 @@
+[gd_scene load_steps=14 format=3 uid="uid://0i3utmxa15gd"]
+
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://addons/ai4u_prefabs3d/3DModel/Arrow.dae" id="1_l5rai"]
+[ext_resource type="PackedScene" uid="uid://dc4amiln0mwgo" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/agent.tscn" id="2_pqyjy"]
+[ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="3_cdhly"]
+[ext_resource type="Script" uid="uid://c8hphjw3mvqnw" path="res://addons/ai4u/dotnet/scripts/RL/events/TouchRewardFunc.cs" id="4_igiip"]
+[ext_resource type="Script" uid="uid://hbifwb8rtlf7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/Camera3DSensor.cs" id="4_pqyjy"]
+[ext_resource type="Script" uid="uid://cfbd18al51jhl" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBRespawnActuator.cs" id="5_jk51l"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lk240"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
+
+[sub_resource type="Resource" id="Resource_pqyjy"]
+script = ExtResource("3_cdhly")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_cdhly"]
+script = ExtResource("3_cdhly")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_igiip"]
+script = ExtResource("3_cdhly")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_jk51l"]
+script = ExtResource("3_cdhly")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_u2aoq"]
+script = ExtResource("3_cdhly")
+Min = -1
+
+[node name="Agent" type="CharacterBody3D"]
+
+[node name="eye" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.4985206, -0.44757503)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_lk240")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_knogm")
+
+[node name="Arrow" parent="." instance=ExtResource("1_l5rai")]
+transform = Transform3D(0.1, 0, 0, 0, -4.371139e-09, 0.1, 0, -0.1, -4.371139e-09, 0.102265835, 0.44946933, -0.4064366)
+
+[node name="Agent" parent="." node_paths=PackedStringArray("avatarBody") instance=ExtResource("2_pqyjy")]
+remote = true
+avatarBody = NodePath("..")
+controlRequestorTimeScale = 10.0
+
+[node name="MoveActuator" parent="Agent" index="0"]
+moveAmount = 1.0
+actionRange = [SubResource("Resource_pqyjy"), SubResource("Resource_cdhly"), SubResource("Resource_igiip"), SubResource("Resource_jk51l"), SubResource("Resource_u2aoq")]
+
+[node name="RayCasting" parent="Agent/Sensor" index="0" node_paths=PackedStringArray("eye")]
+eye = NodePath("../../../eye")
+
+[node name="RayCasting3" parent="Agent/Sensor" index="1" node_paths=PackedStringArray("eye")]
+eye = NodePath("../../../eye")
+
+[node name="RayCasting2" parent="Agent/Sensor" index="2" node_paths=PackedStringArray("eye")]
+eye = NodePath("../../../eye")
+
+[node name="RayCasting4" parent="Agent/Sensor" index="3" node_paths=PackedStringArray("eye")]
+eye = NodePath("../../../eye")
+
+[node name="FallReward" parent="Agent" index="4"]
+causeEpisodeToEnd = true
+
+[node name="Vision" type="Node" parent="Agent"]
+script = ExtResource("4_pqyjy")
+perceptionKey = "vision"
+
+[node name="RespawnOptions" type="Node3D" parent="Agent"]
+
+[node name="TouchReward" type="Node" parent="Agent"]
+script = ExtResource("4_igiip")
+_collisionCheckInterval = 1.0
+onlyOneTime = false
+causeEpisodeToEnd = true
+
+[node name="Pain" type="Node" parent="Agent"]
+script = ExtResource("4_igiip")
+reward = -1.0
+_collisionCheckInterval = 0.2
+onlyOneTime = false
+
+[node name="Respawn" type="Node" parent="Agent"]
+script = ExtResource("5_jk51l")
+respawnOptionsPath = NodePath("../RespawnOptions")
+actionName = "respawn"
+isOutput = false
+
+[editable path="Agent"]

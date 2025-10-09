@@ -73,6 +73,7 @@ namespace ai4u {
 				this._collisionIntervalCoolDown -= (float)this.agent.GetPhysicsProcessDeltaTime();
 				if (this._collisionIntervalCoolDown > 0)
 				{
+					//GD.Print("Cooldown: " + this._collisionIntervalCoolDown);
 					return;
 				}
 

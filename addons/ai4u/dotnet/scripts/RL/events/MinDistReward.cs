@@ -8,7 +8,7 @@ namespace ai4u
 	{
 		
 		[Export]
-		private NodePath target;
+		internal NodePath target;
 		private Node3D targetNode;
 		
 		[Export]
@@ -48,6 +48,9 @@ namespace ai4u
 		
 		public override void OnUpdate()
 		{
+			if (targetNode == null || rBody == null)
+				this.agent.AddReward(stepReward, this);
+				return;
 			Vector3 d = rBody.GlobalTransform.Origin - targetNode.GlobalTransform.Origin;
 			float dist = d.Length();
 			if (dist < minDistance)

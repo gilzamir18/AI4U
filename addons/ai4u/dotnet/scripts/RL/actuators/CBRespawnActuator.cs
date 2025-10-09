@@ -41,6 +41,10 @@ namespace ai4u
 
 			public override void OnSetup(Agent agent)
 			{
+				if (respawnOptionsPath == null)
+				{
+					throw new Exception("The respawn options path is not set!");
+				}
 				nodeRef = GetNode(respawnOptionsPath);
 				children = nodeRef.GetChildren();
 				cBody = ( (RLAgent) agent).GetAvatarBody() as CharacterBody3D;

@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://dps7l3yqqavaj"]
+
+[ext_resource type="PackedScene" uid="uid://c0mrmykko6x3u" path="res://addons/ai4u/dotnet/prefabs/3d/components/floor.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://c8ag8c5d8en3d" path="res://addons/ai4u/dotnet/prefabs/3d/components/box.tscn" id="2_0wfyh"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jyhfs"]
+albedo_color = Color(0.93595004, 0.11402092, 0.6124397, 1)
+
+[node name="Simple3DScene" type="Node3D"]
+
+[node name="Floor" parent="." groups=["floor"] instance=ExtResource("1_o5qli")]
+
+[node name="Obstacle" parent="." groups=["wall"] instance=ExtResource("2_0wfyh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.41781962, 0.54999995, -1.9709946)
+
+[node name="Goal" parent="." groups=["target"] instance=ExtResource("2_0wfyh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07494116, 0.5500002, -5.5653696)
+
+[node name="MeshInstance3D" parent="Goal" index="1"]
+surface_material_override/0 = SubResource("StandardMaterial3D_jyhfs")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.032754008, 0.99946344, 0, -0.99946344, -0.03275401, -0.8143811, 16.383888, -0.8949852)
+projection = 1
+current = true
+size = 31.597
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.065751456, 0.99783605, 0, -0.99783605, -0.065751456, 0, 4.2702684, 0)
+
+[editable path="Goal"]

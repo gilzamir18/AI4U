@@ -1,0 +1,117 @@
+[gd_scene load_steps=19 format=3 uid="uid://dc4amiln0mwgo"]
+
+[ext_resource type="Script" uid="uid://cndf8gsvfd5lb" path="res://addons/ai4u/dotnet/scripts/RL/agents/RLAgent.cs" id="1_8qwb7"]
+[ext_resource type="Script" uid="uid://3118h8brm6fw" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBMoveActuator.cs" id="2_cingl"]
+[ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="3_0ymg6"]
+[ext_resource type="Script" uid="uid://dsvl3wyrlei0s" path="res://addons/ai4u/dotnet/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="3_j0rys"]
+[ext_resource type="Script" uid="uid://b52rg6tcup40t" path="res://addons/ai4u/dotnet/scripts/RL/sensors/LinearRayCastingSensor.cs" id="4_5h1c6"]
+[ext_resource type="Script" uid="uid://qtkkn76vftgl" path="res://addons/ai4u/dotnet/scripts/godotutils/RaycastMapping.cs" id="5_j6fbu"]
+[ext_resource type="Script" uid="uid://bt1p6nlqftdkf" path="res://addons/ai4u/dotnet/scripts/RL/controllers/ArrowPhysicsMoveController.cs" id="6_tqthp"]
+[ext_resource type="Script" uid="uid://dceo84yiaxm8n" path="res://addons/ai4u/dotnet/scripts/RL/sensors/ActionSensor.cs" id="7_6p0qm"]
+[ext_resource type="Script" uid="uid://btl65hbjhq66l" path="res://addons/ai4u/dotnet/scripts/ControllerConfiguration.cs" id="7_rn3ly"]
+[ext_resource type="Script" uid="uid://ixuty4stydg7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/RewardSensor.cs" id="8_6p0qm"]
+[ext_resource type="Script" uid="uid://71qojaodd6sj" path="res://addons/ai4u/dotnet/scripts/RL/events/FallReward.cs" id="8_dphts"]
+[ext_resource type="Script" uid="uid://csk8vk4qimeq1" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward.cs" id="9_unlba"]
+
+[sub_resource type="Resource" id="Resource_dl5a8"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_v5gob"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_8rebv"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_p0b31"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_lllsg"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_d006v"]
+script = ExtResource("5_j6fbu")
+groups = Dictionary[String, int]({
+"floor": 20,
+"target": 100,
+"wall": 10
+})
+metadata/_custom_type_script = "uid://qtkkn76vftgl"
+
+[node name="Agent" type="Node"]
+script = ExtResource("1_8qwb7")
+doneAtNegativeReward = false
+
+[node name="MoveActuator" type="Node" parent="."]
+script = ExtResource("2_cingl")
+turnAmount = 1.0
+actionRange = [SubResource("Resource_dl5a8"), SubResource("Resource_v5gob"), SubResource("Resource_8rebv"), SubResource("Resource_p0b31"), SubResource("Resource_lllsg")]
+actionName = "move"
+
+[node name="Sensor" type="Node" parent="."]
+script = ExtResource("3_j0rys")
+perceptionKey = "vision"
+stackedObservations = 4
+
+[node name="RayCasting" type="Node" parent="Sensor"]
+script = ExtResource("4_5h1c6")
+groupMapping = SubResource("Resource_d006v")
+numberOfRays = 3
+verticalShift = -30.0
+visionMaxDistance = 500.0
+maxDistance = 500.0
+debugEnabled = true
+
+[node name="RayCasting3" type="Node" parent="Sensor"]
+script = ExtResource("4_5h1c6")
+groupMapping = SubResource("Resource_d006v")
+numberOfRays = 3
+verticalShift = -50.0
+visionMaxDistance = 500.0
+maxDistance = 500.0
+debugEnabled = true
+
+[node name="RayCasting2" type="Node" parent="Sensor"]
+script = ExtResource("4_5h1c6")
+groupMapping = SubResource("Resource_d006v")
+verticalShift = -10.0
+visionMaxDistance = 500.0
+maxDistance = 500.0
+debugEnabled = true
+
+[node name="RayCasting4" type="Node" parent="Sensor"]
+script = ExtResource("4_5h1c6")
+groupMapping = SubResource("Resource_d006v")
+verticalShift = 10.0
+visionMaxDistance = 500.0
+maxDistance = 500.0
+debugEnabled = true
+
+[node name="ActionSensor" type="Node" parent="Sensor"]
+script = ExtResource("7_6p0qm")
+actionName = "actionsensor"
+actionSize = 5
+
+[node name="RewardSensor" type="Node" parent="Sensor"]
+script = ExtResource("8_6p0qm")
+perceptionKey = "rewardsensor"
+
+[node name="HumanController" type="Node" parent="."]
+script = ExtResource("6_tqthp")
+speed = 1.0
+turnAmount = 5.0
+
+[node name="Config" type="Node" parent="."]
+script = ExtResource("7_rn3ly")
+
+[node name="FallReward" type="Node" parent="."]
+script = ExtResource("8_dphts")
+threshold = -1.0
+
+[node name="TargetReward" type="Node" parent="."]
+script = ExtResource("9_unlba")
+causeEpisodeToEnd = true

@@ -55,10 +55,10 @@ namespace  ai4u
 			internalActionMap = new Godot.Collections.Dictionary<string, string>();
 			internalActionMap["forward"] = "ui_up";
 			internalActionMap["backward"] = "ui_down";
-			internalActionMap["left"] = "ui_left";
-			internalActionMap["right"] = "ui_right";
-			internalActionMap["turn_left"] = "ui_page_up";
-			internalActionMap["turn_right"] = "ui_page_down";
+			internalActionMap["left"] = "ui_page_up";
+			internalActionMap["right"] = "ui_page_down";
+			internalActionMap["turn_left"] = "ui_left";
+			internalActionMap["turn_right"] = "ui_right";
 			internalActionMap["jump"] = "ui_select";
 			internalActionMap["jump_forward"] = "ui_home";
 			internalActionMap["reset"] = "ui_cancel";
