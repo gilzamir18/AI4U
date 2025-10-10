@@ -1,5 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://j6cloejav7o7"]
+[gd_scene load_steps=14 format=3 uid="uid://j6cloejav7o7"]
 
+[ext_resource type="Script" uid="uid://vsbns1douocd" path="res://addons/ai4u/dotnet/prefabs/3d/scripts/SingleGoalOrientedAgent.cs" id="1_crbb1"]
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://addons/ai4u_prefabs3d/3DModel/Arrow.dae" id="1_ntsi3"]
 [ext_resource type="PackedScene" uid="uid://dc4amiln0mwgo" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/agent.tscn" id="2_1vyay"]
 [ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="3_r0g8j"]
@@ -9,10 +10,6 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lk240"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
-
-[sub_resource type="Resource" id="Resource_ix7m5"]
-script = ExtResource("3_r0g8j")
-Min = -1
 
 [sub_resource type="Resource" id="Resource_crbb1"]
 script = ExtResource("3_r0g8j")
@@ -30,7 +27,12 @@ Min = -1
 script = ExtResource("3_r0g8j")
 Min = -1
 
+[sub_resource type="Resource" id="Resource_73k70"]
+script = ExtResource("3_r0g8j")
+Min = -1
+
 [node name="Agent" type="CharacterBody3D"]
+script = ExtResource("1_crbb1")
 
 [node name="eye" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.4985206, -0.44757503)
@@ -50,7 +52,8 @@ avatarBody = NodePath("..")
 controlRequestorTimeScale = 10.0
 
 [node name="MoveActuator" parent="Agent" index="0"]
-actionRange = [SubResource("Resource_ix7m5"), SubResource("Resource_crbb1"), SubResource("Resource_boxar"), SubResource("Resource_3fpc5"), SubResource("Resource_867x5")]
+turnAmount = 1.0
+actionRange = [SubResource("Resource_crbb1"), SubResource("Resource_boxar"), SubResource("Resource_3fpc5"), SubResource("Resource_867x5"), SubResource("Resource_73k70")]
 
 [node name="RayCasting" parent="Agent/Sensor" index="0" node_paths=PackedStringArray("eye")]
 eye = NodePath("../../../eye")
@@ -70,25 +73,24 @@ reference = NodePath("../../..")
 [node name="FallReward" parent="Agent" index="4"]
 causeEpisodeToEnd = true
 
-[node name="RespawnOptions" type="Node3D" parent="Agent"]
+[node name="TargetReward" parent="Agent" index="5"]
+successReward = 0.1
+causeEpisodeToEnd = false
 
 [node name="TouchReward" type="Node" parent="Agent"]
 script = ExtResource("4_1vyay")
 reward = 10.0
-_collisionCheckInterval = 1.0
-onlyOneTime = false
 causeEpisodeToEnd = true
 
 [node name="Pain" type="Node" parent="Agent"]
 script = ExtResource("4_1vyay")
 reward = -1.0
-_collisionCheckInterval = 0.2
+_collisionCheckInterval = 0.1
 onlyOneTime = false
-causeEpisodeToEnd = true
 
 [node name="Respawn" type="Node" parent="Agent"]
 script = ExtResource("5_r0g8j")
-respawnOptionsPath = NodePath("../RespawnOptions")
+respawnOptionsPath = NodePath("")
 actionName = "respawn"
 isOutput = false
 

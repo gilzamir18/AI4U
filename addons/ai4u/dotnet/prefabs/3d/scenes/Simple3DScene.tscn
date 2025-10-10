@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://c0mrmykko6x3u" path="res://addons/ai4u/dotnet/prefabs/3d/components/floor.tscn" id="1_o5qli"]
 [ext_resource type="PackedScene" uid="uid://c8ag8c5d8en3d" path="res://addons/ai4u/dotnet/prefabs/3d/components/box.tscn" id="2_0wfyh"]
-[ext_resource type="PackedScene" uid="uid://j6cloejav7o7" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/AgentTemplateMLP.tscn" id="3_5mqdn"]
+[ext_resource type="PackedScene" uid="uid://j6cloejav7o7" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/SingleGoalMLPAgent.tscn" id="3_5mqdn"]
 [ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="4_ds3kt"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jyhfs"]
@@ -50,27 +50,16 @@ size = 31.597
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.065751456, 0.99783605, 0, -0.99783605, -0.065751456, 0, 4.2702684, 0)
 
-[node name="Agent" parent="." instance=ExtResource("3_5mqdn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.33720422, 1.0679331, 2.167015)
-
-[node name="Agent" parent="Agent" index="4"]
-MaxStepsPerEpisode = 400
+[node name="Agent" parent="." node_paths=PackedStringArray("goal", "respawnOptionsPath") instance=ExtResource("3_5mqdn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 4)
+goal = NodePath("../Goal")
+respawnOptionsPath = NodePath("../respawn")
 
 [node name="MoveActuator" parent="Agent/Agent" index="0"]
 actionRange = [SubResource("Resource_ds3kt"), SubResource("Resource_eive1"), SubResource("Resource_v0303"), SubResource("Resource_tnghv"), SubResource("Resource_tyqwj")]
 
-[node name="OrientationSensor" parent="Agent/Agent/Sensor" index="6" node_paths=PackedStringArray("_target")]
-_target = NodePath("../../../../Goal")
-
-[node name="TargetReward" parent="Agent/Agent" index="5"]
-target = NodePath("../../../Goal")
-successReward = 0.1
-
-[node name="TouchReward" parent="Agent/Agent" index="7" node_paths=PackedStringArray("target")]
-target = NodePath("../../../Goal")
-
-[node name="Pain" parent="Agent/Agent" index="8" node_paths=PackedStringArray("target")]
-target = NodePath("../../../Obstacle")
+[node name="respawn" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4814639, 0.10527754, 0.5653746)
 
 [editable path="Goal"]
 [editable path="Agent"]

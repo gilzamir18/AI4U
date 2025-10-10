@@ -14,10 +14,6 @@
 [ext_resource type="Script" uid="uid://chnh2lpd6faxl" path="res://addons/ai4u/dotnet/scripts/RL/sensors/OrientationSensor.cs" id="9_ayhdp"]
 [ext_resource type="Script" uid="uid://csk8vk4qimeq1" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward.cs" id="9_unlba"]
 
-[sub_resource type="Resource" id="Resource_lyt5j"]
-script = ExtResource("3_0ymg6")
-Min = -1
-
 [sub_resource type="Resource" id="Resource_ayhdp"]
 script = ExtResource("3_0ymg6")
 Min = -1
@@ -31,6 +27,10 @@ script = ExtResource("3_0ymg6")
 Min = -1
 
 [sub_resource type="Resource" id="Resource_g12ee"]
+script = ExtResource("3_0ymg6")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_a0bbi"]
 script = ExtResource("3_0ymg6")
 Min = -1
 
@@ -53,7 +53,7 @@ moveAmount = 2.0
 turnAmount = 5.0
 jumpPower = 0.0
 jumpForwardPower = 0.0
-actionRange = [SubResource("Resource_lyt5j"), SubResource("Resource_ayhdp"), SubResource("Resource_j7mra"), SubResource("Resource_tagaf"), SubResource("Resource_g12ee")]
+actionRange = [SubResource("Resource_ayhdp"), SubResource("Resource_j7mra"), SubResource("Resource_tagaf"), SubResource("Resource_g12ee"), SubResource("Resource_a0bbi")]
 actionName = "move"
 
 [node name="Sensor" type="Node" parent="."]

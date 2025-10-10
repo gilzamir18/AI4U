@@ -24,6 +24,11 @@ namespace ai4u {
 
 		private Node3D target;
 		
+		public Node3D Target
+        {
+			get { return target; }
+			set { target = value; }
+        }
 		
 		///<summary>
 		/// The location in the scene from which the angular distance and the Euclidean distance are calculated.
@@ -97,7 +102,8 @@ namespace ai4u {
 
 		public InfoType Info => info;
 
-		public override void OnSetup(Agent agent) {
+		public override void OnSetup(Agent agent)
+		{
 			this.agent = (RLAgent)agent;
 
 			if (_target != null)
@@ -105,9 +111,10 @@ namespace ai4u {
 				this.target = _target;
 			}
 
-			if (reference == null) {
+			if (reference == null)
+			{
 				reference = this.agent.GetAvatarBody() as Node3D;
-			} 
+			}
 
 			if (visibilityTest)
 			{
@@ -122,15 +129,15 @@ namespace ai4u {
 			type = SensorType.sfloatarray;
 			if (info == InfoType.BOTH)
 			{
-				shape = new int[1]{2*stackedObservations};
+				shape = new int[1] { 2 * stackedObservations };
 			}
 			else
 			{
-				shape = new int[]{1*stackedObservations};
+				shape = new int[] { 1 * stackedObservations };
 			}
 
 			history = new HistoryStack<float>(shape[0]);
-			normalized =  _normalized;
+			normalized = _normalized;
 		}
 
 		public override void OnReset(Agent aget)

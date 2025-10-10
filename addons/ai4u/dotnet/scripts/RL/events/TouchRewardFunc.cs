@@ -5,11 +5,17 @@ namespace ai4u {
 	public partial class TouchRewardFunc : RewardFunc {
 
 		[Signal] public delegate void OnTouchEventHandler(TouchRewardFunc source);
-			
+
 		[Export]
 		public float reward = 0.0f;
+
+		[ExportCategory("Target Options")]
+
 		[Export]
 		private Node target;
+
+		[Export]
+		public string group = null;
 
 
 		[ExportCategory("CharacterBody3D Options")]
@@ -17,6 +23,12 @@ namespace ai4u {
 		private float _collisionCheckInterval = 5;
 		[Export]
 		private bool onlyOneTime = true;
+
+		public Node Target
+		{
+			get { return target; }
+			set { target = value; }
+		}
 
 		private float _collisionIntervalCoolDown = 0;
 
@@ -41,10 +53,10 @@ namespace ai4u {
 				this.agent = (RLAgent) agent;
 				this.agent.OnStepEnd += PhysicsUpdate;
 				var body = this.agent.GetAvatarBody();
-				if (body.GetType() == typeof(RigidBody3D))
+				if (body is RigidBody3D)
                 {
 					((RigidBody3D)body).BodyEntered += OnEntered;
-				} else if (body.GetType() == typeof(CharacterBody3D))
+				} else if (body is CharacterBody3D)
                 {
                     isCharacterBody = true;
                     chBody = (CharacterBody3D) body;
@@ -57,7 +69,7 @@ namespace ai4u {
 		}
 		
 		public void OnEntered(Node body) {
-			if (body == target) {
+			if (body == target || CheckTargetGroup(body)) {
 				acmReward += this.reward;
 				eval = true;
 				EmitSignal(SignalName.OnTouch, this);
@@ -66,8 +78,6 @@ namespace ai4u {
 
         public void PhysicsUpdate(RLAgent agent)
         {
-
-
 			if (agent.SetupIsDone && agent.Alive() && isCharacterBody && (!onlyOneTime || !entered) && !agent.Done)
             {
 				this._collisionIntervalCoolDown -= (float)this.agent.GetPhysicsProcessDeltaTime();
@@ -83,7 +93,7 @@ namespace ai4u {
                     var kc = chBody.GetSlideCollision(i);
     
                     var n = (Node)kc.GetCollider();
-                    if (n == target)
+                    if (n == target || CheckTargetGroup(n))
                     {
 						entered = true;
                         acmReward += this.reward;
@@ -106,12 +116,20 @@ namespace ai4u {
 			return eval;
         }
 
-        public override void ResetEval()
-        {
+		public override void ResetEval()
+		{
 			eval = false;
-        }
+		}
 
-        public override void OnReset(Agent agent) {
+		private bool CheckTargetGroup(Node n)
+		{
+			if (group == null || group.Length == 0)
+				return false;
+			return n.IsInGroup(group);
+		}
+
+		public override void OnReset(Agent agent)
+		{
 			acmReward = 0.0f;
 			this._collisionIntervalCoolDown = 0;
 			this.entered = false;

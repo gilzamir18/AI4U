@@ -10,79 +10,83 @@ namespace ai4u
 	/// (when the "early" property is enabled) or **after** (when the "early" property is not enabled).
 	/// </summary>
 	public partial class CBRespawnActuator : Actuator
-	{	
+	{		
+		[Export]
+		private NodePath respawnOptionsPath;
+
+		[Export]
+		private bool radomizeDirection = true;
+
+		[Export]
+		private bool early = true;
+
+
+		private Node nodeRef;
+	
+		private CharacterBody3D cBody;
+		private Godot.Collections.Array<Node> children;
+
+		private int lastSelected = 0;
+
+
+		public int LastSelected
+		{
+			get
+			{
+				return lastSelected;
+			}
+		}
 		
-			[Export]
-			private NodePath respawnOptionsPath;
+		public NodePath RespawnOptionsPath
+		{
+			get { return respawnOptionsPath; }
+			set { respawnOptionsPath = value; }
+		}
 
-			[Export]
-			private bool radomizeDirection = true;
+		public override void OnSetup(Agent agent)
+		{
+			if (respawnOptionsPath == null)
+			{
+				throw new Exception("The respawn options path is not set!");
+			}
+			nodeRef = GetNode(respawnOptionsPath);
+			children = nodeRef.GetChildren();
+			cBody = ( (RLAgent) agent).GetAvatarBody() as CharacterBody3D;
 
-			[Export]
-			private bool early = true;
-
-
-			private Node nodeRef;
-		
-			private CharacterBody3D cBody;
-			private Godot.Collections.Array<Node> children;
-			
-
-
-			private int lastSelected = 0;
-
-
-			public int LastSelected {
-				get {
-					return lastSelected;
-				}
+			if (early)
+			{
+				((RLAgent)agent).OnResetStart += HandleReset;
+			}
+			else
+			{
+				((RLAgent)agent).OnEpisodeStart += HandleReset;
 			}
 		
-
-			public override void OnSetup(Agent agent)
+		}
+		
+		public void HandleReset(RLAgent agent)
+		{
+			Transform3D reference;
+			if (children.Count > 0)
 			{
-				if (respawnOptionsPath == null)
-				{
-					throw new Exception("The respawn options path is not set!");
-				}
-				nodeRef = GetNode(respawnOptionsPath);
-				children = nodeRef.GetChildren();
-				cBody = ( (RLAgent) agent).GetAvatarBody() as CharacterBody3D;
-
-				if (early)
-				{
-					((RLAgent)agent).OnResetStart += HandleReset;
-				}
-				else
-				{
-					((RLAgent)agent).OnEpisodeStart += HandleReset;
-				}
-			
+				int idx = (int)GD.RandRange(0, children.Count-1);
+				reference = ((Node3D)children[idx]).GlobalTransform;
+				lastSelected = idx;
 			}
-			
-			public void HandleReset(RLAgent agent)
+			else
 			{
-				Transform3D reference;
-				if (children.Count > 0)
-				{
-					int idx = (int)GD.RandRange(0, children.Count-1);
-					reference = ((Node3D)children[idx]).GlobalTransform;
-					lastSelected = idx;
-				}
-				else
-				{
-					reference = ((Node3D) nodeRef).GlobalTransform;
-					lastSelected = -1;
-				}
-				var bscale = cBody.Scale;
-				cBody.Velocity = Vector3.Zero;
-				cBody.GlobalTransform = reference;
-                cBody.GlobalPosition = reference.Origin;
-				if (radomizeDirection)
-				{
-                	cBody.Rotate(cBody.Basis.Y, (float)GD.RandRange(0.0, 2.0 * Mathf.Pi));
-				}
-			    cBody.Scale = bscale;
-        }
+				reference = ((Node3D) nodeRef).GlobalTransform;
+				lastSelected = -1;
+			}
+			var bscale = cBody.Scale;
+			cBody.Velocity = Vector3.Zero;
+			cBody.GlobalTransform = reference;
+			cBody.GlobalPosition = reference.Origin;
+			if (radomizeDirection)
+			{
+				cBody.Rotate(cBody.Basis.Y, (float)GD.RandRange(0.0, 2.0 * Mathf.Pi));
+			}
+			cBody.Scale = bscale;
+		}
 	}
 }

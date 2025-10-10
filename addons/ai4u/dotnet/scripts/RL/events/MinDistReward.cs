@@ -8,8 +8,8 @@ namespace ai4u
 	{
 		
 		[Export]
-		internal NodePath target;
-		private Node3D targetNode;
+		private Node3D target;
+		
 		
 		[Export]
 		private float successReward = 0.01f;
@@ -20,22 +20,25 @@ namespace ai4u
 		private RLAgent agent;
 		private float minDistance;
 		private PhysicsBody3D rBody;
-		
+
+		public Node3D Target
+		{
+			get { return target; }
+			set { target = value; }
+		}
+
 		public override void OnSetup(Agent agent)
 		{
-			if (target != null)
-			{
-				targetNode = GetNode(target) as Node3D;
-			}
-            if (target == null)
-            {
-                GD.Print("MinDistReward error: Mandatory field (targetPath) not provided!");
-            }
 
-            this.agent = (RLAgent)agent;
-			
-			rBody = (PhysicsBody3D) this.agent.GetAvatarBody();
-			
+			if (target == null)
+			{
+				GD.Print("MinDistReward error: Mandatory field (targetPath) not provided!");
+			}
+
+			this.agent = (RLAgent)agent;
+
+			rBody = (PhysicsBody3D)this.agent.GetAvatarBody();
+
 			this.agent.AddResetListener(this);
 			//minDistance = (rBody.GlobalTransform.origin - targetNode.GlobalTransform.origin).Length();
 			minDistance = System.Single.PositiveInfinity;
@@ -43,15 +46,17 @@ namespace ai4u
 
 		public void SetTarget(Node3D t)
 		{
-			this.targetNode = t;
+			this.target = t;
 		}
 		
 		public override void OnUpdate()
 		{
-			if (targetNode == null || rBody == null)
+			if (target == null || rBody == null)
+			{
 				this.agent.AddReward(stepReward, this);
 				return;
-			Vector3 d = rBody.GlobalTransform.Origin - targetNode.GlobalTransform.Origin;
+			}
+			Vector3 d = rBody.GlobalTransform.Origin - target.GlobalTransform.Origin;
 			float dist = d.Length();
 			if (dist < minDistance)
 			{
