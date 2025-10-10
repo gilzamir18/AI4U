@@ -1,34 +1,43 @@
-[gd_scene load_steps=15 format=3 uid="uid://0i3utmxa15gd"]
+[gd_scene load_steps=24 format=3 uid="uid://0i3utmxa15gd"]
 
 [ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://addons/ai4u_prefabs3d/3DModel/Arrow.dae" id="1_l5rai"]
 [ext_resource type="Script" uid="uid://vsbns1douocd" path="res://addons/ai4u/dotnet/prefabs/3d/scripts/SingleGoalOrientedAgent.cs" id="1_v68w4"]
-[ext_resource type="PackedScene" uid="uid://dc4amiln0mwgo" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/agent.tscn" id="2_pqyjy"]
 [ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="3_cdhly"]
+[ext_resource type="Script" uid="uid://cndf8gsvfd5lb" path="res://addons/ai4u/dotnet/scripts/RL/agents/RLAgent.cs" id="3_m6ym3"]
+[ext_resource type="Script" uid="uid://3118h8brm6fw" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBMoveActuator.cs" id="4_dj3b4"]
 [ext_resource type="Script" uid="uid://c8hphjw3mvqnw" path="res://addons/ai4u/dotnet/scripts/RL/events/TouchRewardFunc.cs" id="4_igiip"]
 [ext_resource type="Script" uid="uid://hbifwb8rtlf7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/Camera3DSensor.cs" id="4_pqyjy"]
 [ext_resource type="Script" uid="uid://cfbd18al51jhl" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBRespawnActuator.cs" id="5_jk51l"]
+[ext_resource type="Script" uid="uid://dsvl3wyrlei0s" path="res://addons/ai4u/dotnet/scripts/RL/sensors/FloatArrayCompositeSensor.cs" id="6_2lgbk"]
+[ext_resource type="Script" uid="uid://dceo84yiaxm8n" path="res://addons/ai4u/dotnet/scripts/RL/sensors/ActionSensor.cs" id="7_dbssk"]
+[ext_resource type="Script" uid="uid://ixuty4stydg7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/RewardSensor.cs" id="8_likiu"]
+[ext_resource type="Script" uid="uid://chnh2lpd6faxl" path="res://addons/ai4u/dotnet/scripts/RL/sensors/OrientationSensor.cs" id="9_tj1l4"]
+[ext_resource type="Script" uid="uid://bt1p6nlqftdkf" path="res://addons/ai4u/dotnet/scripts/RL/controllers/ArrowPhysicsMoveController.cs" id="10_30rk0"]
+[ext_resource type="Script" uid="uid://btl65hbjhq66l" path="res://addons/ai4u/dotnet/scripts/ControllerConfiguration.cs" id="11_oqv5v"]
+[ext_resource type="Script" uid="uid://71qojaodd6sj" path="res://addons/ai4u/dotnet/scripts/RL/events/FallReward.cs" id="12_iimhc"]
+[ext_resource type="Script" uid="uid://csk8vk4qimeq1" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward.cs" id="13_xkghu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lk240"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
 
-[sub_resource type="Resource" id="Resource_v68w4"]
+[sub_resource type="Resource" id="Resource_8n4bf"]
 script = ExtResource("3_cdhly")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_12xdw"]
+[sub_resource type="Resource" id="Resource_acxj6"]
 script = ExtResource("3_cdhly")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_x3p7j"]
+[sub_resource type="Resource" id="Resource_lqmsc"]
 script = ExtResource("3_cdhly")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_yb20k"]
+[sub_resource type="Resource" id="Resource_gru5b"]
 script = ExtResource("3_cdhly")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_qi588"]
+[sub_resource type="Resource" id="Resource_dxi7j"]
 script = ExtResource("3_cdhly")
 Min = -1
 
@@ -47,38 +56,59 @@ mesh = SubResource("CapsuleMesh_knogm")
 [node name="Arrow" parent="." instance=ExtResource("1_l5rai")]
 transform = Transform3D(0.1, 0, 0, 0, -4.371139e-09, 0.1, 0, -0.1, -4.371139e-09, 0.102265835, 0.44946933, -0.4064366)
 
-[node name="Agent" parent="." node_paths=PackedStringArray("avatarBody") instance=ExtResource("2_pqyjy")]
+[node name="Agent" type="Node" parent="." node_paths=PackedStringArray("avatarBody")]
+script = ExtResource("3_m6ym3")
 remote = true
 avatarBody = NodePath("..")
 controlRequestorTimeScale = 10.0
+doneAtNegativeReward = false
 
-[node name="MoveActuator" parent="Agent" index="0"]
+[node name="MoveActuator" type="Node" parent="Agent"]
+script = ExtResource("4_dj3b4")
+moveAmount = 2.0
 turnAmount = 1.0
-actionRange = [SubResource("Resource_v68w4"), SubResource("Resource_12xdw"), SubResource("Resource_x3p7j"), SubResource("Resource_yb20k"), SubResource("Resource_qi588")]
+jumpPower = 0.0
+jumpForwardPower = 0.0
+actionRange = [SubResource("Resource_8n4bf"), SubResource("Resource_acxj6"), SubResource("Resource_lqmsc"), SubResource("Resource_gru5b"), SubResource("Resource_dxi7j")]
+actionName = "move"
 
-[node name="RayCasting" parent="Agent/Sensor" index="0" node_paths=PackedStringArray("eye")]
-eye = NodePath("../../../eye")
+[node name="Sensor" type="Node" parent="Agent"]
+script = ExtResource("6_2lgbk")
+perceptionKey = "array"
+stackedObservations = 4
 
-[node name="RayCasting3" parent="Agent/Sensor" index="1" node_paths=PackedStringArray("eye")]
-eye = NodePath("../../../eye")
+[node name="ActionSensor" type="Node" parent="Agent/Sensor"]
+script = ExtResource("7_dbssk")
+actionName = "actionsensor"
+actionSize = 5
 
-[node name="RayCasting2" parent="Agent/Sensor" index="2" node_paths=PackedStringArray("eye")]
-eye = NodePath("../../../eye")
+[node name="RewardSensor" type="Node" parent="Agent/Sensor"]
+script = ExtResource("8_likiu")
+perceptionKey = "rewardsensor"
 
-[node name="RayCasting4" parent="Agent/Sensor" index="3" node_paths=PackedStringArray("eye")]
-eye = NodePath("../../../eye")
-
-[node name="OrientationSensor" parent="Agent/Sensor" index="6" node_paths=PackedStringArray("reference")]
+[node name="OrientationSensor" type="Node" parent="Agent/Sensor" node_paths=PackedStringArray("reference")]
+script = ExtResource("9_tj1l4")
 reference = NodePath("../../..")
 
-[node name="FallReward" parent="Agent" index="4"]
+[node name="HumanController" type="Node" parent="Agent"]
+script = ExtResource("10_30rk0")
+speed = 1.0
+turnAmount = 2.0
+
+[node name="Config" type="Node" parent="Agent"]
+script = ExtResource("11_oqv5v")
+
+[node name="FallReward" type="Node" parent="Agent"]
+script = ExtResource("12_iimhc")
+threshold = -1.0
 causeEpisodeToEnd = true
 
-[node name="TargetReward" parent="Agent" index="5"]
-causeEpisodeToEnd = false
+[node name="TargetReward" type="Node" parent="Agent"]
+script = ExtResource("13_xkghu")
 
-[node name="Vision" type="Node" parent="Agent"]
+[node name="Vision" type="Node" parent="Agent" node_paths=PackedStringArray("camera")]
 script = ExtResource("4_pqyjy")
+camera = NodePath("../../Camera3D")
 perceptionKey = "vision"
 
 [node name="TouchReward" type="Node" parent="Agent"]
@@ -89,9 +119,8 @@ causeEpisodeToEnd = true
 [node name="Pain" type="Node" parent="Agent"]
 script = ExtResource("4_igiip")
 reward = -1.0
-_collisionCheckInterval = 0.2
+_collisionCheckInterval = 0.1
 onlyOneTime = false
-causeEpisodeToEnd = true
 
 [node name="Respawn" type="Node" parent="Agent"]
 script = ExtResource("5_jk51l")
@@ -99,4 +128,5 @@ respawnOptionsPath = NodePath("")
 actionName = "respawn"
 isOutput = false
 
-[editable path="Agent"]
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.97672844, 0.21447963, 0, -0.21447963, 0.97672844, 0, 1.7967865, 2.8635755)

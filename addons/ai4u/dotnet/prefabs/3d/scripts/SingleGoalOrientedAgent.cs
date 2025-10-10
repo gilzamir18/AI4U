@@ -27,7 +27,11 @@ namespace ai4u.tridimensional
             GetNode("Agent").GetNode<MinDistReward>("TargetReward").Target = goal;
             GetNode("Agent").GetNode<TouchRewardFunc>("TouchReward").Target = goal;
             GetNode("Agent").GetNode<TouchRewardFunc>("Pain").group = obstacleGroup;
-            GetNode("Agent").GetNode("Sensor").GetNode<OrientationSensor>("OrientationSensor").Target = goal;
+            var a = GetNode("Agent");
+            if (a.HasNode("Sensor"))
+            {
+                a.GetNode("Sensor").GetNode<OrientationSensor>("OrientationSensor").Target = goal;
+            }
         }
     }
 }

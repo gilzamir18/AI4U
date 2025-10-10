@@ -1,0 +1,119 @@
+[gd_scene load_steps=20 format=3 uid="uid://dm3oygaqibwt4"]
+
+[ext_resource type="Script" uid="uid://vsbns1douocd" path="res://addons/ai4u/dotnet/prefabs/3d/scripts/SingleGoalOrientedAgent.cs" id="1_cy7un"]
+[ext_resource type="PackedScene" uid="uid://5ikmnjyidtck" path="res://addons/ai4u_prefabs3d/3DModel/Arrow.dae" id="2_ry30v"]
+[ext_resource type="Script" uid="uid://cndf8gsvfd5lb" path="res://addons/ai4u/dotnet/scripts/RL/agents/RLAgent.cs" id="3_rs1bu"]
+[ext_resource type="Script" uid="uid://3118h8brm6fw" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBMoveActuator.cs" id="4_7j7lg"]
+[ext_resource type="Script" uid="uid://dx1wcphyffndm" path="res://addons/ai4u/dotnet/scripts/godotutils/FieldRange.cs" id="5_gwy8i"]
+[ext_resource type="Script" uid="uid://bt1p6nlqftdkf" path="res://addons/ai4u/dotnet/scripts/RL/controllers/ArrowPhysicsMoveController.cs" id="10_3aa45"]
+[ext_resource type="Script" uid="uid://btl65hbjhq66l" path="res://addons/ai4u/dotnet/scripts/ControllerConfiguration.cs" id="11_07rxf"]
+[ext_resource type="Script" uid="uid://71qojaodd6sj" path="res://addons/ai4u/dotnet/scripts/RL/events/FallReward.cs" id="12_mg1mf"]
+[ext_resource type="Script" uid="uid://csk8vk4qimeq1" path="res://addons/ai4u/dotnet/scripts/RL/events/MinDistReward.cs" id="13_bo3tk"]
+[ext_resource type="Script" uid="uid://hbifwb8rtlf7" path="res://addons/ai4u/dotnet/scripts/RL/sensors/Camera3DSensor.cs" id="14_vperx"]
+[ext_resource type="Script" uid="uid://c8hphjw3mvqnw" path="res://addons/ai4u/dotnet/scripts/RL/events/TouchRewardFunc.cs" id="15_54sso"]
+[ext_resource type="Script" uid="uid://cfbd18al51jhl" path="res://addons/ai4u/dotnet/scripts/RL/actuators/CBRespawnActuator.cs" id="16_xr55o"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lk240"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
+
+[sub_resource type="Resource" id="Resource_jxjq1"]
+script = ExtResource("5_gwy8i")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_sckl7"]
+script = ExtResource("5_gwy8i")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_irq35"]
+script = ExtResource("5_gwy8i")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_3cg3d"]
+script = ExtResource("5_gwy8i")
+Min = -1
+
+[sub_resource type="Resource" id="Resource_cy7un"]
+script = ExtResource("5_gwy8i")
+Min = -1
+
+[node name="Agent" type="CharacterBody3D"]
+script = ExtResource("1_cy7un")
+
+[node name="eye" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.4985206, -0.44757503)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_lk240")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_knogm")
+
+[node name="Arrow" parent="." instance=ExtResource("2_ry30v")]
+transform = Transform3D(0.1, 0, 0, 0, -4.371139e-09, 0.1, 0, -0.1, -4.371139e-09, 0.102265835, 0.44946933, -0.4064366)
+
+[node name="Agent" type="Node" parent="." node_paths=PackedStringArray("avatarBody")]
+script = ExtResource("3_rs1bu")
+remote = true
+avatarBody = NodePath("..")
+controlRequestorTimeScale = 10.0
+doneAtNegativeReward = false
+
+[node name="MoveActuator" type="Node" parent="Agent"]
+script = ExtResource("4_7j7lg")
+moveAmount = 2.0
+turnAmount = 1.0
+jumpPower = 0.0
+jumpForwardPower = 0.0
+actionRange = [SubResource("Resource_jxjq1"), SubResource("Resource_sckl7"), SubResource("Resource_irq35"), SubResource("Resource_3cg3d"), SubResource("Resource_cy7un")]
+actionName = "move"
+
+[node name="HumanController" type="Node" parent="Agent"]
+script = ExtResource("10_3aa45")
+speed = 1.0
+turnAmount = 2.0
+
+[node name="Config" type="Node" parent="Agent"]
+script = ExtResource("11_07rxf")
+
+[node name="FallReward" type="Node" parent="Agent"]
+script = ExtResource("12_mg1mf")
+threshold = -1.0
+causeEpisodeToEnd = true
+
+[node name="TargetReward" type="Node" parent="Agent"]
+script = ExtResource("13_bo3tk")
+
+[node name="Vision" type="Node" parent="Agent" node_paths=PackedStringArray("camera", "viewport")]
+script = ExtResource("14_vperx")
+camera = NodePath("../../Camera3D")
+viewport = NodePath("../../CanvasLayer/SubViewportContainer/SubViewport")
+perceptionKey = "vision"
+
+[node name="TouchReward" type="Node" parent="Agent"]
+script = ExtResource("15_54sso")
+reward = 10.0
+causeEpisodeToEnd = true
+
+[node name="Pain" type="Node" parent="Agent"]
+script = ExtResource("15_54sso")
+reward = -1.0
+_collisionCheckInterval = 0.1
+onlyOneTime = false
+
+[node name="Respawn" type="Node" parent="Agent"]
+script = ExtResource("16_xr55o")
+respawnOptionsPath = NodePath("")
+actionName = "respawn"
+isOutput = false
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9095846, 0.41551894, 0, -0.41551894, 0.9095846, 0, 2.6434762, 1.6901543)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer"]
+offset_right = 287.0
+offset_bottom = 294.0
+
+[node name="SubViewport" type="SubViewport" parent="CanvasLayer/SubViewportContainer"]

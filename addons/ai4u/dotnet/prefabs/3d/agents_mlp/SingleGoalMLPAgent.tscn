@@ -11,23 +11,23 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_knogm"]
 
-[sub_resource type="Resource" id="Resource_crbb1"]
+[sub_resource type="Resource" id="Resource_fxa4n"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_boxar"]
+[sub_resource type="Resource" id="Resource_h3g66"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_3fpc5"]
+[sub_resource type="Resource" id="Resource_418cj"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_867x5"]
+[sub_resource type="Resource" id="Resource_rcm6a"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
-[sub_resource type="Resource" id="Resource_73k70"]
+[sub_resource type="Resource" id="Resource_4eabm"]
 script = ExtResource("3_r0g8j")
 Min = -1
 
@@ -53,7 +53,7 @@ controlRequestorTimeScale = 10.0
 
 [node name="MoveActuator" parent="Agent" index="0"]
 turnAmount = 1.0
-actionRange = [SubResource("Resource_crbb1"), SubResource("Resource_boxar"), SubResource("Resource_3fpc5"), SubResource("Resource_867x5"), SubResource("Resource_73k70")]
+actionRange = [SubResource("Resource_fxa4n"), SubResource("Resource_h3g66"), SubResource("Resource_418cj"), SubResource("Resource_rcm6a"), SubResource("Resource_4eabm")]
 
 [node name="RayCasting" parent="Agent/Sensor" index="0" node_paths=PackedStringArray("eye")]
 eye = NodePath("../../../eye")
