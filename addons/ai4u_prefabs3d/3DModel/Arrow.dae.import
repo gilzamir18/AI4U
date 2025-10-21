@@ -4,20 +4,22 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://5ikmnjyidtck"
-path="res://.godot/imported/Arrow.dae-236bf97be767392dc31e916e1b8e99f1.scn"
+path="res://.godot/imported/Arrow.dae-2c7847b737bc5edad561510972026fa0.scn"
 
 [deps]
 
-source_file="res://addons/ai4u/3DModel/Arrow.dae"
-dest_files=["res://.godot/imported/Arrow.dae-236bf97be767392dc31e916e1b8e99f1.scn"]
+source_file="res://ai4u_prefabs3d/3DModel/Arrow.dae"
+dest_files=["res://.godot/imported/Arrow.dae-2c7847b737bc5edad561510972026fa0.scn"]
 
 [params]
 
 nodes/root_type="Node3D"
 nodes/root_name="Scene Root"
+nodes/root_script=null
 nodes/apply_root_scale=true
 nodes/root_scale=1.0
 nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
 meshes/ensure_tangents=true
 meshes/generate_lods=true
@@ -32,10 +34,14 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
 _subresources={
 "materials": {
 "Material": {
 "use_external/enabled": true,
+"use_external/fallback_path": "",
 "use_external/path": "res://assets/3DModel/Material.tres"
 }
 }

@@ -79,9 +79,9 @@ Clone the repository and copy `addons/ai4u` to your project.
 
 ## Requirements
 
-- Godot 4.2.2, 4.3, or 4.4.1 (.NET version)
+- Godot 4.2.2, 4.3, 4.4.* or 4.5  (.NET version)
 - Python 3.12 or newer
-- Microsoft.ML.OnnxRuntime
+- Microsoft.ML.OnnxRuntime (if using ai4u_ml)
 - Gynasium
 - Tested on Windows 11, Ubuntu 24.04, and PopOS 24.04 (CosmicDE)
 

@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://dps7l3yqqavaj"]
+[gd_scene load_steps=4 format=3 uid="uid://dps7l3yqqavaj"]
 
-[ext_resource type="PackedScene" uid="uid://c0mrmykko6x3u" path="res://addons/ai4u/dotnet/prefabs/3d/components/floor.tscn" id="1_o5qli"]
-[ext_resource type="PackedScene" uid="uid://c8ag8c5d8en3d" path="res://addons/ai4u/dotnet/prefabs/3d/components/box.tscn" id="2_0wfyh"]
-[ext_resource type="PackedScene" uid="uid://dm3oygaqibwt4" path="res://addons/ai4u/dotnet/prefabs/3d/agents_mlp/SingleGoalCnnPolicyAgent.tscn" id="3_5mqdn"]
+[ext_resource type="PackedScene" uid="uid://c0mrmykko6x3u" path="res://ai4u/dotnet/prefabs/3d/components/floor.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://c8ag8c5d8en3d" path="res://ai4u/dotnet/prefabs/3d/components/box.tscn" id="2_0wfyh"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jyhfs"]
 albedo_color = Color(0.93595004, 0.11402092, 0.6124397, 1)
@@ -31,10 +30,5 @@ transform = Transform3D(1, 0, 0, 0, -0.065751456, 0.99783605, 0, -0.99783605, -0
 
 [node name="respawn" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4814639, 0.10527754, 0.5653746)
-
-[node name="Agent" parent="." node_paths=PackedStringArray("goal", "respawnOptionsPath") instance=ExtResource("3_5mqdn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.292881, 1.0500002, 0.78469276)
-goal = NodePath("../Goal")
-respawnOptionsPath = NodePath("../respawn")
 
 [editable path="Goal"]
