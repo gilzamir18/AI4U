@@ -80,10 +80,12 @@ Clone the repository and copy `addons/ai4u` to your project.
 ## Requirements
 
 - Godot 4.2.2, 4.3, 4.4.* or 4.5  (.NET version)
-- Python 3.12 or newer
+- Python (3.12)
 - Microsoft.ML.OnnxRuntime (if using ai4u_ml)
-- Gynasium
+- Gymnasium
 - Tested on Windows 11, Ubuntu 24.04, and PopOS 24.04 (CosmicDE)
+
+This has been tested only with Python 3.12 on Windows and with the default Python 3 setup on Ubuntu and Pop!_OS.
 
 **Minimum hardware:** GeForce 1050ti (4GB VRAM), 8GB RAM, 20GB SSD. For complex tasks (e.g., SAC with image sensors), 24GB RAM and a high-end GPU are recommended. For games, use modest sensor configurations (e.g., moderate RayCasting).
 
