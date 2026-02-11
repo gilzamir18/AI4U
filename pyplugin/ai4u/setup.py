@@ -16,6 +16,6 @@ setup(name='ai4u',
                 "Operating System :: OS Independent",
         ],
         python_requires='>=3.10',
-        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'shimmy==1.3.0', 'Pillow==11.3.0'],
+        install_requires=['numpy==1.26.4', 'gymnasium==0.29.1', 'shimmy==1.3.0', 'Pillow==12.1.1'],
         py_modules=['ai4u', 'AI4UEnv']
 )
